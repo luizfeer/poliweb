@@ -3,12 +3,16 @@
     <q-form
       @submit="onSubmit"
       @reset="onReset"
-      class="q-gutter-md"
+      class="p-6"
     >
+    <span class="text-xl">
+      {{ nameCategorie ? "Criando uma sub-categoria dentro da categoria " + nameCategorie : 'Criando uma nova categoria' }}
+    </span>
     
-      <div class="q-pa-md mt-10">
-        <div class="q-gutter-md row">        
+      <div class="mt-10">
+        <div class="row">        
           <q-select
+            v-if="!nameCategorie"
             filled
             v-model="selectedCity"
             use-input
@@ -19,7 +23,7 @@
             lazy-rules
             option-label="city"     
             hint="Cidade da categoria"
-            style="width: 250px; padding-bottom: 32px"
+            class="pb-8 w-full"
           >
             <template v-slot:no-option>
               <q-item>
@@ -29,7 +33,7 @@
               </q-item>
             </template>
           </q-select>
-          <q-input filled v-model="form.name" lazy-rules label="Nome da categoria" />
+          <q-input filled v-model="form.name" lazy-rules label="Nome da categoria" class="w-full py-2" />
         </div>
       </div>
       
@@ -53,6 +57,7 @@ export default defineComponent({
       citys: ref([]),     
       selectedCity: ref(null),
       emittedValue: ref(null),
+      nameCategorie: ref(''),
       form: ref({
         name: null,
         categoryId: null,
@@ -105,6 +110,10 @@ export default defineComponent({
       }
   } , 
  async mounted () {
+   if(this.$route.params.id){
+    this.form.categoryId = this.$route.params.id
+    this.nameCategorie = this.$route.params.name
+   }
    await this.$api.get('/address')
   .then((response) => {
         //  console.log(response.data.addresses)

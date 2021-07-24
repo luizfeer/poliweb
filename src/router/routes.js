@@ -29,9 +29,29 @@ const routes = [
     ]
   },
   {
+    path: '/categorias/:id?/:name?',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/Categories.vue') }
+    ]
+  },
+  {
+    path: '/sub/:id',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/SubCategorie.vue') }
+    ]
+  },
+  {
+    path: '/ads/:id',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/Ads.vue') }
+    ]
+  },
+  {
     path: '/painel',
-    component: null,
-    // redirect: '/painel/categorias/list',
+       // redirect: '/painel/categorias/list',
     component: () => import('layouts/MainLayout.vue'), 
     //   async beforeEnter (to, from, next) {
     //   // const auth = store.dispatch('loadMe')
@@ -64,7 +84,7 @@ const routes = [
     children: [     
       { path: 'categorias/list', component: () => import('pages/Categories/index.vue') },
       
-      { path: 'categorias/add', component: () => import('pages/Categories/Add.vue') },
+      { path: 'categorias/add/:id?/:name?', component: () => import('pages/Categories/Add.vue') },
       
       { path: 'categorias/remove', component: () => import('pages/Categories/Remove.vue') },
       

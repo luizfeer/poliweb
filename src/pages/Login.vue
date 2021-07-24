@@ -43,6 +43,7 @@ export default {
       .then((response) => {
         if(response.data.token){
          localStorage.setItem("token", response.data.token)  
+         localStorage.setItem("admin", "true")  
          this.$router.push({ path: '/painel/categorias/add' })      
         }
       })

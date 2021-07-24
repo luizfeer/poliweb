@@ -16,7 +16,8 @@
     "quasar": "^2.0.0",
     "tailwindcss": "^2.2.2",
     "vue-picture-swipe": "^2.1.0",
-    "vuex": "^4.0.1"
+    "vuex": "^4.0.1",
+    "vuex-persistedstate": "^4.0.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",

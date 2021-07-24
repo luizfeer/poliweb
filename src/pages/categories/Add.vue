@@ -25,6 +25,8 @@
             hint="Cidade da categoria"
             class="pb-8 w-full"
           >
+
+          
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">

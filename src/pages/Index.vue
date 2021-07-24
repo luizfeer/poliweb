@@ -33,8 +33,7 @@
                       spinner-size="82px"
                     />
                   </div> -->
-                  <div class="pl-3">     
-                    {{ item.subcategories.length }}       
+                  <div class="pl-3">                     
                     <h1 class="text-lg text-gray-600 font-semibold">
                       {{ item.name }}
                     </h1>

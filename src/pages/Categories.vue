@@ -12,7 +12,7 @@
               <q-btn unelevated color="primary" label="Cadastrar sub-categoria" class="m-2"/>
             </router-link>
         </div>
-        
+        <div v-if="ads.length === 0" class="text-lg p-2 text-gray-600">Nenhum dado cadastrado.</div>
         <router-link v-for="item in ads" :key="item.id" :to="`/ads/${item.id}`">
             <div
             class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"

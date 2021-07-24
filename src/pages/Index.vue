@@ -126,7 +126,7 @@ export default defineComponent({
         let msg
         if( err.response){
           msg =  err.response.data.message
-        }else {
+        } else {
           msg = 'Erro na conexão!'
         }
         this.$q.notify({

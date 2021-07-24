@@ -82,13 +82,13 @@ const routes = [
     //   }
     // },
     children: [     
-      { path: 'categorias/list', component: () => import('pages/Categories/index.vue') },
+      { path: 'categorias/list', component: () => import('pages/categories/index.vue') },
       
-      { path: 'categorias/add/:id?/:name?', component: () => import('pages/Categories/Add.vue') },
+      { path: 'categorias/add/:id?/:name?', component: () => import('pages/categories/Add.vue') },
       
-      { path: 'categorias/remove', component: () => import('pages/Categories/Remove.vue') },
+      { path: 'categorias/remove', component: () => import('pages/categories/Remove.vue') },
       
-      { path: 'categorias/edit', component: () => import('pages/Categories/Edit.vue') }
+      { path: 'categorias/edit', component: () => import('pages/categories/Edit.vue') }
     ]    
   },
 

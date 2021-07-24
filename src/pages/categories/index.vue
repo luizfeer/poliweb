@@ -1,6 +1,6 @@
 <template>
-  <div class="q-pa-md">
-    <q-table
+<div class="q-pa-md">
+    <!-- <q-table
       title="Treats"
       :rows="rows"
       :columns="columns"
@@ -16,7 +16,7 @@
           @click="exportTable"
         />
       </template>
-    </q-table>
+    </q-table> -->
   </div>
 </template>
 

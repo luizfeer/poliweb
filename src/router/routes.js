@@ -35,13 +35,13 @@ const routes = [
       { path: '', component: () => import('pages/Categories.vue') }
     ]
   },
-  {
-    path: '/sub/:id',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/SubCategorie.vue') }
-    ]
-  },
+  // {
+  //   path: '/sub/:id',
+  //   component: () => import('layouts/MainLayout.vue'),
+  //   children: [
+  //     { path: '', component: () => import('pages/SubCategorie.vue') }
+  //   ]
+  // },
   {
     path: '/ads/:id',
     component: () => import('layouts/MainLayout.vue'),
@@ -88,7 +88,11 @@ const routes = [
       
       { path: 'categorias/remove', component: () => import('pages/categories/Remove.vue') },
       
-      { path: 'categorias/edit', component: () => import('pages/categories/Edit.vue') }
+      { path: 'categorias/edit', component: () => import('pages/categories/Edit.vue') },      
+      
+      { path: 'ads/add/:id?/:name?', component: () => import('pages/ads/Add.vue') },
+      
+     
     ]    
   },
 

@@ -169,7 +169,7 @@ export default defineComponent({
 	        phone: null
         }),
         formAddress: ref({
-         zipCode: "",
+         zipCode: "37800000",
          city: "Nova Resende",
          state: "MG",
          coordinates: {

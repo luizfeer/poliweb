@@ -109,38 +109,17 @@ export default defineComponent({
       subCategories: ref([]),
       categories: ref([]),
       slide: ref("0"),
-      loading : ref(true)
+      loading : ref(true),
+      localization: ref({})
     };
-  },
-  beforeMount () {
-    this.loading = true
-    this.$api.get('/categories')
-     .then((response) => {
-        if(response.data){
-          this.categories = response.data.categories    
-          console.table(this.categories)
-        }
-      })
-      .catch((err) => {
-        let msg
-        if( err.response){
-          msg =  err.response.data.message
-        } else {
-          msg = 'Erro na conexão!'
-        }
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: msg,
-          icon: 'report_problem'
-        })
-      })
-      .finally(() => {
-        this.loading = false
-      })
-  },
+  }, 
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false
+
+     // move to store
+     const localization = localStorage.getItem("localization")
+     this.localization =  JSON.parse(localization)
+     this.getData()
   },
   methods: {
     subcategories(item) {
@@ -154,7 +133,38 @@ export default defineComponent({
     },
     goTo(path){
       this.$router.push(path)
-    }
+    },
+    getData () {
+      this.loading = true
+      let gps
+      if(this.localization){
+        gps = `?lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}`
+      }
+      this.$api.get(`/categories${gps ? gps : ''}`)
+      .then((response) => {
+          if(response.data){
+            this.categories = response.data.categories    
+            console.table(this.categories)
+          }
+        })
+        .catch((err) => {
+          let msg
+          if( err.response){
+            msg =  err.response.data.message
+          } else {
+            msg = 'Erro na conexão!'
+          }
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+          })
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
   },
-  })
+})
 </script>

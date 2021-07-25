@@ -39,12 +39,15 @@ export default {
   },
   methods:{
   login () {
+    this.$q.loading.show()
     this.$api.post('/admin/login', {...this.form})
       .then((response) => {
-        if(response.data.token){
-         localStorage.setItem("token", response.data.token)  
+        const token = response.data.token
+        if(token){
+          this.$api.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+         localStorage.setItem("token", token)  
          localStorage.setItem("admin", "true")  
-         this.$router.push({ path: '/painel/categorias/add' })      
+         this.$router.push({ path: '/' })      
         }
       })
       .catch((err) => {
@@ -60,6 +63,9 @@ export default {
           message: msg,
           icon: 'report_problem'
         })
+      })
+      .finally(()=>{
+        this.$q.loading.hide()
       })
     }
   }

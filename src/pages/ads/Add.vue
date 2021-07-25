@@ -257,7 +257,7 @@ export default defineComponent({
         this.$q.loading.hide()
       })
     },
-    setPhone() {       
+    setPhone(){       
       this.$q.loading.show()
       this.$api.post(`/categories/ads/${this.adId}/phones`, {...this.formPhone})
       .then((response) => {
@@ -289,7 +289,7 @@ export default defineComponent({
         this.$q.loading.hide()
       })
       },
-      setAddress() {
+      setAddress(){
       this.$q.loading.show()
       this.$api.post(`/categories/ads/${this.adId}/addresses`, {...this.formAddress})
       .then((response) => {

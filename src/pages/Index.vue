@@ -16,7 +16,7 @@
               </router-link>
             <div 
               v-for="(item) in categories" :key="item.id"
-              v-show="!item.deletedAt.length"
+              v-show="!item.deletedAt"
               @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}/${encodeURI(item.name)}`)"
               class="cursor-pointer"
             >
@@ -36,7 +36,7 @@
                   </div>
                   <div class="pl-3">                     
                     <h1 class="text-lg text-gray-600 font-semibold">
-                      {{ item.name }} {{ item.deletedAt.length }}
+                      {{ item.name }}
                     </h1>
                     <h2 class="text-base text-gray-500">{{ item.addressCity }}</h2>
                   </div>            
@@ -51,7 +51,7 @@
               </router-link>
            <div 
             v-for="item in subCategories" :key="item.id" 
-            v-show="!item.deletedAt.length"
+            v-show="!item.deletedAt"
             @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}`)"
              class="cursor-pointer">
             <!-- @click="item.subcategories ? this.subcategories(item.subcategories) : this.goTo(`/categorias/${item.id}`) -->

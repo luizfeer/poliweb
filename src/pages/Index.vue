@@ -16,6 +16,7 @@
               </router-link>
             <div 
               v-for="(item) in categories" :key="item.id"
+              v-show="!item.deletedAt.length"
               @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}/${encodeURI(item.name)}`)"
               class="cursor-pointer"
             >
@@ -23,19 +24,19 @@
               <div
                 class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
               >
-                <div class="flex flex-nowrap">
-                  <!-- <div class="h-20 w-20 min-w-[5rem] rounded-sm overflow-hidden">
+                <div class="flex flex-nowrap pl-1">
+                  <div class="h-[60px] w-[60px] rounded-sm overflow-hidden">
                     <q-img
-                      src="/thumb.png"
+                      :src="item.iconLink"
                       :ratio="1"
-                      class="h-full w-full"
+                      class="h-[60px] w-[60px] rounded-full"
                       spinner-color="white"
-                      spinner-size="82px"
+                      spinner-size="30px"
                     />
-                  </div> -->
+                  </div>
                   <div class="pl-3">                     
                     <h1 class="text-lg text-gray-600 font-semibold">
-                      {{ item.name }}
+                      {{ item.name }} {{ item.deletedAt.length }}
                     </h1>
                     <h2 class="text-base text-gray-500">{{ item.addressCity }}</h2>
                   </div>            
@@ -49,26 +50,27 @@
                 <q-btn unelevated color="primary" label="Cadastrar sub-categoria" v-if="admin" class="m-2"/>
               </router-link>
            <div 
-           v-for="item in subCategories" :key="item.id" 
+            v-for="item in subCategories" :key="item.id" 
+            v-show="!item.deletedAt.length"
             @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}`)"
              class="cursor-pointer">
             <!-- @click="item.subcategories ? this.subcategories(item.subcategories) : this.goTo(`/categorias/${item.id}`) -->
               <div
                 class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
-              >
+              > 
                 <div class="flex flex-nowrap h-14 items-center">
-                  <!-- <div class="h-20 w-20 min-w-[5rem] rounded-sm overflow-hidden">
+                   <div class="h-[60px] w-[60px] rounded-sm overflow-hidden">
                     <q-img
-                      src="/thumb.png"
+                      :src="item.iconLink"
                       :ratio="1"
-                      class="h-full w-full"
+                      class="h-[60px] w-[60px] rounded-full"
                       spinner-color="white"
-                      spinner-size="82px"
+                      spinner-size="30px"
                     />
-                  </div> -->
+                  </div>
                   <div class="pl-3">
                     <h1 class="text-lg text-gray-600 font-semibold">
-                      {{ item.name }}
+                      {{ item.name }} 
                     </h1>
                   </div>            
                 </div>
@@ -132,7 +134,7 @@ export default defineComponent({
       console.log(item)
     },
     goTo(path){
-      this.$router.push(path)
+      this.$router.push({ path })
     },
     getData () {
       this.loading = true

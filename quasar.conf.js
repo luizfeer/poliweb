@@ -23,6 +23,7 @@ module.exports = configure(function (ctx) {
     // https://v2.quasar.dev/quasar-cli/boot-files
     boot: [
       'axios',
+      'color'
     ],
 
     // https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -84,7 +85,7 @@ module.exports = configure(function (ctx) {
       config: {},
 
       // iconSet: 'material-icons', // Quasar icon set
-      lang: 'en-US', // Quasar language pack
+      lang: 'pt-BR', // Quasar language pack
 
       // For special cases outside of where the auto-import stategy can have an impact
       // (like functional components as one of the examples),
@@ -98,7 +99,8 @@ module.exports = configure(function (ctx) {
           'Notify',
           'SessionStorage',
           'LocalStorage',
-          'Loading'
+          'Loading',
+          'AddressbarColor'
       ]
     },
 
@@ -143,9 +145,9 @@ module.exports = configure(function (ctx) {
       },
 
       manifest: {
-        name: `Mega`,
-        short_name: `Mega`,
-        description: `A Quasar Framework app`,
+        name: `Poliweb`,
+        short_name: `Poliweb`,
+        description: `Poliweb, agenda de comércios inteligentes.`,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',

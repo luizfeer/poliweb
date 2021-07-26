@@ -261,15 +261,18 @@ export default defineComponent({
       this.$q.loading.show()
       this.$api.post(`/categories/ads/${this.adId}/phones`, {...this.formPhone})
       .then((response) => {
-        //  console.log(response.data.addresses)
         if(response.data){
-          this.phones.push(response.data.id)
           this.$q.notify({
           color: 'secondary',
           position: 'top',
           message: 'Telefone salvo com sucesso!',         
         })
         }
+        this.formPhone = {
+          isWhatsapp: false,
+	        phone: null
+        }
+        // this.phones.push({...response.data.id})
       })
       .catch((err) => {
         let msg
@@ -294,10 +297,9 @@ export default defineComponent({
       this.$api.post(`/categories/ads/${this.adId}/addresses`, {...this.formAddress})
       .then((response) => {
         //  console.log(response.data.addresses)
-        if(response.data){         
-          this.$route.push('/categories/'+categoryId)
+        if(response.data){
           this.$q.notify({
-          color: 'secondary',
+            color: 'secondary',
           position: 'top',
           message: 'Endereço com sucesso!',         
         })
@@ -319,6 +321,8 @@ export default defineComponent({
       })
       .finally(() => {
         this.$q.loading.hide()
+        this.$router.push({ path: `/categorias/${this.categoryId}` })
+
       })
       },
     onReset () {

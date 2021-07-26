@@ -25,9 +25,7 @@
             hint="Cidade da categoria"
             class="pb-8 w-full"
           >
-
-          
-            <template v-slot:no-option>
+          <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
                   Sem cadastros
@@ -37,7 +35,30 @@
           </q-select>
           <q-input filled v-model="form.name" lazy-rules label="Nome da categoria" class="w-full py-2" />
         </div>
-      </div>
+         <div class="my-4">         
+            <q-select
+              filled
+              v-model="thumb"
+              :options="imgs"
+              label="Icone"
+              color="teal"
+              option-label="id"
+              clearable
+              options-selected-class="text-deep-orange"
+            >
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section avatar>
+                    <q-img :src="scope.opt.link" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label v-html="scope.opt.id" />                    
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+          </div>
+        </div>     
       
       <div>
         <q-btn label="Salvar" type="submit" color="primary"/>
@@ -60,6 +81,8 @@ export default defineComponent({
       selectedCity: ref(null),
       emittedValue: ref(null),
       nameCategorie: ref(''),
+      imgs: ref([]),
+      thumb: ref(''),
       form: ref({
         name: null,
         categoryId: null,
@@ -70,10 +93,14 @@ export default defineComponent({
   watch: {
     selectedCity(val) {
       this.form.addressId = val.id
+    },
+    thumb(val){
+      this.form.iconId = val.id
     }
   },
   methods: {    
     onSubmit(){
+      this.$q.loading.show()
       this.$api.post('/categories', {...this.form})
       .then((response) => {
         //  console.log(response.data.addresses)
@@ -85,6 +112,8 @@ export default defineComponent({
          
         })
         }
+        this.$router.push({ path: '/' })
+
       })
       .catch((err) => {
           let msg
@@ -101,7 +130,7 @@ export default defineComponent({
             })
     })
     .finally(() => {
-      this.laoding = false
+      this.$q.loading.hide()
     })
 
     },
@@ -116,6 +145,14 @@ export default defineComponent({
     this.form.categoryId = this.$route.params.id
     this.nameCategorie = this.$route.params.name
    }
+   
+   await this.$api.get('/icons')
+  .then((response) => {
+        //  console.log(response.data.addresses)
+        if(response.data){
+         this.imgs = response.data.icons
+        }
+      })
    await this.$api.get('/address')
   .then((response) => {
         //  console.log(response.data.addresses)

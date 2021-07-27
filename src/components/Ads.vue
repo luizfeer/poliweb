@@ -141,8 +141,8 @@
             <add-address :edit="true" :address="dataAds.addresses[0]" :ad-id="dataAds.id"></add-address>
           </q-expansion-item>
       </div>
-      <div v-else>            
-         <div v-if="admin" class="bg-gray-100 rounded-3xl mt-4 overflow-hidden">   
+      <div v-else-if="admin">            
+         <div class="bg-gray-100 rounded-3xl mt-4 overflow-hidden">   
           <q-expansion-item
             v-model="expandedAddress"
             icon="perm_identity"
@@ -180,6 +180,7 @@ export default {
       expandedAddress: ref(false),
       follow: ref(false),
       editAddress: ref(false),
+      admin: ref(false),
       items: ref([]),
       phone(phone) {
         return phone.replace(/[^0-9]/g, '')
@@ -250,6 +251,9 @@ export default {
           }
           return false
       }
+  },
+  mounted () {
+     this.admin = localStorage.getItem('admin') ? true : false    
   },
 };
 </script>

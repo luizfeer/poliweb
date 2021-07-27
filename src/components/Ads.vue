@@ -116,25 +116,44 @@
             </a>
         </div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3" v-if="dataAds.addresses && dataAds.addresses.length">
+      <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3 relative" v-if="dataAds.addresses && dataAds.addresses.length">
           <a :href="`http://maps.google.com/maps?q=${dataAds.name},${dataAds.addresses[0].street},Nº${dataAds.addresses[0].number},${dataAds.addresses[0].city} ${dataAds.addresses[0].state},${dataAds.addresses[0].zipCode}`" target="_blank" rel="noopener noreferrer">
-        <div
-          class="
-            flex flex-col
-            justify-center
-            items-center
-            flex-nowrap
-            text-gray-600
-          "
-        >
-          <q-icon
-            name="fas fa-map-marked-alt"
-            class="mr-2 text-3xl text-yellow-500"
-          />
-          {{ `${dataAds.addresses[0].street}, Nº${dataAds.addresses[0].number}. ${dataAds.addresses[0].city} ${dataAds.addresses[0].state} - ${dataAds.addresses[0].zipCode}` }}
-        </div>
-        </a>
+            <div
+              class="
+                flex flex-col
+                justify-center
+                items-center
+                flex-nowrap
+                text-gray-600
+              "
+            >
+              <q-icon
+                name="fas fa-map-marked-alt"
+                class="mr-2 text-3xl text-yellow-500"
+              />
+              {{ `${dataAds.addresses[0].street}, nº ${dataAds.addresses[0].number}. ${dataAds.addresses[0].city} ${dataAds.addresses[0].state} - ${dataAds.addresses[0].zipCode}` }}
+            </div>
+          </a>
+          <q-btn unelevated color="primary" @click.prevent="editAddress = !editAddress" class="absolute right-0 top-0" icon="create" />
+          <q-expansion-item
+            v-model="editAddress"
+          >
+            <add-address :edit="true" :address="dataAds.addresses[0]" :ad-id="dataAds.id"></add-address>
+          </q-expansion-item>
       </div>
+      <div v-else>            
+         <div v-if="admin" class="bg-gray-100 rounded-3xl mt-4 overflow-hidden">   
+          <q-expansion-item
+            v-model="expandedAddress"
+            icon="perm_identity"
+            label="Cadastrar endereço"
+          >
+            <add-address :ad-id="dataAds.id"></add-address>           
+          </q-expansion-item>
+        </div>
+        
+      </div>
+
     </div>
     </div>
 </template>
@@ -143,9 +162,11 @@
 
 import { ref } from "vue";
 import VuePictureSwipe from "vue-picture-swipe";
+import AddAddress from 'components/add/Address'
 
 export default {
   components: {
+    AddAddress,
     VuePictureSwipe,
   },
   props:{
@@ -156,7 +177,9 @@ export default {
   setup() {
     return {
       slide: ref(1),
+      expandedAddress: ref(false),
       follow: ref(false),
+      editAddress: ref(false),
       items: ref([]),
       phone(phone) {
         return phone.replace(/[^0-9]/g, '')

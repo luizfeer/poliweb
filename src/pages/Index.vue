@@ -15,8 +15,7 @@
                 <q-btn unelevated color="primary" label="Cadastrar nova categoria" class="m-2"/>
               </router-link>
             <div 
-              v-for="(item) in categories" :key="item.id"
-              v-show="!item.deletedAt"
+              v-for="(item) in categories" :key="item.id"             
               @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}/${encodeURI(item.name)}`)"
               class="cursor-pointer"
             >
@@ -50,8 +49,7 @@
                 <q-btn unelevated color="primary" label="Cadastrar sub-categoria" v-if="admin" class="m-2"/>
               </router-link>
            <div 
-            v-for="item in subCategories" :key="item.id" 
-            v-show="!item.deletedAt"
+            v-for="item in subCategories" :key="item.id"
             @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}`)"
              class="cursor-pointer">
             <!-- @click="item.subcategories ? this.subcategories(item.subcategories) : this.goTo(`/categorias/${item.id}`) -->
@@ -145,8 +143,10 @@ export default defineComponent({
       this.$api.get(`/categories${gps ? gps : ''}`)
       .then((response) => {
           if(response.data){
-            this.categories = response.data.categories    
-            console.table(this.categories)
+            let categoriesData = response.data.categories
+            categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city && !item.deletedAt })
+            this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+            // console.table(this.categories)
           }
         })
         .catch((err) => {

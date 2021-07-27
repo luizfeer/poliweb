@@ -11,7 +11,7 @@
           animated
           class="h-[auto]"          
         >
-          <q-carousel-slide name="0" class="">
+          <q-carousel-slide name="0" class="0">
             <div class="pl-3 flex">
                 <router-link v-if="admin" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
                     <q-btn unelevated color="primary" label="Cadastrar empresa"  v-if="admin" class="m-2"/>
@@ -45,9 +45,8 @@
                 </div>
             </div>
           </q-carousel-slide>
-          <q-carousel-slide name="1" class="">        
-            <ads-page :data-ads="data" />  
-
+          <q-carousel-slide name="1" class="p-0">        
+            <ads-page :data-ads="data" />
           </q-carousel-slide>
         </q-carousel>
       </template>
@@ -78,7 +77,7 @@ export default ({
       data: ref({}),
       showAds(item){
         console.log(item)
-        this.data= {...item};
+        this.data = {...item};
         this.slide= '1'
       }
     };

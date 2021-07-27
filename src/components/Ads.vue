@@ -20,7 +20,7 @@
       </div>
       <q-space />
       <div class="flex items-center justify-between mt-4">
-          <a v-if="phoneZap" :href="`https://api.whatsapp.com/send?phone=${phoneZap.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer">
+          <a v-if="phoneZap" :href="`https://api.whatsapp.com/send?phone=+55${phoneZap.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer">
             <q-btn push color="positive" text-color="white">
                 <q-icon name="fab fa-whatsapp" class="mr-2" /> Whatsapp
             </q-btn>
@@ -63,7 +63,7 @@
                 <div v-if="index !== dataAds.phones.length-1" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
             </template>
             <template  v-else>
-                <a  :href="`https://api.whatsapp.com/send?phone=${phone.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer" class="flex items-center flex-nowrap text-gray-600">
+                <a  :href="`https://api.whatsapp.com/send?phone=+55${phone.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer" class="flex items-center flex-nowrap text-gray-600">
                     <q-icon
                         name="fab fa-whatsapp-square"
                         class="mr-2 text-xl text-green-600"
@@ -77,7 +77,7 @@
 
       <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3">
         <div v-if="dataAds.site" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`https://:${dataAds.site}`" target="_blank" rel="noopener noreferrer">
+            <a :href="`${dataAds.site}`" target="_blank" rel="noopener noreferrer">
                 <q-icon name="language" class="mr-2 text-xl text-blue-400" />
                 {{ dataAds.site }}
             </a>
@@ -86,23 +86,23 @@
         <div v-if="dataAds.site && (dataAds.facebook || dataAds.instagram || dataAds.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div v-if="dataAds.facebook" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`https://:${dataAds.facebook}`" target="_blank" rel="noopener noreferrer">
+            <a :href="`${dataAds.facebook}`" target="_blank" rel="noopener noreferrer">
                 <q-icon
                     name="fab fa-facebook-square"
                     class="mr-2 text-xl text-blue-800"
                 />
-                {{ dataAds.facebook }}
+                {{ faceId(dataAds.facebook) }}
             </a>
         </div>
         <div v-if="dataAds.facebook  && (dataAds.instagram || dataAds.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div v-if="dataAds.instagram" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`https://:${dataAds.instagram}`" target="_blank" rel="noopener noreferrer">
+            <a :href="`${dataAds.instagram}`" target="_blank" rel="noopener noreferrer">
                 <q-icon
                     name="fab fa-instagram-square"
                     class="mr-2 text-xl text-pink-600"
                 />
-                {{ dataAds.instagram }}
+                {{ instaId(dataAds.instagram) }}
             </a>
         </div>
         <div v-if="dataAds.instagram && dataAds.email" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
@@ -159,8 +159,26 @@ export default {
       follow: ref(false),
       items: ref([]),
       phone(phone) {
-          return phone.replace(/[^0-9]/g, '')
-                      .replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        return phone.replace(/[^0-9]/g, '')
+                  .replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      },
+      faceId(fburl){      
+          let cut = fburl.split("/")
+          if (cut[3]) {
+            return cut[3]
+          }else if(cut[2]){
+            return cut[2]
+          }else {
+            return this.dataAds.name
+          }
+        },
+        instaId(instUrl){
+          instUrl = instUrl.split("?")[0]
+          instUrl = instUrl.split("/")[3]
+          if(instUrl){
+            return "@"+instUrl
+          }
+          return this.dataAds.name
         },
 
       

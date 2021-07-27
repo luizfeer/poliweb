@@ -44,7 +44,7 @@
             class="p-6"
           >
           <div class="mt-10">
-             <div class="row">      
+             <div class="row ">      
               <q-input filled v-model="formAds.name" lazy-rules label="Nome *" class="w-full py-2" />
             </div>
             <div class="row">      
@@ -56,7 +56,7 @@
              <div class="row">      
               <q-input filled v-model="formAds.instagram" type="text" lazy-rules label="Instagram" class="w-full py-2" />
             </div>
-             <div class="row">      
+             <div class="row ">      
               <q-input filled v-model="formAds.email" type="text" lazy-rules label="Email" class="w-full py-2" />
             </div>
              <div class="row">      
@@ -114,7 +114,7 @@
               <q-input filled v-model="formAddress.country" type="text" lazy-rules label="País" class="w-full py-2" />
             </div>
             <div class="row">      
-              <q-input filled v-model="formAddress.street" type="text" lazy-rules label="Rua" class="w-full py-2" />
+              <q-input filled v-model="formAddress.street" type="text" lazy-rules label="Endereço" class="w-full py-2" />
             </div>
             <div class="row">      
               <q-input filled v-model="formAddress.number" type="text" lazy-rules label="Número" class="w-full py-2" />
@@ -187,6 +187,13 @@ export default defineComponent({
   watch: {
     selectedCity(val) {
       this.form.addressId = val.id
+    },
+    'formUser.name'(val){
+      this.formAds.name = val
+
+    },
+    'formUser.email'(val){
+      this.formAds.email = val
     }
   },
   methods: {    
@@ -303,6 +310,7 @@ export default defineComponent({
           position: 'top',
           message: 'Endereço com sucesso!',         
         })
+        this.$router.push({ path: `/categorias/${this.categoryId}` })
         }
       })
       .catch((err) => {
@@ -321,7 +329,6 @@ export default defineComponent({
       })
       .finally(() => {
         this.$q.loading.hide()
-        this.$router.push({ path: `/categorias/${this.categoryId}` })
 
       })
       },

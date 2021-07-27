@@ -20,7 +20,7 @@
           <q-input filled v-model="formAddress.country" type="text" lazy-rules label="País" class="w-full py-2" />
         </div>
         <div class="row">      
-          <q-input filled v-model="formAddress.street" type="text" lazy-rules label="Rua" class="w-full py-2" />
+          <q-input filled v-model="formAddress.street" type="text" lazy-rules label="Endereço" class="w-full py-2" />
         </div>
         <div class="row">      
           <q-input filled v-model="formAddress.number" type="text" lazy-rules label="Número" class="w-full py-2" />
@@ -79,8 +79,7 @@ export default {
       },
       methods: {
         setAddress(){
-              this.$q.loading.show()
-              this.$api.delete(`/categories/ads/addresses/${this.address.id}`)
+              this.$q.loading.show()            
 
               this.$api.post(`/categories/ads/${this.adId}/addresses`, {...this.formAddress})
               .then((response) => {
@@ -89,8 +88,13 @@ export default {
                   this.$q.notify({
                   color: 'secondary',
                   position: 'top',
-                  message: 'Endereço com sucesso!',         
+                  message: 'Endereço salvo com sucesso!',         
                   })
+                  }
+                  if(this.edit){
+                    this.$api.delete(`/categories/ads/addresses/${this.address.id}`)
+                  }else{
+                    this.$router.go(0)
                   }
               })
               .catch((err) => {

@@ -42,7 +42,7 @@
     ></vue-picture-swipe>
     <div class="p-3">
       <div class="bg-white border border-gray-200 rounded-md p-3">
-        <h1 class="text-xl text-gray-700 font-semibold">Sobre</h1>
+        <h1 class="text-xl text-gray-700 font-semibold">Descrição</h1>
         <p class="text-gray-600">
           {{ dataAds.description }}
         </p>

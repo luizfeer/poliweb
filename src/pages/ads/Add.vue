@@ -190,10 +190,6 @@ export default defineComponent({
     },
     'formUser.name'(val){
       this.formAds.name = val
-
-    },
-    'formUser.email'(val){
-      this.formAds.email = val
     }
   },
   methods: {    

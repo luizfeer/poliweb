@@ -133,6 +133,9 @@ export default {
   },
    mounted(){
        const localization = localStorage.getItem("localization")
+       if(!localization){
+         localStorage.setItem("localization", JSON.stringify(citysData[0]))
+       }
       this.localization =  JSON.parse(localization)
   },
   

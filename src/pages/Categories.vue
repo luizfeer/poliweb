@@ -26,15 +26,18 @@
                   class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
                   >
                   <div class="flex flex-nowrap">
-                      <!-- <div class="h-20 w-20 min-w-[5rem] rounded-sm overflow-hidden">
-                      <q-img
-                          src="/thumb.png"
+                      <div class="h-20 w-20 min-w-[5rem] rounded-sm overflow-hidden">
+                      <!-- <q-img
+                          :src="item.files.find( x => x.isThumbnail ).link"
+                          v-if="item.files.find( x => x.isThumbnail )"
                           :ratio="1"
                           class="h-full w-full"
                           spinner-color="white"
                           spinner-size="82px"
-                      />
-                      </div> -->
+                      /> -->
+                      <q-avatar rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ item.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
+                      </div>
+                      
                       <div class="pl-3">
                       <h1 class="text-lg text-gray-600 font-semibold">
                           {{ item.name }}
@@ -70,6 +73,7 @@ export default ({
   name: "PageIndex",
   setup() {
     return {
+      colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       ads: ref([]),
       admin: ref(false),
       slide: ref('0'),

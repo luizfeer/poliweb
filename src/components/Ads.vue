@@ -1,16 +1,18 @@
 <template>
 <div>
     <div class="bg-white border-b border-gray-200 p-3 mb-3">
-      <div class="flex flex-nowrap">
-        <!-- <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden">
-          <q-img
-            src="/thumb.png"
+      <div class="flex flex-nowrap">  
+        <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden">
+          <!-- <q-img
+            v-if="avatar"
+            :src="avatar"
             :ratio="1"
             class="h-full w-full"
             spinner-color="white"
             spinner-size="82px"
-          />
-        </div> -->
+          /> -->
+          <q-avatar rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ dataAds.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
+        </div>
         <div class="pl-3">
           <h1 class="text-2xl text-gray-700 font-semibold">
            {{ dataAds.name }}
@@ -34,12 +36,21 @@
         />
       </div>
     </div>
+    
+     <!-- <lightgallery
+        :settings="{ speed: 500, plugins }"
+        :onInit="onInit"
+        :onBeforeSlide="onBeforeSlide"
+    >
+        <a v-for="img in dataAds.files"
+        :key="img.id"
+        :href="img.link"
+        :data-src="img.link" >
+            <img alt=".." :src="img.link" />
+        </a>
+       
+    </lightgallery> -->
 
-    <vue-picture-swipe
-        v-if="dataAds.photos"
-      :options="{ bgOpacity: 0.65 }"
-      :items="items"
-    ></vue-picture-swipe>
     <div class="p-3">
       <div class="bg-white border border-gray-200 rounded-md p-3">
         <h1 class="text-xl text-gray-700 font-semibold">Descrição</h1>
@@ -159,15 +170,19 @@
 </template>
 
 <script>
+//  import { Options, Vue } from 'vue-class-component';
+    // import Lightgallery from 'lightgallery/vue';
+    // import lgThumbnail from 'lightgallery/plugins/thumbnail';
+    // import lgZoom from 'lightgallery/plugins/zoom';
+// import 'lightgallery/dist/css/lightgallery.css'
 
 import { ref } from "vue";
-import VuePictureSwipe from "vue-picture-swipe";
 import AddAddress from 'components/add/Address'
 
 export default {
-  components: {
+   components:{  
     AddAddress,
-    VuePictureSwipe,
+    // Lightgallery,
   },
   props:{
     dataAds:{
@@ -176,6 +191,8 @@ export default {
   },
   setup() {
     return {
+      // plugins: ref([lgThumbnail, lgZoom]),
+      colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       slide: ref(1),
       expandedAddress: ref(false),
       follow: ref(false),
@@ -241,19 +258,36 @@ export default {
     };
   },
   computed: {
-      phoneZap() {          
-          for (let index = 0; index < this.dataAds.phones.length; index++) {
-              const element =  this.dataAds.phones[index];
-              if(element.isWhatsapp)
-              {
-                  return element
-              }              
-          }
-          return false
-      }
+     modalGallerys () {
+      let arr = [];
+      this.dataAds.files.forEach((value, index) => {
+        let obj = {
+          thumb: value.link,
+          src: value.link
+        };
+        arr.push(obj);
+      });
+      return arr;
+    },
+    avatar() {
+      return this.dataAds.files.find( x => x.isThumbnail ).link
+    },
+    phoneZap() {          
+        for (let index = 0; index < this.dataAds.phones.length; index++) {
+            const element =  this.dataAds.phones[index];
+            if(element.isWhatsapp)
+            {
+                return element
+            }              
+        }
+        return false
+    }
   },
+  methods: { },
   mounted () {
-     this.admin = localStorage.getItem('admin') ? true : false    
+    // const el = document.getElementById('lightgallery')
+    // window.lightGallery(el)
+    this.admin = localStorage.getItem('admin') ? true : false    
   },
 };
 </script>
@@ -291,4 +325,7 @@ export default {
 .my-gallery figcaption {
   display: none;
 }
+ @import 'lightgallery/css/lightgallery.css';
+    @import 'lightgallery/css/lg-thumbnail.css';
+    @import 'lightgallery/css/lg-zoom.css';
 </style>

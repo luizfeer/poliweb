@@ -8,7 +8,7 @@
           transition-prev="slide-right"
           transition-next="slide-left"
           animated
-          class="h-[auto]"          
+          class="h-[auto] p-0"          
         >
            <q-carousel-slide name="0" class="">
               <router-link v-if="admin" :to="`/painel/categorias/add`">
@@ -24,11 +24,11 @@
                 class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
               >
                 <div class="flex flex-nowrap pl-1">
-                  <div class="h-[60px] w-[60px] rounded-sm overflow-hidden">
+                  <div class="h-[68px] w-[68px] rounded-sm overflow-hidden">
                     <q-img
                       :src="item.iconLink"
                       :ratio="1"
-                      class="h-[60px] w-[60px] rounded-full"
+                      class="h-[68px] w-[68px] rounded-full"
                       spinner-color="white"
                       spinner-size="30px"
                     />

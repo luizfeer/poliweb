@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <q-page class="p-0">
     <div class="px-4 py-2">
       <!-- <Location class="my-2" /> -->
       <!-- {{ categories }} -->

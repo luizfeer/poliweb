@@ -1,8 +1,8 @@
 <template>
   <q-page>
-    <div class="">
+    <div class="p-4">
       <!-- <Location class="my-2" /> -->
-      <!-- {{ categories }} -->,
+      <!-- {{ categories }} -->
       <template v-if="!loading">
         <q-carousel
           v-model="slide"
@@ -11,7 +11,7 @@
           animated
           class="h-[auto]"          
         >
-          <q-carousel-slide name="0" class="0">
+          <q-carousel-slide name="0" class="p-0">
            <div @click="$router.go(-1)" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
             <div class="pl-3 flex">
                 <router-link v-if="admin" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
@@ -55,8 +55,8 @@
           </q-carousel-slide>
         </q-carousel>
       </template>
-      <div v-else v-for="i in 10" :key="i">
-        <q-skeleton type="QToolbar" class="my-2 h-14"/>
+      <div v-else v-for="i in 10" :key="i" class="">
+        <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
       </div>       
          
     </div>

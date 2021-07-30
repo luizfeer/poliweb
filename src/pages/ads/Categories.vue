@@ -6,8 +6,8 @@
       <template v-if="!loading"> 
             <ads-page :data="data" />      
       </template>
-      <div v-else v-for="i in 10" :key="i">
-        <q-skeleton type="QToolbar" class="my-2 h-14"/>
+      <div v-else v-for="i in 10" :key="i" class="p-4">
+        <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
       </div>       
          
     </div>

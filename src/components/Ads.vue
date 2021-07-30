@@ -57,27 +57,19 @@
         v-if="adsComponent.phones.length"
         class="bg-white border border-gray-200 rounded-md p-3 text-lg mt-3"
       >
-        <div v-for="(phone, index) in adsComponent.phones" :key="phone.id">
-            <template v-if="!phone.isWhatsapp">
-                <a :href="`tel:${phone.phone}`" class="flex items-center flex-nowrap text-gray-600">
+        <div v-for="(phone, index) in adsComponent.phones" :key="phone.id" v-show="!phone.deletedAt">
+            
+                <a  :href="!phone.isWhatsapp ? `tel:${phone.phone}` : `https://api.whatsapp.com/send?phone=+55${phone.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer" class="flex items-center flex-nowrap text-gray-600">
                     <q-icon
-                        name="fas fa-phone-square-alt"
-                        class="mr-2 text-xl text-red-600"
+                        :name="phone.isWhatsapp ? 'fab fa-whatsapp-square' : 'fas fa-phone-square-alt' "
+                        class="mr-2 text-xl"
+                        :class="!phone.isWhatsapp ? 'text-red-600' : 'text-green-600'"
                     />
                     {{ this.phone(phone.phone) }}
+                    <q-btn unelevated color="primary" class="ml-5 py-1 p-x-4" @click.prevent="editPhoneData(phone)" v-if="admin"> <q-icon class="text-sm" name="create"/> </q-btn>
+                    <q-btn unelevated color="negative" class="ml-5 py-1 p-x-4" @click.prevent="deletePhoneData=phone; confirm=true" v-if="admin"> <q-icon class="text-sm" name="delete"/> </q-btn>
                 </a>
-                <div v-if="index !== adsComponent.phones.length-1" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
-            </template>
-            <template  v-else>
-                <a  :href="`https://api.whatsapp.com/send?phone=+55${phone.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer" class="flex items-center flex-nowrap text-gray-600">
-                    <q-icon
-                        name="fab fa-whatsapp-square"
-                        class="mr-2 text-xl text-green-600"
-                    />
-                    {{ this.phone(phone.phone) }}
-                </a>
-            <div class="divider border-t border-gray-200 w-full px-5 my-3"></div>
-            </template>
+            <div class="divider border-t border-gray-200 w-full px-5 my-3" v-if="(index+1) < adsComponent.phones.length"></div>    
         </div>
         </div>
 
@@ -140,7 +132,7 @@
               {{ `${adsComponent.addresses[0].street}, nº ${adsComponent.addresses[0].number}. ${adsComponent.addresses[0].city} ${adsComponent.addresses[0].state} - ${adsComponent.addresses[0].zipCode}` }}
             </div>
           </a>
-          <q-btn unelevated color="primary" @click.prevent="editAddress = !editAddress" class="absolute right-0 top-0" icon="create" />
+          <q-btn unelevated color="primary" @click.prevent="editAddress = !editAddress" v-if="admin" class="absolute right-0 top-0" icon="create" />
           <q-expansion-item
             v-model="editAddress"
           >
@@ -169,9 +161,80 @@
             >
               <fix-infos :data="adsComponent"></fix-infos>      
             </q-expansion-item> 
+            
+            <q-expansion-item
+              v-model="expand.phone"
+              v-if="editPhone.edit"
+              icon="perm_identity"
+              label="Editar telefone"
+            >
+             <q-form
+                @submit="newPhone"
+                class="p-4"
+              >
+                <div class="row">      
+                  <q-input filled v-model="editPhone.phone" lazy-rules label="Número:" name="phone" class="w-full py-2" />
+                </div>
+                <div class="row">      
+                  <div class="q-gutter-sm">
+                      <q-checkbox v-model="editPhone.isWhatsapp" label="É Whatsapp?" />
+                    </div>
+                </div>
+                <q-btn label="Salvar" type="submit" color="primary"/>  <q-btn color="negative" class="ml-4" label="Cancelar edição" @click="resetPhone" />
+              </q-form>                   
+            </q-expansion-item>
+            <q-expansion-item
+              v-else
+              v-model="expand.phone"
+              icon="perm_identity"
+              label="Criar novo telefone"
+            >
+             <q-form
+                @submit="newPhone"
+                class="p-4"
+              >
+                <div class="row">      
+                  <q-input filled v-model="editPhone.phone" lazy-rules label="Número:" name="phone" class="w-full py-2" />
+                </div>
+                <div class="row">      
+                  <div class="q-gutter-sm">
+                      <q-checkbox v-model="editPhone.isWhatsapp" label="É Whatsapp?" />
+                    </div>
+                </div>  
+                <q-btn label="Salvar" type="submit" color="primary"/>   
+             </q-form>             
+            </q-expansion-item> 
          </div>
        </div>
     </div>
+     <q-dialog v-model="confirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm">Tem certeza que deseja deletar esse telefone?</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
+          <q-btn flat label="Deletar" color="negative" @click="deletePhone()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-page-container>
+      <q-page padding>
+        <q-page-sticky position="bottom-right" class="" :offset="[18, 18]">
+                <q-fab
+                  icon="add"
+                  direction="up"
+                  color="accent"
+                >
+                  <q-fab-action @click="share()" color="primary" icon="share" />
+                  <q-fab-action @click="map()" color="secondary" icon="travel_explore" />
+                </q-fab>
+          </q-page-sticky>
+                       
+        </q-page>
+      </q-page-container>
     </div>
 </template>
 
@@ -223,12 +286,19 @@ export default {
         }),
       expand: ref({
         basic: false,
-        address: false
+        address: false,
+        phone: false
       }),
       follow: ref(false),
       editAddress: ref(false),
+      editPhone: ref({
+        phone: '',
+        isWhatsapp: false
+      }),
       admin: ref(false),
       items: ref([]),
+      confirm: ref(false),
+      deletePhoneData: ref({})
       
     //   items: [
     //     {
@@ -291,6 +361,22 @@ export default {
     }
   },
   methods: {
+    map() {
+      const url = `http://maps.google.com/maps?q=${this.adsComponent.name},${this.adsComponent.addresses[0].city}`
+      window.open(url, '_blank');
+    },
+    async share() {     
+        const shareData = {
+          title: this.adsComponent.name,
+          text: this.adsComponent.description,
+          url: `https://www.poliewbapp.com.br/`,
+        }
+        try {
+          await navigator.share(shareData)         
+        } catch(err) {
+          console.logg('Error: ' + err)
+        }    
+    },
     phone(phone) {
         return phone.replace(/[^0-9]/g, '')
                   .replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
@@ -316,6 +402,89 @@ export default {
       handleFileUpload(){
         this.adsComponent.avatar = this.$refs.file.files[0];
       },
+      editPhoneData(phone){
+        this.expand.phone = true; this.editPhone = {...phone, edit: true}; 
+      },
+      resetPhone () {
+        this.editPhone ={
+          phone: '',
+          isWhatsapp: false
+        }
+      },
+      deletePhone () {
+        this.$q.loading.show()       
+        this.$api.delete(`/categories/ads/phones/${this.deletePhoneData.id}`)
+        .then((response) => {
+            //  console.log(response.data.addresses)
+            if(response.data){                 
+              this.$q.notify({
+              color: 'secondary',
+              position: 'top',
+              message: 'Telefone apagado com sucesso!',         
+              })
+            }
+            this.resetPhone()
+            this.expand.phone = false
+            this.$router.go(0)      
+        })
+        .catch((err) => {
+            let msg
+            if( err.response){
+            msg =  err.response.data.message
+            }else {
+                msg = 'Erro na conexão!'
+            }
+            this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+            })
+        })
+        .finally(() => {           
+            this.$q.loading.hide()
+        })
+      },
+      newPhone() {
+        this.$q.loading.show()
+        let path
+        if(this.editPhone.edit){
+          path = `/categories/ads/phones/${this.editPhone.id}`
+        } else {
+          path = `/categories/ads/${this.adsComponent.id}/phones`
+        }
+        this.$api.post(path, this.editPhone)
+        .then((response) => {
+            //  console.log(response.data.addresses)
+            if(response.data){                 
+              this.$q.notify({
+              color: 'secondary',
+              position: 'top',
+              message: 'Telefone salvo com sucesso!',         
+              })
+            }
+            this.resetPhone()
+            this.expand.phone = false
+            this.$router.go(0)      
+        })
+        .catch((err) => {
+            let msg
+            if( err.response){
+            msg =  err.response.data.message
+            }else {
+                msg = 'Erro na conexão!'
+            }
+            this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+            })
+        })
+        .finally(() => {           
+            this.$q.loading.hide()
+        })
+      },      
       setAtt(){
         
         this.$q.loading.show()            

@@ -10,7 +10,7 @@
           animated
           class="h-[auto] p-0"          
         >
-           <q-carousel-slide name="0" class="">
+           <q-carousel-slide name="0" class="p-0">
               <router-link v-if="admin" :to="`/painel/categorias/add`">
                 <q-btn unelevated color="primary" label="Cadastrar nova categoria" class="m-2"/>
               </router-link>
@@ -43,7 +43,7 @@
               </div>
             </div>
          </q-carousel-slide>
-         <q-carousel-slide name="1" class="">
+         <q-carousel-slide name="1" class="p-0">
            <div @click="slide = '0'" class="cursor-pointer"> <q-icon name="arrow_back" /> Voltar</div>
               <router-link v-if="admin" :to="`/painel/categorias/add/${subCategorieActive.id}/${encodeURI(subCategorieActive.name)}`">
                 <q-btn unelevated color="primary" label="Cadastrar sub-categoria" v-if="admin" class="m-2"/>
@@ -54,7 +54,7 @@
              class="cursor-pointer">
             <!-- @click="item.subcategories ? this.subcategories(item.subcategories) : this.goTo(`/categorias/${item.id}`) -->
               <div
-                class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
+                class="bg-white border border-gray-200 rounded-md mb-3 p-2 shadow-md"
               > 
                 <div class="flex flex-nowrap h-14 items-center">
                    <div class="h-[60px] w-[60px] rounded-sm overflow-hidden">
@@ -78,7 +78,7 @@
          </q-carousel>    
        </template>
        <div v-else v-for="i in 10" :key="i">
-           <q-skeleton type="QToolbar" class="my-2 h-14"/>
+           <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
       </div>
      
       <!-- {{ categories }} -->

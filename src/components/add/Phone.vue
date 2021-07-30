@@ -30,7 +30,7 @@ export default {
     setup () { 
 
         return {
-             phones: ref(''),
+            phones: ref(''),
             formPhone: ref({
                 isWhatsapp: false,
                 phone: null

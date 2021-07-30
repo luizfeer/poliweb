@@ -2,7 +2,7 @@
   <q-page>
     <div class="">
       <!-- <Location class="my-2" /> -->
-      <!-- {{ categories }} -->
+      <!-- {{ categories }} -->,
       <template v-if="!loading">
         <q-carousel
           v-model="slide"
@@ -12,6 +12,7 @@
           class="h-[auto]"          
         >
           <q-carousel-slide name="0" class="0">
+           <div @click="$router.go(-1)" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
             <div class="pl-3 flex">
                 <router-link v-if="admin" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
                     <q-btn unelevated color="primary" label="Cadastrar empresa"  v-if="admin" class="m-2"/>
@@ -48,7 +49,8 @@
                 </div>
             </div>
           </q-carousel-slide>
-          <q-carousel-slide name="1" class="p-0">        
+          <q-carousel-slide name="1" class="p-0">
+           <div @click="slide = '0'" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
             <ads-page :data-ads="data" />
           </q-carousel-slide>
         </q-carousel>
@@ -78,13 +80,15 @@ export default ({
       admin: ref(false),
       slide: ref('0'),
       loading : ref(true),
-      data: ref({}),
-      showAds(item){
+      data: ref({})      
+    };
+  },
+  methods: {
+   showAds(item){
         console.log(item)
         this.data = {...item};
         this.slide= '1'
       }
-    };
   },
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false

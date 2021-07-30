@@ -162,7 +162,8 @@ export default defineComponent({
         facebook: null,
         instagram: null,
         website: null,
-        email: null
+        email: null,
+        avatar: null,
         }),
         formPhone: ref({
           isWhatsapp: false,

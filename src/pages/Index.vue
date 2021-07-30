@@ -44,7 +44,7 @@
             </div>
          </q-carousel-slide>
          <q-carousel-slide name="1" class="">
-           <div @click="slide = '0'" class="cursor-pointer">Voltar</div>
+           <div @click="slide = '0'" class="cursor-pointer"> <q-icon name="arrow_back" /> Voltar</div>
               <router-link v-if="admin" :to="`/painel/categorias/add/${subCategorieActive.id}/${encodeURI(subCategorieActive.name)}`">
                 <q-btn unelevated color="primary" label="Cadastrar sub-categoria" v-if="admin" class="m-2"/>
               </router-link>

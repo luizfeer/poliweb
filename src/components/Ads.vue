@@ -134,6 +134,7 @@
           </a>
           <q-btn unelevated color="primary" @click.prevent="editAddress = !editAddress" v-if="admin" class="absolute right-0 top-0" icon="create" />
           <q-expansion-item
+            v-if="admin"
             v-model="editAddress"
           >
             <add-address :edit="true" :address="adsComponent.addresses[0]" :ad-id="adsComponent.id"></add-address>
@@ -368,7 +369,7 @@ export default {
     async share() {     
         const shareData = {
           title: this.adsComponent.name,
-          text: this.adsComponent.description,
+          text: this.adsComponent.name,
           url: `https://www.poliewbapp.com.br/`,
         }
         try {

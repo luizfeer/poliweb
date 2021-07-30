@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div class="p-4">
+    <div>
       <!-- <Location class="my-2" /> -->
       <!-- {{ categories }} -->
       <template v-if="!loading">
@@ -55,9 +55,11 @@
           </q-carousel-slide>
         </q-carousel>
       </template>
-      <div v-else v-for="i in 10" :key="i" class="">
-        <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
-      </div>       
+      <div v-else class="p-4">
+        <div v-for="i in 10" :key="i" class="">
+          <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
+        </div>       
+      </div>
          
     </div>
   </q-page>

@@ -132,6 +132,7 @@
           </q-form>
         </q-carousel-slide>
      </q-carousel>
+     
   </q-page>
 </template>
 

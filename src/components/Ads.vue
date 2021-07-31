@@ -1,27 +1,31 @@
 <template>
 <div>
-    <div class="bg-white border-b border-gray-200 p-3 mb-3">
-      <div class="flex flex-nowrap">  
-        <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden">
+    <div class="bg-white border-b border-gray-200 p-3 mb-3 pt-6">
+      <div class="flex flex-nowrap relative">  
+      <q-btn @click="setAtt()" v-if="photoUpload" icon="cloud_upload" round class="absolute -top-4 z-50 ml-12"  color="secondary"/>
+      <q-btn @click="openFile()" v-else-if="admin" icon="add_a_photo" round class="absolute -top-4 z-50 ml-12"  color="primary"/>
 
-          <!-- <q-img
-            v-if="avatar"
-            :src="avatar"
+        <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden relative"
+        :class="admin ? 'cursor-pointer': ''"
+        @click="openFile">          
+          <q-img
+            v-if="adsComponent.files.logo && adsComponent.files.logo.length"
+            :src="pathImg()"
             :ratio="1"
             class="h-full w-full"
             spinner-color="white"
             spinner-size="82px"
-          /> -->
-          <q-avatar rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ adsComponent.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
+          />
+          <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ adsComponent.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
+          <input type="file" id="file" ref="file" @change="handleFileUpload()" accept="image/*" class="absolute h-full w-full top-0 right-0 hidden"/>     
         </div>
-          <!-- <input type="file" id="file" ref="file" v-on:change="handleFileUpload()"/>     
-          <button v-on:click="setAtt()">Enviar</button> -->
            <!-- <q-uploader
               label="Individual upload"
-              multiple
+              :url="`https://poliwebapp.com.br/api/categories/ads/${adsComponent.id}/files/logo`"
+              :headers="headers"
+              :form-fields="() => [{name: 'file', value: 'my-value'}]"
               style="max-width: 300px"
-            />
-          {{ adsComponent.avatar }} -->
+            /> -->          
         <div class="pl-3">
           <h1 class="text-2xl text-gray-700 font-semibold">
            {{ adsComponent.name }}
@@ -264,6 +268,10 @@ export default {
   },
   setup() {
     return {
+      headers: ref([
+        { name: 'Authorization', value: '' },
+        { name: 'Content-Type', value: 'multipart/form-data' }
+      ]),
       // plugins: ref([lgThumbnail, lgZoom]),
       colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       slide: ref(1),
@@ -299,7 +307,8 @@ export default {
       admin: ref(false),
       items: ref([]),
       confirm: ref(false),
-      deletePhoneData: ref({})
+      deletePhoneData: ref({}),
+      photoUpload: ref(false),
       
     //   items: [
     //     {
@@ -362,6 +371,11 @@ export default {
     }
   },
   methods: {
+    pathImg () {
+      let last = this.adsComponent.files.logo.length - 1
+      return this.adsComponent.files.logo[last].link
+      // this.adsComponent.files.logo[-1 ? ].link
+    },
     map() {
       const url = `http://maps.google.com/maps?q=${this.adsComponent.name},${this.adsComponent.addresses[0].city}`
       window.open(url, '_blank');
@@ -401,7 +415,13 @@ export default {
         return this.adsComponent.name
       },
       handleFileUpload(){
-        this.adsComponent.avatar = this.$refs.file.files[0];
+        const file = this.$refs.file.files[0];
+        this.photoUpload = true
+        this.adsComponent.files.logo[this.adsComponent.files.logo.length-1].link = URL.createObjectURL(file);
+      },
+      openFile () {
+        if (!this.admin) return
+       this.$refs.file.click()
       },
       editPhoneData(phone){
         this.expand.phone = true; this.editPhone = {...phone, edit: true}; 
@@ -497,9 +517,11 @@ export default {
         // formData.append('instagram', this.adsComponent.instagram);
         // formData.append('email', this.adsComponent.email);
         // formData.append('website', this.adsComponent.website);
-        this.adsComponent.avatar = "https://lh3.googleusercontent.com/tBi5STLJrxCGqCaKuPbZgyAjBpFT3_Gy1r_HWgK3VuHDJMgxIgpyXEEylvsXuDfJLnKNLnqU4bgETdR9ri_aCYC4gfncZ5Wj_Qubv_o9tADDYHjyRkfmjl4nq0l2Uy7E5rEhcleMXbXG1jrPzo38jXJBnlbnW0GyE_LlahiqwnX8eut-z6L-ct-UjqC9ULx9BwhlDGpR0QrOGoMTBexxNFIBS-rI-EmyaQaZ0QZ_ihOmtqhw6E0YY4sJBWN1-AQ475PIrgarWirptXBhHCsMLkDbzkmQpJVmBWvHhUjjnpcixqq7ra1Qnjk9tsLKVeGcLKb7n_E5G-tCpbJOV6Ow9thxlNwcx570rrk3ASKJrcf-vL_8hDxrqbze35E3oQBPvdeMfazlSVff1tUAccKz5XtF3LUXVDwG3qPDUvfVIlTgZ6SpM7kjFwIjI2poL7S-MbWT8xi458a77yXezCB7hwTyLRbvCGXSRiU-d2VXEDD4tw3wgpRTJRqE81c-qrMhX61YlGb-14Rv2V4VDCWxXas8xmy7rIgKS0Q1QbIwFBBtmGOuPLWrhe4C3lNQ6r6V_WXfnXUaw3GnSyaYZ20H4dgokdFyy7fU9le6aRHBVT9dfNg2TxRr8ka0bmz1WiXhA49dTuf6eyRz0vRoGZQrZjEbXShCE6M_pk9ox6vVS6Xeg1b7-rmYxCQQOgE9bn5sTKIAdjmn3grmAb0XD_sh4U-uWg=w437-h969-no?authuser=0"
-
-        this.$api.post(`/categories/ads/${this.adsComponent.id}`, this.adsComponent , { headers: { 'Content-Type': 'multipart/form-data' }})
+        // this.adsComponent.avatar = "https://lh3.googleusercontent.com/tBi5STLJrxCGqCaKuPbZgyAjBpFT3_Gy1r_HWgK3VuHDJMgxIgpyXEEylvsXuDfJLnKNLnqU4bgETdR9ri_aCYC4gfncZ5Wj_Qubv_o9tADDYHjyRkfmjl4nq0l2Uy7E5rEhcleMXbXG1jrPzo38jXJBnlbnW0GyE_LlahiqwnX8eut-z6L-ct-UjqC9ULx9BwhlDGpR0QrOGoMTBexxNFIBS-rI-EmyaQaZ0QZ_ihOmtqhw6E0YY4sJBWN1-AQ475PIrgarWirptXBhHCsMLkDbzkmQpJVmBWvHhUjjnpcixqq7ra1Qnjk9tsLKVeGcLKb7n_E5G-tCpbJOV6Ow9thxlNwcx570rrk3ASKJrcf-vL_8hDxrqbze35E3oQBPvdeMfazlSVff1tUAccKz5XtF3LUXVDwG3qPDUvfVIlTgZ6SpM7kjFwIjI2poL7S-MbWT8xi458a77yXezCB7hwTyLRbvCGXSRiU-d2VXEDD4tw3wgpRTJRqE81c-qrMhX61YlGb-14Rv2V4VDCWxXas8xmy7rIgKS0Q1QbIwFBBtmGOuPLWrhe4C3lNQ6r6V_WXfnXUaw3GnSyaYZ20H4dgokdFyy7fU9le6aRHBVT9dfNg2TxRr8ka0bmz1WiXhA49dTuf6eyRz0vRoGZQrZjEbXShCE6M_pk9ox6vVS6Xeg1b7-rmYxCQQOgE9bn5sTKIAdjmn3grmAb0XD_sh4U-uWg=w437-h969-no?authuser=0"
+        let data = new FormData();
+        data.append('name', 'my-picture');
+        data.append('file', this.$refs.file.files[0]);
+        this.$api.post(`/categories/ads/${this.adsComponent.id}/files/logo`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
         .then((response) => {
             //  console.log(response.data.addresses)
             if(response.data){                 
@@ -538,6 +560,8 @@ export default {
   mounted () {
     // const el = document.getElementById('lightgallery')
     // window.lightGallery(el)
+    const token =  localStorage.getItem('token')
+    this.headers[0].value = `Bearer ${token}`
     this.admin = localStorage.getItem('admin') ? true : false    
   },
 };

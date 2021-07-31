@@ -9,9 +9,9 @@
           transition-prev="slide-right"
           transition-next="slide-left"
           animated
-          class="h-[auto]"          
+          class="h-[auto] pt-4"          
         >
-          <q-carousel-slide name="0" class="p-0">
+          <q-carousel-slide name="0" class="pt-0">
            <div @click="$router.go(-1)" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
             <div class="pl-3 flex">
                 <router-link v-if="admin" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
@@ -28,15 +28,15 @@
                   >
                   <div class="flex flex-nowrap">
                       <div class="h-20 w-20 min-w-[5rem] rounded-sm overflow-hidden">
-                      <!-- <q-img
-                          :src="item.files.find( x => x.isThumbnail ).link"
-                          v-if="item.files.find( x => x.isThumbnail )"
+                      <q-img
+                          v-if="item.files.logo && item.files.logo.length"
+                          :src="pathImg(item)"
                           :ratio="1"
                           class="h-full w-full"
                           spinner-color="white"
                           spinner-size="82px"
-                      /> -->
-                      <q-avatar rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ item.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
+                      />
+                      <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ item.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
                       </div>
                       
                       <div class="pl-3">
@@ -90,7 +90,11 @@ export default ({
         console.log(item)
         this.data = {...item};
         this.slide= '1'
-      }
+      },
+      pathImg (item) {
+      let last = item.files.logo.length - 1
+      return item.files.logo[last].link
+    },
   },
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false

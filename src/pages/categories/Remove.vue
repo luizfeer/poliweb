@@ -124,12 +124,12 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
-import VuePictureSwipe from "vue-picture-swipe";
+// import VuePictureSwipe from "vue-picture-swipe";
 
 export default defineComponent({
   name: "Categorias",
   components: {
-    VuePictureSwipe,
+    // VuePictureSwipe,
   },
   setup() {
     return {

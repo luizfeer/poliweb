@@ -42,16 +42,17 @@
         />
       </div>
     </div>
-    <div class="flex scroll-gallery p-0">
-      <div class="h-[150px] min-w-[80px] bg-gray-100 mx-3 border border-gray-400 rounded-md flex items-center justify-center cursor-pointer" 
+    <div class="flex scroll-gallery ">
+      <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer" 
       v-if="admin"
       @click="$refs.gallery.click()">
         <q-icon name="add_photo_alternate" class="text-gray-400 text-3xl" />
       </div>
       <vue-picture-swipe 
+        class="ml-3"
         v-if="items && items.length"
         :items="items"
-        :options="{ bgOpacity: 0.65 }"    
+        :options="{ bgOpacity: 0.75 }"    
       />
     </div>
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
@@ -337,9 +338,6 @@ export default {
     };
   },
   computed: {   
-    avatar() {
-      return this.adsComponent.files.find( x => x.isThumbnail ).link
-    },
     phoneZap() {     
         for (let index = 0; index < this.adsComponent.phones.length; index++) {
             const element =  this.adsComponent.phones[index];
@@ -584,7 +582,14 @@ export default {
       })
     }
     this.headers[0].value = `Bearer ${token}`
-    this.admin = localStorage.getItem('admin') ? true : false    
+    const admin = localStorage.getItem('admin') ? true : false
+    let id = localStorage.getItem('id')
+    id = JSON.parse(id)
+    this.admin = admin
+
+    if(this.adsComponent.customerId === id){
+      this.admin = true
+    }
   },
 };
 </script>

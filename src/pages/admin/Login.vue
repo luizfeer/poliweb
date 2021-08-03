@@ -8,7 +8,8 @@
         <q-form @submit="login">
 
         <q-card square bordered class="q-pa-lg shadow-1">
-          <q-card-section class="px-3">            
+          Admin
+          <q-card-section>            
             <q-input square filled clearable v-model="form.email" type="email" label="Email" class="mb-5" />
             <q-input square filled clearable v-model="form.password" type="password" label="Senha" />            
           </q-card-section>
@@ -40,15 +41,13 @@ export default {
   methods:{
   login () {
     this.$q.loading.show()
-    this.$api.post('/customers/login', {...this.form})
+    this.$api.post('/admin/login', {...this.form})
       .then((response) => {
-        const data = response.data
-        if(data){
-         this.$api.defaults.headers.common['Authorization'] = 'Bearer ' +  JSON.stringify(data.token);
-         localStorage.setItem("token", JSON.stringify(data.token))  
-         localStorage.setItem("id",  JSON.stringify(data.context.id))
-         localStorage.setItem("context",  JSON.stringify(data.context))
-
+        const token = response.data.token
+        if(token){
+          this.$api.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+         localStorage.setItem("token", token)  
+         localStorage.setItem("admin", "true")  
          this.$router.push({ path: '/' })      
         }
       })

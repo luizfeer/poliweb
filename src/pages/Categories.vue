@@ -91,7 +91,7 @@ export default ({
         this.data = {...item};
         this.slide= '1'
       },
-      pathImg (item) {
+    pathImg (item) {
       let last = item.files.logo.length - 1
       return item.files.logo[last].link
     },
@@ -101,7 +101,7 @@ export default ({
   },
   beforeMount () {
     this.loading = true
-    this.$api.get(`/categories/${this.$route.params.id}/ads`)
+    this.$api.get(`/categories/${this.$route.params.id}/ads?nonDeleted=true`)
      .then((response) => {
         if(response.data){
          this.ads = response.data.categoryAds    

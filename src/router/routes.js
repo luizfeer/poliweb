@@ -29,6 +29,13 @@ const routes = [
     ]
   },
   {
+    path: '/admin/login',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/admin/Login.vue') }
+    ]
+  },
+  {
     path: '/categorias/:id?/:name?',
     component: () => import('layouts/MainLayout.vue'),
     children: [

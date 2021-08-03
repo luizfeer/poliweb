@@ -3,18 +3,24 @@
     <q-table
       title="Treats"
       :rows="customers"
-      :columns="columns"
+      :columns="headers"
       color="primary"
       row-key="name"
+      :filter="filter"
     >
       <template v-slot:top-right>
+        <q-input borderless dense debounce="300" v-model="filter" placeholder="Procurar">
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
         <q-btn
           color="primary"
           icon-right="archive"
-          label="Export to csv"
+          label="Baixar"
           no-caps
           @click="exportTable"
-        />
+        />      
       </template>
     </q-table>
   </div>
@@ -46,6 +52,8 @@ function wrapCsvValue (val, formatFn) {
 export default {
   data() {
     return {
+      filter: '',
+      loading: false,
       customers: [],
       headers: [
         {
@@ -53,24 +61,28 @@ export default {
           required: true,
           label: 'Nome',
           align: 'left',
-          field: row => row.name,
-          format: val => `${val}`,
+          field: 'name',
           sortable: true
         },
         { name: 'email', align: 'center', label: 'Email', field: 'email', sortable: true },
         { name: 'phone', label: 'Telefone', field: 'phone', sortable: true },
-        { name: 'carbs', label: 'Criação', field: 'createdAt' },       
+        { name: 'criacao', label: 'Criação', field: 'createdAt' },       
+        { name: 'id', label: 'ID', field: 'id' },       
         // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
         // { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
       ]
     }
   },
   methods: {
-    getData() {
-      this.$api.get('/customers')
+  },
+  beforeMount() {
+    this.loading = true
+    this.$api.get(`/customers?nonDeleted=true`)
      .then((response) => {
         if(response.data){
-         this.customers = response.data.customers    
+        const customers = response.data.customers 
+        this.customers = customers.filter((item)=>{ return !item.deletedAt })   
+   
         }
       })
       .catch((err) => {
@@ -87,10 +99,11 @@ export default {
           icon: 'report_problem'
         })
       })
+      .finally(() => {
+        this.loading = false
+      })
    },
-   beforeCreate () { 
-     this.getData();
-   },
+   
   setup () {
     const $q = useQuasar()
 
@@ -123,5 +136,5 @@ export default {
     }
   }
 }
-}
+
 </script>

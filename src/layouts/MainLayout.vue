@@ -159,6 +159,8 @@ const linksList = [
     icon: "add_task",
     link: "/cadastro",
   },
+ 
+  
 ];
 
 import { defineComponent, ref } from "vue";
@@ -181,6 +183,15 @@ export default defineComponent({
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
     };
+  },
+  mounted () {
+    if(localStorage.getItem('admin')){
+      this.essentialLinks.push({
+        title: "Usuários",
+        icon: "group",
+        link: "/adm/users",
+      })
+    }
   },
   methods: {
     getImg(path) {

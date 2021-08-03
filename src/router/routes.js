@@ -29,10 +29,17 @@ const routes = [
     ]
   },
   {
-    path: '/admin/login',
+    path: '/adm/login',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/admin/Login.vue') }
+    ]
+  },
+   {
+    path: '/adm/users',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/admin/User.vue') }
     ]
   },
   {

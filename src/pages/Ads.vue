@@ -50,7 +50,6 @@ export default {
 
     setup () {
         return {
-            setAnotherTitle,
             data: ref([]), 
             loading: ref(true)          
         };

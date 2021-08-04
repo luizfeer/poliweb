@@ -9,7 +9,7 @@
         :class="admin ? 'cursor-pointer': ''"
         @click="openFile">          
           <q-img
-            v-if="adsComponent.files.logo && adsComponent.files.logo.length"
+            v-if="adsComponent.files && adsComponent.files.logo.length"
             :src="pathImg()"
             :ratio="1"
             class="h-full w-full"
@@ -315,7 +315,9 @@ export default {
           deletedAt: '',
           phones: [],
           addresses: [],
-          files: []
+          files: {
+            logo: []
+          }          
         }),
       expand: ref({
         basic: false,
@@ -355,6 +357,11 @@ export default {
       return this.adsComponent.files.logo[last].link
       // this.adsComponent.files.logo[-1 ? ].link
     },
+    url(){
+      let url = encodeURIComponent(this.adsComponent.name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase())
+      url = `${this.adsComponent.id}/${url}`
+      return url
+    },
     map() {
       const url = `http://maps.google.com/maps?q=${this.adsComponent.name},${this.adsComponent.addresses[0].city}`
       window.open(url, '_blank');
@@ -363,7 +370,7 @@ export default {
         const shareData = {
           title: this.adsComponent.name,
           text: this.adsComponent.name,
-          url: `https://www.poliewbapp.com.br/`,
+          url: `https://www.poliwebapp.com.br/${this.url()}`,
         }
         try {
           await navigator.share(shareData)         

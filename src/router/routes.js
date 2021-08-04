@@ -57,7 +57,7 @@ const routes = [
   //   ]
   // },
   {
-    path: '/ads/:id',
+    path: '/:id/:name?',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/Ads.vue') }

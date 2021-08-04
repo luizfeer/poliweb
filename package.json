@@ -1,8 +1,8 @@
 {
   "name": "mega",
   "version": "0.0.1",
-  "description": "A Quasar Framework app",
-  "productName": "Mega",
+  "description": "Agenda de comércios Poliweb",
+  "productName": "Poliweb",
   "author": "Luiz Almeida <luiz.garra@live.com>",
   "private": true,
   "scripts": {

@@ -100,7 +100,8 @@ module.exports = configure(function (ctx) {
           'SessionStorage',
           'LocalStorage',
           'Loading',
-          'AddressbarColor'
+          'AddressbarColor',
+          'Meta'
       ]
     },
 
@@ -212,7 +213,7 @@ module.exports = configure(function (ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'mega'
+        appId: 'poliweb'
       },
 
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain

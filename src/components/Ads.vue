@@ -9,7 +9,7 @@
         :class="admin ? 'cursor-pointer': ''"
         @click="openFile">          
           <q-img
-            v-if="adsComponent.files && adsComponent.files.logo.length"
+            v-if="adsComponent.files.length && adsComponent.files.logo.length"
             :src="pathImg()"
             :ratio="1"
             class="h-full w-full"
@@ -91,14 +91,14 @@
         </div>
 
       <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3">
-        <div v-if="adsComponent.site" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`${adsComponent.site}`" target="_blank" rel="noopener noreferrer">
+        <div v-if="adsComponent.website" class="flex items-center flex-nowrap text-gray-600">
+            <a :href="`${adsComponent.website}`" target="_blank" rel="noopener noreferrer">
                 <q-icon name="language" class="mr-2 text-xl text-blue-400" />
-                {{ adsComponent.site }}
+                {{ adsComponent.website }}
             </a>
         </div>
 
-        <div v-if="adsComponent.site && (adsComponent.facebook || adsComponent.instagram || adsComponent.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
+        <div v-if="adsComponent.website && (adsComponent.facebook || adsComponent.instagram || adsComponent.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div v-if="adsComponent.facebook" class="flex items-center flex-nowrap text-gray-600">
             <a :href="`${adsComponent.facebook}`" target="_blank" rel="noopener noreferrer">

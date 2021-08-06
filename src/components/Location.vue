@@ -61,14 +61,14 @@
         </q-card-section>       
              
               
-          <div v-if="gettingLocation">
+          <!-- <div v-if="gettingLocation">
             <i>Getting your location...</i>
           </div>
           
           <div v-if="location">
             {{ dataApi }}
             Your location data is, {{ location.coords.longitude}}
-          </div>
+          </div> -->
         <!-- <q-card-section>
           Preencha sua cidade ou CEP e encontre os serviçoes mais próximos de
           você!
@@ -157,7 +157,15 @@ export default {
       try {
         this.gettingLocation = false;
         this.location = await this.getLocation();
-        this.getCity()
+        // this.getCity()
+        const address = {
+          city: "GPS",
+          coordinates: {
+            lat: this.location.coords.latitude,
+            long: this.location.coords.longitude         
+         },
+        }
+        this.model = address
         console.log(this.location)
       } catch(e) {
         this.gettingLocation = false;        
@@ -172,13 +180,13 @@ export default {
     getCity () {
       const url = "https://www.cepaberto.com/api/v3/nearest?"
       const params = {'lat': this.location.coords.latitude, 'lng': this.location.coords.longitude}
-      const payload = {
+      const payload = {      
         method: 'GET',
         headers: {
-          // 'Accept': 'application/json',
-          // 'Content-Type': 'application/json',
-          'Authorization': 'Token token=c44a71af5fb8f5d3b06198eb69827ab8'
-        }
+          'Authorization': 'Token token=c44a71af5fb8f5d3b06198eb69827ab8',
+          'Content-Type': 'application/json'
+        },
+        mode: 'no-cors',
       }
        
      
@@ -194,7 +202,6 @@ export default {
       .catch(function(error) {
         console.log('There has been a problem with your fetch operation: ' + error.message);
       });
-
     }
     
   },

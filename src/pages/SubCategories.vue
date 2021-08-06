@@ -167,12 +167,16 @@ export default defineComponent({
       .then((response) => {
           if(response.data){
             let categoriesData = response.data.categories
-             if(!this.localization.city==="GPS") categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city && !item.deletedAt })
+             if(this.localization.city!=="GPS"){
+               categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city && !item.deletedAt })
+             }
             if(this.localization.city==="GPS"){
               this.categories = categoriesData
             }  else {
               this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
             }
+            localStorage.setItem('categories', JSON.stringify(this.categories))
+
             // console.table(this.categories)
           }
         })

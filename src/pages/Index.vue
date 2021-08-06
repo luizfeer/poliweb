@@ -15,12 +15,12 @@
         class="bg-blue-50 border border-gray-200 rounded-md my-10 p-2 shadow-md"
       >
         <div class="flex flex-nowrap pl-1">
-          <div class="h-[68px] w-[68px] rounded-full flex items-center justify-center overflow-hidden bg-blue-600">
+          <div class="min-h-[68px] min-w-[68px] rounded-full flex items-center justify-center overflow-hidden bg-blue-600">
             <q-icon name="storefront" class="text-white text-5xl" />
           </div>
           <div class="pl-3 flex items-center">                     
-            <h1 class="text-lg text-gray-600 font-semibold">
-             Encontre o que precisa agora <q-icon name="arrow_forward" class="text-3xl"/>
+            <h1 class="text-base text-gray-600 font-semibold">
+             Encontre o que precisa agora <q-icon name="arrow_forward" class="text-2xl"/>
             </h1>
           </div>            
         </div>

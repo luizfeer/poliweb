@@ -30,32 +30,32 @@
                 touch
               "
             >
-              <div
-                v-for="item in recommenders"
-                :key="item"
+              <router-link
+                :to="`/sub/${item.id}`"
+                v-for="item in categories"
+                :key="item.id"
                 class="
-                  select-none
-                  h-24
-                  min-w-[6rem]
-                  w-24
-                  min-h-[6rem]
+                  select-none                  
+                  min-w-[8rem]
+                  min-h-[8rem]
                   bg-white
                   rounded-md
                   p-4
                   mr-4
                   flex
+                  flex-col
                   items-center
                   justify-center
                 "
               >
                 <q-img
-                  :src="getImg(item.img)"
+                  :src="item.iconLink"
                   spinner-color="text-gray-300"
-                  class="h-10 w-10"
+                  class="h-[64px] w-[64px]"
                   spinner-size="15px"
                 />
-                <p class="text-gray-700 font-semibold">{{ item.title }}</p>
-              </div>
+                <p class="text-gray-700 font-semibold text-base text-center mt-1 h-14">{{ item.name }}</p>
+              </router-link>
             </div>
           </div>
         </div>
@@ -85,58 +85,17 @@
 
 <script>
 import EssentialLink from "components/EssentialLink.vue";
-const recommenders = [
-  {
-    patch: "/",
-    img: "food",
-    title: "Alimentos",
-  },
-  {
-    patch: "/",
-    img: "shopping",
-    title: "Compras",
-  },
-  {
-    patch: "/",
-    img: "gym",
-    title: "Academias",
-  },
-  {
-    patch: "/",
-    img: "cosmetics",
-    title: "Beleza",
-  },
-  {
-    patch: "/",
-    img: "cart",
-    title: "Mercados",
-  },
-  {
-    patch: "/",
-    img: "dog",
-    title: "Pets",
-  },
-  {
-    patch: "/",
-    img: "ticket",
-    title: "Eventos",
-  },
-  {
-    patch: "/",
-    img: "cow",
-    title: "Animais",
-  },
-  {
-    patch: "/",
-    img: "hospital",
-    title: "Saúde",
-  },
-];
+
 const linksList = [
   {
     title: "Home",
     icon: "home",
     link: "/",
+  },
+    {
+    title: "Encontre comércios",
+    icon: "storefront",
+    link: "/encontre",
   },
   {
     title: "Login",
@@ -177,27 +136,65 @@ export default defineComponent({
 
     return {
       essentialLinks: linksList,
+      categories: ref([]),
       leftDrawerOpen,
-      recommenders,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
     };
   },
-  mounted () {
-    if(localStorage.getItem('admin')){
-      this.essentialLinks.push({
-        title: "Usuários",
-        icon: "group",
-        link: "/adm/users",
-      })
+   mounted(){
+     const categories = localStorage.getItem('categories')
+     this.categories = JSON.parse(categories)
+     const admin = localStorage.getItem('admin') ? true : false
+     // move to store
+     const localization = localStorage.getItem("localization")
+     this.localization =  JSON.parse(localization)
+     this.getData()
+      if(admin){
+        this.essentialLinks.push({
+          title: "Usuários",
+          icon: "group",
+          link: "/adm/users",
+        })
     }
   },
-  methods: {
-    getImg(path) {
-      return "/icons-recommenders/" + path + ".png";
-    },
+  methods: { 
+    getData () {
+      this.loading = true
+      let gps
+      if(this.localization){
+        gps = `?lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}`
+      }
+      this.$api.get(`/categories${gps ? gps : ''}`)
+      .then((response) => {
+          if(response.data){
+            let categoriesData = response.data.categories
+            categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city && !item.deletedAt })
+            this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+            // console.table(this.categories)
+          }
+          localStorage.setItem('categories', JSON.stringify(this.categories))
+        })
+        .catch((err) => {
+          let msg
+          if( err.response){
+            msg =  err.response.data.message
+          } else {
+            msg = 'Erro na conexão!'
+          }
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+          })
+        })
+        .finally(() => {
+          this.loading = false
+        })
   },
+  }
 });
 </script>
 <style scoped>

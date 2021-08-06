@@ -51,14 +51,24 @@
           </q-select>         
         </q-card-section>
 
-        <q-card-section @click="gps" class="pt-0 flex items-center text-lg cursor-pointer">
+        <q-card-section @click="locateMe" class="pt-0 flex items-center text-lg cursor-pointer">
           <q-icon name="gps_fixed" class="mr-1" /> Usar o GPS para localização
         </q-card-section>
 
         <q-card-section>
           Preencha sua cidade e encontre os serviçoes mais próximos de
           você!
-        </q-card-section>
+        </q-card-section>       
+             
+              
+          <div v-if="gettingLocation">
+            <i>Getting your location...</i>
+          </div>
+          
+          <div v-if="location">
+            {{ dataApi }}
+            Your location data is, {{ location.coords.longitude}}
+          </div>
         <!-- <q-card-section>
           Preencha sua cidade ou CEP e encontre os serviçoes mais próximos de
           você!
@@ -110,7 +120,10 @@ export default {
       model: ref(null),
       dialog: ref(false),
       citys: ref(citysData),
-      localization: ref({})
+      localization: ref({}),
+      location: ref(null),
+      gettingLocation: ref(false),
+      dataApi: ref([])
       
     }
   },
@@ -122,14 +135,68 @@ export default {
     }
   },
   methods: {
-    gps(){
+    async getLocation() {
+      
+      return new Promise((resolve, reject) => {
+
+        if(!("geolocation" in navigator)) {
+          reject(new Error('Erro com GPS.'));
+        }
+
+        navigator.geolocation.getCurrentPosition(pos => {
+          resolve(pos);
+        }, err => {
+          reject(err);
+        });
+
+      });
+    },
+    async locateMe() {
+
+      this.gettingLocation = true;
+      try {
+        this.gettingLocation = false;
+        this.location = await this.getLocation();
+        this.getCity()
+        console.log(this.location)
+      } catch(e) {
+        this.gettingLocation = false;        
         this.$q.notify({
-        color: 'negative',
+         color: 'negative',
         position: 'top',
-        message: 'O recurso GPS será ativado em breve.',
+        message: e.message,
         icon: 'report_problem'
+        })     
+      }
+    },
+    getCity () {
+      const url = "https://www.cepaberto.com/api/v3/nearest?"
+      const params = {'lat': this.location.coords.latitude, 'lng': this.location.coords.longitude}
+      const payload = {
+        method: 'GET',
+        headers: {
+          // 'Accept': 'application/json',
+          // 'Content-Type': 'application/json',
+          'Authorization': 'Token token=c44a71af5fb8f5d3b06198eb69827ab8'
+        }
+      }
+       
+     
+      fetch(url + new URLSearchParams(params), payload).then(function(response) {
+        if(response.ok) {
+            response.blob().then(function(myBlob) {
+              this.dataApi = myBlob;              
+            });
+        } else {
+          console.log('Network response was not ok.');
+        }
       })
+      .catch(function(error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+      });
+
     }
+    
   },
    mounted(){
        const localization = localStorage.getItem("localization")

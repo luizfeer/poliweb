@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div @click="slide = '0'" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
+    <div class="pt-2">
+        <router-link to="/" class="cursor-pointer ml-2 "> <q-icon name="arrow_back" /> Voltar</router-link>
         <ads-page v-if="!loading" :data-ads="data" />    
         <div v-else class="p-3">
             <q-card>

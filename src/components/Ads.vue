@@ -3,13 +3,13 @@
     <div class="bg-white border-b border-gray-200 p-3 mb-3 pt-6">
       <div class="flex flex-nowrap relative">  
       <q-btn @click="setAtt()" v-if="photoUpload" icon="cloud_upload" round class="absolute -top-4 z-10 ml-12"  color="secondary"/>
-      <q-btn @click="openFile()" v-else-if="admin" icon="add_a_photo" round class="absolute -top-4 z-10 ml-12"  color="primary"/>
+      <q-btn @click="openFile()" v-else-if="admin" icon="add_a_photo" round class="absolute -top-4 z-10 ml-12"  color="primary"/>    
 
         <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden relative"
         :class="admin ? 'cursor-pointer': ''"
-        @click="openFile">          
+        @click="openFile">
           <q-img
-            v-if="adsComponent.files.length && adsComponent.files.logo.length"
+            v-if="adsComponent.files && adsComponent.files.logo && adsComponent.files.logo.length"
             :src="pathImg()"
             :ratio="1"
             class="h-full w-full"
@@ -38,7 +38,7 @@
           :color="!follow ? 'white' : 'positive'"
           :text-color="follow ? 'white' : 'blue-grey-8'"
           :label="follow ? 'Seguindo' : 'Seguir'"
-          @click="follow = !follow"
+          @click="follows()"
         />
       </div>
     </div>
@@ -324,12 +324,12 @@ export default {
         address: false,
         phone: false
       }),
-      follow: ref(false),
       editAddress: ref(false),
       editPhone: ref({
         phone: '',
         isWhatsapp: false
       }),
+      follow: ref(false),
       admin: ref(false),
       confirm: ref(false),
       deletePhoneData: ref({}),
@@ -339,7 +339,7 @@ export default {
       items: ref(),
     };
   },
-  computed: {   
+  computed: {    
     phoneZap() {     
         for (let index = 0; index < this.adsComponent.phones.length; index++) {
             const element =  this.adsComponent.phones[index];
@@ -352,6 +352,48 @@ export default {
     }
   },
   methods: {
+     getFollowColor(){
+      let follow = localStorage.getItem("follow")    
+      if(follow) follow = JSON.parse(follow)  
+      if(!follow) follow = []
+      const index = follow.findIndex(x => x.id === this.adsComponent.id)
+      if(index>-1){
+        this.follow = true
+        return true
+      }
+      return false
+    },
+    saveHistory(){
+      let history = localStorage.getItem("history")
+      if(history) history = JSON.parse(history)      
+      if(!history) history = []
+      const index = history.findIndex(x => x.id === this.adsComponent.id)
+      if(index>-1){
+         history.splice(index, 1);
+         history.push(this.adsComponent)
+      } else if(history && history.length>3){
+        history.shift()
+        history.push(this.adsComponent)
+      } else {
+        history.push(this.adsComponent)
+      }
+      localStorage.setItem("history", JSON.stringify(history))
+    },
+    follows(){
+      let follow = localStorage.getItem("follow")
+      if(follow) follow = JSON.parse(follow)     
+      if(!follow) follow = []
+      const index = follow.findIndex(x => x.id === this.adsComponent.id)
+      if(index>-1){
+        this.follow = false
+         follow.splice(index, 1)
+      } else {
+        this.follow = true
+
+        follow.push(this.adsComponent)
+      }
+      localStorage.setItem("follow", JSON.stringify(follow))
+    },
     pathImg () {
       let last = this.adsComponent.files.logo.length - 1
       return this.adsComponent.files.logo[last].link
@@ -593,10 +635,11 @@ export default {
     let id = localStorage.getItem('id')
     id = JSON.parse(id)
     this.admin = admin
-
     if(this.adsComponent.customerId === id){
       this.admin = true
     }
+      this.saveHistory()
+      this.getFollowColor()
   },
 };
 </script>

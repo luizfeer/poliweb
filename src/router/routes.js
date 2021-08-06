@@ -49,6 +49,20 @@ const routes = [
       { path: '', component: () => import('pages/Categories.vue') }
     ]
   },
+   {
+    path: '/sub/:id?',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/SubCategories.vue') }
+    ]
+  },
+   {
+    path: '/encontre',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/SubCategories.vue') }
+    ]
+  },
   // {
   //   path: '/sub/:id',
   //   component: () => import('layouts/MainLayout.vue'),

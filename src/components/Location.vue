@@ -73,7 +73,7 @@
             </i>
           </div>
 
-          <div v-if="localization" class="p-4">
+          <div v-if="localization" class="p-4 mt-10">
             <p class="text-blue-600 font-medium">Sua última localização aproximada</p>
             <p class="text-lg">
               <span class="text-gray-600 font-medium">{{ localization.city }}</span>

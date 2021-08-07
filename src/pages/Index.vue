@@ -27,13 +27,14 @@
         </div>
         
       </router-link>
+      
        <div
-        class="bg-green-50 border border-green-400 rounded-md my-10 p-2 shadow-md"
-        @click="install"
-         v-if="true"
+        class="bg-green-50 hover:bg-green-400 border border-green-400 rounded-md my-10 p-2 shadow-md"
+        @click="install()"
+         v-if="deferredPrompt"
       >
-        <div class="flex flex-nowrap pl-1">
-          <div class="min-h-[55px] min-w-[55px] rounded-full flex items-center justify-center overflow-hidden bg-green-600">
+        <div class="flex flex-nowrap pl-1 select-none cursor-pointer">
+          <div class="min-h-[55px] min-w-[55px] rounded-full flex items-center justify-center overflow-hidden bg-green-600 ">
             <q-icon name="file_download" class="text-white text-4xl" />
           </div>
           <div class="pl-3 flex items-center">                     
@@ -85,9 +86,9 @@ export default defineComponent({
       // Stash the event so it can be triggered later.
       this.deferredPrompt = e;
     });
-    window.addEventListener("appinstalled", () => {
-      this.deferredPrompt = null;
-    });
+    // window.addEventListener("appinstalled", () => {
+    //   this.deferredPrompt = null;
+    // });
   },
   methods: {
     async install() {

@@ -76,6 +76,7 @@ export default defineComponent({
       slide: ref("0"),
       loading : ref(true),
       localization: ref({}),
+      deferredPrompt: ref(null),
       history: [],
       follow: [],
     };
@@ -86,9 +87,9 @@ export default defineComponent({
       // Stash the event so it can be triggered later.
       this.deferredPrompt = e;
     });
-    // window.addEventListener("appinstalled", () => {
-    //   this.deferredPrompt = null;
-    // });
+    window.addEventListener("appinstalled", () => {
+      this.deferredPrompt = null;
+    });
   },
   methods: {
     async install() {

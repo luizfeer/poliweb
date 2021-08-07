@@ -147,6 +147,7 @@ module.exports = configure(function (ctx) {
 
       manifest: {
         name: `Poliweb`,
+        start_url: "https://www.poliwebapp.com.br/",
         short_name: `Poliweb`,
         description: `Poliweb, agenda de comércios inteligentes.`,
         display: 'standalone',

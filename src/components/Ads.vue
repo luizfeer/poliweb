@@ -625,8 +625,8 @@ export default {
         return {
           src: x.link,
           thumbnail: x.link,
-          w: 800,
-          h: 800
+          w: x.width || 800,
+          h: x.height || 800
         }
       })
     }

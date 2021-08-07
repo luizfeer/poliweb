@@ -43,11 +43,13 @@ export default {
     this.$api.post('/customers/login', {...this.form})
       .then((response) => {
         const data = response.data
+        console.log(data)
         if(data){
-         this.$api.defaults.headers.common['Authorization'] = 'Bearer ' +  JSON.stringify(data.token);
-         localStorage.setItem("token", JSON.stringify(data.token))  
+         this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+         localStorage.setItem("token", data.token)  
          localStorage.setItem("id",  JSON.stringify(data.context.id))
          localStorage.setItem("context",  JSON.stringify(data.context))
+         localStorage.removeItem('admin')
 
          this.$router.push({ path: '/' })      
         }

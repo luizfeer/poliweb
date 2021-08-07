@@ -161,18 +161,24 @@ export default defineComponent({
       }
       let gps
       if(this.localization){
-        gps = `?lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}`
+        gps = `lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}&nonDeleted=true`
       }
-     await this.$api.get(`/categories${gps ? gps : ''}`)
+      this.$api.get(`/categories?${gps ? gps : 'nonDeleted=true'}`)
       .then((response) => {
           if(response.data){
             let categoriesData = response.data.categories
-             if(this.localization.city!=="GPS"){
+            if(this.localization.city!=="GPS" && (this.localization.city==="Nova Resende" || this.localization.city==="Guaxupé")){
+              console.log('1')
+              console.log(this.localization.city)
                categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city && !item.deletedAt })
-             }
-            if(this.localization.city==="GPS"){
-              this.categories = categoriesData
+            }
+            if(this.localization.city==="GPS" || (this.localization.city!=="Nova Resende" && this.localization.city!=="Guaxupé")){
+              console.log('2')
+
+              this.categories = categoriesData.filter((item)=>{ return !item.deletedAt })
             }  else {
+              console.log('3')
+
               this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
             }
             localStorage.setItem('categories', JSON.stringify(this.categories))

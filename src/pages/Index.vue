@@ -25,7 +25,24 @@
           </div>            
         </div>
         </div>
+        
       </router-link>
+       <div
+        class="bg-green-50 border border-green-400 rounded-md my-10 p-2 shadow-md"
+        @click="install"
+         v-if="true"
+      >
+        <div class="flex flex-nowrap pl-1">
+          <div class="min-h-[55px] min-w-[55px] rounded-full flex items-center justify-center overflow-hidden bg-green-600">
+            <q-icon name="file_download" class="text-white text-4xl" />
+          </div>
+          <div class="pl-3 flex items-center">                     
+            <h1 class="text-lg text-green-600 font-semibold">
+             Instalar o Aplicativo
+            </h1>
+          </div>            
+        </div>
+        </div>
       <!-- {{ categories }} -->
       
     </div>  
@@ -61,7 +78,22 @@ export default defineComponent({
       history: [],
       follow: [],
     };
-  }, 
+  },
+   created() {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      this.deferredPrompt = e;
+    });
+    window.addEventListener("appinstalled", () => {
+      this.deferredPrompt = null;
+    });
+  },
+  methods: {
+    async install() {
+      this.deferredPrompt.prompt();
+    }
+  },
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false
      // move to store
@@ -71,9 +103,6 @@ export default defineComponent({
      const follow = localStorage.getItem('follow')
      this.history = JSON.parse(history)
      this.follow = JSON.parse(follow)
-  },
-  methods: {    
-    
-  },
+  }
 })
 </script>

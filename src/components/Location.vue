@@ -100,22 +100,7 @@
 
 <script>
 import { ref } from "vue";
-  const citysData = [
-    {
-      "id": 401,
-      "country": "Brasil",
-      "state": "MG",
-      "city": "Nova Resende",
-      "zipCode": "37860000",
-      "coordinates": {
-        "lat": -21.114253,
-        "long": -46.409309,
-        "rawType": true
-      },
-      "createdAt": "2021-07-25T19:07:29.094Z",
-      "updatedAt": null,
-      "deletedAt": null
-    },
+  const citysData =  [
     {
       "id": 402,
       "country": "Brasil",
@@ -127,7 +112,52 @@ import { ref } from "vue";
         "long": -46.714397,
         "rawType": true
       },
-      "createdAt": "2021-07-25T19:08:45.545Z",
+      "createdAt": "2021-07-26T03:56:36.706Z",
+      "updatedAt": null,
+      "deletedAt": null
+    },
+    {
+      "id": 401,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Nova Resende",
+      "zipCode": "37860000",
+      "coordinates": {
+        "lat": -21.114253,
+        "long": -46.409309,
+        "rawType": true
+      },
+      "createdAt": "2021-07-26T03:55:35.730Z",
+      "updatedAt": "2021-07-26T03:59:29.495Z",
+      "deletedAt": null
+    },
+    {
+      "id": 403,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "São Pedro da União",
+      "zipCode": "37855000",
+      "coordinates": {
+        "lat": -21.13164,
+        "long": -46.6175338,
+        "rawType": true
+      },
+      "createdAt": "2021-08-09T13:20:28.305Z",
+      "updatedAt": null,
+      "deletedAt": null
+    },
+    {
+      "id": 404,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Bom Jesus da Penha",
+      "zipCode": "37948000",
+      "coordinates": {
+        "lat": -21.0165299,
+        "long": -46.5226644,
+        "rawType": true
+      },
+      "createdAt": "2021-08-09T13:22:22.012Z",
       "updatedAt": null,
       "deletedAt": null
     }

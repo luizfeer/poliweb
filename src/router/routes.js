@@ -43,6 +43,13 @@ const routes = [
     ]
   },
   {
+    path: '/adm/cidades',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/admin/AddAddress.vue') }
+    ]
+  },
+  {
     path: '/categorias/:id?/:name?',
     component: () => import('layouts/MainLayout.vue'),
     children: [
@@ -56,7 +63,7 @@ const routes = [
       { path: '', component: () => import('pages/SubCategories.vue') }
     ]
   },
-   {
+  {
     path: '/encontre',
     component: () => import('layouts/MainLayout.vue'),
     children: [

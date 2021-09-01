@@ -59,22 +59,48 @@ export default {
     this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
      .then((response) => {
         if(response.data){
-         this.data = response.data    
+            if(response.data.deletedAt){
+                this.$router.push('/')
+            }
+            
+            let filtered = response.data
+            console.log(filtered)
+
+            filtered.files.gallery = this.filterDeleted(filtered.files.gallery).slice(0).reverse();
+            filtered.phones =  this.filterDeleted(filtered.phones)
+            filtered.address =  this.filterDeleted(filtered.address)
+            this.data = filtered
+            console.log(filtered)
+
+            this.loading = false
+
+            
         }
       })
       .catch((err) => {
-         this.$router.push({ path: '/' })          
-          msg = 'Erro na conexão!'        
+          console.log(err)
+        let msg = 'Erro na conexão!'        
         this.$q.notify({
-          color: 'negative',
+            color: 'negative',
           position: 'top',
           message: msg,
           icon: 'report_problem'
         })
+        this.$router.push({ path: '/' })          
       })
       .finally(() => {
-        this.loading = false
       })
+  },
+  methods: {
+      filterDeleted(arr) {
+          try {
+              return arr.filter((item)=>{ return !item.deletedAt })
+              
+          } catch (error) {
+              console.log(error)
+              return arr
+          }
+      }
   },
 }
 </script>

@@ -28,7 +28,7 @@
       </div>
       <q-space />
       <div class="flex items-center justify-between mt-4">
-          <a v-if="phoneZap" :href="`https://api.whatsapp.com/send?phone=+55${phoneZap.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer">
+          <a  @click="sendAction('open-whatsapp')" v-if="phoneZap" :href="`https://api.whatsapp.com/send?phone=+55${phoneZap.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer">
             <q-btn push color="positive" text-color="white">
                 <q-icon name="fab fa-whatsapp" class="mr-2" /> Whatsapp
             </q-btn>
@@ -51,9 +51,12 @@
       <vue-picture-swipe 
         class="ml-3"
         v-if="items && items.length"
+        @click="openGallery()"
         :items="items"
         :options="{ bgOpacity: 0.75 }"    
-      />
+      >
+      <button>a</button>
+      </vue-picture-swipe>
     </div>
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
 
@@ -70,7 +73,7 @@
       >
         <div v-for="(phone, index) in adsComponent.phones" :key="phone.id" v-show="!phone.deletedAt">
             
-                <a  :href="!phone.isWhatsapp ? `tel:${phone.phone}` : `https://api.whatsapp.com/send?phone=+55${phone.phone}&text=Ol%C3%A1!`"
+                <a @click="sendAction(!phone.isWhatsapp ? 'open-phone' : 'open-whatsapp')" :href="!phone.isWhatsapp ? `tel:${phone.phone}` : `https://api.whatsapp.com/send?phone=+55${phone.phone}&text=Ol%C3%A1!`"
                 target="_blank" rel="noopener noreferrer"
                 class="flex items-start flex-nowrap text-gray-600 flex-col sm:flex-row">
                     <div>
@@ -92,7 +95,7 @@
 
       <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3">
         <div v-if="adsComponent.website" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`${adsComponent.website}`" target="_blank" rel="noopener noreferrer">
+            <a  @click="sendAction('open-site')" :href="`${adsComponent.website}`" target="_blank" rel="noopener noreferrer">
                 <q-icon name="language" class="mr-2 text-xl text-blue-400" />
                 {{ adsComponent.website }}
             </a>
@@ -101,7 +104,7 @@
         <div v-if="adsComponent.website && (adsComponent.facebook || adsComponent.instagram || adsComponent.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div v-if="adsComponent.facebook" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`${adsComponent.facebook}`" target="_blank" rel="noopener noreferrer">
+            <a  @click="sendAction('open-facebook')" :href="`${adsComponent.facebook}`" target="_blank" rel="noopener noreferrer">
                 <q-icon
                     name="fab fa-facebook-square"
                     class="mr-2 text-xl text-blue-800"
@@ -112,7 +115,7 @@
         <div v-if="adsComponent.facebook  && (adsComponent.instagram || adsComponent.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div v-if="adsComponent.instagram" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`${adsComponent.instagram}`" target="_blank" rel="noopener noreferrer">
+            <a  @click="sendAction('open-instagram')" :href="`${adsComponent.instagram}`" target="_blank" rel="noopener noreferrer">
                 <q-icon
                     name="fab fa-instagram-square"
                     class="mr-2 text-xl text-pink-600"
@@ -122,7 +125,7 @@
         </div>
         <div v-if="adsComponent.instagram && adsComponent.email" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
         <div v-if="adsComponent.email" class="flex items-center flex-nowrap text-gray-600">
-            <a :href="`mailto:${adsComponent.email}`" target="_blank" rel="noopener noreferrer">
+            <a  @click="sendAction('open-mail')" :href="`mailto:${adsComponent.email}`" target="_blank" rel="noopener noreferrer">
                 <q-icon
                     name="fas fa-envelope-open-text"
                     class="mr-2 text-xl text-purple-800"
@@ -132,7 +135,7 @@
         </div>
       </div>
       <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3 relative" v-if="adsComponent.addresses && adsComponent.addresses.length">
-          <a :href="`http://maps.google.com/maps?q=${adsComponent.name},${adsComponent.addresses[0].street},Nº${adsComponent.addresses[0].number},${adsComponent.addresses[0].city} ${adsComponent.addresses[0].state},${adsComponent.addresses[0].zipCode}`" target="_blank" rel="noopener noreferrer">
+          <a @click="sendAction('open-map')" :href="`http://maps.google.com/maps?q=${adsComponent.name},${lastAddress.street},Nº${lastAddress.number},${lastAddress.city} ${lastAddress.state},${lastAddress.zipCode}`" target="_blank" rel="noopener noreferrer">
             <div
               class="
                 flex flex-col
@@ -146,7 +149,7 @@
                 name="fas fa-map-marked-alt"
                 class="mr-2 text-3xl text-yellow-500"
               />
-              {{ `${adsComponent.addresses[0].street}, nº ${adsComponent.addresses[0].number}. ${adsComponent.addresses[0].city} ${adsComponent.addresses[0].state} - ${adsComponent.addresses[0].zipCode}` }}
+              {{ `${lastAddress.street}, nº ${lastAddress.number}. ${lastAddress.city} ${lastAddress.state} - ${lastAddress.zipCode}` }}
             </div>
           </a>
           <q-btn unelevated color="primary" @click.prevent="editAddress = !editAddress" v-if="admin" class="absolute right-0 top-0" icon="create" />
@@ -154,7 +157,7 @@
             v-if="admin"
             v-model="editAddress"
           >
-            <add-address :edit="true" :address="adsComponent.addresses[0]" :ad-id="adsComponent.id"></add-address>
+            <add-address :edit="true" :address="lastAddress" :ad-id="adsComponent.id"></add-address>
           </q-expansion-item>
       </div>
       <div v-else-if="admin">            
@@ -262,8 +265,9 @@
           direction="up"
           color="accent"
         >
-          <q-fab-action @click="share()" color="primary" icon="share" />
-          <q-fab-action @click="map()" color="secondary" icon="travel_explore" />
+      
+          <q-fab-action @click="share();sendAction('share')" color="primary" icon="share" />
+          <q-fab-action @click="map();sendAction('open-map')" color="secondary" icon="travel_explore" />
         </q-fab>
       </q-page-sticky>
   </div>
@@ -299,6 +303,7 @@ export default {
       colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       slide: ref(1),
       index: ref([]),
+      openGalleryStatus: ref(false),
       adsComponent: ref({
           id: '',
           avatar: '',
@@ -339,8 +344,14 @@ export default {
       items: ref(),
     };
   },
-  computed: {    
-    phoneZap() {     
+  computed: {
+    lastAddress(){
+      console.log(this.adsComponent.addresses[this.adsComponent.addresses.length-1])
+      console.log(this.adsComponent.addresses.length)
+      return this.adsComponent.addresses[this.adsComponent.addresses.length-1]
+    },
+    phoneZap() {
+      if(!this.adsComponent.phones.length) return false
         for (let index = 0; index < this.adsComponent.phones.length; index++) {
             const element =  this.adsComponent.phones[index];
             if(element.isWhatsapp)
@@ -352,6 +363,12 @@ export default {
     }
   },
   methods: {
+    openGallery(){
+      if(!this.openGalleryStatus){
+        this.sendAction('open-photos')
+        this.openGalleryStatus = true
+      }
+    },
      getFollowColor(){
       let follow = localStorage.getItem("follow")    
       if(follow) follow = JSON.parse(follow)  
@@ -364,6 +381,7 @@ export default {
       return false
     },
     saveHistory(){
+      this.sendAction('open')
       let history = localStorage.getItem("history")
       if(history) history = JSON.parse(history)      
       if(!history) history = []
@@ -380,6 +398,7 @@ export default {
       localStorage.setItem("history", JSON.stringify(history))
     },
     follows(){
+      this.sendAction('follow')
       let follow = localStorage.getItem("follow")
       if(follow) follow = JSON.parse(follow)     
       if(!follow) follow = []
@@ -405,7 +424,8 @@ export default {
       return url
     },
     map() {
-      const url = `http://maps.google.com/maps?q=${this.adsComponent.name},${this.adsComponent.addresses[0].city}`
+      const url = `http://maps.google.com/maps?q=${this.adsComponent.name},${this.lastAddress.city}`
+      this.sendAction('open-map')
       window.open(url, '_blank');
     },
     async share() {     
@@ -420,7 +440,7 @@ export default {
           console.logg('Error: ' + err)
         }    
     },
-    phone(phone) {
+      phone(phone) {
         return phone.replace(/[^0-9]/g, '')
                   .replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
       },
@@ -464,6 +484,30 @@ export default {
           phone: '',
           isWhatsapp: false
         }
+      },
+      sendAction(type, subtitle) {
+        const uuid = localStorage.getItem('uuid')
+        const id = localStorage.getItem('id-user') || null;
+        let context = localStorage.getItem('context');        
+        context = JSON.parse(context)
+        console.log(context)
+        const name = context && context.name ? context.name : 'Visitante'        
+  
+        const payload = {
+          type,
+          description: name,
+          userId: id,
+          uuid: uuid
+        }
+        this.$api.post(`/categories/ads/${this.adsComponent.id}/actions`, payload)
+        .then((response) => {
+            
+        })
+        .catch((err) => {
+            console.log(err)      
+        })
+        .finally(() => {       
+        })
       },
       deletePhone () {
         this.$q.loading.show()       
@@ -632,7 +676,7 @@ export default {
     }
     this.headers[0].value = `Bearer ${token}`
     const admin = localStorage.getItem('admin') ? true : false
-    let id = localStorage.getItem('id')
+    let id = localStorage.getItem('id-customer')
     id = JSON.parse(id)
     this.admin = admin
     if(this.adsComponent.customerId === id){
@@ -653,6 +697,23 @@ export default {
   overflow-scrolling: touch;
   webkit-overflow-scrolling: touch;
 
+}
+.scroll-gallery::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.062);
+	background-color: #F5F5F5;
+}
+
+.scroll-gallery::-webkit-scrollbar
+{
+	width: 4px;
+	height: 4px;
+	background-color: #F5F5F5;
+}
+
+.scroll-gallery::-webkit-scrollbar-thumb
+{
+	background-color: #25252523;
 }
 .my-gallery {
   width: 100%;

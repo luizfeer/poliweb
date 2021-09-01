@@ -104,7 +104,8 @@ export default ({
     this.$api.get(`/categories/${this.$route.params.id}/ads?nonDeleted=true`)
      .then((response) => {
         if(response.data){
-         this.ads = response.data.categoryAds    
+          this.ads = response.data.categoryAds.filter((item)=>{ return !item.deletedAt })   
+          console.log(this.ads)
         }
       })
       .catch((err) => {

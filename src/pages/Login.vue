@@ -47,7 +47,7 @@ export default {
         if(data){
          this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
          localStorage.setItem("token", data.token)  
-         localStorage.setItem("id",  JSON.stringify(data.context.id))
+         localStorage.setItem("id-customer",  JSON.stringify(data.context.id))
          localStorage.setItem("context",  JSON.stringify(data.context))
          localStorage.removeItem('admin')
 

@@ -145,6 +145,10 @@ export default defineComponent({
   },
    mounted(){
      const categories = localStorage.getItem('categories')
+     const uuid = localStorage.getItem('uuid')
+     if(!uuid){
+      localStorage.setItem('uuid', this.uuidv4())
+     }
      this.categories = JSON.parse(categories)
      const admin = localStorage.getItem('admin') ? true : false
      // move to store
@@ -159,7 +163,13 @@ export default defineComponent({
         })
     }
   },
-  methods: { 
+  methods: {
+     uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    },
     getData () {
       this.loading = true
       let gps

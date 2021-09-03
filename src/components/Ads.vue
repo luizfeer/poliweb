@@ -55,7 +55,6 @@
         :items="items"
         :options="{ bgOpacity: 0.75 }"    
       >
-      <button>a</button>
       </vue-picture-swipe>
     </div>
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
@@ -175,6 +174,13 @@
       </div>
        <div v-if="admin">            
          <div class="bg-gray-100 rounded-3xl mt-4 overflow-hidden">
+            <q-expansion-item
+              v-model="expand.action"
+              icon="perm_identity"
+              label="Acompanhe a interação dos visitantes"
+            >
+              <q-btn label="Acessar Relatórios" :to="`/actions/${adsComponent.id}`" class="my-4 mx-2" color="primary"/>                   
+            </q-expansion-item> 
             <q-expansion-item
               v-model="expand.basic"
               icon="perm_identity"
@@ -325,6 +331,7 @@ export default {
           }          
         }),
       expand: ref({
+        action: false,
         basic: false,
         address: false,
         phone: false

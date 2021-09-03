@@ -56,6 +56,13 @@ const routes = [
       { path: '', component: () => import('pages/Categories.vue') }
     ]
   },
+    {
+    path: '/actions/:id',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/ads/Actions.vue') }
+    ]
+  },
    {
     path: '/sub/:id?',
     component: () => import('layouts/MainLayout.vue'),

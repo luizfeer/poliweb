@@ -165,26 +165,23 @@ export default defineComponent({
       }
       this.$api.get(`/categories?${gps ? gps : 'nonDeleted=true'}`)
       .then((response) => {
-          if(response.data){
+          if(response.data){           
             let categoriesData = response.data.categories
-            if(this.localization.city!=="GPS" && (this.localization.city==="Nova Resende" || this.localization.city==="Guaxupé")){
-              console.log('1')
-              console.log(this.localization.city)
-               categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city && !item.deletedAt })
+              categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city })
+            if(categoriesData.length<1){
+               categoriesData = response.data.categories
+            }else{
+              categoriesData = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
             }
-            if(this.localization.city==="GPS" || (this.localization.city!=="Nova Resende" && this.localization.city!=="Guaxupé")){
-              console.log('2')
-
-              this.categories = categoriesData.filter((item)=>{ return !item.deletedAt })
-            }  else {
-              console.log('3')
-
-              this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+            categoriesData = categoriesData.filter((item)=>{ return !item.deletedAt })
+            categoriesData.forEach(e => {
+              return e.name = e.name.trim()              
+            })           
+            this.categories = categoriesData
             }
             localStorage.setItem('categories', JSON.stringify(this.categories))
-
             // console.table(this.categories)
-          }
+          
         })
         .catch((err) => {
           let msg

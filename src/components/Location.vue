@@ -160,6 +160,81 @@ import { ref } from "vue";
       "createdAt": "2021-08-09T13:22:22.012Z",
       "updatedAt": null,
       "deletedAt": null
+    },
+    {
+      "id": 405,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Conceição da Aparecida",
+      "zipCode": "37148000",
+      "coordinates": {
+        "lat": -21.0978884,
+        "long": -46.2209487,
+        "rawType": true
+      },
+      "createdAt": "2021-08-24T14:16:02.214Z",
+      "updatedAt": null,
+      "deletedAt": null
+    },
+    {
+      "id": 406,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Jacuí",
+      "zipCode": "37965000",
+      "coordinates": {
+        "lat": -21.0165804,
+        "long": -46.7517978,
+        "rawType": true
+      },
+      "createdAt": "2021-09-08T23:58:53.833Z",
+      "updatedAt": null,
+      "deletedAt": null
+    },
+    {
+      "id": 408,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Alterosa",
+      "zipCode": "37145000",
+      "coordinates": {
+        "lat": -21.2553137,
+        "long": -46.1525009,
+        "rawType": true
+      },
+      "createdAt": "2021-09-09T00:01:39.851Z",
+      "updatedAt": null,
+      "deletedAt": null
+    },
+    {
+      "id": 407,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Carmo do Rio Claro",
+      "zipCode": "37150000",
+      "coordinates": {
+        "lat": -20.9703672,
+        "long": -46.1316266,
+        "rawType": true
+      },
+      "createdAt": "2021-09-09T00:00:59.604Z",
+      "updatedAt": "2021-09-09T00:02:44.411Z",
+      "deletedAt": null
+    },
+    {
+      "id": 409,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Areado",
+      "zipCode": "37140000",
+      "coordinates": {
+        "lat": -21.3574035,
+        "long": -46.1610013,
+        "rawType": true
+      },
+      "createdAt": "2021-09-09T00:03:46.041Z",
+      "updatedAt": null,
+      "deletedAt": null
     }
   ];
 

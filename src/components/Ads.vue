@@ -57,6 +57,7 @@
       >
       </vue-picture-swipe>
     </div>
+      <q-btn flat rounded color="primary" label="Editar imagens" v-if="admin" :to="`/img/${adsComponent.id}`"/>
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
 
     <div class="p-3">

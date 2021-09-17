@@ -23,7 +23,7 @@
                           {{ item.name }}
                       </h1>
                       <h2 class="text-base text-gray-500">{{ item.description }}</h2>
-                      <h2 v-if="showAddress && item.addresses && item.addresses.length" class="text-base text-gray-500">{{ item.addresses[0].city }}</h2>
+                      <h2 v-if="showAddress && item.addresses && item.addresses.length" class="text-base text-gray-500">{{ lastAddress(item.addresses).city }}</h2>
                       
                       </div>
                   </div>
@@ -50,7 +50,8 @@
                 default: false
             }
         },
-        computed: {
+        computed: {           
+           
             adsEdited() {
                 if(this.reverse){
                     return this.ads.slice().reverse()
@@ -58,7 +59,10 @@
                 return this.ads
             }
         },
-        methods: {          
+        methods: {   
+             lastAddress(addresses){           
+                return addresses[addresses.length-1]
+            },       
              pathImg (item) {
                 let last = item.files.logo.length - 1
                 return item.files.logo[last].link

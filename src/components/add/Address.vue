@@ -79,9 +79,12 @@ export default {
       },
       methods: {
         setAddress(){
-              this.$q.loading.show()            
-
-              this.$api.post(`/categories/ads/${this.adId}/addresses`, {...this.formAddress})
+              this.$q.loading.show()
+              let link = `/categories/ads/${this.adId}/addresses`          
+              if(this.edit){
+                link = `/categories/ads/addresses/${this.formAddress.id}`
+              }
+              this.$api.post(link, {...this.formAddress})
               .then((response) => {
                   //  console.log(response.data.addresses)
                   if(response.data){                 
@@ -90,12 +93,8 @@ export default {
                   position: 'top',
                   message: 'Endereço salvo com sucesso!',         
                   })
-                  }
-                  if(this.edit){
-                    this.$api.delete(`/categories/ads/addresses/${this.address.id}`)
-                  }else{
-                    this.$router.go(0)
-                  }
+                  }                
+                    // this.$router.go(0)                  
               })
               .catch((err) => {
                   let msg

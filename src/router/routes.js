@@ -84,6 +84,13 @@ const routes = [
   //     { path: '', component: () => import('pages/SubCategorie.vue') }
   //   ]
   // },
+   {
+    path: '/img/:id',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/EditImgs.vue') }
+    ]
+  },
   {
     path: '/:id/:name?',
     component: () => import('layouts/MainLayout.vue'),
@@ -91,6 +98,7 @@ const routes = [
       { path: '', component: () => import('pages/Ads.vue') }
     ]
   },
+ 
   {
     path: '/painel',
        // redirect: '/painel/categorias/list',

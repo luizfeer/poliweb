@@ -91,6 +91,13 @@ const routes = [
       { path: '', component: () => import('pages/EditImgs.vue') }
     ]
   },
+    {
+    path: '/clear',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/Clear.vue') }
+    ]
+  },
   {
     path: '/:id/:name?',
     component: () => import('layouts/MainLayout.vue'),

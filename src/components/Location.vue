@@ -235,6 +235,21 @@ import { ref } from "vue";
       "createdAt": "2021-09-09T00:03:46.041Z",
       "updatedAt": null,
       "deletedAt": null
+    },
+     {
+      "id": 410,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Passos",
+      "zipCode": "37900000",
+      "coordinates": {
+        "lat": -20.7233071,
+        "long": -46.649664,
+        "rawType": true
+      },
+      "createdAt": "2021-09-20T13:57:04.069Z",
+      "updatedAt": null,
+      "deletedAt": null
     }
   ];
 

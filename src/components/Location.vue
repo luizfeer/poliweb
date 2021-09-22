@@ -236,18 +236,33 @@ import { ref } from "vue";
       "updatedAt": null,
       "deletedAt": null
     },
+    //  {
+    //   "id": 410,
+    //   "country": "Brasil",
+    //   "state": "MG",
+    //   "city": "Passos",
+    //   "zipCode": "37900000",
+    //   "coordinates": {
+    //     "lat": -20.7233071,
+    //     "long": -46.649664,
+    //     "rawType": true
+    //   },
+    //   "createdAt": "2021-09-20T13:57:04.069Z",
+    //   "updatedAt": null,
+    //   "deletedAt": null
+    // },
      {
-      "id": 410,
+      "id": 411,
       "country": "Brasil",
       "state": "MG",
-      "city": "Passos",
-      "zipCode": "37900000",
+      "city": "Itaú de Minas",
+      "zipCode": "37975000",
       "coordinates": {
-        "lat": -20.7233071,
-        "long": -46.649664,
+        "lat": -20.7346848,
+        "long": -46.8421638,
         "rawType": true
       },
-      "createdAt": "2021-09-20T13:57:04.069Z",
+      "createdAt": "2021-09-22T16:11:15.737Z",
       "updatedAt": null,
       "deletedAt": null
     }

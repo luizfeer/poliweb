@@ -265,6 +265,21 @@ import { ref } from "vue";
       "createdAt": "2021-09-22T16:11:15.737Z",
       "updatedAt": null,
       "deletedAt": null
+    },
+     {
+      "id": 412,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Juruaia",
+      "zipCode": "37805000",
+      "coordinates": {
+        "lat": -21.2557176,
+        "long": -46.5879916,
+        "rawType": true
+      },
+      "createdAt": "2021-09-29T13:36:41.242Z",
+      "updatedAt": null,
+      "deletedAt": null
     }
   ];
 

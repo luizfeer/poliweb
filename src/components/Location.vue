@@ -101,6 +101,21 @@
 <script>
 import { ref } from "vue";
   const citysData =  [
+        {
+      "id": 413,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Alpinópolis",
+      "zipCode": "37940000",
+      "coordinates": {
+        "lat": -20.8269331,
+        "long": -46.530051,
+        "rawType": true
+      },
+      "createdAt": "2021-10-01T16:07:57.448Z",
+      "updatedAt": null,
+      "deletedAt": null
+    },
     {
       "id": 402,
       "country": "Brasil",

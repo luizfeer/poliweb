@@ -325,7 +325,22 @@ const citysData =  [
     "createdAt": "2021-10-17T17:26:19.259Z",
     "updatedAt": null,
     "deletedAt": null
-  }
+  },
+   {
+      "id": 416,
+      "country": "Brasil",
+      "state": "MG",
+      "city": "Muzambinho",
+      "zipCode": "37890000",
+      "coordinates": {
+        "lat": -21.3731308,
+        "long": -46.6649612,
+        "rawType": true
+      },
+      "createdAt": "2021-10-25T16:14:59.785Z",
+      "updatedAt": null,
+      "deletedAt": null
+    }
 
 ];
 

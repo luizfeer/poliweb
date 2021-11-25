@@ -92,32 +92,37 @@ const linksList = [
     icon: "home",
     link: "/",
   },
-    {
-    title: "Encontre comércios",
+  {
+    title: "Ver categorias",
     icon: "storefront",
     link: "/encontre",
+  },
+   {
+    title: "Busque comércios",
+    icon: "search",
+    link: "/buscar",
   },
   {
     title: "Login",
     icon: "account_circle",
     link: "/login",
   },
-  {
-    title: "Facebook",
-    caption: "@Poliweb",
-    icon: "facebook",
-    link: "/facebook",
-  },
-  {
-    title: "Fale conosco",
-    icon: "chat",
-    link: "/contato",
-  },
-  {
-    title: "Cadastre seu negócio",
-    icon: "add_task",
-    link: "/cadastro",
-  },
+  // {
+  //   title: "Facebook",
+  //   caption: "@Poliweb",
+  //   icon: "facebook",
+  //   link: "/facebook",
+  // },
+  // {
+  //   title: "Fale conosco",
+  //   icon: "chat",
+  //   link: "/contato",
+  // },
+  // {
+  //   title: "Cadastre seu negócio",
+  //   icon: "add_task",
+  //   link: "/cadastro",
+  // },
  
   
 ];

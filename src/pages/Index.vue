@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <div class="px-4 py-2">
-      <Location class="my-2" />
+      <Location class="my-2" />     
       <div v-if="history" class="mt-4">
         <span class="text-gray-600 text-xl my-2">Veja novamente</span>
         <CardAds :ads="history" :showAddress="true" :reverse="true" />     
@@ -27,6 +27,14 @@
         </div>
         
       </router-link>
+        <span class="text-gray-600 text-xl my-2">Faça uma busca</span>
+      <form @submit.prevent="open()">
+        <q-input color="teal" outlined debounce="2000"  v-model="searchInput" type="search" class="m-4">
+          <template v-slot:before>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </form>
       
        <div
         class="bg-green-50 hover:bg-green-400 border border-green-400 rounded-md my-10 p-2 shadow-md"
@@ -77,6 +85,7 @@ export default defineComponent({
       loading : ref(true),
       localization: ref({}),
       deferredPrompt: ref(null),
+      searchInput: ref(''),
       history: [],
       follow: [],
     };
@@ -92,6 +101,9 @@ export default defineComponent({
     });
   },
   methods: {
+    open(){
+      this.$router.push(`/buscar/${this.searchInput}`)
+    },
     async install() {
       this.deferredPrompt.prompt();
     }

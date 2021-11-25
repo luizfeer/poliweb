@@ -22,7 +22,7 @@
                 </router-link>
             </div>
               <div v-if="ads.length === 0" class="text-lg p-2 text-gray-600">Nenhum dado cadastrado.</div>
-              <div v-for="(item) in ads" :key="item.id" @click="showAds(item)">
+              <router-link v-for="(item) in ads" :key="item.id" :to="'/'+item.id">
                   <div
                   class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
                   >
@@ -43,16 +43,16 @@
                       <h1 class="text-lg text-gray-600 font-semibold">
                           {{ item.name }}
                       </h1>
-                      <h2 class="text-base text-gray-500">{{ item.description }}</h2>
+                      <h2 class="text-base text-gray-500 min-h-[3rem]">{{ formatDesc(item.description) }}</h2>
                       </div>
                   </div>
                 </div>
-            </div>
+            </router-link>
           </q-carousel-slide>
-          <q-carousel-slide name="1" class="p-0">
+          <!-- <q-carousel-slide name="1" class="p-0">
            <div @click="slide = '0'" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
             <ads-page :data-ads="data" />
-          </q-carousel-slide>
+          </q-carousel-slide> -->
         </q-carousel>
       </template>
       <div v-else class="p-4">
@@ -68,11 +68,11 @@
 <script>
 
 import { ref } from "vue";
-import AdsPage from 'components/Ads'
+// import AdsPage from 'components/Ads'
 
 export default ({
   components: {
-   AdsPage
+  //  AdsPage
   },
   name: "PageIndex",
   setup() {
@@ -86,6 +86,14 @@ export default ({
     };
   },
   methods: {
+    formatDesc(str) {
+      if(!str) return
+      if (str.length > 50) {
+        return str.slice(0, 50) + "...";
+      } else {
+        return str;
+      }
+    },
    showAds(item){
         this.data = {...item};
         this.slide= '1'

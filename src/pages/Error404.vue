@@ -5,7 +5,7 @@
     <div>
       <div style="text-3xl">404</div>
 
-      <div class="text-xl" style="opacity: 0.4">Página naõ disponivel</div>
+      <div class="text-xl" style="opacity: 0.4">Página não disponivel</div>
 
       <q-btn
         class="q-mt-xl"

@@ -326,7 +326,7 @@ const citysData =  [
     "updatedAt": null,
     "deletedAt": null
   },
-   {
+  {
       "id": 416,
       "country": "Brasil",
       "state": "MG",
@@ -340,7 +340,22 @@ const citysData =  [
       "createdAt": "2021-10-25T16:14:59.785Z",
       "updatedAt": null,
       "deletedAt": null
-    }
+  },
+  {
+			"id": 417,
+			"country": "Brasil",
+			"state": "MG",
+			"city": "Monte Belo",
+			"zipCode": "37115000",
+			"coordinates": {
+				"lat": -21.3219632,
+				"long": -46.3759405,
+				"rawType": true
+			},
+			"createdAt": "2022-02-09T20:52:19.276Z",
+			"updatedAt": null,
+			"deletedAt": null
+		}
 
 ];
 

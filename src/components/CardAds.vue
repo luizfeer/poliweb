@@ -65,7 +65,7 @@
             },       
              pathImg (item) {
                 let last = item.files.logo.length - 1
-                return item.files.logo[last].link
+                return item.files.logo[0].link
             },
         },
         

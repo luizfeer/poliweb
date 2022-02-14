@@ -144,7 +144,7 @@ export default {
     },
     pathImg () {
       let last = this.adsComponent.files.logo.length - 1
-      return this.adsComponent.files.logo[last].link
+      return this.adsComponent.files.logo[0].link
       // this.adsComponent.files.logo[-1 ? ].link
     },
    

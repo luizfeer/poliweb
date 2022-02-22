@@ -1,5 +1,5 @@
 import { register } from 'register-service-worker'
-
+import { Notify } from 'quasar'
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
@@ -28,7 +28,16 @@ register(process.env.SERVICE_WORKER_FILE, {
   },
 
   updated (/* registration */) {
-    // console.log('New content is available; please refresh.')
+     Notify.create({
+      message: 'Nova Atualização Disponível!',
+      icon: 'cloud_download',
+      closeBtn: 'Atualizar',
+      timeout: 10000,
+      onDismiss () {
+        location.reload(true)
+      }
+    })
+    console.log('New content is available; please refresh.')
   },
 
   offline () {

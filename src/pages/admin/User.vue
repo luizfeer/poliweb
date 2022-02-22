@@ -6,6 +6,7 @@
       :columns="headers"
       color="primary"
       row-key="name"
+      :pagination="{rowsPerPage: 15 }"
       :filter="filter"
     >
       <template v-slot:top-right>

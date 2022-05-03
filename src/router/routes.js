@@ -11,18 +11,18 @@ const routes = [
      beforeEnter: async (to, from) => {
       const geo = 'a'
       // const geo = await axios.get('https://ip-api.com/json/')
-      console.log('geo', geo.data)
+      // console.log('geo', geo.data)
       const citys = citysData.sort((a, b) => a.city.localeCompare(b.city))
 
      const localization = localStorage.getItem("localization")
        if(!localization){
-         const hasLimit = citys.findIndex(x => {return x.city === geo.data.city})
+        //  const hasLimit = citys.findIndex(x => {return x.city === geo.data.city})
 
-         if(hasLimit>0){
-           localStorage.setItem("localization", JSON.stringify(citysData[hasLimit]))
-         } else{
+        //  if(hasLimit>0){
+          //  localStorage.setItem("localization", JSON.stringify(citysData[hasLimit]))
+        //  } else{
           localStorage.setItem("localization", JSON.stringify(citysData[1]))
-         }
+        //  }
 
         // this.model = this.localization
        }

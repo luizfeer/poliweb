@@ -9,17 +9,17 @@
       </q-input>
       <!-- <Location class="my-2" /> -->
       <!-- {{ categories }} -->
-      <template v-if="!loading">  
+      <template v-if="!loading">
 
-            <div class="p-3 flex">                
-            
+            <div class="p-3 flex">
+
               <div v-if="ads.length === 0" class="text-lg p-2 text-gray-600">Nenhum dado encontrado.</div>
               <router-link v-for="(item) in ads" :key="item.id" :to="'/'+item.id" class="w-full">
                   <div
                   class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
                   >
                   <div class="flex flex-nowrap">
-                                           
+
                       <div class="pl-3">
                       <h3 class="text-sm text-gray-600 font-semibold">
                         {{ item.category }}
@@ -41,9 +41,9 @@
       <div v-else class="p-4">
         <div v-for="i in 10" :key="i" class="">
           <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
-        </div>       
+        </div>
       </div>
-         
+
     </div>
   </q-page>
 </template>
@@ -52,7 +52,7 @@
 
 import { ref } from "vue";
 // import AdsPage from 'components/Ads'
-
+import collect from 'collect.js';
 export default ({
   components: {
   //  AdsPage
@@ -65,15 +65,16 @@ export default ({
       admin: ref(false),
       loading : ref(false),
       data: ref({}),
-      searchInput: ref('')      
+      searchInput: ref('')
     };
   },
   watch: {
-    searchInput(newValue, oldValue) {
+    async searchInput(newValue, oldValue) {
       if(newValue!== oldValue){
-        this.search(`name=${newValue}`)
-        this.search(`description=${newValue}`)
-        this.search(`category=${newValue}`)
+        this.ads= []
+        await this.search(`name=${newValue}`)
+        await this.search(`description=${newValue}`)
+        await this.search(`category=${newValue}`)
       }
     }
   },
@@ -84,13 +85,12 @@ export default ({
       .then((response) => {
           if(response.data){
             console.log(response.data.ads)
-            this.ads = {
-              ...this.add,
-              ...response.data.ads
-            }
+            this.addDataResponse(response.data.ads)
+
           }
         })
       .catch((err) => {
+        console.log(err)
         let msg
         if( err.response){
           msg =  err.response.data.message
@@ -107,6 +107,12 @@ export default ({
       .finally(() => {
         this.loading = false
       })
+    },
+    addDataResponse(data){
+      const collection = collect([ ...this.ads, ...data])
+      const unique = collection.unique('id')
+      const filtred = unique.all()
+      this.ads = filtred
     },
     formatDesc(str) {
       if(!str) return

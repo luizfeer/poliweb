@@ -9,7 +9,7 @@
           transition-prev="slide-right"
           transition-next="slide-left"
           animated
-          class="h-[auto] pt-4"          
+          class="h-[auto] pt-4"
         >
           <q-carousel-slide name="0" class="pt-0">
            <div @click="$router.go(-1)" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
@@ -38,7 +38,7 @@
                       />
                       <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ item.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
                       </div>
-                      
+
                       <div class="pl-3">
                       <h1 class="text-lg text-gray-600 font-semibold">
                           {{ item.name }}
@@ -58,9 +58,9 @@
       <div v-else class="p-4">
         <div v-for="i in 10" :key="i" class="">
           <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
-        </div>       
+        </div>
       </div>
-         
+
     </div>
   </q-page>
 </template>
@@ -82,7 +82,7 @@ export default ({
       admin: ref(false),
       slide: ref('0'),
       loading : ref(true),
-      data: ref({})      
+      data: ref({})
     };
   },
   methods: {
@@ -111,6 +111,10 @@ export default ({
     this.$api.get(`/categories/${this.$route.params.id}/ads?nonDeleted=true`)
      .then((response) => {
         if(response.data){
+
+          response.data.categoryAds.sort((a, b) => a.name.localeCompare(b.name))
+
+
           this.ads = response.data.categoryAds.filter((item)=>{ return !item.deletedAt })
         }
       })

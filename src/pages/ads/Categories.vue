@@ -3,13 +3,13 @@
     <div class="px-4 py-2">
       <!-- <Location class="my-2" /> -->
       <!-- {{ categories }} -->
-      <template v-if="!loading"> 
-            <ads-page :data="data" />      
+      <template v-if="!loading">
+            <ads-page :data="data" />
       </template>
       <div v-else v-for="i in 10" :key="i" class="p-4">
         <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
-      </div>       
-         
+      </div>
+
     </div>
   </q-page>
 </template>
@@ -45,7 +45,9 @@ export default({
     this.$api.get(`/categories/${this.$route.params.id}/ads`)
      .then((response) => {
         if(response.data){
-         this.data = response.data.categoryAds    
+          response.data.categoryAds.sort((a, b) => a.name.localeCompare(b.name))
+
+         this.data = response.data.categoryAds
         }
       })
       .catch((err) => {

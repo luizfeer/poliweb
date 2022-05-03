@@ -35,7 +35,7 @@
                 v-for="item in categories"
                 :key="item.id"
                 class="
-                  select-none                  
+                  select-none
                   min-w-[8rem]
                   min-h-[8rem]
                   bg-white
@@ -65,7 +65,7 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-1">
       <q-list>
         <!-- <q-item-label header class="text-grey-8">
-          
+
         </q-item-label> -->
 
         <EssentialLink
@@ -123,8 +123,8 @@ const linksList = [
   //   icon: "add_task",
   //   link: "/cadastro",
   // },
- 
-  
+
+
 ];
 
 import { defineComponent, ref } from "vue";
@@ -149,6 +149,7 @@ export default defineComponent({
     };
   },
    mounted(){
+     console.log('mount')
      const categories = localStorage.getItem('categories')
      const uuid = localStorage.getItem('uuid')
      if(!uuid){
@@ -192,18 +193,19 @@ export default defineComponent({
           //   }  else {
           //     this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
           //   }
-           if(response.data){           
+           if(response.data){
             let categoriesData = response.data.categories
               categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city })
             if(categoriesData.length<1){
                categoriesData = response.data.categories
             }else{
               categoriesData = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+
             }
             categoriesData = categoriesData.filter((item)=>{ return !item.deletedAt })
             categoriesData.forEach(e => {
-              return e.name = e.name.trim()              
-            })           
+              return e.name = e.name.trim()
+            })
             this.categories = categoriesData
             }
           localStorage.setItem('categories', JSON.stringify(this.categories))

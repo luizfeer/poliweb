@@ -9,7 +9,7 @@ const routes = [
       { path: '', component: () => import('pages/Index.vue') }
     ],
      beforeEnter: async (to, from) => {
-      const geo = await axios.get('http://ip-api.com/json/')
+      const geo = await axios.get('https://ip-api.com/json/')
       console.log('geo', geo.data)
       const citys = citysData.sort((a, b) => a.city.localeCompare(b.city))
 

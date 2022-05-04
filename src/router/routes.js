@@ -97,12 +97,12 @@ const routes = [
       },
       {
         path: '/encontre',
-       component: () => import('pages/ListCategories.vue')
+       component: () => import('pages/SubCategories.vue')
 
       },
       {
         path: '/sub/:id',
-        component: () => import('pages/SubCategories.vue')
+        component: () => import('pages/Categories.vue')
       },
       {
         path: '/img/:id',

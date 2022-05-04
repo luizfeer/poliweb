@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="bg-white border-b border-gray-200 p-3 mb-3 pt-6">
-      <div class="flex flex-nowrap relative">  
+      <div class="flex flex-nowrap relative">
       <!-- <q-btn @click="setAtt()" v-if="photoUpload" icon="cloud_upload" round class="absolute -top-4 z-10 ml-12"  color="secondary"/>
       <q-btn @click="openFile()" v-else-if="admin" icon="add_a_photo" round class="absolute -top-4 z-10 ml-12"  color="primary"/>     -->
 
@@ -27,37 +27,37 @@
         </div>
       </div>
       <q-space />
-      
+
     <div class="flex scroll-gallery-img mt-3 p-1">
-      <!-- <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer" 
+      <!-- <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer"
       v-if="admin"
       @click="$refs.gallery.click()">
         <q-icon name="add_photo_alternate" class="text-gray-400 text-3xl" />
       </div> -->
       <template v-if="adsComponent.files && adsComponent.files.gallery">
-      <div 
+      <div
         class="m-1"
         v-for="item in adsComponent.files.gallery"
-        :key="item.id"         
+        :key="item.id"
       >
        <div class="q-gutter-md row items-start">
-        <q-img         
+        <q-img
           :src="item.link"
-          style="width: 170px; height: 170px;"
+          class="h-[90px] w-[90px] md:h-[180px] md:w-[180px] "
           fit="cover"
         >
           <div class="absolute-bottom text-subtitle1 text-center">
-            <q-btn push color="primary" label="Apagar" @click="openConfirm(item)"/>
+            <q-btn push color="primary" size="xs" label="Apagar" @click="openConfirm(item)"/>
           </div>
         </q-img>
       </div>
-    
+
       </div>
     </template>
     </div>
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
 
-  
+
       <q-dialog v-model="confirmGallery" persistent>
       <q-card>
         <q-card-section class="row items-center">
@@ -77,7 +77,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-   
+
   </div>
   </div>
 </template>
@@ -88,7 +88,7 @@ import { ref } from "vue";
 
 
 export default {
-   components:{  
+   components:{
   },
   setup() {
     return {
@@ -120,7 +120,7 @@ export default {
           addresses: [],
           files: {
             logo: []
-          }          
+          }
         }),
 
     };
@@ -129,7 +129,7 @@ export default {
        filterDeleted(arr) {
           try {
               return arr.filter((item)=>{ return !item.deletedAt })
-              
+
           } catch (error) {
               console.log(error)
               return arr
@@ -147,69 +147,32 @@ export default {
       return this.adsComponent.files.logo[0].link
       // this.adsComponent.files.logo[-1 ? ].link
     },
-   
-   
+
+
       logoUpload () {
         const file = this.$refs.file.files[0];
         this.photoUpload = true
         this.adsComponent.files.logo[this.adsComponent.files.logo.length-1].link = URL.createObjectURL(file);
       },
-     
+
       openFile () {
         if (!this.admin) return
        this.$refs.file.click()
       },
-     
+
       deleteImg () {
-        this.$q.loading.show()       
+        this.$q.loading.show()
         this.$api.delete(`/categories/ads/files/${this.tray.id}`)
         .then((response) => {
             //  console.log(response.data.addresses)
-            if(response.data){                 
+            if(response.data){
               this.$q.notify({
               color: 'secondary',
               position: 'top',
-              message: 'Imagem apagada com sucesso!',         
+              message: 'Imagem apagada com sucesso!',
               })
-            }            
-            this.$router.go(0)      
-        })
-        .catch((err) => {
-            let msg
-            if( err.response){
-            msg =  err.response.data.message
-            }else {
-                msg = 'Erro na conexão!'
             }
-            this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: msg,
-            icon: 'report_problem'
-            })
-        })
-        .finally(() => {           
-            this.$q.loading.hide()
-        })
-      },
-     
-      sendGallery () {
-        this.$q.loading.show()            
-        let data = new FormData();
-        data.append('name', 'gallery');
-        // data.append('file', this.$refs.gallery.files[0]);
-        this.$api.post(`/categories/ads/${this.adsComponent.id}/files/gallery`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
-        .then((response) => {
-            //  console.log(response.data.addresses)
-            if(response.data){                 
-              this.$q.notify({
-              color: 'secondary',
-              position: 'top',
-              message: 'Imagem salva com sucesso!',         
-              })
             this.$router.go(0)
-            }
-            // $router.go(0)          
         })
         .catch((err) => {
             let msg
@@ -229,22 +192,59 @@ export default {
             this.$q.loading.hide()
         })
       },
-      setAtt(){        
-        this.$q.loading.show()            
+
+      sendGallery () {
+        this.$q.loading.show()
+        let data = new FormData();
+        data.append('name', 'gallery');
+        // data.append('file', this.$refs.gallery.files[0]);
+        this.$api.post(`/categories/ads/${this.adsComponent.id}/files/gallery`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
+        .then((response) => {
+            //  console.log(response.data.addresses)
+            if(response.data){
+              this.$q.notify({
+              color: 'secondary',
+              position: 'top',
+              message: 'Imagem salva com sucesso!',
+              })
+            this.$router.go(0)
+            }
+            // $router.go(0)
+        })
+        .catch((err) => {
+            let msg
+            if( err.response){
+            msg =  err.response.data.message
+            }else {
+                msg = 'Erro na conexão!'
+            }
+            this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+            })
+        })
+        .finally(() => {
+            this.$q.loading.hide()
+        })
+      },
+      setAtt(){
+        this.$q.loading.show()
         let data = new FormData();
         data.append('name', 'my-picture');
         data.append('file', this.$refs.file.files[0]);
         this.$api.post(`/categories/ads/${this.adsComponent.id}/files/logo`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
         .then((response) => {
             //  console.log(response.data.addresses)
-            if(response.data){                 
+            if(response.data){
               this.$q.notify({
               color: 'secondary',
               position: 'top',
-              message: 'Cadastro salvo com sucesso!',         
+              message: 'Cadastro salvo com sucesso!',
               })
             }
-            // $router.go(0)          
+            // $router.go(0)
         })
         .catch((err) => {
             let msg
@@ -278,7 +278,7 @@ export default {
             if(response.data.deletedAt){
                 this.$router.push('/')
             }
-            
+
             let filtered = response.data
             console.log(filtered)
 
@@ -290,19 +290,19 @@ export default {
 
             this.loading = false
 
-            
+
         }
       })
       .catch((err) => {
           console.log(err)
-        let msg = 'Erro na conexão!'        
+        let msg = 'Erro na conexão!'
         this.$q.notify({
             color: 'negative',
           position: 'top',
           message: msg,
           icon: 'report_problem'
         })
-        this.$router.push({ path: '/' })          
+        this.$router.push({ path: '/' })
       })
       .finally(() => {
       })
@@ -320,9 +320,9 @@ export default {
     //   })
     // }
     // this.headers[0].value = `Bearer ${token}`
-   
 
-      
+
+
   },
 };
 </script>

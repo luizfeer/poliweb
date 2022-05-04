@@ -31,7 +31,7 @@
               "
             >
               <router-link
-                :to="`/sub/${item.id}`"
+                :to="redirect(item)"
                 v-for="item in categories"
                 :key="item.id"
                 class="
@@ -175,6 +175,13 @@ export default defineComponent({
     }
   },
   methods: {
+    redirect(item){
+      if(item.subcategories.length){
+        return `/sub/${item.id}`
+      }else{
+        return `/categorias/${item.id}`
+      }
+    },
      uuidv4() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);

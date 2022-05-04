@@ -102,7 +102,7 @@ const routes = [
       },
       {
         path: '/sub/:id',
-        component: () => import('pages/Categories.vue')
+        component: () => import('pages/SubCategories.vue')
       },
       {
         path: '/img/:id',

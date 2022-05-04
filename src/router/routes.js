@@ -5,139 +5,125 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Index.vue') }
-    ],
-     beforeEnter: async (to, from) => {
-      const geo = 'a'
-      // const geo = await axios.get('https://ip-api.com/json/')
-      // console.log('geo', geo.data)
+    beforeEnter: async (to, from) => {
+      let geo = {}
+      const options = {
+        method: 'GET',
+        url: 'https://ipapi.co/json/',
+        // headers: {
+        //   'X-RapidAPI-Host': 'ip-geolocation-and-threat-detection.p.rapidapi.com',
+        //   'X-RapidAPI-Key': '40d9ffead9msh25fc9428d1adbecp1f7159jsnb6b98cfcc60b'
+        // }
+      };
+
       const citys = citysData.sort((a, b) => a.city.localeCompare(b.city))
 
-     const localization = localStorage.getItem("localization")
-       if(!localization){
-        //  const hasLimit = citys.findIndex(x => {return x.city === geo.data.city})
+      const localization = localStorage.getItem("localization")
+      if(!localization){
+         await axios.request(options).then(function (response) {
+           geo = response.data;
+           console.log(geo)
+         }).catch(function (error) {
+           console.error(error);
+         });
+         const hasLimit = citys.findIndex(x => {return x.city === geo.city})
 
-        //  if(hasLimit>0){
-          //  localStorage.setItem("localization", JSON.stringify(citysData[hasLimit]))
-        //  } else{
+         if(hasLimit>0){
+           localStorage.setItem("localization", JSON.stringify(citysData[hasLimit]))
+         } else{
           localStorage.setItem("localization", JSON.stringify(citysData[1]))
-        //  }
+         }
 
-        // this.model = this.localization
        }
-     }
-  },
-  {
-    path: '/home',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Home.vue') }
-    ]
-  },
-  // {
-  //   path: '/categorias',
-  //   component: () => import('layouts/MainLayout.vue'),
-  //   children: [
-  //     { path: '', component: () => import('src/pages/Categories/Categories.vue') }
-  //   ]
-  // },
-  {
-    path: '/login',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Login.vue') }
-    ]
-  },
-  {
-    path: '/adm/login',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/admin/Login.vue') }
-    ]
-  },
-   {
-    path: '/adm/users',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/admin/User.vue') }
-    ]
-  },
-  {
-    path: '/adm/cidades',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/admin/AddAddress.vue') }
-    ]
-  },
-  {
-    path: '/categorias/:id?/:name?',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Categories.vue') }
-    ]
-  },
-  {
-    path: '/buscar/:terms?',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Search.vue') }
-    ]
-  },
-  {
-    path: '/actions/:id',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/ads/Actions.vue') }
-    ]
-  },
-   {
-    path: '/sub/:id?',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/SubCategories.vue') }
-    ]
-  },
-  {
-    path: '/encontre',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/SubCategories.vue') }
-    ]
-  },
-  // {
-  //   path: '/sub/:id',
-  //   component: () => import('layouts/MainLayout.vue'),
-  //   children: [
-  //     { path: '', component: () => import('pages/SubCategorie.vue') }
-  //   ]
-  // },
-   {
-    path: '/img/:id',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/EditImgs.vue') }
-    ]
-  },
-    {
-    path: '/clear',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Clear.vue') }
-    ]
-  },
-  {
-    path: '/:id/:name?',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Ads.vue') }
-    ]
-  },
+     },
+     children: [
+      { path: '', component: () => import('pages/Index.vue') },
+      {
+        path: '/home',
+       component: () => import('pages/Home.vue')
 
+      },
+      // {
+      //   path: '/categorias',
+      //
+      //   children: [
+      //     { path: '', component: () => import('src/pages/Categories/Categories.vue') }
+      //   ]
+      // },
+      {
+        path: '/login',
+       component: () => import('pages/Login.vue')
+
+      },
+      {
+        path: '/adm/login',
+       component: () => import('pages/admin/Login.vue')
+
+      },
+      {
+        path: '/adm/users',
+       component: () => import('pages/admin/User.vue')
+
+      },
+      {
+        path: '/adm/cidades',
+       component: () => import('pages/admin/AddAddress.vue')
+
+      },
+      {
+        path: '/categorias/:id?/:name?',
+       component: () => import('pages/Categories.vue')
+
+      },
+      {
+        path: '/buscar/:terms?',
+       component: () => import('pages/Search.vue')
+
+      },
+      {
+        path: '/actions/:id',
+       component: () => import('pages/ads/Actions.vue')
+
+      },
+      {
+        path: '/sobre',
+       component: () => import('pages/About.vue')
+
+      },
+      {
+        path: '/list',
+       component: () => import('pages/ListCategoriesPagination.vue')
+
+      },
+      {
+        path: '/encontre',
+       component: () => import('pages/ListCategories.vue')
+
+      },
+      {
+        path: '/sub/:id',
+        component: () => import('pages/SubCategories.vue')
+      },
+      {
+        path: '/img/:id',
+       component: () => import('pages/EditImgs.vue')
+
+      },
+        {
+        path: '/clear',
+       component: () => import('pages/Clear.vue')
+
+      },
+      {
+        path: '/:id/:name?',
+       component: () => import('pages/Ads.vue')
+
+      }
+    ],
+  },
   {
     path: '/painel',
-       // redirect: '/painel/categorias/list',
-    component: () => import('layouts/MainLayout.vue'),
+      // redirect: '/painel/categorias/list',
     //   async beforeEnter (to, from, next) {
     //   // const auth = store.dispatch('loadMe')
     //   const token = localStorage.getItem('jwtToken')
@@ -166,6 +152,7 @@ const routes = [
     //     router.push({ path: '/login' })
     //   }
     // },
+    component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: 'categorias/list', component: () => import('pages/categories/index.vue') },
 
@@ -176,8 +163,6 @@ const routes = [
       { path: 'categorias/edit', component: () => import('pages/categories/Edit.vue') },
 
       { path: 'ads/add/:id?/:name?', component: () => import('pages/ads/Add.vue') },
-
-
     ]
   },
 

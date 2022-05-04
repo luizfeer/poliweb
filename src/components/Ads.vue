@@ -282,7 +282,6 @@
 
 <script>
  import VuePictureSwipe from 'vue3-picture-swipe';
-import { ref } from "vue";
 
 import AddAddress from 'components/add/Address'
 import FixInfos from 'components/FixInfos'
@@ -300,18 +299,18 @@ export default {
       required: true
     }
   },
-  setup() {
+  data() {
     return {
-      headers: ref([
+      headers: [
         { name: 'Authorization', value: '' },
         { name: 'Content-Type', value: 'multipart/form-data' }
-      ]),
-      // plugins: ref([lgThumbnail, lgZoom]),
-      colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
-      slide: ref(1),
-      index: ref([]),
-      openGalleryStatus: ref(false),
-      adsComponent: ref({
+      ],
+      // plugins: [lgThumbnail, lgZoom]),
+      colors: ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning'],
+      slide: 1,
+      index: [],
+      openGalleryStatus: false,
+      adsComponent: {
           id: '',
           avatar: '',
           categoryId: '',
@@ -330,26 +329,26 @@ export default {
           files: {
             logo: []
           }
-        }),
-      expand: ref({
+        },
+      expand: {
         action: false,
         basic: false,
         address: false,
         phone: false
-      }),
-      editAddress: ref(false),
-      editPhone: ref({
+      },
+      editAddress: false,
+      editPhone: {
         phone: '',
         isWhatsapp: false
-      }),
-      follow: ref(false),
-      admin: ref(false),
-      confirm: ref(false),
-      deletePhoneData: ref({}),
-      photoUpload: ref(false),
-      confirmGallery: ref(false),
-      preview: ref(''),
-      items: ref(),
+      },
+      follow: false,
+      admin: false,
+      confirm: false,
+      deletePhoneData: {},
+      photoUpload: false,
+      confirmGallery: false,
+      preview: '',
+      items: '',
     };
   },
   computed: {
@@ -664,6 +663,7 @@ export default {
       }
    },
    created () {
+
      this.adsComponent = { ...this.dataAds}
     console.table(this.adsComponent)
 

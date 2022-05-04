@@ -107,6 +107,11 @@ const linksList = [
     icon: "account_circle",
     link: "/login",
   },
+   {
+    title: "Sobre",
+    icon: "info",
+    link: "/sobre",
+  },
   // {
   //   title: "Facebook",
   //   caption: "@Poliweb",

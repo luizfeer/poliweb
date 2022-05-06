@@ -167,11 +167,18 @@ export default defineComponent({
      this.localization =  JSON.parse(localization)
      this.getData()
       if(admin){
-        this.essentialLinks.push({
+        this.essentialLinks.push(
+        {
           title: "Usuários",
           icon: "group",
           link: "/adm/users",
-        })
+        },
+        {
+          title: "Icones",
+          icon: "insert_emoticon",
+          link: "/adm/icons",
+        }
+        )
     }
   },
   methods: {
@@ -205,22 +212,24 @@ export default defineComponent({
           //   }  else {
           //     this.categories = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
           //   }
-           if(response.data){
-            let categoriesData = response.data.categories
-              categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city })
-            if(categoriesData.length<1){
-               categoriesData = response.data.categories
-            }else{
-              categoriesData = categoriesData.sort((a, b) => a.name.localeCompare(b.name));
 
+            try {
+              let categoriesData = response.data.categories
+              categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city })
+              console.log('before', categoriesData)
+              categoriesData.forEach(e => {
+                return e.name = e.name.trim()
+              })
+              categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+              console.log('after', categoriesData)
+
+              categoriesData = categoriesData.filter((item)=>{ return !item.deletedAt })
+
+              this.categories = categoriesData
+              localStorage.setItem('categories', JSON.stringify(this.categories))
+            } catch (error) {
+              console.log(error)
             }
-            categoriesData = categoriesData.filter((item)=>{ return !item.deletedAt })
-            categoriesData.forEach(e => {
-              return e.name = e.name.trim()
-            })
-            this.categories = categoriesData
-            }
-          localStorage.setItem('categories', JSON.stringify(this.categories))
         })
         .catch((err) => {
           let msg

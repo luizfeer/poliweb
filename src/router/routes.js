@@ -57,8 +57,11 @@ const routes = [
       },
       {
         path: '/adm/login',
-       component: () => import('pages/admin/Login.vue')
-
+        component: () => import('pages/admin/Login.vue')
+      },
+       {
+        path: '/adm/icons',
+        component: () => import('pages/admin/Icon.vue')
       },
       {
         path: '/adm/users',
@@ -160,7 +163,7 @@ const routes = [
 
       { path: 'categorias/remove', component: () => import('pages/categories/Remove.vue') },
 
-      { path: 'categorias/edit', component: () => import('pages/categories/Edit.vue') },
+      { path: 'categorias/edit/:id/:name/:icon', component: () => import('pages/categories/Edit.vue') },
 
       { path: 'ads/add/:id?/:name?', component: () => import('pages/ads/Add.vue') },
     ]

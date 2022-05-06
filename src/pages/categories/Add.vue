@@ -8,9 +8,9 @@
     <span class="text-xl">
       {{ nameCategorie ? "Criando uma sub-categoria dentro da categoria " + nameCategorie : 'Criando uma nova categoria' }}
     </span>
-    
+
       <div class="mt-10">
-        <div class="row">        
+        <div class="row">
           <q-select
             v-if="!nameCategorie"
             filled
@@ -21,7 +21,7 @@
             input-debounce="0"
             :options="citys"
             lazy-rules
-            option-label="city"     
+            option-label="city"
             hint="Cidade da categoria"
             class="pb-8 w-full"
           >
@@ -35,7 +35,13 @@
           </q-select>
           <q-input filled v-model="form.name" lazy-rules label="Nome da categoria" class="w-full py-2" />
         </div>
-         <div class="my-4">         
+         <div class="my-4">
+            <q-input filled v-model="iconName" lazy-rules label="Pesquisar nos icone" @blur="filterIcon()" class="w-full py-2">
+            <template v-slot:append>
+            <q-icon v-if="iconName !== ''"  name="clear" class="cursor-pointer" @click="iconName = '';filterIcon()" />
+            <q-icon  name="search" @click="filterIcon()"/>
+          </template>
+          </q-input>
             <q-select
               filled
               v-model="thumb"
@@ -52,14 +58,14 @@
                     <q-img :src="scope.opt.link" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label v-html="scope.opt.id" />                    
+                    <q-item-label v-html="scope.opt.name" />
                   </q-item-section>
                 </q-item>
               </template>
             </q-select>
           </div>
-        </div>     
-      
+        </div>
+
       <div>
         <q-btn label="Salvar" type="submit" color="primary"/>
       </div>
@@ -69,25 +75,27 @@
 
 <script>
 import { defineComponent } from "vue";
-import { ref } from "vue";
 
 export default defineComponent({
   name: "AddCategorias",
-  setup() {
+  data() {
     return {
-      slide: ref(1),
-      follow: ref(false),
-      citys: ref([]),     
-      selectedCity: ref(null),
-      emittedValue: ref(null),
-      nameCategorie: ref(''),
-      imgs: ref([]),
-      thumb: ref(''),
-      form: ref({
+      iconName: '',
+      loading: false,
+      slide: 1,
+      follow: false,
+      citys: [],
+      selectedCity: null,
+      emittedValue: null,
+      nameCategorie: '',
+      imgs: [],
+      imgsRequest: [],
+      thumb: '',
+      form: {
         name: null,
         categoryId: null,
         addressId: null,
-      })
+      }
     }
   },
   watch: {
@@ -98,7 +106,7 @@ export default defineComponent({
       this.form.iconId = val.id
     }
   },
-  methods: {    
+  methods: {
     onSubmit(){
       this.$q.loading.show()
       this.$api.post('/categories', {...this.form})
@@ -109,7 +117,7 @@ export default defineComponent({
           color: 'secondary',
           position: 'top',
           message: 'Cadastrado com sucesso!',
-         
+
         })
         }
         this.$router.push({ path: '/' })
@@ -138,19 +146,34 @@ export default defineComponent({
         form.name = null
         form.addressId = null
         selectedCity = null
+      },
+      filterIcon(){
+      try {
+        this.loading = true
+        const icons = this.imgsRequest.filter((item)=>{ return item.name.includes(this.iconName) })
+        this.imgs = icons
+      } catch (error) {
+
+      } finally {
+        this.loading = false
       }
-  } , 
+
+    }
+  } ,
  async mounted () {
    if(this.$route.params.id){
     this.form.categoryId = this.$route.params.id
     this.nameCategorie = this.$route.params.name
    }
-   
+
    await this.$api.get('/icons')
   .then((response) => {
         //  console.log(response.data.addresses)
         if(response.data){
-         this.imgs = response.data.icons
+        const icons = response.data.icons.filter((item)=>{ return !item.deletedAt })
+
+         this.imgs = icons
+         this.imgsRequest = icons
         }
       })
    await this.$api.get('/address')

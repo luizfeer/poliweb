@@ -13,7 +13,7 @@
         <div class="row">
           <q-input filled v-model="form.name" lazy-rules label="Nome da categoria" class="w-full py-2" />
         </div>
-          <q-input filled v-model="iconName" lazy-rules label="Pesquisar nos icone" class="w-full py-2">
+          <q-input filled v-model="iconName" lazy-rules label="Pesquisar nos icone" @blur="filterIcon()" class="w-full py-2">
             <template v-slot:append>
             <q-icon v-if="iconName !== ''"  name="clear" class="cursor-pointer" @click="iconName = '';filterIcon()" />
             <q-icon  name="search" @click="filterIcon()"/>

@@ -103,6 +103,11 @@ const routes = [
        component: () => import('pages/SubCategories.vue')
 
       },
+       {
+        path: '/cidades',
+       component: () => import('pages/Citys.vue')
+
+      },
       {
         path: '/sub/:id',
         component: () => import('pages/SubCategories.vue')
@@ -112,7 +117,19 @@ const routes = [
        component: () => import('pages/EditImgs.vue')
 
       },
-        {
+      {
+        path: '/slider/:id',
+        component: () => import('pages/Slider.vue')
+      },
+      {
+        path: '/slider2/:id',
+        component: () => import('pages/Slider2.vue')
+      },
+      {
+        path: '/contato',
+        component: () => import('pages/Contact.vue')
+      },
+      {
         path: '/clear',
        component: () => import('pages/Clear.vue')
 

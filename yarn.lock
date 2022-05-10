@@ -4462,10 +4462,10 @@
     "prelude-ls" "^1.2.1"
     "type-check" "~0.4.0"
 
-"lightgallery@^2.1.8":
-  "integrity" "sha512-YyPVsnCDn6NHDemJ44NM0cgqROOpxvLlO09fQz+++mo9BVmhyRvn+jykZsZit53QiHQPlgLxLhMRa5cCF3htkg=="
-  "resolved" "https://registry.npmjs.org/lightgallery/-/lightgallery-2.1.8.tgz"
-  "version" "2.1.8"
+"lightgallery@^2.4.0":
+  "integrity" "sha512-9i/E/w3yaqs56y3k6SWIUS3JTLpeDCZIVnIuNppzAmj5KjLGy5wrFisoDUD0HdxVUdX0wHG5mjvB4h0TXtyf/w=="
+  "resolved" "https://registry.npmjs.org/lightgallery/-/lightgallery-2.4.0.tgz"
+  "version" "2.4.0"
 
 "lilconfig@^2.0.3":
   "integrity" "sha512-EHKqr/+ZvdKCifpNrJCKxBTgk5XupZA3y/aCPY9mxfgBzmgh93Mt/WqjjQ38oMxXuvDokaKiM3lAgvSH2sjtHg=="
@@ -6960,6 +6960,11 @@
   "resolved" "https://registry.npmjs.org/vendors/-/vendors-1.0.4.tgz"
   "version" "1.0.4"
 
+"vue-demi@^0.12.1":
+  "integrity" "sha512-BREuTgTYlUr0zw0EZn3hnhC3I6gPWv+Kwh4MCih6QcAeaTlaIX0DwOVN0wHej7hSvDPecz4jygy/idsgKfW58Q=="
+  "resolved" "https://registry.npmjs.org/vue-demi/-/vue-demi-0.12.5.tgz"
+  "version" "0.12.5"
+
 "vue-eslint-parser@^7.9.0":
   "integrity" "sha512-QBlhZ5LteDRVy2dISfQhNEmmcqph+GTaD4SH41bYzXcVHFPJ9p34zCG6QAqOZVa8PKaVgbomFnoZpGJRZi14vg=="
   "resolved" "https://registry.npmjs.org/vue-eslint-parser/-/vue-eslint-parser-7.9.0.tgz"
@@ -6982,6 +6987,13 @@
     "hash-sum" "^2.0.0"
     "loader-utils" "^2.0.0"
 
+"vue-recaptcha@^2.0.2":
+  "integrity" "sha512-bE5WMz9jyiiY1PlaBOSUvsgTZ/ONoRV7Oq4Fn4JVz//ul+DJ0LHIJERfoF0NNEIDWXv6GjhwGLveGhoq0sEerg=="
+  "resolved" "https://registry.npmjs.org/vue-recaptcha/-/vue-recaptcha-2.0.2.tgz"
+  "version" "2.0.2"
+  dependencies:
+    "vue-demi" "^0.12.1"
+
 "vue-router@4.0.10":
   "integrity" "sha512-YbPf6QnZpyyWfnk7CUt2Bme+vo7TLfg1nGZNkvYqKYh4vLaFw6Gn8bPGdmt5m4qrGnKoXLqc4htAsd3dIukICA=="
   "resolved" "https://registry.npmjs.org/vue-router/-/vue-router-4.0.10.tgz"
@@ -6997,7 +7009,7 @@
     "hash-sum" "^1.0.2"
     "loader-utils" "^1.0.2"
 
-"vue@^3.0.0", "vue@^3.0.2", "vue@3.1.5":
+"vue@^2.0.0 || ^3.0.0", "vue@^3.0.0", "vue@^3.0.0-0 || ^2.6.0", "vue@^3.0.2", "vue@3.1.5":
   "integrity" "sha512-Ho7HNb1nfDoO+HVb6qYZgeaobt1XbY6KXFe4HGs1b9X6RhkWG/113n4/SrtM1LUclM6OrP/Se5aPHHvAPG1iVQ=="
   "resolved" "https://registry.npmjs.org/vue/-/vue-3.1.5.tgz"
   "version" "3.1.5"

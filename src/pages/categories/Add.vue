@@ -170,10 +170,9 @@ export default defineComponent({
   .then((response) => {
         //  console.log(response.data.addresses)
         if(response.data){
-        const icons = response.data.icons.filter((item)=>{ return !item.deletedAt })
-
-         this.imgs = icons
-         this.imgsRequest = icons
+          const icons = response.data.icons.filter((item)=>{ return !item.deletedAt })
+          this.imgs = icons
+          this.imgsRequest = icons
         }
       })
    await this.$api.get('/address')

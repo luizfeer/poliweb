@@ -14,9 +14,10 @@
     "axios": "^0.21.1",
     "collect.js": "^4.33.0",
     "core-js": "^3.6.5",
-    "lightgallery": "^2.1.8",
+    "lightgallery": "^2.4.0",
     "quasar": "^2.0.0",
     "tailwindcss": "^2.2.2",
+    "vue-recaptcha": "^2.0.2",
     "vue3-picture-swipe": "^3.0.4",
     "vuex": "^4.0.1",
     "vuex-persistedstate": "^4.0.0"

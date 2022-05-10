@@ -97,6 +97,11 @@ const linksList = [
     icon: "storefront",
     link: "/encontre",
   },
+  {
+    title: "Cidades",
+    icon: "location_city",
+    link: "/cidades",
+  },
    {
     title: "Busque comércios",
     icon: "search",

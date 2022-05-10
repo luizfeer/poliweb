@@ -112,10 +112,16 @@ const linksList = [
     icon: "account_circle",
     link: "/login",
   },
+
    {
     title: "Sobre",
     icon: "info",
     link: "/sobre",
+  },
+   {
+    title: "Contato",
+    icon: "alternate_email",
+    link: "/contato",
   },
   // {
   //   title: "Facebook",

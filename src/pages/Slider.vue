@@ -1,4 +1,5 @@
 <template>
+<a href="instagram://story-camera" target="_blank" rel="noopener noreferrer"> teste</a>
   <lightgallery
     :settings="config"
     :onInit="onInit"
@@ -11,12 +12,12 @@
     >
       <a
           v-if="item.fileType==='image/webp'"
-          data-lg-size="1080-720"
+          :data-lg-size="`${item.width}-${item.height}`"
           className="gallery-item"
           :data-src="item.link"
         >
 
-        <img className="img-responsive" :src="item.link" class="h-[5rem]" />
+        <q-img :src="item.link" class="h-[5rem]" />
       </a>
       <a
       v-else
@@ -77,7 +78,7 @@ export default {
         plugins: plugins,
         playsinline: true,
         progressBar : true,
-        slideShowAutoplay : true,
+        slideShowAutoplay : false,
         autoplayControls: true,
         videojs: true,
         autoplayVideoOnSlide:true,

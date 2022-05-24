@@ -253,6 +253,21 @@ export const citysData =  [
 			"createdAt": "2022-02-09T20:52:19.276Z",
 			"updatedAt": null,
 			"deletedAt": null
+		},
+    {
+			"id": 418,
+			"country": "Brasil",
+			"state": "SP",
+			"city": "Tapiratiba",
+			"zipCode": "13760000",
+			"coordinates": {
+				"lat": -21.4620769,
+				"long": -46.732666,
+				"rawType": true
+			},
+			"createdAt": "2022-05-24T15:39:39.268Z",
+			"updatedAt": null,
+			"deletedAt": null
 		}
 
 ];

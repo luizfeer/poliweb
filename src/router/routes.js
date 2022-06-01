@@ -117,10 +117,10 @@ const routes = [
        component: () => import('pages/EditImgs.vue')
 
       },
-      {
-        path: '/slider/:id',
-        component: () => import('pages/Slider.vue')
-      },
+      // {
+      //   path: '/slider/:id',
+      //   component: () => import('src/pages/Video.vue')
+      // },
       {
         path: '/slider2/:id',
         component: () => import('pages/Slider2.vue')

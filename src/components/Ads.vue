@@ -42,6 +42,9 @@
         />
       </div>
     </div>
+    <div>
+      <video-slide v-if="admin" :videos="adsComponent.files.videos"></video-slide>
+    </div>
     <div class="flex scroll-gallery ">
       <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer"
       v-if="admin"
@@ -285,11 +288,13 @@
 
 import AddAddress from 'components/add/Address'
 import FixInfos from 'components/FixInfos'
+import VideoSlide from 'components/VideoSlide'
 
 export default {
    components:{
     AddAddress,
     FixInfos,
+    VideoSlide,
     VuePictureSwipe
     // Lightgallery,
   },
@@ -327,7 +332,8 @@ export default {
           phones: [],
           addresses: [],
           files: {
-            logo: []
+            logo: [],
+            videos: [],
           }
         },
       expand: {

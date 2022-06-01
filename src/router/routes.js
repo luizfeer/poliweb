@@ -20,7 +20,7 @@ const routes = [
 
       const localization = localStorage.getItem("localization")
       if(!localization){
-         await axios.request(options).then(function (response) {
+         axios.request(options).then(function (response) {
            geo = response.data;
            console.log(geo)
          }).catch(function (error) {
@@ -134,10 +134,10 @@ const routes = [
        component: () => import('pages/Clear.vue')
 
       },
+
       {
         path: '/:id/:name?',
        component: () => import('pages/Ads.vue')
-
       }
     ],
   },

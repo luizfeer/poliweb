@@ -28,7 +28,7 @@
       </div>
       <q-space />
       <div class="flex items-center justify-between mt-4">
-          <a  @click="sendAction('open-whatsapp')" v-if="phoneZap" :href="`https://api.whatsapp.com/send?phone=+55${phoneZap.phone}&text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer">
+          <a  @click="sendAction('open-whatsapp')" v-if="phoneZap" :href="`https://wa.me/55${onlyNumber(phoneZap.phone)}?text=Ol%C3%A1!`" target="_blank" rel="noopener noreferrer">
             <q-btn push color="positive" text-color="white">
                 <q-icon name="fab fa-whatsapp" class="mr-2" /> Whatsapp
             </q-btn>
@@ -73,7 +73,7 @@
       >
         <div v-for="(phone, index) in adsComponent.phones" :key="phone.id" v-show="!phone.deletedAt">
 
-                <a @click="sendAction(!phone.isWhatsapp ? 'open-phone' : 'open-whatsapp')" :href="!phone.isWhatsapp ? `tel:${phone.phone}` : `https://api.whatsapp.com/send?phone=+55${phone.phone}&text=Ol%C3%A1!`"
+                <a @click="sendAction(!phone.isWhatsapp ? 'open-phone' : 'open-whatsapp')" :href="!phone.isWhatsapp ? `tel:${phone.phone}` : `https://wa.me/55${onlyNumber(phone.phone)}?text=Ol%C3%A1!`"
                 target="_blank" rel="noopener noreferrer"
                 class="flex items-start flex-nowrap text-gray-600 flex-col sm:flex-row">
                     <div>
@@ -370,6 +370,9 @@ export default {
     }
   },
   methods: {
+    onlyNumber(n) {
+      return n.replace(/\D/g, '')
+    },
     openGallery(){
       if(!this.openGalleryStatus){
         this.sendAction('open-photos')

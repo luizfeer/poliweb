@@ -1,14 +1,23 @@
 <template>
-<a href="instagram://story-camera" target="_blank" rel="noopener noreferrer"> teste</a>
-  <lightgallery
+ <lightgallery
     :settings="config"
     :onInit="onInit"
     :onBeforeSlide="onBeforeSlide"
     class="flex"
+    :onSlideItemLoad="video"
   >
+    <!-- <a
+            v-for="item in items"
+            :key="item.id"
+            data-lg-size="500-400"
+            className="gallery-item"
+            :data-src="item.src"
+        >
+            <img className="img-responsive" :src="item.thumb" />
+        </a> -->
     <template
-      v-for="item in media"
-      :key="item.id"
+      v-for="(item, index) in items"
+      :key="index"
     >
       <a
           v-if="item.fileType==='image/webp'"
@@ -17,46 +26,38 @@
           :data-src="item.link"
         >
 
-        <q-img :src="item.link" class="h-[5rem]" />
       </a>
-      <a
-      v-else
-      class="gallery-item"
-      :data-video="JSON.stringify({source: [{src:item.link, type:'video/mp4'}], attributes: {preload: true, controls: false}})"
-      data-poster="">
-      <img
-        width="200"
-        class="img-responsive"
-        src="https://www.lightgalleryjs.com/images/demo/html5-video-poster.jpg"
-      />
+
+
+       <a
+        v-else
+        class="gallery-item"
+        :data-video="JSON.stringify({source: [{src:item.link, type:'video/mp4'}], attributes: {preload: true, autoplay: 'autoplay'}})"
+        data-poster=""
+      >
+
     </a>
     </template>
-    <!-- <a
-      data-lg-size="1400-1400"
-      class="gallery-item"
-      data-src="https://images.unsplash.com/photo-1544550285-f813152fb2fd?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1400&q=80"
-      data-sub-html="<h4>Photo by - <a href='https://unsplash.com/@asoshiation' >Shah </a></h4><p> Location - <a href='https://unsplash.com/s/photos/shinimamiya%2C-osaka%2C-japan'>Shinimamiya, Osaka, Japan</a></p>"
-    >
-      <img
-        class="img-responsive"
-        src="https://images.unsplash.com/photo-1544550285-f813152fb2fd?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=240&q=80"
-      />
-    </a>
-    <a
-      data-lg-size="1400-1400"
-      class="gallery-item"
-      data-src="https://images.unsplash.com/photo-1584592740039-cddf0671f3d4?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1400&q=80"
-      data-sub-html="<h4>Photo by - <a href='https://unsplash.com/@katherine_xx11' >Katherine Gu </a></h4><p> For all those years we were alone and helpless.</p>"
-    >
-      <img
-        style="width: 200px"
-        class="img-responsive"
-        src="https://images.unsplash.com/photo-1584592740039-cddf0671f3d4?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=240&q=80"
-      />
-    </a>
-    -->
-
   </lightgallery>
+  <div ref="myDiv" v-if="items.length">
+
+      <video ref="video" id="videoId" style="visibility: hidden; z-index:-1" class="
+      absolute">
+          <source :src="items[0].link" type="video/mp4">
+      </video>
+      <div class="border-effect relative h-24 m-4 rounded-lg" @click="open()">
+        <canvas crossorigin="anonymous" class="h-full w-full absolute rounded-lg" ref="canvas" id="canvas" style="object-fit: cover; object-position: 100% 50%;"></canvas>
+        <div class="glass h-full w-full b-0 top-0 left-0 right-0 absolute "></div>
+        <div class="h-full w-full b-0 top-0 left-0 right-0 absolute flex items-center justify-center">
+          <span class=" text-white font-bold text-3xl" style="text-shadow: 1px 1px 3px #000;">Ver videos
+             <!-- <q-icon name="play_arrow"></q-icon> -->
+          </span>
+        </div>
+      </div>
+  </div>
+<!-- <a href="instagram://story-camera" target="_blank" rel="noopener noreferrer"> teste</a> -->
+
+
 </template>
 
 <script>
@@ -72,6 +73,9 @@ export default {
   },
   data() {
     return {
+      img: '',
+      items: [],
+
         // plugins: [lgThumbnail, lgZoom]),
       config: {
         speed: 800,
@@ -80,7 +84,6 @@ export default {
         progressBar : true,
         slideShowAutoplay : false,
         autoplayControls: true,
-        videojs: true,
         autoplayVideoOnSlide:true,
         licenseKey: 'C6FC35D1-E1734CCA-B69150EE-25CEB158'
       },
@@ -114,34 +117,48 @@ export default {
     };
   },
   watch: {
-    media(newVal, oldVal) {
+    items(newVal, oldVal) {
         this.$nextTick(() => {
             lightGallery.refresh();
         });
     },
   },
   methods: {
-    onInit: (detail) => {
-        lightGallery = detail.instance;
-    },
-    updateSlides: function () {
-        this.media = [
-            ...this.media,
-            {
-                id: '5',
-                size: '1400-800',
-                src: 'img-5.jpg',
-                thumb: 'thumb-5.jpg',
-            }
-        ];
-        lightGallery.refresh();
-    },
-    onBeforeSlide: () => {
-      console.log('calling before slide');
-    },
+  async video(e){
+    await this.$nextTick()
+    await this.$nextTick()
+    console.log(e)
+    console.log('video')
+    const video = document.getElementsByClassName('lg-current')[0].firstChild.firstChild
+    console.log(video)
+    video.onended = function(e) {
+      lightGallery.goToNextSlide();
+      /*Do things here!*/
+    };
+    console.log(video.duration)
+
+  },
+  stopVideo(){
+    console.log('asas')
+    if(document.getElementsByClassName('lg-current')[0]){
+      document.getElementsByClassName('lg-current')[0].firstChild.firstChild.pause()
+    }
+  },
+   onInit: (detail) => {
+            lightGallery = detail.instance;
+        },
+  open(){
+      lightGallery.openGallery();
+},
+  onBeforeSlide(){
+    console.log('calling before slide');
+    this.stopVideo();
+  },
     filterDeleted(arr) {
       try {
-        return arr.filter((item)=>{ return !item.deletedAt })
+        return arr.filter(item => {
+          return item.deletedAt === null;
+        });
       } catch (error) {
         console.log(error)
         return arr
@@ -159,52 +176,22 @@ export default {
       return this.adsComponent.files.logo[0].link
       // this.adsComponent.files.logo[-1 ? ].link
     },
+    formatMedia(media) {
+      //format media to lightgallery format
+      let newMedia = []
+      media.forEach(item => {
+        newMedia.push({
+          id: item.id,
+          size: '800-800',
+          src: item.link,
+          thumb: item.link,
+          subHtml: '',
+          fileType: item.fileType
 
-
-      logoUpload () {
-        const file = this.$refs.file.files[0];
-        this.photoUpload = true
-        this.adsComponent.files.logo[this.adsComponent.files.logo.length-1].link = URL.createObjectURL(file);
-      },
-
-      openFile () {
-        if (!this.admin) return
-       this.$refs.file.click()
-      },
-
-      deleteImg () {
-        this.$q.loading.show()
-        this.$api.delete(`/categories/ads/files/${this.tray.id}`)
-        .then((response) => {
-            //  console.log(response.data.addresses)
-            if(response.data){
-              this.$q.notify({
-              color: 'secondary',
-              position: 'top',
-              message: 'Imagem apagada com sucesso!',
-              })
-            }
-            this.$router.go(0)
         })
-        .catch((err) => {
-            let msg
-            if( err.response){
-            msg =  err.response.data.message
-            }else {
-                msg = 'Erro na conexão!'
-            }
-            this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: msg,
-            icon: 'report_problem'
-            })
-        })
-        .finally(() => {
-            this.$q.loading.hide()
-        })
-      },
-
+      })
+      return newMedia
+    },
       sendGallery () {
         this.$q.loading.show()
         let data = new FormData();
@@ -241,49 +228,32 @@ export default {
             this.$q.loading.hide()
         })
       },
-      setAtt(){
-        this.$q.loading.show()
-        let data = new FormData();
-        data.append('name', 'my-picture');
-        data.append('file', this.$refs.file.files[0]);
-        this.$api.post(`/categories/ads/${this.adsComponent.id}/files/logo`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
-        .then((response) => {
-            //  console.log(response.data.addresses)
-            if(response.data){
-              this.$q.notify({
-              color: 'secondary',
-              position: 'top',
-              message: 'Cadastro salvo com sucesso!',
-              })
-            }
-            // $router.go(0)
-        })
-        .catch((err) => {
-            let msg
-            if( err.response){
-            msg =  err.response.data.message
-            }else {
-                msg = 'Erro na conexão!'
-            }
-            this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: msg,
-            icon: 'report_problem'
-            })
-        })
-        .finally(() => {
-            this.$q.loading.hide()
-        })
+
+      async createThumb(){
+        await this.$nextTick()
+        console.log('a')
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('a')
+
+        const video = this.$refs.video
+        const canvas = this.$refs.canvas
+
+
+        const context = canvas.getContext('2d')
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
+        console.log(video)
+        console.log(canvas)
+        console.log(context)
+        // const dataURL = canvas2.toDataURL()
+        // this.img = dataURL
       }
+
    },
-   created () {
-      this.adsComponent = { ...this.dataAds}
-      console.table(this.adsComponent)
-   },
-  mounted () {
+
+  async mounted () {
+     console.log(this.$refs.myDiv)
     this.loading = true
-    this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
+    await this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
      .then((response) => {
         if(response.data){
             if(response.data.deletedAt){
@@ -292,13 +262,15 @@ export default {
 
             let filtered = response.data
             console.log(filtered.files.gallery )
+            filtered.files.gallery = filtered.files.gallery.slice(0).reverse();
+            filtered.files.gallery = this.filterDeleted(filtered.files.gallery);
+            this.items = filtered.files.gallery
 
-            filtered.files.gallery = this.filterDeleted(filtered.files.gallery).slice(0).reverse();
-            this.media = filtered.files.gallery
-            filtered.phones =  this.filterDeleted(filtered.phones)
-            filtered.address =  this.filterDeleted(filtered.address)
-            this.adsComponent = filtered
-            console.log(filtered)
+
+            // this.media = this.media.filter(item => {
+            //   return item.link !== null;
+            // });
+            console.log(this.media)
 
             this.loading = false
 
@@ -317,7 +289,22 @@ export default {
         this.$router.push({ path: '/' })
       })
       .finally(() => {
+            this.createThumb()
+
       })
+
+      // video.addEventListener('play', function () {
+      //     canvas.style.display = 'none'
+      //     // img.style.display = 'none'
+      // }, false);
+
+      // video.addEventListener('pause', function () {
+      //     canvas.style.display = 'block'
+      //     // img.style.display = 'block'
+      // }, false)
+
+
+
     // const el = document.getElementById('lightgallery')
     // window.lightGallery(el)
     // const token = localStorage.getItem('token')
@@ -336,9 +323,14 @@ export default {
 
 
   },
+
 };
 </script>
 <style>
+  @import 'lightgallery/css/lightgallery.css';
+  @import 'lightgallery/css/lg-thumbnail.css';
+  @import 'lightgallery/css/lg-video.css';
+  @import 'lightgallery/css/lg-autoplay.css';
 .scroll-gallery-img{
   width: 100%;
   display: flex;
@@ -397,12 +389,59 @@ export default {
     max-width: none;
     object-fit: contain;
 }
-  @import 'lightgallery/css/lightgallery.css';
-  @import 'lightgallery/css/lg-thumbnail.css';
-  @import 'lightgallery/css/lg-video.css';
-  @import 'lightgallery/css/lg-autoplay.css';
+
 
   .lg-backdrop {
     background-color: #000000d1;
   }
+  .border-effect {
+	position: relative;
+
+	background: linear-gradient(0deg, #000, #272727);
+}
+
+.border-effect:before, .border-effect:after {
+  border-radius: .5rem;
+	content: '';
+	position: absolute;
+	left: -2px;
+	top: -2px;
+	background: linear-gradient(45deg, #fb0094, #0000ff,#ff0000, #fb0094,#ffff00, #fb0094, #0000ff,#ff0000, #fb0094,#ffff00);
+  /* background: linear-gradient(45deg, #fb0094, #0000ff, #00ff00,#ffff00, #ff0000, #fb0094,
+		#0000ff, #00ff00,#ffff00, #ff0000); */
+	background-size: 400%;
+	width: calc(100% + 4px);
+	height: calc(100% + 4px);
+	z-index: -1;
+	animation: steam 20s linear infinite;
+}
+
+@keyframes steam {
+	0% {
+		background-position: 0 0;
+	}
+	50% {
+		background-position: 400% 0;
+	}
+	100% {
+		background-position: 0 0;
+	}
+}
+
+.border-effect:after {
+	filter: blur(2px);
+}
+
+.border-effect canvas{
+	filter: blur(2px);
+}
+
+.border-effect:hover .glass{
+  display:none;
+}
+.border-effect:hover .glass{
+  display: block;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+}
 </style>

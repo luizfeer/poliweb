@@ -43,7 +43,7 @@
       </div>
     </div>
     <div>
-      <video-slide v-if="admin" :videos="adsComponent.files.videos"></video-slide>
+      <video-slide :thumb="pathImg()" :videos="adsComponent.files.videos"></video-slide>
     </div>
     <div class="flex scroll-gallery ">
       <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer"

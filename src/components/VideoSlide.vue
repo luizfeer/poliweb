@@ -2,10 +2,11 @@
  <lightgallery
     :settings="config"
     :onInit="onInit"
-    :onBeforeSlide="onBeforeSlide"
+    :onAfterSlide="onAfterSlide"
     class="flex"
-    :onSlideItemLoad="videoEvent"
+    :onBeforeOpen="videoEvent"
   >
+    <!-- :onSlideItemLoad="videoEvent" -->
     <!-- <a
             v-for="item in items"
             :key="item.id"
@@ -46,14 +47,38 @@
           <source :src="items[0].link" type="video/mp4">
       </video>
       <div class="border-effect relative h-24 m-4 rounded-lg" @click="open()">
-        <canvas crossorigin="anonymous" class="h-full w-full absolute rounded-lg" ref="canvas" id="canvas" style="object-fit: cover; object-position: 100% 50%;"></canvas>
-        <div class="glass h-full w-full b-0 top-0 left-0 right-0 absolute "></div>
-        <div class="h-full w-full b-0 top-0 left-0 right-0 absolute flex items-center justify-center">
-          <span class=" text-white font-bold text-3xl" style="text-shadow: 1px 1px 3px #000;">Ver videos
-             <!-- <q-icon name="play_arrow"></q-icon> -->
-          </span>
+        <div class="h-full w-full b-0 top-0 left-0 right-0 absolute z-10 overflow-hidden rounded-lg">
+          <q-img :src="thumb" class="h-full w-full absolute rounded-lg" style=" transform: scale(1.5)"></q-img>
+          <canvas crossorigin="anonymous" class="h-full w-full absolute rounded-lg" ref="canvas" id="canvas" style="object-fit: cover; object-position: 100% 50%;"></canvas>
+          <div class="glass h-full w-full b-0 top-0 left-0 right-0 absolute z-10"></div>
+          <div class="h-full w-full b-0 top-0 left-0 right-0 absolute flex items-center justify-center">
+            <span class=" text-white font-bold text-3xl z-20" style="text-shadow: 1px 1px 3px #000;">Ver videos
+              <!-- <q-icon name="play_arrow"></q-icon> -->
+            </span>
+          </div>
         </div>
       </div>
+  </div>
+  <!-- div to buttons navbar -->
+  <div id="buttons">
+    <div class="flex justify-between items-center absolute bottom-0 w-full z-[1999] p-4">
+        <q-btn
+          @click="stopVideo"
+          class="text-white"
+          flat
+          dense
+          color="white"
+          :icon="videoPaused ? 'play_circle_filled' : 'pause'"
+        ></q-btn>
+        <q-btn
+          @click="stopVideo"
+          class="text-white"
+          flat
+          dense
+          color="white"
+          icon="delete"
+        ></q-btn>
+    </div>
   </div>
 <!-- <a href="instagram://story-camera" target="_blank" rel="noopener noreferrer"> teste</a> -->
 
@@ -76,10 +101,16 @@ export default {
       type: Array,
       default: ()=> []
     },
+    thumb: {
+      type: String,
+      default: ''
+    },
   },
   data() {
     return {
       img: '',
+      videoPaused: false,
+      actualSlide: '',
       items: [],
         // plugins: [lgThumbnail, lgZoom]),
       config: {
@@ -108,10 +139,12 @@ export default {
   async videoEvent(e){
     await this.$nextTick()
     await this.$nextTick()
-    console.log(e)
-    console.log('video')
+    const toolbar = document.getElementsByClassName('lg-outer')[0]
+    const buttons  = document.getElementById('buttons')
+    toolbar.append(buttons)
     const video = document.getElementsByClassName('lg-current')[0].firstChild.firstChild
     console.log(video)
+    console.log('n',lightGallery.slide)
     video.onended = function(e) {
       lightGallery.goToNextSlide();
       /*Do things here!*/
@@ -120,20 +153,26 @@ export default {
 
   },
   stopVideo(){
-    console.log('asas')
     if(document.getElementsByClassName('lg-current')[0]){
-      document.getElementsByClassName('lg-current')[0].firstChild.firstChild.pause()
+      if(this.videoPaused){
+        document.getElementsByClassName('lg-current')[0].firstChild.firstChild.play()
+        this.videoPaused = false
+      } else {
+        document.getElementsByClassName('lg-current')[0].firstChild.firstChild.pause()
+        this.videoPaused = true
+      }
     }
   },
-   onInit: (detail) => {
-            lightGallery = detail.instance;
-        },
+  onInit: (detail) => {
+    lightGallery = detail.instance;
+  },
   open(){
-      lightGallery.openGallery();
-},
-  onBeforeSlide(){
-    console.log('calling before slide');
-    this.stopVideo();
+    lightGallery.openGallery();
+  },
+  onAfterSlide({index}){
+    this.actualSlide = index
+    console.log('n', index);
+    // this.stopVideo();
   },
     filterDeleted(arr) {
       try {

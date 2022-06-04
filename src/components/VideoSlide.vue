@@ -1,5 +1,7 @@
 <template>
+<div class="w-full px-4 mb-5">
  <lightgallery
+    v-if="videos.length > 0"
     :settings="config"
     :onInit="onInit"
     :onAfterSlide="onAfterSlide"
@@ -40,13 +42,18 @@
     </a>
     </template>
   </lightgallery>
+   <div class="h-16 w-full bg-gray-100 border border-gray-400 rounded-md flex items-center justify-center cursor-pointer"
+      v-if="admin"
+      @click="sendVideo=true">
+        <q-icon name="add" class="text-gray-400 text-3xl" /> Adicionar Video
+      </div>
   <div ref="myDiv" v-if="items.length">
 
       <video ref="video" id="videoId" style="visibility: hidden; z-index:-1" class="
       absolute">
           <source :src="items[0].link" type="video/mp4">
       </video>
-      <div class="border-effect relative h-24 m-4 rounded-lg" @click="open()">
+      <div class="border-effect relative h-24 m-4 rounded-lg cursor-pointer" @click="open()">
         <div class="h-full w-full b-0 top-0 left-0 right-0 absolute z-10 overflow-hidden rounded-lg">
           <q-img :src="thumb" class="h-full w-full absolute rounded-lg" style=" transform: scale(1.5)"></q-img>
           <canvas crossorigin="anonymous" class="h-full w-full absolute rounded-lg" ref="canvas" id="canvas" style="object-fit: cover; object-position: 100% 50%;"></canvas>
@@ -71,27 +78,67 @@
           :icon="videoPaused ? 'play_circle_filled' : 'pause'"
         ></q-btn>
         <q-btn
-          @click="stopVideo"
+          @click="()=>{confirmDelete=true;stopVideo()}"
           class="text-white"
           flat
           dense
           color="white"
+          v-if="admin"
           icon="delete"
         ></q-btn>
     </div>
   </div>
 <!-- <a href="instagram://story-camera" target="_blank" rel="noopener noreferrer"> teste</a> -->
+ <q-dialog v-model="confirmDelete" persistent class="z-[99999]">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm">Tem certeza que deseja deletar esse Video?</span>
+        </q-card-section>
 
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
+          <q-btn flat label="Deletar" color="negative" @click="deleteVideo()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+      <q-dialog v-model="sendVideo" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="file_upload" color="primary" text-color="white" />
+          <span class="q-ml-sm">Envie um novo video</span>
+          <q-uploader
+            ref="uploader"
+            :multiple="false"
+            class="w-full mt-4"
+            :factory="uploadFile"
+            label="Escolha um video com até 100mb"
+            @rejected="onRejected"
+            max-file-size="104857600"
+            accept="video/*"
+          />
+            <!-- @added="added"
+            @finish="uploaded"
+            @uploaded="uploaded" -->
+            <!-- :filter="checkFileSize" -->
+        </q-card-section>
 
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
+          <q-btn flat @click="upload" label="Enviar" color="primary" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+</div>
 </template>
 
 <script>
 import Lightgallery from 'lightgallery/vue';
 import lgVideo from 'lightgallery/plugins/video';
-import lgAutoplay from 'lightgallery/plugins/autoplay';
+
 
 let lightGallery = null;
-const  plugins = [lgVideo, lgAutoplay]
+const  plugins = [lgVideo]
 export default {
    components:{
     Lightgallery
@@ -105,28 +152,42 @@ export default {
       type: String,
       default: ''
     },
+    id: {
+      type: Number,
+      default: 0
+    },
+    admin: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
+        file_path : null,
       img: '',
+      sendVideo: false,
+      confirmDelete: false,
       videoPaused: false,
       actualSlide: '',
       items: [],
-        // plugins: [lgThumbnail, lgZoom]),
       config: {
         speed: 800,
         slideShowInterval: 15000,
         plugins: plugins,
         playsinline: true,
-        progressBar : true,
-        slideShowAutoplay : true,
-        autoplayControls: true,
-        autoplayVideoOnSlide:true,
         licenseKey: 'C6FC35D1-E1734CCA-B69150EE-25CEB158'
       },
       media: [],
 
     };
+  },
+  computed: {
+    headers() {
+      return this.$api.defaults.headers.common
+    },
+    baseApi(){
+      return this.$api.defaults.baseURL
+    }
   },
   watch: {
     items(newVal, oldVal) {
@@ -136,6 +197,87 @@ export default {
     },
   },
   methods: {
+    upload(e) {
+      this.$refs.uploader.upload();
+    },
+    uploadFile(files) {
+      return new Promise((resolve, reject) => {
+        const myUploader = this.$refs.uploader
+        this.file_path = files[0]
+        const fileData = new FormData()
+
+        fileData.append('file_path ', this.file_path)
+
+        //Replace http://localhost:8000 with your API URL
+        const uploadFile = this.$api.post(`/categories/ads/${this.id}/files/videos`, fileData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then((response) => {
+          console.log(response.data);
+
+        // Notify plugin needs to be installed
+        // https://quasar.dev/quasar-plugins/notify#Installation
+          this.$q.notify({
+            type: 'positive',
+            message: `Video enviado com sucesso!`
+          })
+          this.sendVideo = false
+          location.reload()
+          myUploader.removeFile(files)
+          resolve(files)
+        }).catch((error) => {
+          this.$q.notify({
+            type: 'negative',
+            message: `Error Uploaded`
+          })
+          console.log(error);
+          reject(error)
+        })
+      })
+    },
+    onRejected (rejectedEntries) {
+      console.log(rejectedEntries)
+      // Notify plugin needs to be installed
+      // https://quasar.dev/quasar-plugins/notify#Installation
+      this.$q.notify({
+        type: 'negative',
+        message: `Erro ao enviar o video`
+      })
+    },
+  deleteVideo() {
+    this.confirmDelete = false;
+    this.$q.loading.show()
+        this.$api.delete(`/categories/ads/files/${this.videos[this.actualSlide].id}`)
+        .then((response) => {
+            //  console.log(response.data.addresses)
+            if(response.data){
+              this.$q.notify({
+              color: 'secondary',
+              position: 'top',
+              message: 'Videeo apagado com sucesso!',
+              })
+            }
+            location.reload()
+        })
+        .catch((err) => {
+            let msg
+            if( err.response){
+            msg =  err.response.data.message
+            }else {
+                msg = 'Erro na conexão!'
+            }
+            this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+            })
+        })
+        .finally(() => {
+            this.$q.loading.hide()
+        })
+      },
   async videoEvent(e){
     await this.$nextTick()
     await this.$nextTick()
@@ -212,42 +354,7 @@ export default {
       })
       return newMedia
     },
-      sendGallery () {
-        this.$q.loading.show()
-        let data = new FormData();
-        data.append('name', 'gallery');
-        // data.append('file', this.$refs.gallery.files[0]);
-        this.$api.post(`/categories/ads/${this.adsComponent.id}/files/gallery`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
-        .then((response) => {
-            //  console.log(response.data.addresses)
-            if(response.data){
-              this.$q.notify({
-              color: 'secondary',
-              position: 'top',
-              message: 'Imagem salva com sucesso!',
-              })
-            this.$router.go(0)
-            }
-            // $router.go(0)
-        })
-        .catch((err) => {
-            let msg
-            if( err.response){
-            msg =  err.response.data.message
-            }else {
-                msg = 'Erro na conexão!'
-            }
-            this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: msg,
-            icon: 'report_problem'
-            })
-        })
-        .finally(() => {
-            this.$q.loading.hide()
-        })
-      },
+
 
       async createThumb(){
         await this.$nextTick()
@@ -271,6 +378,8 @@ export default {
    },
 
   async mounted () {
+      console.log(this.$api.defaults.headers.common)
+
       console.log(this.$refs.myDiv)
       this.items = this.videos
       this.createThumb()

@@ -43,7 +43,7 @@
       </div>
     </div>
     <div>
-      <video-slide :thumb="pathImg()" :videos="adsComponent.files.videos"></video-slide>
+      <video-slide :admin="admin" :id="adsComponent.id" :thumb="pathImg()" :videos="adsComponent.files.videos"></video-slide>
     </div>
     <div class="flex scroll-gallery ">
       <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer"
@@ -269,7 +269,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <q-page-sticky position="bottom-right" class="" :offset="[18, 18]">
+    <q-page-sticky position="bottom-right z-[200]" class="" :offset="[18, 18]">
         <q-fab
           icon="add"
           direction="up"

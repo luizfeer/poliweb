@@ -67,7 +67,7 @@
       </div>
   </div>
   <!-- div to buttons navbar -->
-  <div id="buttons">
+  <div id="buttons-video">
     <div class="flex justify-between items-center absolute bottom-0 w-full z-[1999] p-4">
         <q-btn
           @click="stopVideo"
@@ -282,7 +282,7 @@ export default {
     await this.$nextTick()
     await this.$nextTick()
     const toolbar = document.getElementsByClassName('lg-outer')[0]
-    const buttons  = document.getElementById('buttons')
+    const buttons  = document.getElementById('buttons-video')
     toolbar.append(buttons)
     const video = document.getElementsByClassName('lg-current')[0].firstChild.firstChild
     console.log(video)
@@ -544,10 +544,10 @@ export default {
 .lg-backdrop {
     background-color: #000000;
 }
-#buttons{
+#buttons-video{
   display: none;
 }
-.lg-components-open #buttons{
+.lg-components-open #buttons-video{
   display: block;
 }
 </style>

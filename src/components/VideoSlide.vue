@@ -544,4 +544,10 @@ export default {
 .lg-backdrop {
     background-color: #000000;
 }
+#buttons{
+  display: none;
+}
+.lg-components-open #buttons{
+  display: block;
+}
 </style>

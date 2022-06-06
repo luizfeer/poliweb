@@ -431,8 +431,8 @@ export default {
     },
     pathImg () {
       if(!this.adsComponent.files.logo) return
-      let last = this.adsComponent.files.logo.length - 1
       return this.adsComponent.files.logo[0].link
+      // let last = this.adsComponent.files.logo.length - 1
       // this.adsComponent.files.logo[-1 ? ].link
     },
     url(){

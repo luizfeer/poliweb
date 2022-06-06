@@ -76,7 +76,7 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       https: false,
-      port: 3000,
+      port: 3050,
       open: true // opens browser window automatically
     },
 
@@ -162,37 +162,37 @@ module.exports = configure(function (ctx) {
           {
             src: 'icons/icon-128x128.png',
             sizes: '128x128',
-            type: 'image/png',            
+            type: 'image/png',
             purpose: "maskable"
           },
           {
             src: 'icons/icon-192x192.png',
             sizes: '192x192',
-            type: 'image/png',            
+            type: 'image/png',
             purpose: "maskable"
           },
           {
             src: 'icons/icon-256x256.png',
             sizes: '256x256',
-            type: 'image/png',            
+            type: 'image/png',
             purpose: "maskable"
           },
           {
             src: 'icons/icon-384x384.png',
             sizes: '384x384',
-            type: 'image/png',            
+            type: 'image/png',
             purpose: "maskable"
           },
           {
             src: 'icons/icon-512x512.png',
             sizes: '512x512',
-            type: 'image/png',            
+            type: 'image/png',
             purpose: "maskable"
           },
            {
             src: 'icons/icon-512x512.png',
             sizes: '520x520',
-            type: 'image/png',            
+            type: 'image/png',
             purpose: "maskable"
           }
         ]

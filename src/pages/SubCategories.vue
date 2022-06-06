@@ -148,6 +148,8 @@ export default defineComponent({
         id: item.id,
         name: item.name
       }
+      item.subcategories.sort((a, b) => a.name.localeCompare(b.name));
+
       this.subCategories = item.subcategories
       this.slide = '1'
       console.log(item)

@@ -69,6 +69,9 @@ export default {
               filtered.files.gallery = this.filterDeleted(filtered.files.gallery)
               filtered.files.gallery = filtered.files.gallery.slice(0).reverse();
             }
+             if(filtered.files && filtered.files.logo){
+              filtered.files.logo = filtered.files.logo.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
+            }
              if(filtered.files && filtered.files.videos){
               filtered.files.videos = this.filterDeleted(filtered.files.videos)
               filtered.files.videos = filtered.files.videos.slice(0).reverse();
@@ -76,7 +79,6 @@ export default {
             filtered.phones =  this.filterDeleted(filtered.phones)
             filtered.address =  this.filterDeleted(filtered.address)
             this.data = filtered
-            console.log(filtered)
 
             this.loading = false
 

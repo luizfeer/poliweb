@@ -17,14 +17,13 @@
                       />
                       <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ item.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
                       </div>
-                      
                       <div class="pl-3">
                       <h1 class="text-lg text-gray-600 font-semibold">
                           {{ item.name }}
                       </h1>
                       <h2 class="text-base text-gray-500">{{ item.description }}</h2>
                       <h2 v-if="showAddress && item.addresses && item.addresses.length" class="text-base text-gray-500">{{ lastAddress(item.addresses).city }}</h2>
-                      
+
                       </div>
                   </div>
                 </div>
@@ -50,8 +49,8 @@
                 default: false
             }
         },
-        computed: {           
-           
+        computed: {
+
             adsEdited() {
                 if(this.reverse){
                     return this.ads.slice().reverse()
@@ -59,16 +58,16 @@
                 return this.ads
             }
         },
-        methods: {   
-             lastAddress(addresses){           
+        methods: {
+             lastAddress(addresses){
                 return addresses[addresses.length-1]
-            },       
+            },
              pathImg (item) {
-                let last = item.files.logo.length - 1
+                item.files.logo = item.files.logo.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
                 return item.files.logo[0].link
             },
         },
-        
+
     }
 </script>
 

@@ -139,11 +139,10 @@ const linksList = [
   //   icon: "add_task",
   //   link: "/cadastro",
   // },
-
-
 ];
 
 import { defineComponent, ref } from "vue";
+import { differenceInHours } from 'date-fns'
 
 export default defineComponent({
   name: "MainLayout",
@@ -168,13 +167,38 @@ export default defineComponent({
      console.log('mount')
      const categories = localStorage.getItem('categories')
      const uuid = localStorage.getItem('uuid')
+      let context = localStorage.getItem("context")
      if(!uuid){
       localStorage.setItem('uuid', this.uuidv4())
      }
+     let admin
+     if(context){
+      context = JSON.parse(context)
+      const result = differenceInHours(
+        new Date(),
+        new Date(context.when)
+      )
+      console.log(result)
+      if(result>23){
+         this.$q.notify({
+          color: 'negative',
+          position: 'bottom',
+          message: 'Seu login está expirado, faça login novamente!',
+           actions: [
+            { label: 'Login', color: 'white', handler: () => {
+              this.$router.push({ path: '/login' })
+            }}
+          ]
+          })
+        localStorage.removeItem('admin')
+      }else{
+        admin = localStorage.getItem('admin') ? true : false
+      }
+     }
      this.categories = JSON.parse(categories)
-     const admin = localStorage.getItem('admin') ? true : false
      // move to store
      const localization = localStorage.getItem("localization")
+
      this.localization =  JSON.parse(localization)
      this.getData()
       if(admin){

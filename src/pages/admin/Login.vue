@@ -1,17 +1,16 @@
 <template>
-  <q-page class="bg-blue-100 w-full h-full row justify-center items-center">
-    <div class="column">
+  <q-page class="bg-blue-100 h-full row justify-center items-center">
+    <div class="column max-w-[300px] relative">
       <div class="row">
-        <h5 class="text-h5 text-black q-my-md">Login</h5>
+        <h5 class="text-h5 text-black q-my-md">Admin</h5>
       </div>
       <div class="row">
         <q-form @submit="login">
 
-        <q-card square bordered class="q-pa-lg shadow-1">
-          Admin
-          <q-card-section>            
+        <q-card square bordered class="q-pa-lg shadow-1 max-w-[300px]">
+          <q-card-section class="px-3">
             <q-input square filled clearable v-model="form.email" type="email" label="Email" class="mb-5" />
-            <q-input square filled clearable v-model="form.password" type="password" label="Senha" />            
+            <q-input square filled clearable v-model="form.password" type="password" label="Senha" />
           </q-card-section>
           <q-card-actions class="q-px-md">
             <q-btn unelevated color="light-blue-7" size="lg" class="full-width" type="submit" label="Login"/>
@@ -28,7 +27,7 @@
 
 <script>
 export default {
-  name: 'Login',
+  name: 'LoginAdmin',
   data () {
     return {
       form:{
@@ -43,12 +42,16 @@ export default {
     this.$q.loading.show()
     this.$api.post('/admin/login', {...this.form})
       .then((response) => {
-        const token = response.data.token
-        if(token){
-          this.$api.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-         localStorage.setItem("token", token)  
-         localStorage.setItem("admin", "true")  
-         this.$router.push({ path: '/' })      
+        const data = response.data
+        console.log(data)
+        if(data){
+         this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+         localStorage.setItem("token", data.token)
+         localStorage.setItem("id-customer",  JSON.stringify(data.context.id))
+         localStorage.setItem("context",  JSON.stringify({...data.context, when: new Date()}))
+         localStorage.setItem('admin', true)
+
+         this.$router.push({ path: '/' })
         }
       })
       .catch((err) => {

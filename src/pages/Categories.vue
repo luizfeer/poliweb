@@ -99,7 +99,7 @@ export default ({
         this.slide= '1'
       },
     pathImg (item) {
-      let last = item.files.logo.length - 1
+      item.files.logo = item.files.logo.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
       return item.files.logo[0].link
     },
   },

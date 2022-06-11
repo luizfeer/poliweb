@@ -40,76 +40,103 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import AdsPage from 'components/Ads'
-
+import { useMeta, useQuasar } from 'quasar'
+import { api } from 'boot/axios'
+import { useRouter, useRoute } from 'vue-router'
 export default {
     components: {
         AdsPage
     },
 
-    setup () {
-        return {
-            data: ref([]),
-            loading: ref(true)
-        };
-    },
-    mounted () {
-    this.loading = true
-    this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
+   setup () {
+    const $q = useQuasar()
+    const router = useRouter()
+    const route = useRoute()
+    let loading = ref(true)
+    let data = ref({
+      description: '',
+      files:{gallery:[{ link:''}]}
+    })
+    const filterDeleted = (arr) => {
+      try {
+          return arr.filter((item)=>{ return !item.deletedAt })
+        } catch (error) {
+            console.log(error)
+            return arr
+        }
+      }
+    const getData = () => api.get(`/categories/ads/${route.params.id}?nonDeleted=true`)
      .then((response) => {
         if(response.data){
             if(response.data.deletedAt){
-                this.$router.push('/')
+                router.push('/')
             }
 
             let filtered = response.data
             console.log(filtered)
             if(filtered.files && filtered.files.gallery){
-              filtered.files.gallery = this.filterDeleted(filtered.files.gallery)
+              filtered.files.gallery = filterDeleted(filtered.files.gallery)
               filtered.files.gallery = filtered.files.gallery.slice(0).reverse();
             }
              if(filtered.files && filtered.files.logo){
               filtered.files.logo = filtered.files.logo.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
             }
              if(filtered.files && filtered.files.videos){
-              filtered.files.videos = this.filterDeleted(filtered.files.videos)
+              filtered.files.videos = filterDeleted(filtered.files.videos)
               filtered.files.videos = filtered.files.videos.slice(0).reverse();
             }
-            filtered.phones =  this.filterDeleted(filtered.phones)
-            filtered.address =  this.filterDeleted(filtered.address)
-            this.data = filtered
-
-            this.loading = false
-
-
+            filtered.phones =  filterDeleted(filtered.phones)
+            filtered.address =  filterDeleted(filtered.address)
+            data.value = filtered
+            loading.value = false
         }
       })
       .catch((err) => {
-          console.log(err)
+        console.log(err)
         let msg = 'Erro na conexão!'
-        this.$q.notify({
+        $q.notify({
             color: 'negative',
           position: 'top',
           message: msg,
           icon: 'report_problem'
         })
-        this.$router.push({ path: '/' })
+       router.push({ path: '/' })
       })
       .finally(() => {
       })
-  },
-  methods: {
-      filterDeleted(arr) {
-          try {
-              return arr.filter((item)=>{ return !item.deletedAt })
+      onMounted(async () => {
+        await getData()
 
-          } catch (error) {
-              console.log(error)
-              return arr
-          }
-      }
-  },
+      })
+      console.log('123', data.value.files)
+
+      useMeta(() => {
+        return {
+          title: data.value.name,
+      // optional; sets final title as "Index Page - My Website", useful for multiple level meta
+          titleTemplate: title => `${title} - Poliweb`,
+          meta: {
+            description: { name: data.value.name, content: data.value.description },
+            keywords: { name: 'keywords', content:  `${data.value.description.split(',')}` },
+            ogDesc: {
+              name: 'og:description',
+              content: data.value.description
+            },
+            ogImage: {
+              name: 'og:image',
+              content: data.value.files.gallery[0].link
+            },
+
+          },
+        }
+      })
+      return {
+          data,
+          loading
+      };
+    }
 }
 </script>
 

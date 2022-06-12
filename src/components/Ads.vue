@@ -100,7 +100,8 @@
         <div v-if="adsComponent.website" class="flex items-center flex-nowrap text-gray-600">
             <a  @click="sendAction('open-site')" :href="`${adsComponent.website}`" target="_blank" rel="noopener noreferrer">
                 <q-icon name="language" class="mr-2 text-xl text-blue-400" />
-                {{ adsComponent.website }}
+                <!-- {{ adsComponent.website }} -->
+                Site
             </a>
         </div>
 
@@ -112,7 +113,8 @@
                     name="fab fa-facebook-square"
                     class="mr-2 text-xl text-blue-800"
                 />
-                {{ faceId(adsComponent.facebook) }}
+                <!-- {{ faceId(adsComponent.facebook) }} -->
+                Facebook
             </a>
         </div>
         <div v-if="adsComponent.facebook  && (adsComponent.instagram || adsComponent.email)" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
@@ -123,7 +125,8 @@
                     name="fab fa-instagram-square"
                     class="mr-2 text-xl text-pink-600"
                 />
-                {{ instaId(adsComponent.instagram) }}
+                <!-- {{ instaId(adsComponent.instagram) }} -->
+                Instagram
             </a>
         </div>
         <div v-if="adsComponent.instagram && adsComponent.email" class="divider border-t border-gray-200 w-full px-5 my-3"></div>
@@ -133,7 +136,8 @@
                     name="fas fa-envelope-open-text"
                     class="mr-2 text-xl text-purple-800"
                 />
-                {{ adsComponent.email }}
+                <!-- {{ adsComponent.email }} -->
+                Email
             </a>
         </div>
       </div>

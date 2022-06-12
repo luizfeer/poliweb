@@ -119,7 +119,7 @@ export default {
           titleTemplate: title => `${title} - Poliweb`,
           meta: {
             description: { name: data.value.name, content: data.value.description },
-            keywords: { name: 'keywords', content:  `${data.value.description.split(',')}` },
+            keywords: { name: 'keywords', content:  `${data.value.description}` },
             ogDesc: {
               name: 'og:description',
               content: data.value.description

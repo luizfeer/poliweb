@@ -268,6 +268,23 @@ export const citysData =  [
 			"createdAt": "2022-05-24T15:39:39.268Z",
 			"updatedAt": null,
 			"deletedAt": null
+		},
+
+    {
+			"id": 419,
+			"country": "Brasil",
+			"state": "SP",
+			"city": "Caconde",
+			"zipCode": "13770000",
+			"coordinates": {
+				"lat": -21.5275957,
+				"long": -46.5825599,
+				"rawType": true
+			},
+			"createdAt": "2022-06-21T17:20:51.914Z",
+			"updatedAt": null,
+			"deletedAt": null
 		}
+  
 
 ];

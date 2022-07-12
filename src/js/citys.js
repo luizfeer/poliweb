@@ -284,6 +284,21 @@ export const citysData =  [
 			"createdAt": "2022-06-21T17:20:51.914Z",
 			"updatedAt": null,
 			"deletedAt": null
+		},
+    {
+			"id": 420,
+			"country": "Brasil",
+			"state": "MG",
+			"city": "Arceburgo",
+			"zipCode": "37820000",
+			"coordinates": {
+				"lat": -21.3637935,
+				"long": -46.9377161,
+				"rawType": true
+			},
+			"createdAt": "2022-07-12T13:24:43.535Z",
+			"updatedAt": null,
+			"deletedAt": null
 		}
   
 

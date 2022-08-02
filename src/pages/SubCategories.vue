@@ -153,7 +153,7 @@ export default defineComponent({
         
       this.$api.delete(`/categories/${item.id}'}`)
       .then((response) => {
-            await this.getData()           
+          this.getData()         
           
         })
         .catch((err) => {

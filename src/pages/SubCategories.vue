@@ -153,7 +153,12 @@ export default defineComponent({
         
       this.$api.delete(`/categories/${item.id}`)
       .then((response) => {
-          this.getData()         
+           this.$q.notify({
+            color: 'positive',
+            position: 'top',
+            message: 'Deletado',
+            icon: 'report_problem'
+          })        
           
         })
         .catch((err) => {

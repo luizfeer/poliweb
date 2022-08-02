@@ -151,7 +151,7 @@ export default defineComponent({
       let text = "Deseja apagar";
       if (confirm(text) === false)  return
         
-      this.$api.delete(`/categories/${item.id}'}`)
+      this.$api.delete(`/categories/${item.id}`)
       .then((response) => {
           this.getData()         
           

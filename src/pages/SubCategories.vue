@@ -36,7 +36,9 @@
                   </div>
                   <div class="ml-2 w-full">
                     <h1 class="text-lg text-gray-600 font-semibold flex items-center justify-between ">
-                      {{ item.name }} <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
+                      {{ item.name }} 
+                      <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
+                      <q-btn unelevated color="negative" label="Excluir" v-if="admin" @click.stop="removeCategory(item)" class="m-2"/>
                     </h1>
                     <h2 class="text-base text-gray-500">{{ item.addressCity }}</h2>
                   </div>
@@ -69,7 +71,9 @@
                   </div>
                   <div class="ml-2 w-full">
                     <h1 class="text-lg text-gray-600 font-semibold flex items-center justify-between">
-                      {{ item.name }} <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
+                      {{ item.name }} 
+                      <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
+                      <q-btn unelevated color="negative" label="Excluir" v-if="admin" @click.stop="removeCategory(item)" class="m-2"/>
                     </h1>
                   </div>
                 </div>
@@ -142,6 +146,28 @@ export default defineComponent({
       console.log(`categorias/edit/${item.id}/${item.name}/${item.iconId}`)
       this.$router.push({path: `/painel/categorias/edit/${item.id}/${item.name}/${item.iconId}`})
       // return
+    },
+    async removeCategory (item) {
+      let text = "Deseja apagar";
+      if (confirm(text) === false)  return
+        
+      this.$api.delete(`/categories/${item.id}'}`)
+      .then((response) => {
+            await this.getData()           
+          
+        })
+        .catch((err) => {
+       
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: 'Erro ao deletar',
+            icon: 'report_problem'
+          })
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     subcategories(item) {
       this.subCategorieActive = {

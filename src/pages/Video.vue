@@ -43,7 +43,7 @@
 
       <video ref="video" id="videoId" style="visibility: hidden; z-index:-1" class="
       absolute">
-          <source :src="items[0].link" type="video/mp4">
+          <source :src="(items[0]||{}).link" type="video/mp4">
       </video>
       <div class="border-effect relative h-24 m-4 rounded-lg" @click="open()">
         <canvas crossorigin="anonymous" class="h-full w-full absolute rounded-lg" ref="canvas" id="canvas" style="object-fit: cover; object-position: 100% 50%;"></canvas>

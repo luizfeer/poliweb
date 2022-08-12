@@ -126,7 +126,7 @@ export default {
             },
             ogImage: {
               name: 'og:image',
-              content: (data.value.files.gallery[0]||{}).link 
+              content: data.value.files.gallery ? data.value.files.gallery[0].link : null
             },
 
           },

@@ -78,7 +78,8 @@ export default {
             console.log(filtered)
             if(filtered.files && filtered.files.gallery){
               filtered.files.gallery = filterDeleted(filtered.files.gallery)
-              filtered.files.gallery = filtered.files.gallery.slice(0).reverse();
+              filtered.files.gallery = filtered.files.gallery.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
+
             }
              if(filtered.files && filtered.files.logo){
               filtered.files.logo = filtered.files.logo.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));

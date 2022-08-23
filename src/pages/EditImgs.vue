@@ -278,13 +278,9 @@ export default {
             if(response.data.deletedAt){
                 this.$router.push('/')
             }
-
             let filtered = response.data
-            console.log(filtered)
-
-            filtered.files.gallery = this.filterDeleted(filtered.files.gallery).slice(0).reverse();
-            filtered.phones =  this.filterDeleted(filtered.phones)
-            filtered.address =  this.filterDeleted(filtered.address)
+            filtered.files.gallery = this.filterDeleted(filtered.files.gallery)
+            filtered.files.gallery = filtered.files.gallery.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
             this.adsComponent = filtered
             console.log(filtered)
 

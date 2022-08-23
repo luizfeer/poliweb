@@ -36,9 +36,11 @@
                   </div>
                   <div class="ml-2 w-full">
                     <h1 class="text-lg text-gray-600 font-semibold flex items-center justify-between ">
-                      {{ item.name }} 
-                      <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
-                      <q-btn unelevated color="negative" label="Excluir" v-if="admin" @click.stop="removeCategory(item)" class="m-2"/>
+                      {{ item.name }}
+                      <div class="d-flex">
+                        <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
+                        <q-btn unelevated color="negative" label="Excluir" v-if="admin && isMaster" @click.stop="removeCategory(item)" class="m-2"/>
+                      </div>
                     </h1>
                     <h2 class="text-base text-gray-500">{{ item.addressCity }}</h2>
                   </div>
@@ -71,9 +73,11 @@
                   </div>
                   <div class="ml-2 w-full">
                     <h1 class="text-lg text-gray-600 font-semibold flex items-center justify-between">
-                      {{ item.name }} 
-                      <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
-                      <q-btn unelevated color="negative" label="Excluir" v-if="admin" @click.stop="removeCategory(item)" class="m-2"/>
+                      {{ item.name }}
+                      <div class="d-flex">
+                        <q-btn unelevated color="primary" label="Editar" v-if="admin" @click.stop="editCategory(item)" class="m-2"/>
+                        <q-btn unelevated color="negative" label="Excluir" v-if="admin && isMaster" @click.stop="removeCategory(item)" class="m-2"/>
+                      </div>
                     </h1>
                   </div>
                 </div>
@@ -116,6 +120,7 @@ export default defineComponent({
       slide: "0",
       loading : true,
       localization: {},
+      isMaster: false,
     };
   },
   async mounted(){
@@ -132,6 +137,9 @@ export default defineComponent({
     }
 
      this.admin = localStorage.getItem('admin') ? true : false
+     let context = localStorage.getItem('context')
+     context = JSON.parse(context)
+     this.isMaster = context.isMaster ? true : false
      // move to store
      const localization = localStorage.getItem("localization")
      this.localization =  JSON.parse(localization)
@@ -150,7 +158,7 @@ export default defineComponent({
     async removeCategory (item) {
       let text = "Deseja apagar";
       if (confirm(text) === false)  return
-        
+
       this.$api.delete(`/categories/${item.id}`)
       .then((response) => {
            this.$q.notify({
@@ -158,11 +166,11 @@ export default defineComponent({
             position: 'top',
             message: 'Deletado',
             icon: 'report_problem'
-          })        
-          
+          })
+
         })
         .catch((err) => {
-       
+
           this.$q.notify({
             color: 'negative',
             position: 'top',

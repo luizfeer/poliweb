@@ -382,7 +382,14 @@ export default {
 
       console.log(this.$refs.myDiv)
       this.items = this.videos
-      this.createThumb()
+      try {
+
+        if(videos.length > 0){
+          this.createThumb()
+        }
+      } catch (error) {
+
+      }
 
 
 

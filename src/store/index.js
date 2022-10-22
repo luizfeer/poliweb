@@ -2,6 +2,7 @@ import { store } from 'quasar/wrappers'
 import { createStore } from 'vuex'
 // import createPersistedState from 'vuex-persistedstate';
 import categories from './categories'
+import login from './login'
 // import example from './module-example'
 
 /*
@@ -17,6 +18,7 @@ export default store(function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
       categories,
+      login
       // example
     },
     // plugins: [createPersistedState()],

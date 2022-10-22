@@ -38,6 +38,9 @@ export default {
     }
   },
   methods:{
+  //  ...mapActions({
+  //   setLogin: 'login/setMe'
+  // }),
   handleHold ({ evt, ...newInfo }) {
     this.$router.push({ path: '/adm/login' })
 
@@ -49,13 +52,18 @@ export default {
         const data = response.data
         console.log(data)
         if(data){
-         this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-         localStorage.setItem("token", data.token)
-         localStorage.setItem("id-customer",  JSON.stringify(data.context.id))
-          localStorage.setItem("context",  JSON.stringify({...data.context, when: new Date()}))
-         localStorage.removeItem('admin')
+          try {
+            this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+            localStorage.setItem("token", data.token)
+            localStorage.setItem("id-customer",  JSON.stringify(data.context.id))
+            localStorage.setItem("context",  JSON.stringify({...data.context, when: new Date()}))
+            localStorage.removeItem('admin')
+            const path = data.context.categoryAdId ? `/${data.context.categoryAdId}` : '/'
+            this.$router.push({ path: path })
 
-         this.$router.push({ path: '/' })
+          } catch (error) {
+            console.log(error)
+          }
         }
       })
       .catch((err) => {

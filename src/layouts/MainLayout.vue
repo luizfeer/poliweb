@@ -147,7 +147,7 @@ export default defineComponent({
     },
      watch:{
       $route (to, from){
-          if(to!==from){
+          if(from.fullPath === '/login'){
             console.log('change router')
              this.init()
           }

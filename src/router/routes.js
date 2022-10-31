@@ -103,14 +103,24 @@ const routes = [
        component: () => import('pages/SubCategories.vue')
 
       },
-      {
-        path: '/cidades',
-       component: () => import('pages/Citys.vue')
+      // {
+      //   path: '/cidades',
+      //  component: () => import('pages/Citys.vue')
 
-      },
+      // },
       {
         path: '/cidade/:cidade',
        component: () => import('pages/City.vue')
+
+      },
+      {
+        path: '/cidades',
+       component: () => import('pages/CitysIndex.vue')
+
+      },
+      {
+        path: '/c/:city/:id?',
+       component: () => import('pages/ListCategoriesPagination.vue')
 
       },
       {

@@ -86,8 +86,6 @@
 
 <script>
 import { defineComponent } from "vue";
-import { slugify } from 'src/js/slugify'
-import { citysData } from 'src/js/citys'
 
 // export default {
 //   }
@@ -114,21 +112,10 @@ export default defineComponent({
     };
   },
   async mounted(){
-    this.citys = citysData
-    this.citys.map(city => {
-       city.link = slugify(city.city)
-     })
     let slide = false
     // const categories = localStorage.getItem('categories')
     // this.categories = JSON.parse(categories)
     const idSub = this.$route.params.id
-    const city = this.$route.params.city
-
-    this.citys.filter(item => {
-      if(item.link === city){
-        this.localization = item
-      }
-    })
     if(this.categories){
       this.loading = false
     }
@@ -139,9 +126,8 @@ export default defineComponent({
 
      this.admin = localStorage.getItem('admin') ? true : false
      // move to store
-    //  const localization = localStorage.getItem("localization")
-    //  this.localization =  JSON.parse(localization)
-
+     const localization = localStorage.getItem("localization")
+     this.localization =  JSON.parse(localization)
      await this.getData()
      if(idSub && !slide){
       this.gotoSub(idSub)
@@ -149,7 +135,6 @@ export default defineComponent({
 
   },
   methods: {
-    slugify,
     async onLoad(index, done) {
       if(!this.pagination.firstLoad){
         this.pagination.firstLoad=true
@@ -187,7 +172,7 @@ export default defineComponent({
         gps = `lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}`
       }
       const pagination = `page=${this.pagination.page}&limit=${this.pagination.limit}&`
-       await this.$api.get(`/categories?nonDeleted=true&${pagination}${gps ||{}}`)
+      await this.$api.get(`/categories?nonDeleted=true&${gps ||{}}&${pagination}`)
       .then((response) => {
           if(response.data){
             this.pagination.total = response.data.total

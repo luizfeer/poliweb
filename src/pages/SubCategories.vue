@@ -139,7 +139,7 @@ export default defineComponent({
      this.admin = localStorage.getItem('admin') ? true : false
      let context = localStorage.getItem('context')
      context = JSON.parse(context)
-     this.isMaster = context.isMaster ? true : false
+     this.isMaster = (context||{}).isMaster ? true : false
      // move to store
      const localization = localStorage.getItem("localization")
      this.localization =  JSON.parse(localization)

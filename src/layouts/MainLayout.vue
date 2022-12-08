@@ -190,6 +190,7 @@ export default defineComponent({
                         }]
                     })
                     localStorage.removeItem('admin')
+                    localStorage.removeItem('context')
                 } else {
                     if ((context || {}).company !== null) {
                         this.essentialLinks = [{

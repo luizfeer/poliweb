@@ -142,7 +142,7 @@
         </div>
       </div>
       <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3 relative" v-if="adsComponent.addresses && adsComponent.addresses.length">
-          <a @click="sendAction('open-map')" :href="`https://maps.google.com/maps?q=${adsComponent.name},${lastAddress.street},Nº${lastAddress.number},${lastAddress.city} ${lastAddress.state},${lastAddress.zipCode}`" target="_blank" rel="noopener noreferrer">
+          <a @click="sendAction('open-map')" :href="`https://maps.google.com/maps?q=${adsComponent.name},${lastAddress.street}, ${lastAddress.number},${lastAddress.city} ${lastAddress.state},${lastAddress.zipCode}`" target="_blank" rel="noopener noreferrer">
             <div
               class="
                 flex flex-col
@@ -156,7 +156,7 @@
                 name="fas fa-map-marked-alt"
                 class="mr-2 text-3xl text-yellow-500"
               />
-              {{ `${lastAddress.street}, nº ${lastAddress.number}. ${lastAddress.city} ${lastAddress.state} - ${lastAddress.zipCode}` }}
+              {{ `${lastAddress.street}, ${lastAddress.number}. ${lastAddress.city} ${lastAddress.state} - ${lastAddress.zipCode}` }}
             </div>
           </a>
           <q-btn unelevated color="primary" @click.prevent="editAddress = !editAddress" v-if="admin" class="absolute right-0 top-0" icon="create" />

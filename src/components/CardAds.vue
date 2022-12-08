@@ -49,6 +49,11 @@
                 default: false
             }
         },
+        data() {
+          return {
+            colors: ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']
+          }
+        },
         computed: {
 
             adsEdited() {

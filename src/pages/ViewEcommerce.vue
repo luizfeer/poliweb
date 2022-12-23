@@ -21,12 +21,12 @@
 
         <div class="mt-3 p-1">
             <q-btn color="secondary" push v-if="admin" @click="addProduct()">
-              <div class="row items-center no-wrap">
-                <q-icon left name="shopping_basket" />
-                <div class="text-center">
-                  Cadastrar novo produto
+                <div class="row items-center no-wrap">
+                    <q-icon left name="shopping_basket" />
+                    <div class="text-center">
+                        Cadastrar novo produto
+                    </div>
                 </div>
-              </div>
             </q-btn>
 
             <template v-if="(adsComponent.files && adsComponent.files.ecommerceFiltered)">
@@ -40,7 +40,6 @@
                             </div>
                         </q-btn>
                     </div>
-
 
                     <div class="q-pa-md row items-start q-gutter-md">
                         <div v-for="item in category" :key="item.id">
@@ -76,8 +75,7 @@
                         <q-btn flat color="primary">
                           Reserve
                         </q-btn> -->
-                                    <q-btn push color="primary" size="xs" label="Apagar" @click="openConfirmDelete(item)" />
-                                    <q-btn push color="primary" size="xs" label="Editar" @click="openConfirmEdit(item)" />
+                                    <q-btn push color="primary" size="xs" label="Adicionar ao carrinho" @click="addToCart(item)" />
                                 </q-card-actions>
                             </q-card>
                         </div>
@@ -86,165 +84,86 @@
                 </div>
             </template>
         </div>
-        <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden" />
 
-        <q-dialog v-model="confirmGallery" persistent :maximized="maximizedToggle" transition-show="slide-up" transition-hide="slide-down">
-            <q-card class="">
-                <q-bar>
-                    <q-space />
-
-                    <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
-                        <q-tooltip v-if="maximizedToggle" class="bg-white text-primary">Minimizar</q-tooltip>
-                    </q-btn>
-                    <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
-                        <q-tooltip v-if="!maximizedToggle" class="bg-white text-primary">Maximizar</q-tooltip>
-                    </q-btn>
-                    <q-btn dense flat icon="close" v-close-popup>
-                        <q-tooltip class="bg-white text-primary">Fechar</q-tooltip>
-                    </q-btn>
-                </q-bar>
-
-                <q-card-section>
-                    <div class="text-h6">Cadastrar novo produto</div>
-                </q-card-section>
-                <q-card-section class="row items-center">
-                    <!-- <q-avatar icon="file_upload" color="primary" text-color="white" /> -->
-                    <q-img :src="preview" style="height: 270px; max-width: 400px" spinner-color="primary" spinner-size="82px" />
-                </q-card-section>
-                <div class="px-5">
-                    <div class="row">
-                        <q-input filled v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-2" />
-                    </div>
-                    <div class="row">
-                        <q-input filled v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-2" />
-                    </div>
-                    <div class="row">
-                        <q-input filled v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-2" mask="#.##" fill-mask="0" reverse-fill-mask />
-                    </div>
-                    <div class="row">
-                        <q-select :disable="disableCategory" v-model="form.label.category" :options="optionsCategory" filled lazy-rules label="Categoria" class="w-full py-2" />
-                    </div>
-                </div>
-
-                <q-card-actions align="right">
-                    <q-btn flat label="Cancelar" color="warning" v-close-popup />
-                    <q-btn flat @click="sendGallery" label="Enviar" color="primary" />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-        <q-dialog v-model="confirmEdit" persistent :maximized="maximizedToggle" transition-show="slide-up" transition-hide="slide-down">
-            <q-card class="">
-                <q-bar>
-                    <q-space />
-
-                    <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
-                        <q-tooltip v-if="maximizedToggle" class="bg-white text-primary">Minimizar</q-tooltip>
-                    </q-btn>
-                    <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
-                        <q-tooltip v-if="!maximizedToggle" class="bg-white text-primary">Maximizar</q-tooltip>
-                    </q-btn>
-                    <q-btn dense flat icon="close" v-close-popup>
-                        <q-tooltip class="bg-white text-primary">Fechar</q-tooltip>
-                    </q-btn>
-                </q-bar>
-
-                <q-card-section>
-                    <div class="text-h6">Editar produto</div>
-                </q-card-section>
-                <q-card-section class="row items-center">
-                    <!-- <q-avatar icon="file_upload" color="primary" text-color="white" /> -->
-                    <q-img :src="edit.preview" style="height: 270px; max-width: 400px" spinner-color="primary" spinner-size="82px" />
-                </q-card-section>
-                <div class="px-5">
-                    <div class="row">
-                        <q-input filled v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-2" />
-                    </div>
-                    <div class="row">
-                        <q-input filled v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-2" />
-                    </div>
-                    <div class="row">
-                        <q-input filled v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-2" mask="#.##" fill-mask="0" reverse-fill-mask />
-                    </div>
-                    <div class="row">
-                        <q-select v-model="form.label.category" :options="optionsCategory" filled lazy-rules label="Categoria" class="w-full py-2" />
-                    </div>
-                </div>
-
-                <q-card-actions align="right">
-                    <q-btn flat label="Cancelar" color="warning" v-close-popup />
-                    <q-btn flat @click="editProduct" label="Salvar" color="primary" />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-        <q-dialog v-model="confirmDelete" persistent>
-            <q-card>
-                <q-card-section class="row items-center">
-                    <q-avatar icon="delete" color="negative" text-color="white" />
-                    <span class="q-ml-sm">Deseja apagar esse produto?</span>
-                    <q-img :src="tray.preview" class="mt-4" spinner-color="primary" spinner-size="82px" />
-                </q-card-section>
-
-                <q-card-actions align="right">
-                    <q-btn flat label="Cancelar" color="primary" v-close-popup />
-                    <q-btn flat @click="deleteImg()" label="Apagar" color="primary" />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-
-          <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
-            <!-- drawer content -->
-            </q-drawer>
     </div>
+    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
+        <div class="col-dx">
+            <div class="cart ">
+                <h2 class="text-h5 p-2 md:p-4">Seu carrinho</h2>
+                <div class="cart-list" v-if="queries.cart.length">
+                    <div class="cart-item w-full produto" v-for="(item, id) in queries.cart" :key="'id-' + id">
+                        <div class="row w-full p-2 md:p-4">
+                            <q-img class="col" spinner-color="black" style="height: 60px; max-width: 90px" :src="item.link" alt="" />
+
+                            <div class="col row">
+                                <h4 class="title col-12 text-no-wrap">{{ item.name }}</h4>
+                                <div class="row w-full">
+                                    <div class="col-8">
+                                        <div class="quantity row items-end">
+                                            <div class="h-5 w-5 items-center justify-center flex bg-gray-500 rounded-full font-extrabold cursor-pointer" @click="sub(item)">
+                                                <q-icon :name="item.quantity<2 ? 'close' :'remove'" size="sm" color="white" style="font-size: 10px;" />
+                                            </div>
+                                            <input type="text" @keypress="isNumber($event)" v-model.number="item.quantity" class="w-10 border-2 text-center border-gray-400 rounded-md mx-1" @input="calcItem(item)">
+                                            <div class="h-5 w-5 items-center justify-center flex bg-gray-500 rounded-full font-extrabold cursor-pointer" @click="add(item)">
+                                                <q-icon name="add" size="sm" color="white" style="font-size: 10px;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class=" col-4 price text-left text-bold italic text-green-900">{{ RS(item.value) }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <div>
+                            <div class="total">{{ item.subtitle.value * item.quantity }}</div> -->
+                        <!-- </div> -->
+                    </div>
+
+                    <div class="text-lg text-right w-full text-gray-700">
+                        <span class="total-title ">Total </span>
+                        <span class="font-bold">{{ RS(total) }}</span>
+                    </div>
+                </div>
+                <div class="empty-contents px-4" v-else>
+                    <p class="italic text-gray-700">Seu carrinho ainda está vazio</p>
+                </div>
+            </div>
+        </div>
+        <!-- drawer content -->
+    </q-drawer>
 </div>
 </template>
 
 <script>
 import {
+    reactive,
+    toRefs,
     ref
 } from "vue";
 import {
     categoryes
 } from 'src/js/CategoryesEcommerce'
-
+import {
+    db
+} from '../db/db';
+import {
+    liveQuery
+} from "dexie";
 export default {
     components: {},
     setup() {
         return {
-            confirmDelete: ref(false),
-            tray: ref({
-                preview: '',
-                id: ''
+            db,
+            queries: reactive({
+                cart: [],
+                itemsError: null
             }),
+            idAd: ref(''),
             rightDrawerOpen: ref(true),
-            headers: ref([{
-                    name: 'Authorization',
-                    value: ''
-                },
-                {
-                    name: 'Content-Type',
-                    value: 'multipart/form-data'
-                }
-            ]),
-            // plugins: ref([lgThumbnail, lgZoom]),
-            confirmGallery: ref(false),
-            edit: ref({
-                preview: '',
-                id: ''
-            }),
-            confirmEdit: ref(false),
             preview: ref(''),
             maximizedToggle: ref(true),
             admin: ref(false),
-            form: ref({
-                title: {},
-                subtitle: {},
-                label: {},
-            }),
-            resetForm: ref({
-                title: {},
-                subtitle: {},
-                label: {},
-            }),
+            cart: ref([]),
             optionsCategory: ref(categoryes),
             adsComponent: ref({
                 id: '',
@@ -270,7 +189,76 @@ export default {
 
         };
     },
+    computed: {
+        total() {
+            let total = 0;
+            for (let i = 0; i < this.queries.cart.length; i++) {
+                total += this.queries.cart[i].value * this.queries.cart[i].quantity;
+            }
+            return total;
+        }
+    },
     methods: {
+        initialDb() {
+            const queryRefs = toRefs(this.queries);
+            this.subscription = liveQuery( async () => {
+                return db.cart.where({ad: this.idAd}).toArray()
+            }).subscribe(
+                (items) => {
+                    console.log('aa', items)
+                    // Success result:
+                    queryRefs.cart.value = items;
+                    queryRefs.itemsError.value = null;
+                },
+                (error) => {
+                    queryRefs.itemsError.value = error;
+                }
+            );
+
+        },
+       async addToCart(item) {
+          const quantityCount = await db.cart.where({ad: this.idAd, idProd: item.id}).first();
+          let quantity = quantityCount ? quantityCount.quantity+1 : 1;
+            db.cart.put({
+               ...(quantityCount && {id: quantityCount.id}),
+               ad: item.categoryAdId,
+               link: item.link,
+               label: item.label.category.label,
+               category: item.label.category.category,
+               value: item.subtitle.value,
+               name: item.title.name,
+               idProd: item.id,
+               quantity: quantity
+            })
+        },
+        isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
+        RS(value) {
+            return value.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            })
+        },
+        add(item) {
+            db.cart.where({id: item.id}).modify(item => ++item.quantity);
+        },
+        sub(item) {
+
+            if (item.quantity > 1) {
+              db.cart.where({id: item.id}).modify(item => --item.quantity);
+
+            } else {
+              db.cart.where({id: item.id}).delete()
+            }
+        },
+
         filterEatchType(arr) {
             if (!arr) return
             let productsFiltered = {}
@@ -320,25 +308,12 @@ export default {
                 return arr
             }
         },
-        openConfirm(item) {
-            this.confirmGallery = true
-            this.tray = {
-                preview: item.link,
-                id: item.id
-            }
-        },
+
         pathImg() {
             let last = this.adsComponent.files.logo.length - 1
             return this.adsComponent.files.logo[0].link
             // this.adsComponent.files.logo[-1 ? ].link
-        },
-
-        logoUpload() {
-            const file = this.$refs.file.files[0];
-            this.photoUpload = true
-            this.adsComponent.files.logo[this.adsComponent.files.logo.length - 1].link = URL.createObjectURL(file);
-        },
-
+        }
     },
     created() {
         this.adsComponent = {
@@ -348,6 +323,9 @@ export default {
 
     },
     mounted() {
+        // On mount, subscribe to your query:
+        this.idAd = parseFloat(this.$route.params.id)
+        this.initialDb()
         const admin = localStorage.getItem('admin') ? true : false
         let id = localStorage.getItem('id-customer')
         id = JSON.parse(id)
@@ -356,7 +334,7 @@ export default {
             this.admin = true
         }
         this.loading = true
-        this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
+        this.$api.get(`/categories/ads/${this.idAd}?nonDeleted=true`)
             .then((response) => {
                 if (response.data) {
                     console.log(response.data)
@@ -410,10 +388,18 @@ export default {
         // this.headers[0].value = `Bearer ${token}`
 
     },
+    unmounted() {
+        // Stop subscribing:
+        this.subscription.unsubscribe();
+    },
 };
 </script>
 
 <style scoped>
+.produto:nth-child(even) {
+    background: #eee;
+}
+
 .my-card {
     width: 100%;
     min-width: 280px;

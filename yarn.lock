@@ -1554,6 +1554,21 @@
   "resolved" "https://registry.npmjs.org/@vue/shared/-/shared-3.1.5.tgz"
   "version" "3.1.5"
 
+"@vueuse/rxjs@^9.7.0":
+  "integrity" "sha512-oXjamzG7CPYqnkGDaaqK58aQo/gpG2RxLs+hKBlL3cUxN22bpFimTkMoi0fkHiZNWfDeh0TvRW96g7CoxNX9/A=="
+  "resolved" "https://registry.npmjs.org/@vueuse/rxjs/-/rxjs-9.7.0.tgz"
+  "version" "9.7.0"
+  dependencies:
+    "@vueuse/shared" "9.7.0"
+    "vue-demi" "*"
+
+"@vueuse/shared@9.7.0":
+  "integrity" "sha512-pwmt1y3TJ2s5KqWmkv9ZKEV59GwuZQZk8XLiU+hGswz0jej318ozbea9E4A/A50ksyM26swSFr7sZ9llNPsZHg=="
+  "resolved" "https://registry.npmjs.org/@vueuse/shared/-/shared-9.7.0.tgz"
+  "version" "9.7.0"
+  dependencies:
+    "vue-demi" "*"
+
 "@webassemblyjs/ast@1.11.1":
   "integrity" "sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw=="
   "resolved" "https://registry.npmjs.org/@webassemblyjs/ast/-/ast-1.11.1.tgz"
@@ -2853,6 +2868,11 @@
     "acorn-node" "^1.6.1"
     "defined" "^1.0.0"
     "minimist" "^1.1.1"
+
+"dexie@^4.0.0-alpha.4":
+  "integrity" "sha512-xYABeT5ctG7WAJtyr/6gKhWXD6NY8ydZieQlvLQkFV6KXY33I+ShE39pToGzQw+3/xs760rW+opxhoVZ/yzVxQ=="
+  "resolved" "https://registry.npmjs.org/dexie/-/dexie-4.0.0-alpha.4.tgz"
+  "version" "4.0.0-alpha.4"
 
 "didyoumean@^1.2.2":
   "integrity" "sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw=="
@@ -6071,12 +6091,12 @@
   dependencies:
     "queue-microtask" "^1.2.2"
 
-"rxjs@^7.2.0":
-  "integrity" "sha512-aX8w9OpKrQmiPKfT1bqETtUr9JygIz6GZ+gql8v7CijClsP0laoFUdKzxFAoWuRdSlOdU2+crss+cMf+cqMTnw=="
-  "resolved" "https://registry.npmjs.org/rxjs/-/rxjs-7.2.0.tgz"
-  "version" "7.2.0"
+"rxjs@^7.2.0", "rxjs@^7.8.0", "rxjs@>=6.0.0":
+  "integrity" "sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg=="
+  "resolved" "https://registry.npmjs.org/rxjs/-/rxjs-7.8.0.tgz"
+  "version" "7.8.0"
   dependencies:
-    "tslib" "~2.1.0"
+    "tslib" "^2.1.0"
 
 "safe-buffer@^5.0.1", "safe-buffer@^5.1.0", "safe-buffer@>=5.1.0", "safe-buffer@~5.1.0", "safe-buffer@~5.1.1", "safe-buffer@5.1.2":
   "integrity" "sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g=="
@@ -6779,15 +6799,10 @@
     "micromatch" "^4.0.0"
     "semver" "^7.3.4"
 
-"tslib@^2.0.3":
+"tslib@^2.0.3", "tslib@^2.1.0":
   "integrity" "sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg=="
   "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.3.0.tgz"
   "version" "2.3.0"
-
-"tslib@~2.1.0":
-  "integrity" "sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A=="
-  "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.1.0.tgz"
-  "version" "2.1.0"
 
 "tunnel@^0.0.6":
   "integrity" "sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg=="
@@ -6964,6 +6979,11 @@
   "integrity" "sha512-/juG65kTL4Cy2su4P8HjtkTxk6VmJDiOPBufWniqQ6wknac6jNiXS9vU+hO3wgusiyqWlzTbVHi0dyJqRONg3w=="
   "resolved" "https://registry.npmjs.org/vendors/-/vendors-1.0.4.tgz"
   "version" "1.0.4"
+
+"vue-demi@*":
+  "integrity" "sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A=="
+  "resolved" "https://registry.npmjs.org/vue-demi/-/vue-demi-0.13.11.tgz"
+  "version" "0.13.11"
 
 "vue-demi@^0.12.1":
   "integrity" "sha512-BREuTgTYlUr0zw0EZn3hnhC3I6gPWv+Kwh4MCih6QcAeaTlaIX0DwOVN0wHej7hSvDPecz4jygy/idsgKfW58Q=="

@@ -137,6 +137,11 @@ const routes = [
        component: () => import('pages/EditEcommerce.vue')
 
       },
+      {
+        path: '/loja/:id',
+       component: () => import('pages/ViewEcommerce.vue')
+
+      },
       // {
       //   path: '/slider/:id',
       //   component: () => import('src/pages/Video.vue')

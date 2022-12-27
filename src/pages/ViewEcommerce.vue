@@ -254,7 +254,7 @@ export default {
             for (let i = 0; i < this.queries.cart.length; i++) {
                 pedido += `${this.queries.cart[i].quantity}x ${this.queries.cart[i].name}  - [${this.RS(this.queries.cart[i].quantity*this.queries.cart[i].value)}]\n`;
             }
-            pedido += `*Total: ${this.RS(this.total)}* \n`;
+            pedido += `\n*Total: ${this.RS(this.total)}* \n`;
             console.log(pedido);
             return encodeURIComponent(pedido);
         },

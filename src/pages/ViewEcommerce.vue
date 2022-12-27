@@ -42,55 +42,49 @@
                     </div>
 
                     <div class="q-pa-md row items-start q-gutter-md">
-                        <div v-for="item in category" :key="item.id">
-                            <!-- <div class="q-gutter-md row items-start">
-                          <q-img  class="h-[90px] w-[90px] md:h-[180px] md:w-[180px] " fit="cover">
-                              <div class="absolute-bottom text-subtitle1 text-center">
-                              </div>
-                          </q-img>
-                      </div>
-                    </div> -->
-                            <q-card class="my-card">
-                                <q-img :src="item.link" />
-                                <q-card-section>
-                                    <div class="row no-wrap items-center">
-                                        <div class="col text-h6 ellipsis">
-                                            <!-- {{ item.label.category.label }} -->
-                                            {{ item.title.name }}
-                                        </div>
+                        <q-card class="w-full xl:w-1/3 " v-for="item in category" :key="item.id">
+                            <q-img :src="item.link" />
+                            <q-card-section class="py-0">
+                                <div class="no-wrap items-center row ">
+                                    <div class="col text-h6 ellipsis">
+                                        <!-- {{ item.label.category.label }} -->
+                                        {{ item.title.name }}
                                     </div>
-                                    <!-- <q-rating v-model="stars" :max="5" size="32px" /> -->
-                                </q-card-section>
-                                <q-card-section class="q-pt-none">
-                                    <div class="text-subtitle1">
-                                        R$ {{ item.subtitle.value }}
-                                    </div>
-                                    <div class="text-caption text-grey">
-                                        {{ item.title.description }}
-                                    </div>
-                                </q-card-section>
-                                <q-separator />
-                                <q-card-actions>
-                                    <!-- <q-btn flat round icon="event" />
-                        <q-btn flat color="primary">
-                          Reserve
-                        </q-btn> -->
-                                    <q-btn push color="primary" size="xs" label="Adicionar ao carrinho" @click="addToCart(item)" />
-                                </q-card-actions>
-                            </q-card>
-                        </div>
+                                </div>
+                                <!-- <q-rating v-model="stars" :max="5" size="32px" /> -->
+                            </q-card-section>
+                            <q-card-section class="q-pt-none">
+                                <div class="text-subtitle1">
+                                    R$ {{ item.subtitle.value }}
+                                </div>
+                                <div class="text-caption text-grey">
+                                    {{ item.title.description }}
+                                </div>
+                            </q-card-section>
+                            <q-separator />
+                            <q-card-actions class="w-full flex justify-center">
+                                <q-btn push :color="item.quantityCart > 0 ? 'secondary' : 'primary'" size="md" @click="addToCart(item)">
+                                    <q-badge v-if="item.quantityCart > 0" color="black" floating>{{ item.quantityCart }}</q-badge>
+                                    Adicionar ao carrinho
+                                </q-btn>
+                            </q-card-actions>
+                        </q-card>
                     </div>
 
                 </div>
             </template>
+            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="secondary" round dense icon="shopping_cart" class="fixed right-5 top-20 " />
+
         </div>
 
     </div>
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
-        <div class="col-dx">
-            <div class="cart ">
-                <h2 class="text-h5 p-2 md:p-4">Seu carrinho</h2>
-                <div class="cart-list" v-if="queries.cart.length">
+    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered :width="350" :breakpoint="500">
+
+        <div class="cart">
+            <h2 class="text-h5 p-2 md:py-4 font-mono mt-3">Seu carrinho</h2>
+            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="black" round dense icon="close" class="absolute top-4 right-4" />
+            <div v-if="queries.cart.length">
+                <div class="cart-list m-3 rounded-md border-2 border-gray-300">
                     <div class="cart-item w-full produto" v-for="(item, id) in queries.cart" :key="'id-' + id">
                         <div class="row w-full p-2 md:p-4">
                             <q-img class="col" spinner-color="black" style="height: 60px; max-width: 90px" :src="item.link" alt="" />
@@ -109,7 +103,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class=" col-4 price text-left text-bold italic text-green-900">{{ RS(item.value) }}</div>
+                                    <div class=" col-4 price text-right text-bold italic text-green-900">{{ RS(item.value) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -118,19 +112,48 @@
                             <div class="total">{{ item.subtitle.value * item.quantity }}</div> -->
                         <!-- </div> -->
                     </div>
-
-                    <div class="text-lg text-right w-full text-gray-700">
-                        <span class="total-title ">Total </span>
-                        <span class="font-bold">{{ RS(total) }}</span>
-                    </div>
                 </div>
-                <div class="empty-contents px-4" v-else>
-                    <p class="italic text-gray-700">Seu carrinho ainda está vazio</p>
+                <div class="text-lg text-right w-full text-gray-700 my-4 pr-3">
+                    <span class="total-title ">Total </span>
+                    <span class="font-bold">{{ RS(total) }}</span>
+                </div>
+                <div class="justify-center flex w-full">
+                    <q-btn color="secondary" label="Finalizar pedido" @click="confirmPedido = true" />
                 </div>
             </div>
+
+            <div class="empty-contents px-4" v-else>
+                <p class="italic text-gray-700">Seu carrinho ainda está vazio</p>
+            </div>
+
         </div>
-        <!-- drawer content -->
     </q-drawer>
+    <q-dialog v-model="confirmPedido">
+        <q-card>
+            <q-card-section>
+                <div class="text-h6">Confirmar pedido</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+                Tem certeza que deseja realizar o pedido?
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn flat label="Não" v-close-popup />
+                <a :href="`https://wa.me/55${onlyNumber()}?text=${pedido}`" class="text-green-700 font-bold p-4">SIM</a>
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+    <div class="h-32 w-full"></div>
+    <div class="w-full bg-green-700 p-4 fixed bottom-0" v-if="queries.cart.length && isMobile">
+        <div class="row items-center justify-between">
+            <div class="row items-center">
+                <div class="text-green-700 bg-white py-1 px-2 rounded-md font-bold">{{ totalItems }}</div>
+                <div class="font-medium text-white text-xl ml-2"> {{ RS(total)  }} </div>
+            </div>
+            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="white" outline label="Ver carrinho" />
+        </div>
+    </div>
 </div>
 </template>
 
@@ -159,6 +182,8 @@ export default {
                 itemsError: null
             }),
             idAd: ref(''),
+            pedido: ref(''),
+            confirmPedido: ref(false),
             rightDrawerOpen: ref(true),
             preview: ref(''),
             maximizedToggle: ref(true),
@@ -196,13 +221,49 @@ export default {
                 total += this.queries.cart[i].value * this.queries.cart[i].quantity;
             }
             return total;
-        }
+        },
+        totalItems() {
+            let total = 0;
+            for (let i = 0; i < this.queries.cart.length; i++) {
+                total += this.queries.cart[i].quantity;
+            }
+            return total;
+        },
+        isMobile() {
+            return this.$q.screen.lt.sm;
+        },
     },
     methods: {
+        onlyNumber() {
+            return '3599976145'
+        },
+        async botaoPedido() {
+            this.pedido = await this.geraPedidoWhatsapp()
+            this.confirmPedido = true
+        },
+        async geraPedidoWhatsapp() {
+            let pedido = '* 🚨POLIWEB ECOMMERCE*' + '\n';
+            let date = new Date();
+            let day = date.getDate();
+            let month = date.getMonth() + 1;
+            let year = date.getFullYear();
+            let hour = date.getHours();
+            let minutes = date.getMinutes();
+            pedido += `Pedido realizado: ${day}/${month}/${year} às ${hour}:${minutes} \n\n`;
+            'Olá, gostaria de fazer o seguinte pedido: \n';
+            for (let i = 0; i < this.queries.cart.length; i++) {
+                pedido += `${this.queries.cart[i].quantity}x ${this.queries.cart[i].name}  - [${this.RS(this.queries.cart[i].quantity*this.queries.cart[i].value)}]\n`;
+            }
+            pedido += `*Total: ${this.RS(this.total)}* \n`;
+            console.log(pedido);
+            return encodeURIComponent(pedido);
+        },
         initialDb() {
             const queryRefs = toRefs(this.queries);
-            this.subscription = liveQuery( async () => {
-                return db.cart.where({ad: this.idAd}).toArray()
+            this.subscription = liveQuery(async () => {
+                return db.cart.where({
+                    ad: this.idAd
+                }).toArray()
             }).subscribe(
                 (items) => {
                     console.log('aa', items)
@@ -216,19 +277,25 @@ export default {
             );
 
         },
-       async addToCart(item) {
-          const quantityCount = await db.cart.where({ad: this.idAd, idProd: item.id}).first();
-          let quantity = quantityCount ? quantityCount.quantity+1 : 1;
+        async addToCart(item) {
+            item.quantityCart++
+            const quantityCount = await db.cart.where({
+                ad: this.idAd,
+                idProd: item.id
+            }).first();
+            let quantity = quantityCount ? quantityCount.quantity + 1 : 1;
             db.cart.put({
-               ...(quantityCount && {id: quantityCount.id}),
-               ad: item.categoryAdId,
-               link: item.link,
-               label: item.label.category.label,
-               category: item.label.category.category,
-               value: item.subtitle.value,
-               name: item.title.name,
-               idProd: item.id,
-               quantity: quantity
+                ...(quantityCount && {
+                    id: quantityCount.id
+                }),
+                ad: item.categoryAdId,
+                link: item.link,
+                label: item.label.category.label,
+                category: item.label.category.category,
+                value: item.subtitle.value,
+                name: item.title.name,
+                idProd: item.id,
+                quantity: quantity
             })
         },
         isNumber(evt) {
@@ -247,15 +314,21 @@ export default {
             })
         },
         add(item) {
-            db.cart.where({id: item.id}).modify(item => ++item.quantity);
+            db.cart.where({
+                id: item.id
+            }).modify(item => ++item.quantity);
         },
         sub(item) {
 
             if (item.quantity > 1) {
-              db.cart.where({id: item.id}).modify(item => --item.quantity);
+                db.cart.where({
+                    id: item.id
+                }).modify(item => --item.quantity);
 
             } else {
-              db.cart.where({id: item.id}).delete()
+                db.cart.where({
+                    id: item.id
+                }).delete()
             }
         },
 
@@ -276,6 +349,7 @@ export default {
                             label: label,
                             title: title,
                             subtitle: subtitle,
+                            quantityCart: 0
                         })
                     }
                 });

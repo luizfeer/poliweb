@@ -118,7 +118,7 @@
                     <span class="font-bold">{{ RS(total) }}</span>
                 </div>
                 <div class="justify-center flex w-full">
-                    <q-btn color="secondary" label="Finalizar pedido" @click="confirmPedido = true" />
+                    <q-btn color="secondary" label="Finalizar pedido" @click="botaoPedido()" />
                 </div>
             </div>
 

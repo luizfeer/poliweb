@@ -240,13 +240,21 @@ export default {
         },
     },
     methods: {
+        phoneZap() {
+            if (!this.adsComponent.phones.length) return false
+            for (let index = 0; index < this.adsComponent.phones.length; index++) {
+                const element = this.adsComponent.phones[index];
+                if (element.isWhatsapp) {
+                    return element
+                }
+            }
+            return false
+        },
         backPage() {
             this.$router.go(-1)
         },
         onlyNumber() {
-            let number = this.adsComponent.value.phones[0].number
-            let onlyNumber = number.replace(/\D/g, '');
-            return onlyNumber
+            return this.phoneZap()
         },
         async botaoPedido() {
             this.pedido = await this.geraPedidoWhatsapp()

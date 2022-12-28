@@ -43,7 +43,7 @@
 
                     <div class="q-pa-md row items-start q-gutter-md">
                         <q-card class="w-full xl:w-1/3 " v-for="item in category" :key="item.id">
-                            <q-img :src="item.link" />
+                            <q-img :src="item.link" style="max-height: 150px;" />
                             <q-card-section class="py-0">
                                 <div class="no-wrap items-center row ">
                                     <div class="col text-h6 ellipsis">
@@ -76,7 +76,14 @@
             <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="secondary" round dense icon="shopping_cart" class="fixed right-5 top-20 " />
 
         </div>
-
+        <q-btn color="grey-9" push outline @click="backPage()">
+            <div class="row items-center no-wrap">
+                <q-icon left name="arrow_back" />
+                <div class="text-center">
+                    Voltar
+                </div>
+            </div>
+        </q-btn>
     </div>
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered :width="350" :breakpoint="500">
 
@@ -88,7 +95,6 @@
                     <div class="cart-item w-full produto" v-for="(item, id) in queries.cart" :key="'id-' + id">
                         <div class="row w-full p-2 md:p-4">
                             <q-img class="col" spinner-color="black" style="height: 60px; max-width: 90px" :src="item.link" alt="" />
-
                             <div class="col row">
                                 <h4 class="title col-12 text-no-wrap">{{ item.name }}</h4>
                                 <div class="row w-full">
@@ -140,7 +146,7 @@
 
             <q-card-actions align="right">
                 <q-btn flat label="Não" v-close-popup />
-                <a :href="`https://wa.me/55${onlyNumber()}?text=${pedido}`" class="text-green-700 font-bold p-4">SIM</a>
+                <a :href="`https://wa.me/55${onlyNumber()}?text=${pedido}`" target="_blank" class="text-green-700 font-bold p-4">SIM</a>
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -184,7 +190,7 @@ export default {
             idAd: ref(''),
             pedido: ref(''),
             confirmPedido: ref(false),
-            rightDrawerOpen: ref(true),
+            rightDrawerOpen: ref(false),
             preview: ref(''),
             maximizedToggle: ref(true),
             admin: ref(false),
@@ -234,8 +240,13 @@ export default {
         },
     },
     methods: {
+        backPage() {
+            this.$router.go(-1)
+        },
         onlyNumber() {
-            return '3599976145'
+            let number = this.adsComponent.value.phones[0].number
+            let onlyNumber = number.replace(/\D/g, '');
+            return onlyNumber
         },
         async botaoPedido() {
             this.pedido = await this.geraPedidoWhatsapp()
@@ -266,8 +277,6 @@ export default {
                 }).toArray()
             }).subscribe(
                 (items) => {
-                    console.log('aa', items)
-                    // Success result:
                     queryRefs.cart.value = items;
                     queryRefs.itemsError.value = null;
                 },

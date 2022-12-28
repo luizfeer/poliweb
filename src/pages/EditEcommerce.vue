@@ -21,15 +21,14 @@
 
         <div class="mt-3 p-1">
             <q-btn color="secondary" push v-if="admin" @click="addProduct()">
-              <div class="row items-center no-wrap">
-                <q-icon left name="shopping_basket" />
-                <div class="text-center">
-                  Cadastrar novo produto
+                <div class="row items-center no-wrap">
+                    <q-icon left name="shopping_basket" />
+                    <div class="text-center">
+                        Cadastrar novo produto
+                    </div>
                 </div>
-              </div>
             </q-btn>
-
-            <template v-if="(adsComponent.files && adsComponent.files.ecommerceFiltered)">
+            <template v-if="adsComponent.files && adsComponent.files.ecommerceFiltered && adsComponent.files.ecommerceFiltered.length">
                 <div class="mb-10 " v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
                     <div class="row">
                         <h1 class="text-h4">{{ category[0].label.category.label }}</h1>
@@ -41,7 +40,6 @@
                         </q-btn>
                     </div>
 
-
                     <div class="q-pa-md row items-start q-gutter-md">
                         <div v-for="item in category" :key="item.id">
                             <!-- <div class="q-gutter-md row items-start">
@@ -52,7 +50,7 @@
                       </div>
                     </div> -->
                             <q-card class="my-card">
-                                <q-img :src="item.link" />
+                                <q-img :src="item.link"  style="max-height: 150px;" />
                                 <q-card-section>
                                     <div class="row no-wrap items-center">
                                         <div class="col text-h6 ellipsis">
@@ -85,6 +83,19 @@
 
                 </div>
             </template>
+            <div v-else class="text-center text-gray-600 mt-5 flex items-center">
+                <q-icon name="shopping_basket" size="2rem" /><div class="text-lg">Você ainda não cadastrou produtos. Cadastre um novo.</div>
+
+            </div>
+            <hr class="my-4">
+            <q-btn color="grey-9" outline push @click="backPage()">
+                <div class="row items-center no-wrap">
+                    <q-icon left name="arrow_back" />
+                    <div class="text-center">
+                        Voltar
+                    </div>
+                </div>
+            </q-btn>
         </div>
         <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden" />
 
@@ -111,20 +122,20 @@
                     <!-- <q-avatar icon="file_upload" color="primary" text-color="white" /> -->
                     <q-img :src="preview" style="height: 270px; max-width: 400px" spinner-color="primary" spinner-size="82px" />
                 </q-card-section>
-                <div class="px-5">
-                    <div class="row">
-                        <q-input filled v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-2" />
+                <q-form @submit.prevent.stop="sendGallery" div class="px-5">
+                  <div class="row">
+                        <q-input filled :rules="required" ref="name" v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-4" />
                     </div>
                     <div class="row">
-                        <q-input filled v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-2" />
+                        <q-input filled :rules="required" ref="description" v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-4" />
                     </div>
                     <div class="row">
-                        <q-input filled v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-2" mask="#.##" fill-mask="0" reverse-fill-mask />
+                        <q-input filled :rules="required" ref="value" v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-4" mask="#.##" fill-mask="0" reverse-fill-mask />
                     </div>
                     <div class="row">
-                        <q-select :disable="disableCategory" v-model="form.label.category" :options="optionsCategory" filled lazy-rules label="Categoria" class="w-full py-2" />
+                        <q-select v-model="form.label.category" :options="optionsCategory" filled :rules="required" ref="category" lazy-rules label="Categoria" class="w-full py-4" />
                     </div>
-                </div>
+                </q-form>
 
                 <q-card-actions align="right">
                     <q-btn flat label="Cancelar" color="warning" v-close-popup />
@@ -155,24 +166,24 @@
                     <!-- <q-avatar icon="file_upload" color="primary" text-color="white" /> -->
                     <q-img :src="edit.preview" style="height: 270px; max-width: 400px" spinner-color="primary" spinner-size="82px" />
                 </q-card-section>
-                <div class="px-5">
-                    <div class="row">
-                        <q-input filled v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-2" />
+                <q-form @submit.prevent.stop="saveProduct" div class="px-5">
+                  <div class="row">
+                        <q-input filled :rules="required" ref="name" v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-4" />
                     </div>
                     <div class="row">
-                        <q-input filled v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-2" />
+                        <q-input filled :rules="required" ref="description" v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-4" />
                     </div>
                     <div class="row">
-                        <q-input filled v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-2" mask="#.##" fill-mask="0" reverse-fill-mask />
+                        <q-input filled :rules="required" ref="value" v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-4" mask="#.##" fill-mask="0" reverse-fill-mask />
                     </div>
                     <div class="row">
-                        <q-select v-model="form.label.category" :options="optionsCategory" filled lazy-rules label="Categoria" class="w-full py-2" />
+                        <q-select v-model="form.label.category" :options="optionsCategory" filled :rules="required" ref="category" lazy-rules label="Categoria" class="w-full py-4" />
                     </div>
-                </div>
+                </q-form>
 
                 <q-card-actions align="right">
                     <q-btn flat label="Cancelar" color="warning" v-close-popup />
-                    <q-btn flat @click="editProduct" label="Salvar" color="primary" />
+                    <q-btn flat @click="saveProduct()" label="Salvar" color="primary" />
                 </q-card-actions>
             </q-card>
         </q-dialog>
@@ -181,7 +192,7 @@
                 <q-card-section class="row items-center">
                     <q-avatar icon="delete" color="negative" text-color="white" />
                     <span class="q-ml-sm">Deseja apagar esse produto?</span>
-                    <q-img :src="tray.preview" class="mt-4" spinner-color="primary" spinner-size="82px" />
+                    <q-img :src="tray.preview" class="mt-4" spinner-color="primary" spinner-size="82px" style="max-height: 300px;" />
                 </q-card-section>
 
                 <q-card-actions align="right">
@@ -190,11 +201,17 @@
                 </q-card-actions>
             </q-card>
         </q-dialog>
-
-          <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
-            <!-- drawer content -->
-            </q-drawer>
     </div>
+    <q-page-sticky position="bottom-right z-[200]" class="" :offset="[18, 18]">
+        <q-fab
+          icon="add"
+          direction="up"
+          color="accent"
+        >
+
+          <q-fab-action @click="share();" color="primary" icon="share" />
+        </q-fab>
+      </q-page-sticky>
 </div>
 </template>
 
@@ -210,12 +227,13 @@ export default {
     components: {},
     setup() {
         return {
+            required: [val => !!val || 'Campo obrigatório'],
             confirmDelete: ref(false),
             tray: ref({
                 preview: '',
                 id: ''
             }),
-            rightDrawerOpen: ref(true),
+            rightDrawerOpen: ref(false),
             headers: ref([{
                     name: 'Authorization',
                     value: ''
@@ -271,6 +289,176 @@ export default {
         };
     },
     methods: {
+      backPage() {
+        this.$router.go(-1)
+      },
+      async share() {
+        const shareData = {
+          title: this.adsComponent.name,
+          text: 'Confira loja: '+ this.adsComponent.name,
+          url: `https://www.poliwebapp.com.br/loja/${this.adsComponent.id}`,
+        }
+        try {
+          await navigator.share(shareData)
+        } catch(err) {
+          console.logg('Error: ' + err)
+        }
+    },
+        addProduct() {
+          this.$refs.gallery.click()
+        },
+        galleryUpload() {
+            const file = this.$refs.gallery.files[0];
+            this.preview = URL.createObjectURL(file);
+            this.confirmGallery = true
+        },
+        openFile() {
+            if (!this.admin) return
+            this.$refs.file.click()
+        },
+
+        deleteImg() {
+            this.$q.loading.show()
+            this.$api.delete(`/categories/ads/files/${this.tray.id}`)
+                .then((response) => {
+                    //  console.log(response.data.addresses)
+                    if (response.data) {
+                        this.$q.notify({
+                            color: 'secondary',
+                            position: 'top',
+                            message: 'Produto apagado com sucesso!',
+                        })
+                    }
+                    this.$router.go(0)
+                })
+                .catch((err) => {
+                    let msg
+                    if (err.response) {
+                        msg = err.response.data.message
+                    } else {
+                        msg = 'Erro na conexão!'
+                    }
+                    this.$q.notify({
+                        color: 'negative',
+                        position: 'top',
+                        message: msg,
+                        icon: 'report_problem'
+                    })
+                })
+                .finally(() => {
+                    this.$q.loading.hide()
+                })
+        },
+        sendGallery() {
+            this.$refs.name.validate()
+            this.$refs.category.validate()
+            this.$refs.value.validate()
+            this.$refs.description.validate()
+
+
+            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || this.$refs.description.hasError) {
+                $q.notify({
+                    color: 'negative',
+                    message: 'Você precisa preencher todos os campos!',
+                })
+                return
+            }
+            this.$q.loading.show()
+            let data = new FormData();
+            data.append('file', this.$refs.gallery.files[0]);
+            // data.append('name', 'ecommerce');
+            const url = new URLSearchParams()
+            url.append('title', JSON.stringify(this.form.title));
+            url.append('subtitle', JSON.stringify(this.form.subtitle));
+            url.append('label', JSON.stringify(this.form.label));
+            this.$api.post(`/categories/ads/${this.adsComponent.id}/files/ecommerce?${url.toString()}`, data, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                .then((response) => {
+                    //  console.log(response.data.addresses)
+                    if (response.data) {
+                        this.$q.notify({
+                            color: 'secondary',
+                            position: 'top',
+                            message: 'Produto salvo com sucesso!',
+                        })
+                        this.$router.go(0)
+                    }
+                    // $router.go(0)
+                })
+                .catch((err) => {
+                    let msg
+                    if (err.response) {
+                        msg = err.response.data.message
+                    } else {
+                        msg = 'Erro na conexão!'
+                    }
+                    this.$q.notify({
+                        color: 'negative',
+                        position: 'top',
+                        message: msg,
+                        icon: 'report_problem'
+                    })
+                })
+                .finally(() => {
+                    this.$q.loading.hide()
+                })
+        },
+        saveProduct() {
+            this.$refs.name.validate()
+            this.$refs.category.validate()
+            this.$refs.value.validate()
+            this.$refs.description.validate()
+
+
+            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || this.$refs.description.hasError) {
+                $q.notify({
+                    color: 'negative',
+                    message: 'Você precisa preencher todos os campos!',
+                })
+                return
+            }
+            this.$q.loading.show()
+            const data = {
+                title: JSON.stringify(this.form.title),
+                subtitle: JSON.stringify(this.form.subtitle),
+                label: JSON.stringify(this.form.label)
+            }
+            this.$api.post(`/categories/ads/files/${this.edit.id}`, {
+                    ...data
+                })
+                .then((response) => {
+                    //  console.log(response.data.addresses)
+                    if (response.data) {
+                        this.$q.notify({
+                            color: 'secondary',
+                            position: 'top',
+                            message: 'Produto atualziado com sucesso!',
+                        })
+                        this.$router.go(0)
+                    }
+                    // $router.go(0)
+                })
+                .catch((err) => {
+                    let msg
+                    if (err.response) {
+                        msg = err.response.data.message
+                    } else {
+                        msg = 'Erro na conexão!'
+                    }
+                    this.$q.notify({
+                        color: 'negative',
+                        position: 'top',
+                        message: msg,
+                        icon: 'report_problem'
+                    })
+                })
+                .finally(() => {
+                    this.$q.loading.hide()
+                })
+        },
         filterEatchType(arr) {
             if (!arr) return
             let productsFiltered = {}
@@ -314,17 +502,29 @@ export default {
             if (!arr) return
             try {
                 return arr.sort((b, a) => new Date(a.createdAt) - new Date(b.createdAt));
-
             } catch (error) {
                 console.log(error)
                 return arr
             }
         },
-        openConfirm(item) {
-            this.confirmGallery = true
+        openConfirmDelete(item) {
+            this.confirmDelete = true
             this.tray = {
                 preview: item.link,
                 id: item.id
+            }
+        },
+        openConfirmEdit(item) {
+            this.confirmEdit = true
+            this.edit = {
+                ...item,
+                preview: item.link,
+            }
+            this.form = this.resetForm
+            this.form = {
+                title: item.title,
+                subtitle: item.subtitle,
+                label: item.label,
             }
         },
         pathImg() {

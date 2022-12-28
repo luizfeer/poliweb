@@ -42,6 +42,8 @@
         />
       </div>
     </div>
+    <preview-ecommerce :ecommercePreview="adsComponent.files.ecommercePreview" :admin="admin" />
+
     <div>
       <video-slide :admin="admin" :id="adsComponent.id" :thumb="pathImg()" :videos="adsComponent.files.videos"></video-slide>
     </div>
@@ -293,13 +295,15 @@
 import AddAddress from 'components/add/Address'
 import FixInfos from 'components/FixInfos'
 import VideoSlide from 'components/VideoSlide'
+import PreviewEcommerce from 'components/PreviewEcommerce'
 
 export default {
    components:{
     AddAddress,
     FixInfos,
     VideoSlide,
-    VuePictureSwipe
+    VuePictureSwipe,
+    PreviewEcommerce
     // Lightgallery,
   },
   props:{
@@ -314,6 +318,7 @@ export default {
         { name: 'Authorization', value: '' },
         { name: 'Content-Type', value: 'multipart/form-data' }
       ],
+      id: '',
       // plugins: [lgThumbnail, lgZoom]),
       colors: ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning'],
       slide: 1,
@@ -700,6 +705,8 @@ export default {
     const admin = localStorage.getItem('admin') ? true : false
     let id = localStorage.getItem('id-customer')
     id = JSON.parse(id)
+    // get id to params router
+    this.id = this.$route.params.id
     this.admin = admin
     if(this.adsComponent.customerId === id){
       this.admin = true

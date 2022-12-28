@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </q-btn>
-            <template v-if="adsComponent.files && adsComponent.files.ecommerceFiltered && adsComponent.files.ecommerceFiltered.length">
+            <template v-if="adsComponent.files && adsComponent.files.ecommerceFiltered && (Object.keys(adsComponent.files.ecommerceFiltered).length)">
                 <div class="mb-10 " v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
                     <div class="row">
                         <h1 class="text-h4">{{ category[0].label.category.label }}</h1>
@@ -554,6 +554,9 @@ export default {
         this.admin = admin
         if (this.adsComponent.customerId === id) {
             this.admin = true
+        }
+        if(!this.admin) {
+            this.$router.push(`/${this.$route.params.id}`)
         }
         this.loading = true
         this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)

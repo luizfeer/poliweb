@@ -1,5 +1,5 @@
 <template>
-    <div class="items-start q-gutter-md border-t-2 border-b-2 border-gray-300 bg-gray-100 my-5" @click="goToLoja()">
+    <div class="items-start q-gutter-md border-t-2 border-b-2 border-gray-300 bg-gray-100 my-5" @click="goToLoja()" v-if="admin || ecommercePreview">
       <div class="text-xl w-full pl-4 mt-4 ">Produtos</div>
       <div class="flex-nowrap overflow-x-scroll flex gap-x-4 p-4 pr-0 mt-0" v-if="ecommercePreview && ecommercePreview.length>0">
         <q-card class="min-w-max min-h-full flex-grow max-w-xs" v-for="item in ecommercePreview" :key="item.id">
@@ -28,7 +28,7 @@
             </q-card-actions>
         </q-card>
         </div>
-        <div v-else class="ml-8 p-8 w-48 rounded-md flex items-center justify-center
+        <div v-else-if="admin" class="ml-8 p-8 w-48 rounded-md flex items-center justify-center
         ce flex-col bg-white border border-gray-500">
           <div class="text-center pb-2">
               Adicionar novo produto a loja

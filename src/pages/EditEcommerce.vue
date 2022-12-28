@@ -20,7 +20,20 @@
         <q-space />
 
         <div class="mt-3 p-1">
-            <q-btn color="secondary" push v-if="admin" @click="addProduct()">
+          <!-- div if phoneZap is false msg: "Não há telefone cadastrado, cadastre um" -->
+
+          <div v-if="!phoneZap && !loading" class="text-center text-red-900 mt-5 m-4 p-4 border-red-500 border rounded-md row items-center">
+            <div class="col-3">
+              <q-icon name="phone" size="5rem" />
+            </div>
+            <div class="col text-left">
+              <div class="text-base font-bold mb-2">Não há telefone com whatsapp cadastrado, cadastre um para receber os pedidos em seu número.</div>
+              <div class="text-sm">Você só poderá ter um ecommerce se tiver um número com whatsapp cadastrado!</div>
+              <div class="text-sm">Volte e edite seu perfil com um novo numero whatsapp!</div>
+            </div>
+          </div>
+
+            <q-btn color="secondary" push v-if="admin && phoneZap" @click="addProduct()">
                 <div class="row items-center no-wrap">
                     <q-icon left name="shopping_basket" />
                     <div class="text-center">
@@ -50,7 +63,7 @@
                       </div>
                     </div> -->
                             <q-card class="my-card">
-                                <q-img :src="item.link"  style="max-height: 150px;" />
+                                <q-img :src="item.link" style="max-height: 150px;" />
                                 <q-card-section>
                                     <div class="row no-wrap items-center">
                                         <div class="col text-h6 ellipsis">
@@ -83,8 +96,9 @@
 
                 </div>
             </template>
-            <div v-else class="text-center text-gray-600 mt-5 flex items-center">
-                <q-icon name="shopping_basket" size="2rem" /><div class="text-lg">Você ainda não cadastrou produtos. Cadastre um novo.</div>
+            <div v-else class="text-center text-gray-600 mt-5 flex  m-4 p-4 border-gray-500 border rounded-md row items-center">
+                <q-icon name="shopping_basket" size="2rem" />
+                <div class="text-lg">Você ainda não cadastrou produtos. Cadastre um novo.</div>
 
             </div>
             <hr class="my-4">
@@ -123,7 +137,7 @@
                     <q-img :src="preview" style="height: 270px; max-width: 400px" spinner-color="primary" spinner-size="82px" />
                 </q-card-section>
                 <q-form @submit.prevent.stop="sendGallery" div class="px-5">
-                  <div class="row">
+                    <div class="row">
                         <q-input filled :rules="required" ref="name" v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-4" />
                     </div>
                     <div class="row">
@@ -167,7 +181,7 @@
                     <q-img :src="edit.preview" style="height: 270px; max-width: 400px" spinner-color="primary" spinner-size="82px" />
                 </q-card-section>
                 <q-form @submit.prevent.stop="saveProduct" div class="px-5">
-                  <div class="row">
+                    <div class="row">
                         <q-input filled :rules="required" ref="name" v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-4" />
                     </div>
                     <div class="row">
@@ -203,15 +217,11 @@
         </q-dialog>
     </div>
     <q-page-sticky position="bottom-right z-[200]" class="" :offset="[18, 18]">
-        <q-fab
-          icon="add"
-          direction="up"
-          color="accent"
-        >
+        <q-fab icon="add" direction="up" color="accent">
 
-          <q-fab-action @click="share();" color="primary" icon="share" />
+            <q-fab-action @click="share();" color="primary" icon="share" />
         </q-fab>
-      </q-page-sticky>
+    </q-page-sticky>
 </div>
 </template>
 
@@ -249,6 +259,7 @@ export default {
                 preview: '',
                 id: ''
             }),
+            loading: ref(true),
             confirmEdit: ref(false),
             preview: ref(''),
             maximizedToggle: ref(true),
@@ -288,24 +299,36 @@ export default {
 
         };
     },
-    methods: {
-      backPage() {
-        this.$router.go(-1)
-      },
-      async share() {
-        const shareData = {
-          title: this.adsComponent.name,
-          text: 'Confira loja: '+ this.adsComponent.name,
-          url: `https://www.poliwebapp.com.br/loja/${this.adsComponent.id}`,
-        }
-        try {
-          await navigator.share(shareData)
-        } catch(err) {
-          console.logg('Error: ' + err)
-        }
+    computed: {
+        phoneZap() {
+            if (!(this.adsComponent.phones||{}).length) return false
+            for (let index = 0; index < this.adsComponent.phones.length; index++) {
+                const element = this.adsComponent.phones[index];
+                if (element.isWhatsapp) {
+                    return element
+                }
+            }
+            return false
+        },
     },
+    methods: {
+        backPage() {
+            this.$router.go(-1)
+        },
+        async share() {
+            const shareData = {
+                title: this.adsComponent.name,
+                text: 'Confira loja: ' + this.adsComponent.name,
+                url: `https://www.poliwebapp.com.br/loja/${this.adsComponent.id}`,
+            }
+            try {
+                await navigator.share(shareData)
+            } catch (err) {
+                console.logg('Error: ' + err)
+            }
+        },
         addProduct() {
-          this.$refs.gallery.click()
+            this.$refs.gallery.click()
         },
         galleryUpload() {
             const file = this.$refs.gallery.files[0];
@@ -354,7 +377,6 @@ export default {
             this.$refs.category.validate()
             this.$refs.value.validate()
             this.$refs.description.validate()
-
 
             if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || this.$refs.description.hasError) {
                 $q.notify({
@@ -411,7 +433,6 @@ export default {
             this.$refs.category.validate()
             this.$refs.value.validate()
             this.$refs.description.validate()
-
 
             if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || this.$refs.description.hasError) {
                 $q.notify({
@@ -555,7 +576,7 @@ export default {
         if (this.adsComponent.customerId === id) {
             this.admin = true
         }
-        if(!this.admin) {
+        if (!this.admin) {
             this.$router.push(`/${this.$route.params.id}`)
         }
         this.loading = true

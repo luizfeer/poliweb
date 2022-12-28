@@ -146,7 +146,7 @@
 
             <q-card-actions align="right">
                 <q-btn flat label="Não" v-close-popup />
-                <a :href="`https://wa.me/55${onlyNumber()}?text=${pedido}`" target="_blank" class="text-green-700 font-bold p-4">SIM</a>
+                <a :href="`https://wa.me/55${phoneZap}?text=${pedido}`" target="_blank" class="text-green-700 font-bold p-4">SIM</a>
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -238,23 +238,20 @@ export default {
         isMobile() {
             return this.$q.screen.lt.sm;
         },
-    },
-    methods: {
-        phoneZap() {
+         phoneZap() {
             if (!this.adsComponent.phones.length) return false
             for (let index = 0; index < this.adsComponent.phones.length; index++) {
                 const element = this.adsComponent.phones[index];
                 if (element.isWhatsapp) {
-                    return element
+                    return element.phone.replace(/[^0-9]/g, '')
                 }
             }
             return false
         },
+    },
+    methods: {
         backPage() {
             this.$router.go(-1)
-        },
-        onlyNumber() {
-            return this.phoneZap()
         },
         async botaoPedido() {
             this.pedido = await this.geraPedidoWhatsapp()

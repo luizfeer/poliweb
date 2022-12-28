@@ -34,11 +34,11 @@
                     <div class="row">
                         <h1 class="text-h4">{{ category[0].label.category.label }}</h1>
 
-                        <q-btn color="secondary" flat v-if="admin" @click="addCategory(category[0].label.category)">
+                        <!-- <q-btn color="secondary" flat v-if="admin" @click="addCategory(category[0].label.category)">
                             <div class="row items-center no-wrap">
                                 <q-icon left name="add_circle" />
                             </div>
-                        </q-btn>
+                        </q-btn> -->
                     </div>
 
                     <div class="q-pa-md row items-start q-gutter-md">

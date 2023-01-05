@@ -568,19 +568,14 @@ export default {
         console.table(this.adsComponent)
 
     },
-    mounted() {
-        const admin = localStorage.getItem('admin') ? true : false
-        let id = localStorage.getItem('id-customer')
+    async mounted() {
+      const admin = await localStorage.getItem('admin') ? true : false
+        let id = await localStorage.getItem('id-customer')
         id = JSON.parse(id)
         this.admin = admin
-        if (this.adsComponent.customerId === id) {
-            this.admin = true
-        }
-        if (!this.admin) {
-            this.$router.push(`/${this.$route.params.id}`)
-        }
+
         this.loading = true
-        this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
+        await this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
             .then((response) => {
                 if (response.data) {
                     console.log(response.data)
@@ -632,6 +627,14 @@ export default {
         //   })
         // }
         // this.headers[0].value = `Bearer ${token}`
+
+        if (this.adsComponent.customerId === id) {
+            this.admin = true
+        }
+        console.log(this.adsComponent, id, this.admin)
+        if (!this.admin) {
+            this.$router.push(`/${this.$route.params.id}`)
+        }
 
     },
 };

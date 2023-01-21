@@ -163,7 +163,21 @@ const routes = [
       {
         path: '/:id/:name?',
        component: () => import('pages/Ads.vue')
+      },
+      {
+        path: '/politica-de-privacidade',
+        component: () => import('pages/PoliticaPrivacidade.vue')
+      },
+      {
+        path: '/termos-e-condicoes',
+        component: () => import('pages/TermosCondicoes.vue')
+      },
+      {
+        path: '/cadastre',
+        component: () => import('pages/Cadastre.vue'),
       }
+
+      //vue router redirec to external link
     ],
   },
   {

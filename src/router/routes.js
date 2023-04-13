@@ -175,6 +175,11 @@ const routes = [
       {
         path: '/cadastre',
         component: () => import('pages/Cadastre.vue'),
+      },
+      {
+        path: '/downlaod',
+        component: () => import('pages/DownloadApp.vue'),
+
       }
 
       //vue router redirec to external link

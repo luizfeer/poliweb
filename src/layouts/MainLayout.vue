@@ -57,11 +57,13 @@
             <router-view />
         </q-page-container>
     </transition>
+    <Download />
 </q-layout>
 </template>
 
 <script>
 import EssentialLink from "components/EssentialLink.vue";
+import Download from "components/Download.vue";
 
 const linksList = [{
         title: "Home",
@@ -126,10 +128,12 @@ import {
 } from 'date-fns'
 
 export default defineComponent({
+
     name: "MainLayout",
 
     components: {
         EssentialLink,
+        Download
     },
 
     setup() {

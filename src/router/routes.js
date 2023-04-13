@@ -177,7 +177,7 @@ const routes = [
         component: () => import('pages/Cadastre.vue'),
       },
       {
-        path: '/downlaod',
+        path: '/baixar',
         component: () => import('pages/DownloadApp.vue'),
 
       }

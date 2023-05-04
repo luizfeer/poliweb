@@ -6,7 +6,7 @@
       <q-btn @click="openFile()" v-else-if="admin" icon="add_a_photo" round class="absolute -top-4 z-10 ml-12"  color="primary"/>     -->
 
             <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden relative" :class="admin ? 'cursor-pointer': ''" @click="openFile">
-                <q-img v-if="adsComponent.files && adsComponent.files.logo && (adsComponent.files.logo || {}).length" :src="pathImg()" :ratio="1" class="h-full w-full" spinner-color="white" spinner-size="82px" />
+                <q-img  v-if="adsComponent.files && adsComponent.files.logo && (adsComponent.files.logo || {}).length" :src="pathImg()" :ratio="1" class="h-full w-full" spinner-color="white" spinner-size="82px" />
                 <!-- <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ adsComponent.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
           <input type="file" id="file" ref="file" @change="logoUpload()" accept="image/*" class="absolute h-full w-full top-0 right-0 hidden"/>      -->
             </div>
@@ -43,7 +43,7 @@
 
                     <div class="q-pa-md row items-start q-gutter-md">
                         <q-card class="w-full xl:w-1/3 " v-for="item in category" :key="item.id">
-                            <q-img :src="item.link" style="max-height: 150px;" />
+                            <q-img :src="item.link" style="max-height: 150px;" @click="openModalImg(item)" />
                             <q-card-section class="py-0">
                                 <div class="no-wrap items-center row ">
                                     <div class="col text-h6 ellipsis">
@@ -161,6 +161,15 @@
         </div>
     </div>
 </div>
+<q-dialog v-model="componentProps.show">
+
+    <q-btn @click="componentProps.show = false" class="absolute top-4 right-4" color="black" round dense icon="close" />
+    <q-card>
+        <q-card-section>
+            <img :src="componentProps.props.link" style="max-width: 300px;"/>
+        </q-card-section>
+    </q-card>
+</q-dialog>
 </template>
 
 <script>
@@ -183,6 +192,12 @@ export default {
     setup() {
         return {
             db,
+            componentProps: ref({
+              show:false,
+              props:{
+                img:''
+              }
+            }),
             queries: reactive({
                 cart: [],
                 itemsError: null
@@ -221,6 +236,7 @@ export default {
         };
     },
     computed: {
+
         total() {
             let total = 0;
             for (let i = 0; i < this.queries.cart.length; i++) {
@@ -250,6 +266,10 @@ export default {
         },
     },
     methods: {
+       openModalImg(item) {
+        this.componentProps.show = true
+          this.componentProps.props = item
+      },
         backPage() {
             this.$router.go(-1)
         },

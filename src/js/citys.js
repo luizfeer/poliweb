@@ -299,7 +299,21 @@ export const citysData =  [
 			"createdAt": "2022-07-12T13:24:43.535Z",
 			"updatedAt": null,
 			"deletedAt": null
+		},
+     {
+			"id": 421,
+			"country": "Brasil",
+			"state": "MG",
+			"city": "São José do Rio Pardo",
+			"zipCode": "13720000",
+			"coordinates": {
+				"lat": -21.6057319,
+				"long": -46.9035498,
+				"rawType": true
+			},
+			"createdAt": "2023-05-17T02:56:35.298Z",
+			"updatedAt": null,
+			"deletedAt": null
 		}
-  
 
 ];

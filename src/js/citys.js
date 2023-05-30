@@ -314,7 +314,7 @@ export const citysData =  [
 			"createdAt": "2023-05-17T02:56:35.298Z",
 			"updatedAt": null,
 			"deletedAt": null
-		}
+		},
     {
 			"id": 422,
 			"country": "Brasil",

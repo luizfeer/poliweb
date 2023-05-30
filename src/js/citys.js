@@ -315,5 +315,20 @@ export const citysData =  [
 			"updatedAt": null,
 			"deletedAt": null
 		}
+    {
+			"id": 422,
+			"country": "Brasil",
+			"state": "SP",
+			"city": "Mococa",
+			"zipCode": "13730000",
+			"coordinates": {
+				"lat": -21.4712865,
+				"long": -47.008845,
+				"rawType": true
+			},
+			"createdAt": "2023-05-30T20:35:47.617Z",
+			"updatedAt": null,
+			"deletedAt": null
+		}
 
 ];

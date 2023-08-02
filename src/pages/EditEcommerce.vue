@@ -231,7 +231,7 @@ import {
 } from "vue";
 import {
     categoryes
-} from 'src/js/CategoryesEcommerce'
+} from 'src/js/CategoryesEcommerceNew'
 
 export default {
     components: {},

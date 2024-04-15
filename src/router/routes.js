@@ -43,6 +43,11 @@ const routes = [
        component: () => import('pages/Home.vue')
 
       },
+      {
+        path: '/politica',
+        component: () => import('pages/PoliticaSeguranca.vue')
+
+      },
       // {
       //   path: '/categorias',
       //

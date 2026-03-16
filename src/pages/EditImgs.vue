@@ -32,7 +32,7 @@
       <!-- <div class="h-[150px] min-w-[80px] bg-gray-100 border ml-3 border-gray-400 rounded-md flex items-center justify-center cursor-pointer"
       v-if="admin"
       @click="$refs.gallery.click()">
-        <q-icon name="add_photo_alternate" class="text-gray-400 text-3xl" />
+        <AppIcon name="add-photo-alternate" :size="48" class="text-gray-400" />
       </div> -->
       <template v-if="adsComponent.files && adsComponent.files.gallery">
       <div
@@ -61,7 +61,7 @@
       <q-dialog v-model="confirmGallery" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="negative" text-color="white" />
+          <q-avatar color="negative" text-color="white"><template #icon><AppIcon name="delete" :size="24" /></template></q-avatar>
           <span class="q-ml-sm">Deseja apagar essa imagem?</span>
           <q-img
             :src="tray.preview"

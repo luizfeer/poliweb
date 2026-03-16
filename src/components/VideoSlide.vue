@@ -45,7 +45,7 @@
    <div class="h-16 w-full bg-gray-100 border border-gray-400 rounded-md flex items-center justify-center cursor-pointer"
       v-if="admin"
       @click="sendVideo=true">
-        <q-icon name="add" class="text-gray-400 text-3xl" /> Adicionar Video
+        <AppIcon name="add" :size="48" class="text-gray-400" /> Adicionar Video
       </div>
   <div ref="myDiv" v-if="items.length">
 
@@ -69,14 +69,9 @@
   <!-- div to buttons navbar -->
   <div id="buttons-video">
     <div class="flex justify-between items-center absolute bottom-0 w-full z-[1999] p-4">
-        <q-btn
-          @click="stopVideo"
-          class="text-white"
-          flat
-          dense
-          color="white"
-          :icon="videoPaused ? 'play_circle_filled' : 'pause'"
-        ></q-btn>
+        <q-btn @click="stopVideo" class="text-white" flat dense color="white">
+          <template #icon><AppIcon :name="videoPaused ? 'play-circle-filled' : 'pause'" :size="24" /></template>
+        </q-btn>
         <q-btn
           @click="()=>{confirmDelete=true;stopVideo()}"
           class="text-white"
@@ -84,15 +79,16 @@
           dense
           color="white"
           v-if="admin"
-          icon="delete"
-        ></q-btn>
+        >
+          <template #icon><AppIcon name="delete" :size="24" /></template>
+        </q-btn>
     </div>
   </div>
 <!-- <a href="instagram://story-camera" target="_blank" rel="noopener noreferrer"> teste</a> -->
  <q-dialog v-model="confirmDelete" persistent class="z-[99999]">
       <q-card>
         <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="negative" text-color="white" />
+          <q-avatar color="negative" text-color="white"><template #icon><AppIcon name="delete" :size="24" /></template></q-avatar>
           <span class="q-ml-sm">Tem certeza que deseja deletar esse Video?</span>
         </q-card-section>
 
@@ -105,7 +101,7 @@
       <q-dialog v-model="sendVideo" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <q-avatar icon="file_upload" color="primary" text-color="white" />
+          <q-avatar color="primary" text-color="white"><template #icon><AppIcon name="file-upload" :size="24" /></template></q-avatar>
           <span class="q-ml-sm">Envie um novo video</span>
           <q-uploader
             ref="uploader"

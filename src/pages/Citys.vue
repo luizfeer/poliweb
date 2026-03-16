@@ -4,9 +4,9 @@
       class="flex text-xl text-gray-500 flex-nowrap cursor-pointer"
       @click="dialog = true"
     >
-      <q-icon name="location_on" />
+      <AppIcon name="location-on" :size="24" />
       <span class="pl-1 text-blue-600">{{ localization && localization.city ? localization.city : "Selecione sua cidade" }}</span>
-      <q-icon name="arrow_drop_down" class="text-base" />
+      <AppIcon name="arrow-drop-down" :size="24" class="text-base" />
     </div> -->
 
 
@@ -25,7 +25,7 @@
             <q-item clickable v-ripple v-for="city in citys" :key="city.id" @click="model=city">
               <q-item-section >
                 <div class="flex items-center">
-                 <q-icon name="location_on" class="mr-2" />
+                 <AppIcon name="location-on" :size="24" class="mr-2" />
                  <span>
                    {{ city.city }}
                   </span>
@@ -37,7 +37,7 @@
 
         <div class="flex flex-col items-center mt-4">
           <q-btn @click="locateMe" class="pt-0 flex items-center text-lg cursor-pointer text-blue-600">
-            <q-icon name="gps_fixed" class="mr-1" /> Usar o GPS para localização
+            <AppIcon name="gps-fixed" :size="20" class="mr-1" /> Usar o GPS para localização
           </q-btn>
 
           <q-card-section>

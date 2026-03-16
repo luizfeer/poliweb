@@ -1,24 +1,46 @@
 <template>
-  <q-page class="bg-blue-100 w-full h-full row justify-center items-center">
-    <div class="column">
-      <div class="row" v-touch-hold:2000.touch="handleHold">
-        <h5 class="text-h5 text-black q-my-md select-none">Login</h5>
+  <q-page class="login-page w-full min-h-full row justify-center items-center">
+    <div class="login-container column items-center">
+      <div class="row cursor-pointer" @click="goToAdmin">
+        <h1 class="login-title text-h5 text-weight-medium select-none">Login</h1>
       </div>
-      <div class="row px-4">
-        <q-form @submit="login">
-
-        <q-card square bordered class="q-pa-lg shadow-1 max-w-[300px]">
-          <q-card-section class="px-3">
-            <q-input square filled clearable v-model="form.email" type="email" label="Email" class="mb-5" />
-            <q-input square filled clearable v-model="form.password" type="password" label="Senha" />
-          </q-card-section>
-          <q-card-actions class="q-px-md">
-            <q-btn unelevated color="light-blue-7" size="lg" class="full-width" type="submit" label="Login"/>
-          </q-card-actions>
-          <q-card-section class="text-center q-pa-none">
-            <p class="text-grey-6">Cadastre-se em breve</p>
-          </q-card-section>
-        </q-card>
+      <div class="row q-mt-lg">
+        <q-form @submit="login" class="full-width">
+          <q-card flat class="login-card">
+            <q-card-section class="q-pa-lg">
+              <q-input
+                v-model="form.email"
+                type="email"
+                label="Email"
+                outlined
+                dense
+                clearable
+                class="login-input q-mb-md"
+              />
+              <q-input
+                v-model="form.password"
+                type="password"
+                label="Senha"
+                outlined
+                dense
+                clearable
+                class="login-input"
+              />
+            </q-card-section>
+            <q-card-actions class="q-px-lg q-pb-lg q-pt-none">
+              <q-btn
+                unelevated
+                no-caps
+                size="md"
+                class="login-btn full-width"
+                type="submit"
+                label="Entrar"
+              />
+            </q-card-actions>
+            <q-card-section class="text-center q-pa-none q-pb-md">
+              <p class="login-footer-text">Cadastre-se em breve</p>
+            </q-card-section>
+          </q-card>
         </q-form>
       </div>
     </div>
@@ -41,9 +63,8 @@ export default {
   //  ...mapActions({
   //   setLogin: 'login/setMe'
   // }),
-  handleHold ({ evt, ...newInfo }) {
+  goToAdmin () {
     this.$router.push({ path: '/adm/login' })
-
   },
   login () {
     this.$q.loading.show()
@@ -88,8 +109,67 @@ export default {
 }
 </script>
 
-<style>
-.q-card {
-  width: 360px;
+<style lang="scss" scoped>
+.login-page {
+  background: #f6f9fc;
+}
+
+.login-container {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.login-title {
+  color: #32325d !important;
+  letter-spacing: -0.5px;
+  transition: color 0.2s ease;
+}
+
+.cursor-pointer:hover .login-title {
+  color: #635bff !important;
+}
+
+.login-card {
+  width: 400px;
+  max-width: 90vw;
+  background: #ffffff !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.login-input {
+  :deep(.q-field__control) {
+    &::before {
+      border-color: #e6e9eb !important;
+    }
+    &:hover::before {
+      border-color: #c4c4c4 !important;
+    }
+  }
+  :deep(.q-field--outlined .q-field__control:before) {
+    border-width: 1px;
+  }
+}
+
+.login-btn {
+  background: #635bff !important;
+  color: #ffffff !important;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.login-btn:hover {
+  background: #5851ea !important;
+}
+
+.login-footer-text {
+  color: #8898aa;
+  font-size: 0.875rem;
+  margin: 0;
 }
 </style>

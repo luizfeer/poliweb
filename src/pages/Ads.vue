@@ -1,5 +1,5 @@
 <template>
-<div class="pt-2">
+<div class="ads-page-wrapper">
     <!-- <router-link @click="$router.go(-1)"  class="cursor-pointer ml-2 "> <q-icon name="arrow_back" /> Voltar</router-link> -->
     <ads-page v-if="!loading" :data-ads="data" />
     <div v-else class="p-3">
@@ -200,5 +200,8 @@ export default {
 </script>
 
 <style scoped>
-
+.ads-page-wrapper {
+  padding-top: 0.5rem;
+  padding-bottom: env(safe-area-inset-bottom);
+}
 </style>

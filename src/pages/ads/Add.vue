@@ -1,10 +1,24 @@
 <template>
-  <q-page class="bg-gray-100">
-    
-    <span class="text-xl">
-      {{ "Criando um anúncio dentro da categoria " + nameCategorie }}
-    </span>
-     <q-carousel
+  <q-page class="add-ad-page">
+    <q-dialog
+      v-model="openAsModal"
+      persistent
+      maximized
+      transition-show="slide-up"
+      transition-hide="slide-down"
+      class="add-ad-dialog"
+    >
+      <q-card class="add-ad-card">
+        <div class="add-ad-header">
+          <span class="add-ad-title">
+            {{ "Criando um anúncio dentro da categoria " + nameCategorie }}
+          </span>
+          <q-btn flat round dense icon="close" color="grey-7" @click="closeModal" />
+        </div>
+
+        <q-separator />
+
+        <q-carousel
         v-model="slide"
         transition-prev="slide-right"
         transition-next="slide-left"
@@ -131,8 +145,9 @@
          
           </q-form>
         </q-carousel-slide>
-     </q-carousel>
-     
+        </q-carousel>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -144,6 +159,7 @@ export default defineComponent({
   name: "AddCategorias",
   setup() {
     return {   
+      openAsModal: ref(true),
       slide: ref('0'), 
       nameCategorie: ref(''),
       categoryId: ref(''),
@@ -334,6 +350,11 @@ export default defineComponent({
       form.name = null
       form.addressId = null
       selectedCity = null
+    },
+    closeModal () {
+      this.openAsModal = false
+      const fallbackPath = this.categoryId ? `/categorias/${this.categoryId}` : '/'
+      this.$router.push({ path: fallbackPath })
     }
   }, 
  async mounted () {
@@ -345,4 +366,27 @@ export default defineComponent({
 });
 </script>
 <style>
+.add-ad-page {
+  background: transparent;
+}
+
+.add-ad-card {
+  min-height: 100dvh;
+  border-radius: 0;
+}
+
+.add-ad-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #f8fafc;
+}
+
+.add-ad-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
 </style>

@@ -24,7 +24,7 @@
 
           <div v-if="!phoneZap && !loading" class="text-center text-red-900 mt-5 m-4 p-4 border-red-500 border rounded-md row items-center">
             <div class="col-3">
-              <q-icon name="phone" size="5rem" />
+              <AppIcon name="phone" :size="80" />
             </div>
             <div class="col text-left">
               <div class="text-base font-bold mb-2">Não há telefone com whatsapp cadastrado, cadastre um para receber os pedidos em seu número.</div>
@@ -35,7 +35,7 @@
 
             <q-btn color="secondary" push v-if="admin && phoneZap" @click="addProduct()">
                 <div class="row items-center no-wrap">
-                    <q-icon left name="shopping_basket" />
+                    <AppIcon name="shopping-basket" :size="20" class="mr-2" />
                     <div class="text-center">
                         Cadastrar novo produto
                     </div>
@@ -48,7 +48,7 @@
 
                         <q-btn color="secondary" flat v-if="admin" @click="addCategory(category[0].label.category)">
                             <div class="row items-center no-wrap">
-                                <q-icon left name="add_circle" />
+                                <AppIcon name="add-circle" :size="20" class="mr-2" />
                             </div>
                         </q-btn>
                     </div>
@@ -97,14 +97,14 @@
                 </div>
             </template>
             <div v-else class="text-center text-gray-600 mt-5 flex  m-4 p-4 border-gray-500 border rounded-md row items-center">
-                <q-icon name="shopping_basket" size="2rem" />
-                <div class="text-lg">Você ainda não cadastrou produtos. Cadastre um novo.</div>
+                <AppIcon name="shopping-basket" :size="32" />
+                <div class="text-lg">Você ainda não tem produtos cadastrados. Toque em "Cadastrar novo produto" para começar.</div>
 
             </div>
             <hr class="my-4">
             <q-btn color="grey-9" outline push @click="backPage()">
                 <div class="row items-center no-wrap">
-                    <q-icon left name="arrow_back" />
+                    <AppIcon name="arrow-back" :size="20" class="mr-2" />
                     <div class="text-center">
                         Voltar
                     </div>
@@ -118,13 +118,16 @@
                 <q-bar>
                     <q-space />
 
-                    <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
+                    <q-btn dense flat @click="maximizedToggle = false" :disable="!maximizedToggle">
+                        <template #icon><AppIcon name="minimize" :size="20" /></template>
                         <q-tooltip v-if="maximizedToggle" class="bg-white text-primary">Minimizar</q-tooltip>
                     </q-btn>
-                    <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
+                    <q-btn dense flat @click="maximizedToggle = true" :disable="maximizedToggle">
+                        <template #icon><AppIcon name="maximize" :size="20" /></template>
                         <q-tooltip v-if="!maximizedToggle" class="bg-white text-primary">Maximizar</q-tooltip>
                     </q-btn>
-                    <q-btn dense flat icon="close" v-close-popup>
+                    <q-btn dense flat v-close-popup>
+                        <template #icon><AppIcon name="close" :size="20" /></template>
                         <q-tooltip class="bg-white text-primary">Fechar</q-tooltip>
                     </q-btn>
                 </q-bar>
@@ -162,13 +165,16 @@
                 <q-bar>
                     <q-space />
 
-                    <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
+                    <q-btn dense flat @click="maximizedToggle = false" :disable="!maximizedToggle">
+                        <template #icon><AppIcon name="minimize" :size="20" /></template>
                         <q-tooltip v-if="maximizedToggle" class="bg-white text-primary">Minimizar</q-tooltip>
                     </q-btn>
-                    <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
+                    <q-btn dense flat @click="maximizedToggle = true" :disable="maximizedToggle">
+                        <template #icon><AppIcon name="maximize" :size="20" /></template>
                         <q-tooltip v-if="!maximizedToggle" class="bg-white text-primary">Maximizar</q-tooltip>
                     </q-btn>
-                    <q-btn dense flat icon="close" v-close-popup>
+                    <q-btn dense flat v-close-popup>
+                        <template #icon><AppIcon name="close" :size="20" /></template>
                         <q-tooltip class="bg-white text-primary">Fechar</q-tooltip>
                     </q-btn>
                 </q-bar>
@@ -204,7 +210,7 @@
         <q-dialog v-model="confirmDelete" persistent>
             <q-card>
                 <q-card-section class="row items-center">
-                    <q-avatar icon="delete" color="negative" text-color="white" />
+                    <q-avatar color="negative" text-color="white"><template #icon><AppIcon name="delete" :size="24" /></template></q-avatar>
                     <span class="q-ml-sm">Deseja apagar esse produto?</span>
                     <q-img :src="tray.preview" class="mt-4" spinner-color="primary" spinner-size="82px" style="max-height: 300px;" />
                 </q-card-section>

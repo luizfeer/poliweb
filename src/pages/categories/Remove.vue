@@ -21,7 +21,7 @@
       <q-space />
       <div class="flex items-center justify-between mt-4">
         <q-btn push color="positive" text-color="white">
-          <q-icon name="fab fa-whatsapp" class="mr-2" /> Whatsapp
+          <AppIcon name="whatsapp" :size="20" class="mr-2" /> Whatsapp
         </q-btn>
         <q-btn
           :push="!follow"
@@ -49,54 +49,39 @@
       </div>
       <div class="bg-white border border-gray-200 rounded-md p-3 text-lg mt-3">
         <div class="flex items-center flex-nowrap text-gray-600">
-          <q-icon
-            name="fas fa-phone-square-alt"
-            class="mr-2 text-xl text-red-600"
-          />
+          <AppIcon name="phone" :size="24" class="mr-2 text-red-600" />
           (35) 3562-2084
         </div>
 
         <div class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div class="flex items-center flex-nowrap text-gray-600">
-          <q-icon
-            name="fab fa-whatsapp-square"
-            class="mr-2 text-xl text-green-600"
-          />
+          <AppIcon name="whatsapp" :size="24" class="mr-2 text-green-600" />
           (35) 99963-8710
         </div>
       </div>
 
       <div class="bg-white border border-gray-200 rounded-md p-3 text-xl mt-3">
         <div class="flex items-center flex-nowrap text-gray-600">
-          <q-icon name="language" class="mr-2 text-xl text-blue-400" />
+          <AppIcon name="language" :size="24" class="mr-2 text-blue-400" />
           favoritamodaintima.com.br
         </div>
 
         <div class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div class="flex items-center flex-nowrap text-gray-600">
-          <q-icon
-            name="fab fa-facebook-square"
-            class="mr-2 text-xl text-blue-800"
-          />
+          <AppIcon name="facebook" :size="24" class="mr-2 text-blue-800" />
           Favorita Moda Intima
         </div>
         <div class="divider border-t border-gray-200 w-full px-5 my-3"></div>
 
         <div class="flex items-center flex-nowrap text-gray-600">
-          <q-icon
-            name="fab fa-instagram-square"
-            class="mr-2 text-xl text-pink-600"
-          />
+          <AppIcon name="instagram" :size="24" class="mr-2 text-pink-600" />
           @favorita_acessorios
         </div>
         <div class="divider border-t border-gray-200 w-full px-5 my-3"></div>
         <div class="flex items-center flex-nowrap text-gray-600">
-          <q-icon
-            name="fas fa-envelope-open-text"
-            class="mr-2 text-xl text-purple-800"
-          />
+          <AppIcon name="mail" :size="24" class="mr-2 text-purple-800" />
           favoritaviashop@hotmail.com
         </div>
       </div>
@@ -110,10 +95,7 @@
             text-gray-600
           "
         >
-          <q-icon
-            name="fas fa-map-marked-alt"
-            class="mr-2 text-3xl text-yellow-500"
-          />
+          <AppIcon name="map-pin" :size="32" class="mr-2 text-yellow-500" />
           Rua Coronel Joaquim Firmino da Silva, 537
         </div>
       </div>

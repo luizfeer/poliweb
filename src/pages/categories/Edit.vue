@@ -15,8 +15,8 @@
         </div>
           <q-input filled v-model="iconName" lazy-rules label="Pesquisar nos icone" @blur="filterIcon()" class="w-full py-2">
             <template v-slot:append>
-            <q-icon v-if="iconName !== ''"  name="clear" class="cursor-pointer" @click="iconName = '';filterIcon()" />
-            <q-icon  name="search" @click="filterIcon()"/>
+            <AppIcon v-if="iconName !== ''" name="clear" :size="20" class="cursor-pointer" @click="iconName = '';filterIcon()" />
+            <AppIcon name="search" :size="20" class="cursor-pointer" @click="filterIcon()"/>
           </template>
           </q-input>
       <q-inner-loading

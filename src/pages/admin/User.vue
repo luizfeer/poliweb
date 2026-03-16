@@ -12,7 +12,7 @@
       <template v-slot:top-right>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Procurar">
           <template v-slot:append>
-            <q-icon name="search" />
+            <AppIcon name="search" :size="20" />
           </template>
         </q-input>
         <!-- <q-btn

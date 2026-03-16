@@ -1,66 +1,98 @@
 <template>
-  <q-page>
-    <div>
-      <!-- <Location class="my-2" /> -->
-      <!-- {{ categories }} -->
+  <q-page class="category-page">
+    <div class="category-container">
       <template v-if="!loading">
-        <q-carousel
-          v-model="slide"
-          transition-prev="slide-right"
-          transition-next="slide-left"
-          animated
-          class="h-[auto] pt-4"
-        >
-          <q-carousel-slide name="0" class="pt-0">
-           <div @click="$router.go(-1)" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
-            <div class="pl-3 flex">
-                <router-link v-if="admin" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
-                    <q-btn unelevated color="primary" label="Cadastrar empresa"  v-if="admin" class="m-2"/>
-                </router-link>
-                <router-link v-if="admin && !ads.length" :to="`/painel/categorias/add/${$route.params.id}/${$route.params.name}`">
-                  <q-btn unelevated color="primary" label="Cadastrar sub-categoria" class="m-2"/>
-                </router-link>
-            </div>
-              <div v-if="ads.length === 0" class="text-lg p-2 text-gray-600">Nenhum dado cadastrado.</div>
-              <router-link v-for="(item) in ads" :key="item.id" :to="'/'+item.id">
-                  <div
-                  class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
-                  >
-                  <div class="flex flex-nowrap">
-                      <div class="h-20 w-20 min-w-[5rem] rounded-sm overflow-hidden">
-                      <q-img
-                          v-if="item.files.logo && item.files.logo.length"
-                          :src="pathImg(item)"
-                          :ratio="1"
-                          class="h-full w-full"
-                          spinner-color="white"
-                          spinner-size="82px"
-                      />
-                      <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ item.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
-                      </div>
+        <div class="category-header">
+          <button type="button" class="back-link" @click="$router.go(-1)">
+            <AppIcon name="arrow-back" :size="22" />
+            <span>Voltar</span>
+          </button>
+          <h1 class="category-title">Comércios da categoria</h1>
+          <p class="category-subtitle">Escolha como deseja visualizar os estabelecimentos.</p>
+        </div>
 
-                      <div class="pl-3">
-                      <h1 class="text-lg text-gray-600 font-semibold">
-                          {{ item.name }}
-                      </h1>
-                      <h2 class="text-base text-gray-500 min-h-[3rem]">{{ formatDesc(item.description) }}</h2>
-                      </div>
-                  </div>
+        <div class="admin-actions" v-if="admin">
+          <router-link :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
+            <q-btn no-caps rounded unelevated color="primary" icon="storefront" label="Cadastrar empresa" class="admin-btn mr-2 mb-2"/>
+          </router-link>
+          <router-link v-if="!ads.length" :to="`/painel/categorias/add/${$route.params.id}/${$route.params.name}`">
+            <q-btn no-caps rounded unelevated color="secondary" icon="category" label="Cadastrar sub-categoria" class="admin-btn mb-2"/>
+          </router-link>
+        </div>
+
+        <div class="view-toggle-wrap">
+          <q-btn-toggle
+            v-model="viewMode"
+            unelevated
+            toggle-color="primary"
+            color="white"
+            text-color="grey-8"
+            no-caps
+            rounded
+            class="view-toggle"
+            :options="[
+              { label: 'Lista', value: 'list', icon: 'view_list' },
+              { label: 'Grid', value: 'grid', icon: 'grid_view' }
+            ]"
+          />
+        </div>
+
+        <div v-if="ads.length === 0" class="empty-state">Nenhum comércio cadastrado nessa categoria.</div>
+
+        <div class="ads-grid" :class="`ads-grid-${viewMode}`">
+          <router-link
+            v-for="item in ads"
+            :key="item.id"
+            :to="'/' + item.id"
+            class="ad-card-link"
+          >
+            <article class="ad-card" :class="`ad-card-${viewMode}`">
+              <div class="ad-card-media" :class="`ad-card-media-${viewMode}`">
+                <q-img
+                  v-if="getGalleryBackdrop(item)"
+                  :src="getGalleryBackdrop(item)"
+                  :ratio="1"
+                  class="ad-media-bg"
+                  spinner-color="white"
+                  spinner-size="26px"
+                />
+                <div v-else class="ad-media-bg ad-media-bg-fallback"></div>
+                <div class="ad-media-overlay"></div>
+
+                <div class="ad-logo-wrap">
+                  <q-img
+                    v-if="getLogo(item)"
+                    :src="getLogo(item)"
+                    :ratio="1"
+                    :class="['ad-logo-round', `ad-logo-round-${viewMode}`]"
+                    spinner-color="white"
+                    spinner-size="20px"
+                  />
+                  <q-avatar
+                    v-else
+                    round
+                    :class="['ad-logo-round', `ad-logo-round-${viewMode}`]"
+                    :color="colors[Math.floor(Math.random() * colors.length)]"
+                    text-color="white"
+                  >
+                    {{ initials(item.name) }}
+                  </q-avatar>
                 </div>
-            </router-link>
-          </q-carousel-slide>
-          <!-- <q-carousel-slide name="1" class="p-0">
-           <div @click="slide = '0'" class="cursor-pointer ml-2"> <q-icon name="arrow_back" /> Voltar</div>
-            <ads-page :data-ads="data" />
-          </q-carousel-slide> -->
-        </q-carousel>
+              </div>
+              <div class="ad-card-body">
+                <h2 class="ad-card-title">{{ item.name }}</h2>
+                <p class="ad-card-desc">{{ formatDesc(item.description) || "Sem descrição no momento." }}</p>
+              </div>
+            </article>
+          </router-link>
+        </div>
       </template>
-      <div v-else class="p-4">
-        <div v-for="i in 10" :key="i" class="">
+
+      <div v-else class="p-2">
+        <div v-for="i in 10" :key="i">
           <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
         </div>
       </div>
-
     </div>
   </q-page>
 </template>
@@ -82,10 +114,15 @@ export default ({
       admin: ref(false),
       slide: ref('0'),
       loading : ref(true),
-      data: ref({})
+      data: ref({}),
+      viewMode: ref('list')
     };
   },
   methods: {
+    initials(name) {
+      if (!name) return ""
+      return name.split(" ").map((n)=>n[0]).join("").toUpperCase().slice(0, 2)
+    },
     formatDesc(str) {
       if(!str) return
       if (str.length > 50) {
@@ -98,9 +135,19 @@ export default ({
         this.data = {...item};
         this.slide= '1'
       },
-    pathImg (item) {
-      item.files.logo = item.files.logo.sort((b, a) =>   new Date(a.createdAt) -  new Date(b.createdAt));
-      return item.files.logo[0].link
+    getLogo(item) {
+      if (!item?.files?.logo?.length) return null
+      const logos = item.files.logo
+        .filter((logo) => !logo.deletedAt && logo.link)
+        .sort((b, a) => new Date(a.createdAt) - new Date(b.createdAt))
+      return logos.length ? logos[0].link : null
+    },
+    getGalleryBackdrop(item) {
+      if (!item?.files?.gallery?.length) return null
+      const gallery = item.files.gallery
+        .filter((img) => !img.deletedAt && img.link)
+        .sort((b, a) => new Date(a.createdAt) - new Date(b.createdAt))
+      return gallery.length ? gallery[0].link : null
     },
   },
   mounted(){
@@ -138,3 +185,198 @@ export default ({
   },
   })
 </script>
+
+<style scoped>
+.category-page {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  min-height: 100%;
+}
+
+.category-container {
+  padding: 12px 14px 20px;
+}
+
+.category-header {
+  margin-bottom: 12px;
+}
+
+.back-link {
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #4338ca;
+  font-weight: 600;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.category-title {
+  margin: 0 !important;
+  padding: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.category-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 12px 0 4px;
+}
+
+.view-toggle-wrap {
+  margin: 10px 0 14px;
+}
+
+.view-toggle :deep(.q-btn) {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.empty-state {
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  color: #475569;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.ads-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.ads-grid-list {
+  grid-template-columns: 1fr;
+}
+
+.ads-grid-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ad-card-link {
+  text-decoration: none;
+}
+
+.ad-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.ad-card:active {
+  transform: scale(0.98);
+  border-color: #c7d2fe;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.12);
+}
+
+.ad-card-list {
+  display: flex;
+  align-items: stretch;
+}
+
+.ad-card-grid {
+  display: block;
+}
+
+.ad-card-media {
+  position: relative;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.ad-card-media-list {
+  width: 88px;
+  min-width: 88px;
+  height: 88px;
+}
+
+.ad-card-media-grid {
+  width: 100%;
+  height: 132px;
+}
+
+.ad-media-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ad-media-bg-fallback {
+  background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%);
+}
+
+.ad-media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.35) 100%);
+}
+
+.ad-logo-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.ad-logo-round {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3);
+}
+
+.ad-logo-round-grid {
+  width: 82px;
+  height: 82px;
+}
+
+.ad-logo-round-list {
+  width: 68px;
+  height: 68px;
+}
+
+.ad-card-body {
+  padding: 10px;
+}
+
+.ad-card-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ad-card-desc {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  min-height: 30px;
+}
+
+.admin-btn {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+</style>

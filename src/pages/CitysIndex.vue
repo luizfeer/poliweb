@@ -1,26 +1,22 @@
 <template>
-  <div class="w-full p-4">
+  <div class="citys-index w-full p-4 pb-8">
+    <div class="city-header mb-6">
+      <h1 class="text-xl font-semibold text-gray-800 m-0">Escolha uma cidade</h1>
+      <p class="text-gray-500 text-sm mt-1">Toque para ver os comércios da região</p>
+    </div>
 
-
-        <q-card-section>
-          <div class="text-h6">Escolha uma cidade</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <q-list bordered separator>
-            <q-item clickable v-ripple v-for="city in citys" :key="city.id" :to="`/c/${city.link}`">
-              <q-item-section >
-                <div class="flex items-center">
-                 <q-icon name="location_on" class="mr-2" />
-                 <span>
-                   {{ city.city }}
-                  </span>
-                </div>
-                 </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card-section>
-
+    <div class="city-list space-y-2">
+      <router-link
+        v-for="city in citys"
+        :key="city.id"
+        :to="`/c/${city.link}`"
+        class="city-item flex items-center gap-3 min-h-[52px] px-4 py-3 rounded-xl bg-white shadow-sm active:bg-gray-50 touch-manipulation no-underline text-inherit"
+      >
+        <AppIcon name="location-on" :size="22" class="text-primary flex-shrink-0" />
+        <span class="font-medium text-gray-800 flex-1">{{ city.city }}</span>
+        <AppIcon name="chevron-right" :size="20" class="text-gray-400" />
+      </router-link>
+    </div>
   </div>
 </template>
 

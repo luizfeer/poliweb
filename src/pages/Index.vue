@@ -1,60 +1,158 @@
 <template>
-  <q-page>
-    <div class="px-4 py-2">
-      <Location class="my-2" />     
-      <div v-if="history" class="mt-4">
-        <span class="text-gray-600 text-xl my-2">Veja novamente</span>
-        <CardAds :ads="history" :showAddress="true" :reverse="true" />     
-      </div>
-      <div v-if="follow" class="mt-8">
-        <span class="text-gray-600 text-xl my-2">Você segue</span>
-        <CardAds :ads="follow" :showAddress="true" :reverse="true" />     
-      </div>
-      <router-link to="/encontre">
-      <div
-        class="bg-blue-50 border border-gray-200 rounded-md my-10 p-2 shadow-md"
-      >
-        <div class="flex flex-nowrap pl-1">
-          <div class="min-h-[68px] min-w-[68px] rounded-full flex items-center justify-center overflow-hidden bg-blue-600">
-            <q-icon name="storefront" class="text-white text-5xl" />
+  <q-page class="index-page">
+    <div class="px-4 py-4 pb-8">
+      <Location class="mb-4" />
+
+      <!-- Destaque: favorito que você segue -->
+      <div v-if="favoriteFollow" class="section mt-2">
+        <div
+          class="favorite-widget flex flex-col md:flex-row md:items-center gap-3 md:gap-5 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-[0.99] transition-transform touch-manipulation"
+          @click="goToFavorite(favoriteFollow)"
+        >
+          <!-- Mini galeria 16:9 -->
+          <div class="favorite-gallery16">
+            <div class="favorite-gallery16-inner">
+              <div class="favorite-gallery16-grid">
+                <div
+                  v-for="(img, i) in favoriteImages"
+                  :key="'fv-img-' + i"
+                  class="favorite-gallery16-img"
+                >
+                  <img :src="img" loading="lazy" />
+                </div>
+                <div
+                  v-if="!favoriteImages.length"
+                  class="favorite-gallery16-placeholder"
+                >
+                  <AppIcon name="storefront" :size="30" class="text-white" />
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="pl-3 flex items-center">                     
-            <h1 class="text-base text-gray-600 font-semibold">
-             Encontre o que precisa agora <q-icon name="arrow_forward" class="text-2xl"/>
-            </h1>
-          </div>            
+
+          <!-- Texto e ações -->
+          <div class="flex-1 min-w-0 md:mt-0">
+            <p class="text-xs font-semibold text-primary mb-1 uppercase tracking-wide">
+              Seu favorito
+            </p>
+            <p class="font-semibold text-gray-900 text-base m-0 line-clamp-1">
+              {{ favoriteFollow.name }}
+            </p>
+            <p
+              v-if="favoriteFollow.description"
+              class="text-xs text-gray-500 mt-1 mb-0 line-clamp-2"
+            >
+              {{ favoriteFollow.description }}
+            </p>
+            <div class="mt-3 flex items-center gap-2">
+              <q-chip outline color="primary" text-color="primary" size="sm" class="px-2 py-1">
+                Ver perfil
+              </q-chip>
+              <span class="text-[11px] text-gray-400">
+                Toque para abrir o comércio
+              </span>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div v-if="history?.length" class="section mt-6">
+        <h2 class="section-title">Veja novamente</h2>
+        <CardAds :ads="history" :showAddress="true" :reverse="true" />
+      </div>
+      <div v-if="follow?.length" class="section mt-8">
+        <h2 class="section-title">Você segue</h2>
+        <CardAds :ads="follow" :showAddress="true" :reverse="true" />
+      </div>
+
+      <router-link to="/encontre" class="block mt-8">
+        <div class="action-card flex items-center gap-4 p-4 rounded-2xl bg-primary/10 border border-primary/20 active:scale-[0.99] transition-transform touch-manipulation">
+          <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+            <AppIcon name="storefront" class="text-white" :size="28" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 m-0">Encontre o que precisa agora</p>
+            <p class="text-sm text-gray-500 m-0 mt-0.5">Ver todas as categorias</p>
+          </div>
+          <AppIcon name="arrow-forward" :size="24" class="text-primary flex-shrink-0" />
         </div>
-        
       </router-link>
-        <span class="text-gray-600 text-xl my-2">Faça uma busca</span>
-      <form @submit.prevent="open()">
-        <q-input color="teal" outlined debounce="2000"  v-model="searchInput" type="search" class="m-4">
-          <template v-slot:before>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </form>
-      
-       <div
-        class="bg-green-50 hover:bg-green-400 border border-green-400 rounded-md my-10 p-2 shadow-md"
+
+      <div class="section mt-8">
+        <h2 class="section-title">Faça uma busca</h2>
+        <form @submit.prevent="open()" class="mt-3">
+          <q-input
+            v-model="searchInput"
+            type="search"
+            standout="bg-white"
+            rounded
+            clearable
+            borderless
+            input-class="search-input-field"
+            placeholder="Busque por nome, categoria ou serviço"
+            class="search-input-wrapper"
+            :debounce="300"
+          >
+            <template v-slot:prepend>
+              <AppIcon name="search" :size="20" class="text-gray-400" />
+            </template>
+            <template v-slot:append>
+              <q-btn
+                unelevated
+                color="primary"
+                size="sm"
+                class="search-button"
+                @click="open()"
+              >
+                Buscar
+              </q-btn>
+            </template>
+          </q-input>
+        </form>
+      </div>
+
+      <div
+        v-if="deferredPrompt"
+        class="action-card flex items-center gap-4 p-4 mt-8 rounded-2xl bg-green-50 border border-green-200 active:scale-[0.99] transition-transform touch-manipulation"
         @click="install()"
-         v-if="deferredPrompt"
       >
-        <div class="flex flex-nowrap pl-1 select-none cursor-pointer">
-          <div class="min-h-[55px] min-w-[55px] rounded-full flex items-center justify-center overflow-hidden bg-green-600 ">
-            <q-icon name="file_download" class="text-white text-4xl" />
-          </div>
-          <div class="pl-3 flex items-center">                     
-            <h1 class="text-lg text-green-600 font-semibold">
-             Instalar o Aplicativo
-            </h1>
-          </div>            
+        <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-green-600 flex items-center justify-center">
+          <AppIcon name="file-download" class="text-white" :size="28" />
         </div>
+        <div class="flex-1">
+          <p class="font-semibold text-green-800 m-0">Instalar o Aplicativo</p>
+          <p class="text-sm text-green-600 m-0 mt-0.5">Use como app no seu celular</p>
         </div>
-      <!-- {{ categories }} -->
-      
-    </div>  
+      </div>
+
+      <!-- Grid de categorias no final da página -->
+      <div v-if="categories && categories.length" class="section mt-10">
+        <h2 class="section-title mb-3">Categorias</h2>
+        <p class="text-xs text-gray-500 mb-3">
+          Explore todos os tipos de comércios disponíveis perto de você.
+        </p>
+        <div class="grid grid-cols-3 gap-3">
+          <router-link
+            v-for="cat in categories"
+            :key="cat.id"
+            :to="redirectCategory(cat)"
+            class="category-grid-card no-underline"
+          >
+            <div class="category-grid-icon-wrapper">
+              <q-img
+                :src="cat.iconLink"
+                class="category-grid-icon"
+                spinner-color="gray-300"
+                spinner-size="18px"
+              />
+            </div>
+            <p class="category-grid-name">
+              {{ cat.name }}
+            </p>
+          </router-link>
+        </div>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -70,6 +168,17 @@ export default defineComponent({
   components: {
     Location,
     CardAds,
+  },
+  computed: {
+    favoriteImages() {
+      const ad = this.favoriteFollow
+      const gallery = ad?.files?.gallery
+      if (!Array.isArray(gallery) || !gallery.length) return []
+      return gallery
+        .filter((g) => !g.deletedAt && g.link)
+        .slice(0, 4)
+        .map((g) => g.link)
+    },
   },
   name: "PageIndex",
   setup() {   
@@ -88,6 +197,7 @@ export default defineComponent({
       searchInput: ref(''),
       history: [],
       follow: [],
+      favoriteFollow: null,
     };
   },
    created() {
@@ -104,19 +214,198 @@ export default defineComponent({
     open(){
       this.$router.push(`/buscar/${this.searchInput}`)
     },
+    goToFavorite(ad) {
+      if (!ad || !ad.id || !ad.name) return
+      let slug = encodeURIComponent(
+        ad.name
+          .replace(/[^a-z0-9_]+/gi, "-")
+          .replace(/^-|-$/g, "")
+          .toLowerCase()
+      )
+      this.$router.push(`/${ad.id}/${slug}`)
+    },
+    redirectCategory(item) {
+      const subs = item?.subcategories
+      if (subs && subs.length) {
+        return `/sub/${item.id}`
+      }
+      return `/categorias/${item.id}`
+    },
     async install() {
       this.deferredPrompt.prompt();
     }
   },
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false
-     // move to store
      const localization = localStorage.getItem("localization")
-     this.localization =  JSON.parse(localization)
+     this.localization = localization ? JSON.parse(localization) : null
      const history = localStorage.getItem('history')
      const follow = localStorage.getItem('follow')
-     this.history = JSON.parse(history)
-     this.follow = JSON.parse(follow)
+     this.history = history ? JSON.parse(history) : []
+     this.follow = follow ? JSON.parse(follow) : []
+     this.favoriteFollow = this.follow && this.follow.length ? this.follow[this.follow.length - 1] : null
+     const categories = localStorage.getItem('categories')
+     this.categories = categories ? JSON.parse(categories) : []
   }
 })
 </script>
+
+<style scoped>
+.index-page {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+}
+.action-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search-input-wrapper {
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(59, 130, 246, 0.15);
+  border: 1px solid #dbeafe;
+  padding-right: 0.25rem;
+  overflow: hidden;
+}
+
+.search-input-wrapper :deep(.q-field__control),
+.search-input-wrapper :deep(.q-field__marginal),
+.search-input-wrapper :deep(.q-field__native) {
+  border-radius: 999px !important;
+}
+
+.search-input-wrapper :deep(.q-field__control) {
+  box-shadow: none !important;
+}
+
+.search-input-field {
+  font-size: 0.95rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.search-button {
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.favorite-widget {
+  background: linear-gradient(135deg, #f9fafb, #eef2ff);
+}
+
+.favorite-gallery16 {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  background: #020617;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .favorite-gallery16 {
+    max-width: 260px;
+  }
+}
+
+.favorite-gallery16-inner {
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+}
+
+.favorite-gallery16-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.favorite-gallery16-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.favorite-gallery16-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.favorite-gallery16-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+}
+
+.category-grid-card {
+  background: white;
+  border-radius: 16px;
+  padding: 10px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.category-grid-card:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  border-color: #c7d2fe;
+}
+
+.category-grid-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.category-grid-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.category-grid-name {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+  margin: 0;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.no-underline {
+  text-decoration: none;
+}
+</style>

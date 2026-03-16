@@ -1,137 +1,113 @@
 <template>
-<div>
-    <div class="bg-white border-b border-gray-200 p-3 mb-3 pt-6">
-        <div class="flex flex-nowrap relative">
-            <!-- <q-btn @click="setAtt()" v-if="photoUpload" icon="cloud_upload" round class="absolute -top-4 z-10 ml-12"  color="secondary"/>
-      <q-btn @click="openFile()" v-else-if="admin" icon="add_a_photo" round class="absolute -top-4 z-10 ml-12"  color="primary"/>     -->
-
-            <div class="h-20 w-20 min-w-[5rem] rounded-full overflow-hidden relative" :class="admin ? 'cursor-pointer': ''" @click="openFile">
-                <q-img  v-if="adsComponent.files && adsComponent.files.logo && (adsComponent.files.logo || {}).length" :src="pathImg()" :ratio="1" class="h-full w-full" spinner-color="white" spinner-size="82px" />
-                <!-- <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ adsComponent.name.split(" ").map((n)=>n[0]).join("").toUpperCase() }}</q-avatar>
-          <input type="file" id="file" ref="file" @change="logoUpload()" accept="image/*" class="absolute h-full w-full top-0 right-0 hidden"/>      -->
+<div class="ecommerce-page">
+    <div class="ecommerce-header">
+        <div class="ecommerce-header-inner">
+            <div class="ecommerce-logo" :class="{ 'cursor-pointer': admin }" @click="admin && $router.push(`/ecommerce/${$route.params.id}`)">
+                <q-img v-if="adsComponent.files && adsComponent.files.logo && (adsComponent.files.logo || {}).length" :src="pathImg()" :ratio="1" class="h-full w-full object-cover" spinner-color="gray-300" spinner-size="40px" />
+                <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ (adsComponent.name || '').split(" ").map((n)=>n[0]).join("").toUpperCase().slice(0, 2) }}</q-avatar>
             </div>
-            <div class="pl-3">
-                <h1 class="text-2xl text-gray-700 font-semibold">
-                    {{ adsComponent.name }}
-                </h1>
-                <h2 class="text-lg text-gray-500">{{ adsComponent.description }}</h2>
+            <div class="ecommerce-info">
+                <h1 class="ecommerce-name">{{ adsComponent.name }}</h1>
+                <p class="ecommerce-desc" v-if="adsComponent.description">{{ adsComponent.description }}</p>
             </div>
         </div>
-        <q-space />
 
-        <div class="mt-3 p-1">
-            <q-btn color="secondary" push v-if="admin" @click="addProduct()">
-                <div class="row items-center no-wrap">
-                    <q-icon left name="shopping_basket" />
-                    <div class="text-center">
-                        Cadastrar novo produto
-                    </div>
-                </div>
+        <div class="ecommerce-actions">
+            <q-btn color="secondary" push v-if="admin" @click="$router.push(`/ecommerce/${$route.params.id}`)" size="sm" class="ecommerce-btn-add">
+                <AppIcon name="shopping-basket" :size="18" class="mr-1" />
+                Cadastrar produto
             </q-btn>
-
-            <template v-if="(adsComponent.files && adsComponent.files.ecommerceFiltered)">
-                <div class="mb-10 " v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
-                    <div class="row">
-                        <h1 class="text-h4">{{ category[0].label.category.label }}</h1>
-
-                        <!-- <q-btn color="secondary" flat v-if="admin" @click="addCategory(category[0].label.category)">
-                            <div class="row items-center no-wrap">
-                                <q-icon left name="add_circle" />
-                            </div>
-                        </q-btn> -->
-                    </div>
-
-                    <div class="q-pa-md row items-start q-gutter-md">
-                        <q-card class="w-full xl:w-1/3 " v-for="item in category" :key="item.id">
-                            <q-img :src="item.link" style="max-height: 150px;" @click="openModalImg(item)" />
-                            <q-card-section class="py-0">
-                                <div class="no-wrap items-center row ">
-                                    <div class="col text-h6 ellipsis">
-                                        <!-- {{ item.label.category.label }} -->
-                                        {{ item.title.name }}
-                                    </div>
-                                </div>
-                                <!-- <q-rating v-model="stars" :max="5" size="32px" /> -->
-                            </q-card-section>
-                            <q-card-section class="q-pt-none">
-                                <div class="text-subtitle1">
-                                    R$ {{ item.subtitle.value }}
-                                </div>
-                                <div class="text-caption text-grey">
-                                    {{ item.title.description }}
-                                </div>
-                            </q-card-section>
-                            <q-separator />
-                            <q-card-actions class="w-full flex justify-center">
-                                <q-btn push :color="item.quantityCart > 0 ? 'secondary' : 'primary'" size="md" @click="addToCart(item)">
-                                    <q-badge v-if="item.quantityCart > 0" color="black" floating>{{ item.quantityCart }}</q-badge>
-                                    Adicionar ao carrinho
-                                </q-btn>
-                            </q-card-actions>
-                        </q-card>
-                    </div>
-
-                </div>
-            </template>
-            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="secondary" round dense icon="shopping_cart" class="fixed right-5 top-20 " />
-
+            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="secondary" round dense class="ecommerce-cart-fab" :class="{ 'has-items': queries.cart.length }">
+                <AppIcon name="shopping-cart" :size="24" />
+                <q-badge v-if="queries.cart.length" color="primary" floating>{{ totalItems }}</q-badge>
+            </q-btn>
         </div>
-        <q-btn color="grey-9" push outline @click="backPage()">
-            <div class="row items-center no-wrap">
-                <q-icon left name="arrow_back" />
-                <div class="text-center">
-                    Voltar
+    </div>
+
+    <div class="ecommerce-content">
+        <template v-if="(adsComponent.files && adsComponent.files.ecommerceFiltered)">
+            <div class="ecommerce-category" v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
+                <div class="ecommerce-category-header">
+                    <h2 class="ecommerce-category-title">{{ category[0].label.category.label }}</h2>
+                    <div class="ecommerce-view-toggle">
+                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'card' }" @click="viewMode = 'card'" title="Cards">
+                            <AppIcon name="layout-grid" :size="18" />
+                        </button>
+                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'" title="Lista">
+                            <AppIcon name="list" :size="18" />
+                        </button>
+                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'compact' }" @click="viewMode = 'compact'" title="Compacto">
+                            <AppIcon name="layout-list" :size="18" />
+                        </button>
+                    </div>
+                </div>
+                <div class="ecommerce-grid" :class="'view-' + viewMode">
+                    <div class="ecommerce-card" v-for="item in category" :key="item.id">
+                        <div class="ecommerce-card-img" @click="openModalImg(item)">
+                            <q-img :src="item.link" :ratio="1" class="object-cover" />
+                        </div>
+                        <div class="ecommerce-card-body">
+                            <h3 class="ecommerce-card-title">{{ item.title.name }}</h3>
+                            <p class="ecommerce-card-desc" v-if="item.title.description && viewMode !== 'compact'">{{ item.title.description }}</p>
+                            <p class="ecommerce-card-price">R$ {{ item.subtitle.value }}</p>
+                            <q-btn :color="item.quantityCart > 0 ? 'secondary' : 'primary'" size="sm" unelevated class="ecommerce-card-btn" @click="addToCart(item)">
+                                <q-badge v-if="item.quantityCart > 0" color="white" text-color="secondary" floating>{{ item.quantityCart }}</q-badge>
+                                <AppIcon name="add-shopping-cart" :size="16" class="mr-1" />
+                                {{ viewMode === 'compact' ? '+' : (item.quantityCart > 0 ? 'Adicionar mais' : 'Adicionar') }}
+                            </q-btn>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </template>
+
+        <q-btn color="grey-8" flat @click="backPage()" class="ecommerce-back">
+            <AppIcon name="arrow-back" :size="20" class="mr-2" />
+            Voltar
         </q-btn>
     </div>
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered :width="350" :breakpoint="500">
-
+    <q-drawer v-model="rightDrawerOpen" side="right" bordered :width="360" :breakpoint="600" overlay behavior="mobile" class="cart-drawer">
         <div class="cart">
-            <h2 class="text-h5 p-2 md:py-4 font-mono mt-3">Seu carrinho</h2>
-            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="black" round dense icon="close" class="absolute top-4 right-4" />
-            <div v-if="queries.cart.length">
-                <div class="cart-list m-3 rounded-md border-2 border-gray-300">
-                    <div class="cart-item w-full produto" v-for="(item, id) in queries.cart" :key="'id-' + id">
-                        <div class="row w-full p-2 md:p-4">
-                            <q-img class="col" spinner-color="black" style="height: 60px; max-width: 90px" :src="item.link" alt="" />
-                            <div class="col row">
-                                <h4 class="title col-12 text-no-wrap">{{ item.name }}</h4>
-                                <div class="row w-full">
-                                    <div class="col-8">
-                                        <div class="quantity row items-end">
-                                            <div class="h-5 w-5 items-center justify-center flex bg-gray-500 rounded-full font-extrabold cursor-pointer" @click="sub(item)">
-                                                <q-icon :name="item.quantity<2 ? 'close' :'remove'" size="sm" color="white" style="font-size: 10px;" />
-                                            </div>
-                                            <input type="text" @keypress="isNumber($event)" v-model.number="item.quantity" class="w-10 border-2 text-center border-gray-400 rounded-md mx-1" @input="calcItem(item)">
-                                            <div class="h-5 w-5 items-center justify-center flex bg-gray-500 rounded-full font-extrabold cursor-pointer" @click="add(item)">
-                                                <q-icon name="add" size="sm" color="white" style="font-size: 10px;" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class=" col-4 price text-right text-bold italic text-green-900">{{ RS(item.value) }}</div>
+            <div class="cart-header">
+                <h2 class="cart-title">Seu carrinho</h2>
+                <q-btn flat round dense @click="rightDrawerOpen = false" class="cart-close">
+                    <AppIcon name="close" :size="22" />
+                </q-btn>
+            </div>
+            <div v-if="queries.cart.length" class="cart-body">
+                <div class="cart-list">
+                    <div class="cart-item" v-for="(item, id) in queries.cart" :key="'id-' + id">
+                        <q-img class="cart-item-img" :src="item.link" alt="" />
+                        <div class="cart-item-info">
+                            <h4 class="cart-item-name">{{ item.name }}</h4>
+                            <div class="cart-item-row">
+                                <div class="cart-qty">
+                                    <button type="button" class="cart-qty-btn" @click="sub(item)" :disabled="item.quantity <= 1">
+                                        <AppIcon :name="item.quantity <= 1 ? 'close' : 'remove'" :size="14" />
+                                    </button>
+                                    <input type="number" min="1" v-model.number="item.quantity" class="cart-qty-input" @change="updateQuantity(item)">
+                                    <button type="button" class="cart-qty-btn" @click="add(item)">
+                                        <AppIcon name="add" :size="14" />
+                                    </button>
                                 </div>
+                                <span class="cart-item-price">{{ RS(item.value * item.quantity) }}</span>
                             </div>
                         </div>
-
-                        <!-- <div>
-                            <div class="total">{{ item.subtitle.value * item.quantity }}</div> -->
-                        <!-- </div> -->
                     </div>
                 </div>
-                <div class="text-lg text-right w-full text-gray-700 my-4 pr-3">
-                    <span class="total-title ">Total </span>
-                    <span class="font-bold">{{ RS(total) }}</span>
-                </div>
-                <div class="justify-center flex w-full">
-                    <q-btn color="secondary" label="Finalizar pedido" @click="botaoPedido()" />
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <span>Total</span>
+                        <span class="cart-total-value">{{ RS(total) }}</span>
+                    </div>
+                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated @click="botaoPedido()" />
                 </div>
             </div>
-
-            <div class="empty-contents px-4" v-else>
-                <p class="italic text-gray-700">Seu carrinho ainda está vazio</p>
+            <div v-else class="cart-empty">
+                <AppIcon name="shopping-cart" :size="48" class="text-gray-300 mb-3" />
+                <p>Seu carrinho está vazio</p>
+                <p class="text-caption text-grey">Adicione produtos para continuar</p>
             </div>
-
         </div>
     </q-drawer>
     <q-dialog v-model="confirmPedido">
@@ -150,20 +126,21 @@
             </q-card-actions>
         </q-card>
     </q-dialog>
-    <div class="h-32 w-full"></div>
-    <div class="w-full bg-green-700 p-4 fixed bottom-0" v-if="queries.cart.length && isMobile">
-        <div class="row items-center justify-between">
-            <div class="row items-center">
-                <div class="text-green-700 bg-white py-1 px-2 rounded-md font-bold">{{ totalItems }}</div>
-                <div class="font-medium text-white text-xl ml-2"> {{ RS(total)  }} </div>
+    <div class="ecommerce-spacer"></div>
+    <div class="ecommerce-mobile-bar" v-if="queries.cart.length && isMobile">
+        <div class="ecommerce-mobile-bar-inner">
+            <div class="ecommerce-mobile-total">
+                <span class="ecommerce-mobile-items">{{ totalItems }} itens</span>
+                <span class="ecommerce-mobile-value">{{ RS(total) }}</span>
             </div>
-            <q-btn @click="rightDrawerOpen = !rightDrawerOpen" color="white" outline label="Ver carrinho" />
+            <button type="button" class="ecommerce-mobile-btn" @click="rightDrawerOpen = true">Ver carrinho</button>
         </div>
     </div>
 </div>
-<q-dialog v-model="componentProps.show">
-
-    <q-btn @click="componentProps.show = false" class="absolute top-4 right-4" color="black" round dense icon="close" />
+<q-dialog v-model="componentProps.show" class="ecommerce-img-dialog">
+    <q-btn @click="componentProps.show = false" class="absolute top-4 right-4 z-10" round dense flat>
+      <AppIcon name="close" :size="24" />
+    </q-btn>
     <q-card>
         <q-card-section>
             <img :src="componentProps.props.link" style="max-width: 300px;"/>
@@ -190,8 +167,12 @@ import {
 export default {
     components: {},
     setup() {
+        const colors = ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']
+        const viewMode = ref('card')
         return {
             db,
+            colors,
+            viewMode,
             componentProps: ref({
               show:false,
               props:{
@@ -255,7 +236,7 @@ export default {
             return this.$q.screen.lt.sm;
         },
          phoneZap() {
-            if (!this.adsComponent.phones.length) return false
+            if (!this.adsComponent?.phones?.length) return false
             for (let index = 0; index < this.adsComponent.phones.length; index++) {
                 const element = this.adsComponent.phones[index];
                 if (element.isWhatsapp) {
@@ -332,15 +313,6 @@ export default {
                 quantity: quantity
             })
         },
-        isNumber(evt) {
-            evt = (evt) ? evt : window.event;
-            var charCode = (evt.which) ? evt.which : evt.keyCode;
-            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-                evt.preventDefault();
-            } else {
-                return true;
-            }
-        },
         RS(value) {
             return value.toLocaleString('pt-BR', {
                 style: 'currency',
@@ -353,17 +325,16 @@ export default {
             }).modify(item => ++item.quantity);
         },
         sub(item) {
-
             if (item.quantity > 1) {
-                db.cart.where({
-                    id: item.id
-                }).modify(item => --item.quantity);
-
+                db.cart.where({ id: item.id }).modify(i => --i.quantity);
             } else {
-                db.cart.where({
-                    id: item.id
-                }).delete()
+                db.cart.where({ id: item.id }).delete();
             }
+        },
+        updateQuantity(item) {
+            const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+            item.quantity = qty;
+            db.cart.where({ id: item.id }).modify(i => { i.quantity = qty; });
         },
 
         filterEatchType(arr) {
@@ -418,17 +389,15 @@ export default {
         },
 
         pathImg() {
-            let last = this.adsComponent.files.logo.length - 1
-            return this.adsComponent.files.logo[0].link
-            // this.adsComponent.files.logo[-1 ? ].link
+            const logo = this.adsComponent?.files?.logo
+            if (!logo?.length) return ''
+            return logo[0].link
         }
     },
     created() {
-        this.adsComponent = {
-            ...this.dataAds
+        if (this.dataAds) {
+            this.adsComponent = { ...this.dataAds }
         }
-        console.table(this.adsComponent)
-
     },
     mounted() {
         // On mount, subscribe to your query:
@@ -504,75 +473,449 @@ export default {
 </script>
 
 <style scoped>
-.produto:nth-child(even) {
-    background: #eee;
+.ecommerce-page {
+  padding-bottom: env(safe-area-inset-bottom);
+  min-height: 100vh;
+  background: #f9fafb;
+}
+.ecommerce-header {
+  background: white;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.ecommerce-header-inner {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.ecommerce-logo {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.ecommerce-info {
+  flex: 1;
+  min-width: 0;
+}
+.ecommerce-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+.ecommerce-desc {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ecommerce-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  gap: 0.5rem;
+}
+.ecommerce-cart-fab {
+  position: fixed !important;
+  right: 1rem;
+  top: 5.5rem;
+  z-index: 20;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.ecommerce-cart-fab.has-items {
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.ecommerce-content {
+  padding: 1rem;
+  padding-bottom: 6rem;
+}
+.ecommerce-category {
+  margin-bottom: 1.5rem;
+}
+.ecommerce-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.ecommerce-category-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  padding-left: 0.25rem;
+}
+.ecommerce-view-toggle {
+  display: flex;
+  gap: 0.25rem;
+}
+.ecommerce-view-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #9ca3af;
+  -webkit-tap-highlight-color: transparent;
+}
+.ecommerce-view-btn:hover,
+.ecommerce-view-btn.active {
+  background: #f3f4f6;
+  color: #059669;
+  border-color: #059669;
+}
+.ecommerce-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .ecommerce-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .ecommerce-grid.view-card {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+/* Lista: layout horizontal */
+.ecommerce-grid.view-list {
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+.ecommerce-grid.view-list .ecommerce-card {
+  flex-direction: row;
+  min-height: 100px;
+}
+.ecommerce-grid.view-list .ecommerce-card-img {
+  width: 100px;
+  min-width: 100px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+.ecommerce-grid.view-list .ecommerce-card-body {
+  flex: 1;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+.ecommerce-grid.view-list .ecommerce-card-title {
+  flex: 1 1 100%;
+  -webkit-line-clamp: 1;
+}
+.ecommerce-grid.view-list .ecommerce-card-desc {
+  display: none;
+}
+.ecommerce-grid.view-list .ecommerce-card-price {
+  margin: 0;
+}
+.ecommerce-grid.view-list .ecommerce-card-btn {
+  margin: 0 0 0 auto;
+}
+/* Compacto: grid mais denso */
+.ecommerce-grid.view-compact {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+.ecommerce-grid.view-compact .ecommerce-card-img {
+  aspect-ratio: 1;
+}
+.ecommerce-grid.view-compact .ecommerce-card-body {
+  padding: 0.5rem;
+  gap: 0.25rem;
+}
+.ecommerce-grid.view-compact .ecommerce-card-title {
+  font-size: 0.8125rem;
+  -webkit-line-clamp: 2;
+}
+.ecommerce-grid.view-compact .ecommerce-card-desc {
+  display: none;
+}
+.ecommerce-grid.view-compact .ecommerce-card-price {
+  font-size: 0.875rem;
+}
+.ecommerce-grid.view-compact .ecommerce-card-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-height: 32px;
+}
+@media (min-width: 640px) {
+  .ecommerce-grid.view-compact {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+.ecommerce-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+.ecommerce-card-img {
+  aspect-ratio: 1;
+  cursor: pointer;
+  overflow: hidden;
+}
+.ecommerce-card-body {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+.ecommerce-card-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ecommerce-card-desc {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ecommerce-card-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #059669;
+  margin: 0;
+}
+.ecommerce-card-btn {
+  margin-top: auto;
+  font-size: 0.8125rem;
+}
+.ecommerce-back {
+  margin-top: 1rem;
+}
+.ecommerce-spacer {
+  height: 1rem;
+}
+.ecommerce-mobile-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  padding: 0.75rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+}
+.ecommerce-mobile-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.ecommerce-mobile-total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.ecommerce-mobile-items {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.9);
+}
+.ecommerce-mobile-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+.ecommerce-mobile-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #047857;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.my-card {
-    width: 100%;
-    min-width: 280px;
+/* Cart drawer */
+.cart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1rem;
 }
-
-.scroll-gallery-img {
-    width: 100%;
-    display: flex;
-    overflow-x: auto;
-    overflow-y: scroll;
-    overflow-scrolling: touch;
-    webkit-overflow-scrolling: touch;
-
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
-
-.scroll-gallery-img::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.062);
-    background-color: #F5F5F5;
+.cart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
 }
-
-.scroll-gallery-img::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-    background-color: #F5F5F5;
+.cart-close {
+  margin: -0.5rem;
 }
-
-.scroll-gallery-img::-webkit-scrollbar-thumb {
-    background-color: #25252523;
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
-
-.my-gallery {
-    width: 100%;
-    display: flex;
-    flex-wrap: nowrap;
+.cart-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
 }
-
-.my-gallery img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    min-height: 150px;
-    min-width: 150px;
+.cart-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
 }
-
-.my-gallery figure {
-    display: flex;
-    margin: 0 !important;
-    margin-right: 0.75rem !important;
-    width: 150px;
-    min-width: 150px;
-    height: 150px;
-    overflow: hidden;
-    border-radius: 0.5rem;
+.cart-item:last-child {
+  border-bottom: none;
 }
-
-.my-gallery figcaption {
-    display: none;
+.cart-item-img {
+  width: 64px;
+  min-width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
 }
-
-.pswp img {
-    max-width: none;
-    object-fit: contain;
+.cart-item-info {
+  flex: 1;
+  min-width: 0;
 }
-
-@import 'lightgallery/css/lightgallery.css';
-@import 'lightgallery/css/lg-thumbnail.css';
-@import 'lightgallery/css/lg-zoom.css';
+.cart-item-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cart-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.cart-qty-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  -webkit-tap-highlight-color: transparent;
+}
+.cart-qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.cart-qty-input {
+  width: 40px;
+  height: 28px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.cart-item-price {
+  font-weight: 600;
+  color: #059669;
+  font-size: 0.9375rem;
+}
+.cart-footer {
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+}
+.cart-total-value {
+  font-size: 1.25rem;
+  color: #059669;
+}
+.cart-checkout {
+  width: 100%;
+  min-height: 48px;
+  font-weight: 600;
+}
+.cart-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+</style>
+<style>
+.ecommerce-img-dialog .q-btn.absolute {
+  background: rgba(255,255,255,0.9);
+  color: #374151;
+}
+.ecommerce-img-dialog .q-btn.absolute:hover {
+  background: white;
+}
 </style>

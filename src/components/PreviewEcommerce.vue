@@ -1,45 +1,34 @@
 <template>
-    <div class="items-start q-gutter-md border-t-2 border-b-2 border-gray-300 bg-gray-100 my-5" @click="goToLoja()" v-if="admin || ecommercePreview">
-      <div class="text-xl w-full pl-4 mt-4 ">Produtos</div>
-      <div class="flex-nowrap overflow-x-scroll flex gap-x-4 p-4 pr-0 mt-0" v-if="ecommercePreview && ecommercePreview.length>0">
-        <q-card class="min-w-max min-h-full flex-grow max-w-xs" v-for="item in ecommercePreview" :key="item.id">
-            <q-img :src="item.link" style="max-height: 150px;" />
-            <q-card-section class="py-0">
-                <div class="no-wrap items-center row w-36">
-                    <div class="col text-base ellipsis">
-                        {{ item.title.name }}
-                    </div>
-                </div>
-            </q-card-section>
-            <q-card-section class="q-pt-none">
-                <div class="text-sm">
-                    R$ {{ item.subtitle.value }}
-                </div>
-                <div class="text-caption text-xs text-grey">
-                    {{ item.title.description }}
-                </div>
-            </q-card-section>
-            <q-separator />
-            <q-card-actions class="w-full flex justify-center">
-                <q-btn flat :color="item.quantityCart > 0 ? 'secondary' : 'primary'" size="md" @click="addToCart(item)">
-                    <q-badge v-if="item.quantityCart > 0" color="black" floating>{{ item.quantityCart }}</q-badge>
-                    Comprar
-                </q-btn>
-            </q-card-actions>
-        </q-card>
-        </div>
-        <div v-else-if="admin" class="ml-8 p-8 w-48 rounded-md flex items-center justify-center
-        ce flex-col bg-white border border-gray-500">
-          <div class="text-center pb-2">
-              Adicionar novo produto a loja
+    <div class="preview-ecommerce" v-if="admin || (ecommercePreview && ecommercePreview.length)">
+      <div class="preview-ecommerce-header">
+        <h2 class="preview-ecommerce-title">Produtos</h2>
+        <button type="button" class="preview-ecommerce-link" @click="goToLoja">
+          Ver loja completa
+          <AppIcon name="chevron-right" :size="18" />
+        </button>
+      </div>
+      <div class="preview-ecommerce-scroll" v-if="ecommercePreview && ecommercePreview.length > 0">
+        <div class="preview-ecommerce-card" v-for="item in ecommercePreview" :key="item.id" @click="goToLoja">
+          <div class="preview-ecommerce-card-inner" @click.stop>
+            <div class="preview-ecommerce-img" @click="goToLoja">
+              <q-img :src="item.link" :ratio="1" class="object-cover" />
+            </div>
+            <div class="preview-ecommerce-body">
+              <h3 class="preview-ecommerce-name">{{ item.title.name }}</h3>
+              <p class="preview-ecommerce-desc" v-if="item.title.description">{{ item.title.description }}</p>
+              <p class="preview-ecommerce-price">R$ {{ item.subtitle.value }}</p>
+              <q-btn flat :color="item.quantityCart > 0 ? 'secondary' : 'primary'" size="sm" class="preview-ecommerce-btn" @click.stop="onComprar(item)">
+                <q-badge v-if="item.quantityCart > 0" color="primary" floating>{{ item.quantityCart }}</q-badge>
+                Comprar
+              </q-btn>
+            </div>
           </div>
-          <!-- add icon plus -->
-          <q-icon name="add_shopping_cart" class="text-2xl" ></q-icon>
-
         </div>
-        <div class="flex justify-end">
-          <q-btn  flat label="Ir para loja completa" class="text-right mb-4 " icon-right="chevron_right" />
-        </div>
+      </div>
+      <div v-else-if="admin" class="preview-ecommerce-empty" @click="goToLoja">
+        <AppIcon name="add-shopping-cart" :size="32" class="text-gray-400" />
+        <span>Adicionar produtos à loja</span>
+      </div>
     </div>
 </template>
 
@@ -57,6 +46,10 @@ export default {
       admin: {
           type: Boolean,
           default: false
+      },
+      addToCart: {
+          type: Function,
+          default: null
       }
     },
     setup() {
@@ -71,17 +64,139 @@ export default {
     methods: {
         goToLoja() {
           const id = this.$route.params.id
-          if(this.admin) {
-                this.$router.push(`/ecommerce/${id}`)
-            } else {
-                this.$router.push(`/loja/${id}`)
-            }
+          if (this.admin) {
+            this.$router.push(`/ecommerce/${id}`)
+          } else {
+            this.$router.push(`/loja/${id}`)
+          }
         },
-
+        onComprar(item) {
+          if (this.addToCart) {
+            this.addToCart(item)
+          } else {
+            this.goToLoja()
+          }
+        }
     }
 }
 </script>
 
-<style lang="scss" scoped>
-
+<style scoped>
+.preview-ecommerce {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
+  margin: 1rem 0;
+}
+.preview-ecommerce-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem 0.75rem;
+}
+.preview-ecommerce-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+.preview-ecommerce-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #059669;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.preview-ecommerce-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 1rem 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.preview-ecommerce-scroll::-webkit-scrollbar {
+  display: none;
+}
+.preview-ecommerce-card {
+  flex-shrink: 0;
+  width: 160px;
+  cursor: pointer;
+}
+.preview-ecommerce-card-inner {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.preview-ecommerce-img {
+  aspect-ratio: 1;
+  overflow: hidden;
+  cursor: pointer;
+}
+.preview-ecommerce-body {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.preview-ecommerce-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.preview-ecommerce-desc {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.preview-ecommerce-price {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #059669;
+  margin: 0;
+}
+.preview-ecommerce-btn {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+.preview-ecommerce-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  margin: 0 1rem;
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 </style>

@@ -1,85 +1,81 @@
 <template>
-  <q-page>
-    <div class="px-4 py-2">
-      <!-- <Location class="my-2" /> -->
+  <q-page class="list-page">
+    <div class="list-container">
+      <template v-if="!loading">
+        <div class="list-header">
+          <h1 class="list-title">Categorias e subcategorias</h1>
+          <p class="list-subtitle">Navegue por cidade e encontre comércios por tema.</p>
+        </div>
 
-       <template v-if="!loading">
-         <div
-          class="h-[auto] p-0"
+        <router-link v-if="admin" :to="`/painel/categorias/add`">
+          <q-btn no-caps rounded unelevated color="primary" icon="add_circle" label="Cadastrar nova categoria" class="admin-btn mb-2"/>
+        </router-link>
+
+        <section
+          v-for="item in categories"
+          :key="item.id"
+          class="category-section"
         >
-
-            <router-link v-if="admin" :to="`/painel/categorias/add`">
-              <q-btn unelevated color="primary" label="Cadastrar nova categoria" class="m-2"/>
-            </router-link>
-            <div
-              v-for="(item) in categories" :key="item.id"
-            >
-            <!-- @click="item.subcategories ? this.subcategories(item.subcategories) : this.goTo(`/categorias/${item.id}`) -->
-              <div
-                class="bg-white border border-gray-200 rounded-md mt-3 p-2 shadow-md"
-              >
-                <div class="flex flex-nowrap pl-1">
-                  <!-- <div class="h-[68px] w-[68px] rounded-sm overflow-hidden">
-                    <q-img
-                      :src="item.iconLink"
-                      :ratio="1"
-                      class="h-[68px] w-[68px] rounded-full"
-                      spinner-color="white"
-                      spinner-size="30px"
-                    />
-                  </div> -->
-                  <div class="pl-3 mb-3">
-                    <h2 class="text-lg text-gray-500">{{ item.name }} em {{ item.addressCity }}</h2>
-                  </div>
-                </div>
-
-              <!-- <router-link v-if="admin" :to="`/painel/categorias/add/${subCategorieActive.id}/${encodeURI(subCategorieActive.name)}`">
-                <q-btn unelevated color="primary" label="Cadastrar sub-categoria" v-if="admin" class="m-2"/>
-              </router-link> -->
-              <router-link
-                v-for="sub in item.subcategories" :key="sub.id"
-                :to="`/categorias/${sub.id}`"
-              >
-                <!-- @click="sub.subcategories.length ? subcategories(sub) : goTo(`/categorias/${sub.id}`)" -->
-
-              <!-- @click="sub.subcategories ? this.subcategories(sub.subcategories) : this.goTo(`/categorias/${sub.id}`) -->
-                <div
-                  class="bg-white border border-gray-200 rounded-md p-2 shadow-md mb-2"
-                >
-                  <div class="flex flex-nowrap h-14 items-center">
-                    <!-- <div class="h-[40px] w-[40px] rounded-sm overflow-hidden"> -->
-                      <!-- <q-img
-                        :src="sub.iconLink"
-                        :ratio="1"
-                        class="h-[40px] w-[40px] rounded-full"
-                        spinner-color="white"
-                        spinner-size="30px"
-                      />
-                    </div> -->
-                    <div class="pl-3">
-                      <h1 class="text-lg text-gray-600 font-semibold">
-                        {{ sub.name }}
-                      </h1>
-                    </div>
-                  </div>
-                </div>
-
-
-
-            </router-link>
+          <div class="category-section-head">
+            <div class="category-head-main">
+              <div class="category-icon-wrap">
+                <q-img
+                  v-if="item.iconLink"
+                  :src="item.iconLink"
+                  class="category-icon-img"
+                  spinner-color="white"
+                  spinner-size="20px"
+                />
+                <AppIcon v-else name="storefront" :size="18" class="text-indigo-500" />
+              </div>
+              <div>
+                <h2 class="category-section-name">{{ item.name }}</h2>
+                <span class="category-section-city">{{ item.addressCity }}</span>
               </div>
             </div>
+          </div>
 
+          <div class="sub-grid">
+            <router-link
+              v-for="sub in item.subcategories"
+              :key="sub.id"
+              :to="`/categorias/${sub.id}`"
+              class="sub-link"
+            >
+              <article class="sub-chip-card">
+                <div class="sub-chip-content">
+                  <div class="sub-chip-left">
+                    <div class="sub-icon-wrap">
+                      <q-img
+                        v-if="sub.iconLink"
+                        :src="sub.iconLink"
+                        class="sub-icon-img"
+                        spinner-color="white"
+                        spinner-size="16px"
+                      />
+                      <AppIcon v-else name="tag" :size="14" class="text-indigo-500" />
+                    </div>
+                    <span class="sub-chip-name">{{ sub.name }}</span>
+                  </div>
+                  <div class="sub-chip-chevron">
+                    <AppIcon name="chevron-right" :size="16" class="text-indigo-400" />
+                  </div>
+                </div>
+              </article>
+            </router-link>
+          </div>
+        </section>
+      </template>
 
-
-         </div>
-       </template>
-       <div v-else v-for="i in 10" :key="i">
-           <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
+      <div v-else>
+        <div class="loading-hint">
+          <q-spinner-dots color="primary" size="28px" />
+          <span>{{ loadingMessage }}</span>
+        </div>
+        <div v-for="i in 10" :key="i">
+          <q-skeleton type="QToolbar" class="my-2 h-[86px]"/>
+        </div>
       </div>
-
-      <!-- {{ categories }} -->
-
     </div>
   </q-page>
 </template>
@@ -104,6 +100,7 @@ export default defineComponent({
       categories: [],
       slide: "0",
       loading : true,
+      loadingMessage: 'Carregando categorias da cidade...',
       localization: {},
       pagination:{
         page: 1,
@@ -124,12 +121,12 @@ export default defineComponent({
     const idSub = this.$route.params.id
     const city = this.$route.params.city
 
-    this.citys.filter(item => {
-      if(item.link === city){
-        this.localization = item
-      }
-    })
-    if(this.categories){
+    const matchedCity = this.citys.find(item => item.link === city)
+    if (matchedCity) {
+      this.localization = matchedCity
+      localStorage.setItem('localization', JSON.stringify(matchedCity))
+    }
+    if(this.categories && this.categories.length){
       this.loading = false
     }
     if(idSub && this.categories){
@@ -142,6 +139,7 @@ export default defineComponent({
     //  const localization = localStorage.getItem("localization")
     //  this.localization =  JSON.parse(localization)
 
+     this.loading = true
      await this.getData()
      if(idSub && !slide){
       this.gotoSub(idSub)
@@ -179,7 +177,7 @@ export default defineComponent({
        if(item) this.subcategories(item)
     },
     async getData () {
-      if(!this.categories){
+      if(this.pagination.page === 1){
         this.loading = true
       }
       let gps
@@ -223,3 +221,163 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.list-page {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.list-container {
+  padding: 10px 12px 16px;
+}
+
+.list-header {
+  margin-bottom: 10px;
+}
+
+.list-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.list-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.category-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px;
+  margin-top: 10px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.category-section-head {
+  margin-bottom: 8px;
+}
+
+.category-head-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-icon-wrap {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 999px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-icon-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.category-section-name {
+  margin: 0;
+  font-size: 0.97rem;
+  color: #334155;
+  font-weight: 700;
+}
+
+.category-section-city {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.sub-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.sub-link {
+  text-decoration: none;
+}
+
+.sub-chip-card {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px;
+  transition: border-color 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.sub-chip-card:active {
+  transform: scale(0.98);
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 15px rgba(79, 70, 229, 0.12);
+}
+
+.sub-chip-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sub-chip-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sub-icon-wrap {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border-radius: 999px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sub-icon-img {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+}
+
+.sub-chip-chevron {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 999px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sub-chip-name {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.87rem;
+}
+
+.admin-btn {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.loading-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 0.84rem;
+  margin: 8px 0 10px;
+}
+</style>

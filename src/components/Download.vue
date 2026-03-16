@@ -2,7 +2,6 @@
   <q-dialog
     v-model="display"
     persistent
-    seamless
     position="standard"
     class="download-modal"
     transition-show="scale"
@@ -48,9 +47,9 @@
 
 <style scoped>
 .download-modal :deep(.q-dialog__backdrop) {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .download-card {

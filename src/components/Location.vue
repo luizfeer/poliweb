@@ -67,14 +67,23 @@
           Use seu GPS e encontre os serviços mais próximos de você!
         </q-card-section>
 
-        <!-- Loading ao trocar cidade -->
-        <div v-if="switchingCity" class="switching-overlay">
-          <div class="switching-content">
-            <p class="text-base font-medium mb-3">Levando você para os comércios de</p>
-            <q-spinner-dots size="48px" color="primary" />
-            <p class="text-base font-semibold text-primary mt-3">{{ model?.city }}</p>
-          </div>
-        </div>
+        <!-- Loading ao trocar cidade (Teleport para garantir overlay fullscreen) -->
+        <Teleport to="body">
+          <Transition name="switch-fade">
+            <div v-if="switchingCity" class="switching-overlay">
+              <div class="switching-content">
+                <p class="switching-text">Levando você para os comércios de</p>
+                <p class="switching-city">{{ model?.city }}</p>
+                <div class="switching-spinner">
+                  <q-spinner-dots size="56px" color="primary" />
+                </div>
+                <Transition name="label-fade" mode="out-in">
+                  <p :key="switchingLabelIndex" class="switching-label">{{ switchingLabels[switchingLabelIndex] }}</p>
+                </Transition>
+              </div>
+            </div>
+          </Transition>
+        </Teleport>
 
         <div v-if="localization && !switchingCity" class="p-4 mx-4 mb-4 rounded-xl bg-gray-50">
           <p class="text-primary font-medium text-sm">Sua última localização</p>
@@ -90,7 +99,7 @@
 </template>
 
 <script>
-import { ref, inject } from "vue";
+import { ref, inject, watch, onUnmounted } from "vue";
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { citysData } from 'src/js/citys'
@@ -100,6 +109,36 @@ export default {
     const store = useStore()
     const router = useRouter()
     const loadCategoriesRef = inject('loadCategories')
+    const switchingCity = ref(false)
+    const switchingLabelIndex = ref(0)
+    const switchingLabels = [
+      'Encontre os melhores comércios na sua região',
+      'Sua agenda de serviços e empresas',
+      'Conectando você aos comércios locais',
+      'Descubra o que sua cidade tem a oferecer',
+      'Comércios perto de você',
+      'A Poliweb na palma da sua mão',
+    ]
+    let labelInterval = null
+
+    watch(switchingCity, (isSwitching) => {
+      if (isSwitching) {
+        switchingLabelIndex.value = 0
+        labelInterval = setInterval(() => {
+          switchingLabelIndex.value = (switchingLabelIndex.value + 1) % switchingLabels.length
+        }, 2500)
+      } else {
+        if (labelInterval) {
+          clearInterval(labelInterval)
+          labelInterval = null
+        }
+      }
+    })
+
+    onUnmounted(() => {
+      if (labelInterval) clearInterval(labelInterval)
+    })
+
     return {
       store,
       router,
@@ -110,8 +149,10 @@ export default {
       localization: ref({}),
       location: ref(null),
       gettingLocation: ref(false),
-      switchingCity: ref(false),
-      dataApi: ref([])
+      switchingCity,
+      dataApi: ref([]),
+      switchingLabels,
+      switchingLabelIndex,
     }
   },
   watch: {
@@ -229,15 +270,73 @@ export default {
 }
 .switching-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.95);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  min-height: 100dvh;
+  background: rgba(255, 255, 255, 0.97);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 9999;
 }
 .switching-content {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
   padding: 2rem;
+  max-width: 280px;
+}
+.switching-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 0 1.25rem;
+  text-align: center;
+  line-height: 1.4;
+}
+.switching-city {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1976d2;
+  margin: 0 0 1.25rem;
+  text-align: center;
+}
+.switching-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+}
+.switching-label {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 1.25rem 0 0;
+  text-align: center;
+  line-height: 1.4;
+  min-height: 2.5rem;
+  max-width: 260px;
+}
+.switch-fade-enter-active,
+.switch-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.switch-fade-enter-from,
+.switch-fade-leave-to {
+  opacity: 0;
+}
+.label-fade-enter-active,
+.label-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.label-fade-enter-from,
+.label-fade-leave-to {
+  opacity: 0;
 }
 </style>

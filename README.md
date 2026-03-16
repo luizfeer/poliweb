@@ -7,6 +7,10 @@ Sua funnção é consumir a API criada em node e hospedado no AWS Lightsail, mos
   - https://www.poliwebapp.com.br/
   - https://play.google.com/store/apps/details?id=br.com.poliwebapp.www.twa
 
+### Cloudflare Pages (build)
+- **Build command:** `pnpm run build`
+- **Build output directory:** `dist/pwa` (ou o que estiver em quasar.conf.js)
+
 ## Install the dependencies
 ```bash
 yarn

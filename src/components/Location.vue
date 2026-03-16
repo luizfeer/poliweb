@@ -70,9 +70,9 @@
         <!-- Loading ao trocar cidade -->
         <div v-if="switchingCity" class="switching-overlay">
           <div class="switching-content">
+            <p class="text-base font-medium mb-3">Levando você para os comércios de</p>
             <q-spinner-dots size="48px" color="primary" />
-            <p class="text-base font-medium mt-4">Carregando categorias...</p>
-            <p class="text-sm text-gray-500">{{ model?.city }}</p>
+            <p class="text-base font-semibold text-primary mt-3">{{ model?.city }}</p>
           </div>
         </div>
 

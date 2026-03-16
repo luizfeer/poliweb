@@ -31,10 +31,36 @@
           debounce="600"
         >
           <template v-slot:prepend>
-            <AppIcon name="search" :size="20" class="text-gray-400" />
+            <div class="search-input-icon">
+              <AppIcon name="search" :size="20" class="text-gray-400" />
+            </div>
           </template>
         </q-input>
       </form>
+
+      <!-- Últimos acessados (formato balão flutuante) -->
+      <div v-if="history.length && !searchInput && !loading" class="history-bubbles-wrapper">
+        <p class="history-bubbles-label">Últimos acessados</p>
+        <div class="history-bubbles">
+          <router-link
+            v-for="item in history"
+            :key="item.id"
+            :to="goToAd(item)"
+            class="history-bubble"
+          >
+            <q-img
+              v-if="item.files?.logo && item.files.logo.length"
+              :src="pathImg(item)"
+              :ratio="1"
+              class="history-bubble-img"
+              spinner-color="white"
+              spinner-size="24px"
+            />
+            <span v-else class="history-bubble-avatar">{{ (item.name || '').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) }}</span>
+            <span class="history-bubble-name">{{ item.name }}</span>
+          </router-link>
+        </div>
+      </div>
 
       <!-- Resultados -->
       <template v-if="!loading">
@@ -53,7 +79,7 @@
             <router-link
               v-for="item in ads"
               :key="item.id"
-              :to="'/' + item.id"
+              :to="goToAd(item)"
               class="result-card-link"
             >
               <div class="result-card">
@@ -116,7 +142,8 @@ export default ({
       admin: ref(false),
       loading : ref(false),
       data: ref({}),
-      searchInput: ref('')
+      searchInput: ref(''),
+      history: ref([])
     };
   },
   watch: {
@@ -177,14 +204,30 @@ export default ({
         this.data = {...item};
         this.slide= '1'
       },
+    goToAd(item) {
+      if (!item?.id || !item?.name) return '/'
+      const slug = encodeURIComponent(
+        item.name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()
+      )
+      return `/${item.id}/${slug}`
+    },
     pathImg (item) {
-      let last = item.files.logo.length - 1
-      return item.files.logo[0].link
+      const logo = item?.files?.logo
+      if (!logo?.length) return ''
+      const sorted = [...logo].sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0))
+      return sorted[0]?.link || ''
     },
   },
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false
-     this.searchInput = this.$route.params.terms
+     this.searchInput = this.$route.params.terms || ''
+     const stored = localStorage.getItem('history')
+     try {
+       this.history = (stored && JSON.parse(stored)) || []
+       if (!Array.isArray(this.history)) this.history = []
+     } catch {
+       this.history = []
+     }
   },
   beforeMount () {
   },
@@ -214,6 +257,13 @@ export default ({
 
 .search-input-wrapper :deep(.q-field__control) {
   box-shadow: none !important;
+}
+
+.search-input-icon {
+  padding-left: 1rem;
+  padding-right: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .search-input-field {
@@ -307,5 +357,89 @@ export default ({
   font-size: 0.8rem;
   color: #6b7280;
   margin: 0;
+}
+
+/* Últimos acessados - formato balão flutuante (sem colar nos cantos) */
+.history-bubbles-wrapper {
+  margin-top: 1.25rem;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.06);
+}
+
+.history-bubbles-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem 0;
+  padding-left: 0.25rem;
+}
+
+.history-bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-start;
+}
+
+.history-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: #ffffff;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.88rem;
+  font-weight: 500;
+  max-width: calc(100% - 0.5rem);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.history-bubble:active {
+  transform: scale(0.98);
+}
+
+.history-bubble:hover {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+}
+
+.history-bubble-img {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.history-bubble-avatar {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-bubble-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
 }
 </style>

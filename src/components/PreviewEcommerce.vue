@@ -11,7 +11,7 @@
         <div class="preview-ecommerce-card" v-for="item in ecommercePreview" :key="item.id" @click="goToLoja">
           <div class="preview-ecommerce-card-inner" @click.stop>
             <div class="preview-ecommerce-img" @click="goToLoja">
-              <q-img :src="item.link" :ratio="1" class="object-cover" />
+              <q-img :src="item.link" :ratio="1" />
             </div>
             <div class="preview-ecommerce-body">
               <h3 class="preview-ecommerce-name">{{ item.title.name }}</h3>
@@ -135,7 +135,7 @@ export default {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
   border: 1px solid #e5e7eb;
   height: 100%;
   display: flex;
@@ -145,6 +145,19 @@ export default {
   aspect-ratio: 1;
   overflow: hidden;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+.preview-ecommerce-img :deep(.q-img__content) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.preview-ecommerce-img :deep(img) {
+  object-fit: contain !important;
+  object-position: center;
 }
 .preview-ecommerce-body {
   padding: 0.75rem;

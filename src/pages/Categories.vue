@@ -99,8 +99,10 @@
 
 <script>
 
-import { ref } from "vue";
+import { ref, watch } from "vue";
 // import AdsPage from 'components/Ads'
+
+const CATEGORIES_VIEW_KEY = 'poliweb_categories_view_mode'
 
 export default ({
   components: {
@@ -108,6 +110,13 @@ export default ({
   },
   name: "PageIndex",
   setup() {
+    const stored = typeof localStorage !== 'undefined' && localStorage.getItem(CATEGORIES_VIEW_KEY)
+    const viewMode = ref(stored === 'grid' || stored === 'list' ? stored : 'list')
+    watch(viewMode, (val) => {
+      try {
+        localStorage.setItem(CATEGORIES_VIEW_KEY, val)
+      } catch (_) {}
+    })
     return {
       colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       ads: ref([]),
@@ -115,7 +124,7 @@ export default ({
       slide: ref('0'),
       loading : ref(true),
       data: ref({}),
-      viewMode: ref('list')
+      viewMode
     };
   },
   methods: {

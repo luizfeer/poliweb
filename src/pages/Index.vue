@@ -94,7 +94,9 @@
             :debounce="300"
           >
             <template v-slot:prepend>
-              <AppIcon name="search" :size="20" class="text-gray-400" />
+              <div class="search-input-icon">
+                <AppIcon name="search" :size="20" class="text-gray-400" />
+              </div>
             </template>
             <template v-slot:append>
               <q-btn
@@ -283,6 +285,13 @@ export default defineComponent({
 
 .search-input-wrapper :deep(.q-field__control) {
   box-shadow: none !important;
+}
+
+.search-input-icon {
+  padding-left: 1rem;
+  padding-right: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .search-input-field {

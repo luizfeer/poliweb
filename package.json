@@ -6,6 +6,8 @@
   "author": "Luiz Almeida <luiz.garra@live.com>",
   "private": true,
   "scripts": {
+    "dev": "quasar dev -m pwa",
+    "dev:spa": "quasar dev",
     "build": "quasar build -m pwa",
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0"

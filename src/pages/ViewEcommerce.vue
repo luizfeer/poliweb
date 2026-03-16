@@ -1,6 +1,6 @@
 <template>
 <div class="ecommerce-page">
-    <div class="ecommerce-header">
+    <div class="ecommerce-header ecommerce-header-glass">
         <div class="ecommerce-header-inner">
             <div class="ecommerce-logo" :class="{ 'cursor-pointer': admin }" @click="admin && $router.push(`/ecommerce/${$route.params.id}`)">
                 <q-img v-if="adsComponent.files && adsComponent.files.logo && (adsComponent.files.logo || {}).length" :src="pathImg()" :ratio="1" class="h-full w-full object-cover" spinner-color="gray-300" spinner-size="40px" />
@@ -10,6 +10,21 @@
                 <h1 class="ecommerce-name">{{ adsComponent.name }}</h1>
                 <p class="ecommerce-desc" v-if="adsComponent.description">{{ adsComponent.description }}</p>
             </div>
+        </div>
+
+        <div class="ecommerce-actions-bar">
+            <button type="button" class="ecommerce-action-btn" @click="copyLink" title="Copiar link">
+                <AppIcon name="link" :size="22" />
+                <span>Copiar link</span>
+            </button>
+            <button type="button" class="ecommerce-action-btn" @click="shareStore" title="Compartilhar">
+                <AppIcon name="share" :size="22" />
+                <span>Compartilhar</span>
+            </button>
+            <button type="button" class="ecommerce-action-btn ecommerce-action-whatsapp" @click="openWhatsappChooser" title="Enviar no WhatsApp">
+                <AppIcon name="whatsapp" :size="22" />
+                <span>WhatsApp</span>
+            </button>
         </div>
 
         <div class="ecommerce-actions">
@@ -24,19 +39,58 @@
         </div>
     </div>
 
+    <q-dialog v-model="whatsappChooser" persistent class="wa-dialog-centered">
+        <q-card class="wa-choice-card">
+            <q-card-section class="wa-choice-header">
+                <div class="wa-choice-icon">
+                    <AppIcon name="whatsapp" :size="24" class="text-white" />
+                </div>
+                <h3 class="wa-choice-title">O que deseja fazer?</h3>
+                <p class="wa-choice-subtitle">Escolha como deseja usar o WhatsApp.</p>
+            </q-card-section>
+            <q-card-section class="q-pt-none">
+                <div class="wa-choice-actions">
+                    <button type="button" class="admin-row-btn" @click="shareToWhatsappFriend">
+                        <div class="arb-icon" style="background: linear-gradient(135deg,#25d366,#128c7e)">
+                            <AppIcon name="share" :size="18" class="text-white" />
+                        </div>
+                        <div class="arb-info">
+                            <span class="arb-label">Compartilhar com um amigo</span>
+                            <span class="arb-sub">Envie o link da loja pelo WhatsApp</span>
+                        </div>
+                        <AppIcon name="chevron-right" :size="20" class="text-gray-400" />
+                    </button>
+                    <button v-if="phoneZap" type="button" class="admin-row-btn" @click="openWhatsappCompany">
+                        <div class="arb-icon" style="background: linear-gradient(135deg,#128c7e,#075e54)">
+                            <AppIcon name="chat" :size="18" class="text-white" />
+                        </div>
+                        <div class="arb-info">
+                            <span class="arb-label">Entrar em contato com a loja</span>
+                            <span class="arb-sub">Fale diretamente com o negócio</span>
+                        </div>
+                        <AppIcon name="chevron-right" :size="20" class="text-gray-400" />
+                    </button>
+                </div>
+            </q-card-section>
+            <q-card-actions align="center" class="q-pb-md">
+                <button class="abs-action-cancel" @click="whatsappChooser = false">Cancelar</button>
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+
     <div class="ecommerce-content">
         <template v-if="(adsComponent.files && adsComponent.files.ecommerceFiltered)">
             <div class="ecommerce-category" v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
                 <div class="ecommerce-category-header">
                     <h2 class="ecommerce-category-title">{{ category[0].label.category.label }}</h2>
                     <div class="ecommerce-view-toggle">
-                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'card' }" @click="viewMode = 'card'" title="Cards">
+                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'card' }" @click="setViewMode('card')" title="Cards">
                             <AppIcon name="layout-grid" :size="18" />
                         </button>
-                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'" title="Lista">
+                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'list' }" @click="setViewMode('list')" title="Lista">
                             <AppIcon name="list" :size="18" />
                         </button>
-                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'compact' }" @click="viewMode = 'compact'" title="Compacto">
+                        <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'compact' }" @click="setViewMode('compact')" title="Compacto">
                             <AppIcon name="layout-list" :size="18" />
                         </button>
                     </div>
@@ -44,7 +98,7 @@
                 <div class="ecommerce-grid" :class="'view-' + viewMode">
                     <div class="ecommerce-card" v-for="item in category" :key="item.id">
                         <div class="ecommerce-card-img" @click="openModalImg(item)">
-                            <q-img :src="item.link" :ratio="1" class="object-cover" />
+                            <q-img :src="item.link" :ratio="1" />
                         </div>
                         <div class="ecommerce-card-body">
                             <h3 class="ecommerce-card-title">{{ item.title.name }}</h3>
@@ -164,11 +218,16 @@ import {
 import {
     liveQuery
 } from "dexie";
+
+const ECOMMERCE_VIEW_KEY = 'poliweb_ecommerce_view_mode'
+
 export default {
     components: {},
     setup() {
         const colors = ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']
-        const viewMode = ref('card')
+        const stored = typeof localStorage !== 'undefined' && localStorage.getItem(ECOMMERCE_VIEW_KEY)
+        const validModes = ['card', 'list', 'compact']
+        const viewMode = ref(validModes.includes(stored) ? stored : 'card')
         return {
             db,
             colors,
@@ -187,6 +246,7 @@ export default {
             pedido: ref(''),
             confirmPedido: ref(false),
             rightDrawerOpen: ref(false),
+            whatsappChooser: ref(false),
             preview: ref(''),
             maximizedToggle: ref(true),
             admin: ref(false),
@@ -245,12 +305,77 @@ export default {
             }
             return false
         },
+        shareUrl() {
+            return typeof window !== 'undefined' ? `${window.location.origin}/loja/${this.$route.params.id}` : ''
+        },
     },
     methods: {
+        setViewMode(mode) {
+            this.viewMode = mode
+            try {
+                localStorage.setItem(ECOMMERCE_VIEW_KEY, mode)
+            } catch (_) {}
+        },
        openModalImg(item) {
         this.componentProps.show = true
           this.componentProps.props = item
       },
+        async copyLink() {
+            try {
+                await navigator.clipboard.writeText(this.shareUrl)
+                this.$q.notify({
+                    color: 'positive',
+                    message: 'Link copiado!',
+                    icon: 'check_circle',
+                    position: 'bottom'
+                })
+            } catch (err) {
+                this.$q.notify({
+                    color: 'negative',
+                    message: 'Não foi possível copiar',
+                    icon: 'error',
+                    position: 'bottom'
+                })
+            }
+        },
+        async shareStore() {
+            const shareData = {
+                title: this.adsComponent.name,
+                text: (this.adsComponent.description || this.adsComponent.name).slice(0, 100),
+                url: this.shareUrl
+            }
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData)
+                    this.$q.notify({
+                        color: 'positive',
+                        message: 'Compartilhado com sucesso!',
+                        icon: 'check_circle',
+                        position: 'bottom'
+                    })
+                } else {
+                    await this.copyLink()
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    await this.copyLink()
+                }
+            }
+        },
+        openWhatsappChooser() {
+            this.whatsappChooser = true
+        },
+        shareToWhatsappFriend() {
+            const text = `Olha essa loja no Poliweb: ${this.shareUrl}`
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`
+            this.whatsappChooser = false
+            window.open(url, '_blank')
+        },
+        openWhatsappCompany() {
+            const url = `https://wa.me/55${this.phoneZap}?text=Ol%C3%A1! Vim pelo app Poliweb!`
+            this.whatsappChooser = false
+            window.open(url, '_blank')
+        },
         backPage() {
             this.$router.go(-1)
         },
@@ -479,12 +604,56 @@ export default {
   background: #f9fafb;
 }
 .ecommerce-header {
-  background: white;
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 10;
+}
+.ecommerce-header-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.ecommerce-actions-bar {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  flex-wrap: nowrap;
+  justify-content: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.ecommerce-actions-bar::-webkit-scrollbar { display: none; }
+.ecommerce-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  color: #4b5563;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .ecommerce-action-btn span { display: none; }
+  .ecommerce-action-btn { padding: 0.5rem; flex: 0 0 auto; }
+}
+.ecommerce-action-btn:active { background: rgba(243, 244, 246, 0.9); }
+.ecommerce-action-whatsapp {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+  color: white !important;
 }
 .ecommerce-header-inner {
   display: flex;
@@ -673,7 +842,7 @@ export default {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
@@ -682,6 +851,15 @@ export default {
   aspect-ratio: 1;
   cursor: pointer;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+.ecommerce-card-img :deep(.q-img__content),
+.ecommerce-card-img :deep(img) {
+  object-fit: contain !important;
+  object-position: center;
 }
 .ecommerce-card-body {
   padding: 0.75rem;

@@ -39,10 +39,27 @@
         </q-list>
     </q-drawer>
     <transition name="slide" mode="out-in">
-        <q-page-container>
+        <q-page-container :class="{ 'has-glass-navbar': showGlassNavbar }">
             <router-view />
         </q-page-container>
     </transition>
+    <!-- Navbar balão centralizado (estilo Apple) -->
+    <div v-if="showGlassNavbar" class="glass-navbar-wrapper">
+        <nav class="glass-navbar">
+            <router-link to="/" class="glass-nav-item" :class="{ active: $route.fullPath === '/' }">
+                <AppIcon name="home" :size="22" />
+                <span>Home</span>
+            </router-link>
+            <router-link to="/encontre" class="glass-nav-item" :class="{ active: $route.fullPath === '/encontre' }">
+                <AppIcon name="storefront" :size="22" />
+                <span>Categorias</span>
+            </router-link>
+            <router-link to="/buscar" class="glass-nav-item" :class="{ active: $route.fullPath.startsWith('/buscar') }">
+                <AppIcon name="search" :size="22" />
+                <span>Buscar</span>
+            </router-link>
+        </nav>
+    </div>
     <Download />
 </q-layout>
 </template>
@@ -50,6 +67,7 @@
 <script>
 import EssentialLink from "components/EssentialLink.vue";
 import Download from "components/Download.vue";
+import AppIcon from "components/AppIcon.vue";
 
 const linksList = [{
         title: "Home",
@@ -120,7 +138,8 @@ export default defineComponent({
 
     components: {
         EssentialLink,
-        Download
+        Download,
+        AppIcon
     },
 
     setup() {
@@ -138,6 +157,14 @@ export default defineComponent({
                 leftDrawerOpen.value = !leftDrawerOpen.value;
             },
         };
+    },
+    computed: {
+        showGlassNavbar() {
+            const p = this.$route.fullPath;
+            // Esconde apenas na página de anúncio (/:id ou /:id/:slug)
+            const isAdPage = /^\/\d+(\/.*)?$/.test(p.replace(/\?.*$/, ''));
+            return !isAdPage;
+        },
     },
     data() {
         return {
@@ -338,5 +365,73 @@ slide-enter-active,
 .slide-leave-to {
     opacity: 0;
     transform: translateX(-30%);
+}
+
+/* Navbar balão centralizado (estilo Apple) - mobile e desktop */
+.glass-navbar-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  z-index: 50;
+  pointer-events: none;
+}
+.glass-navbar-wrapper > nav {
+  pointer-events: auto;
+}
+.glass-navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  max-width: 280px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.glass-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s, background 0.2s;
+}
+.glass-nav-item:hover,
+.glass-nav-item.active {
+  color: #059669;
+  background: rgba(5, 150, 105, 0.08);
+}
+.glass-nav-item :deep(svg) {
+  flex-shrink: 0;
+}
+/* Celular: apenas ícones na navbar */
+@media (max-width: 600px) {
+  .glass-nav-item span {
+    display: none;
+  }
+  .glass-nav-item {
+    padding: 0.5rem;
+  }
+}
+.has-glass-navbar {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
 </style>

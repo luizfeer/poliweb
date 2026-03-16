@@ -67,13 +67,16 @@
           <AppIcon name="play-circle-filled" :size="32" class="text-white" />
           <span class="ads-gallery-video-num">{{ i + 1 }}</span>
         </div>
-        <vue-picture-swipe
-          v-if="items && items.length"
-          @click="onTopGalleryClick"
-          :items="items"
-          :options="{ bgOpacity: 0.85 }"
-          class="ads-gallery-items"
-        />
+        <div class="ads-gallery-pswp-wrap">
+          <vue-picture-swipe
+            v-if="items && items.length"
+            @click="onTopGalleryClick"
+            @open="movePswpToBody"
+            :items="items"
+            :options="{ bgOpacity: 0.85 }"
+            class="ads-gallery-items"
+          />
+        </div>
       </div>
       <q-btn v-if="admin" flat rounded color="primary" label="Editar imagens" size="sm" :to="`/img/${adsComponent.id}`" class="mt-2"/>
       <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
@@ -474,24 +477,26 @@
       </q-card>
     </q-dialog>
 
-    <!-- Barra de ações fixa -->
-    <div class="ads-actions-bar">
-      <button type="button" class="ads-action-btn" @click="copyLink" title="Copiar link">
-        <AppIcon name="link" :size="22" />
-        <span>Copiar link</span>
-      </button>
-      <button type="button" class="ads-action-btn" @click="shareAd" title="Compartilhar">
-        <AppIcon name="share" :size="22" />
-        <span>Compartilhar</span>
-      </button>
-      <button type="button" class="ads-action-btn ads-action-whatsapp" @click="openWhatsappChooser" title="WhatsApp">
-        <AppIcon name="whatsapp" :size="22" />
-        <span>Enviar no WhatsApp</span>
-      </button>
-      <button v-if="lastAddress" type="button" class="ads-action-btn" @click="openMap" title="Ver no mapa">
-        <AppIcon name="place" :size="22" />
-        <span>Ver no mapa</span>
-      </button>
+    <!-- Barra de ações fixa (balão centralizado no desktop) -->
+    <div class="ads-actions-bar-wrapper">
+      <div class="ads-actions-bar">
+        <button type="button" class="ads-action-btn" @click="copyLink" title="Copiar link">
+          <AppIcon name="link" :size="22" />
+          <span>Copiar link</span>
+        </button>
+        <button type="button" class="ads-action-btn" @click="shareAd" title="Compartilhar">
+          <AppIcon name="share" :size="22" />
+          <span>Compartilhar</span>
+        </button>
+        <button type="button" class="ads-action-btn ads-action-whatsapp" @click="openWhatsappChooser" title="Enviar no WhatsApp">
+          <AppIcon name="whatsapp" :size="22" />
+          <span>WhatsApp</span>
+        </button>
+        <button v-if="lastAddress" type="button" class="ads-action-btn" @click="openMap" title="Ver no mapa">
+          <AppIcon name="place" :size="22" />
+          <span>Ver no mapa</span>
+        </button>
+      </div>
     </div>
     <q-dialog v-model="whatsappChooser" persistent class="wa-dialog-centered">
       <q-card class="wa-choice-card">
@@ -671,6 +676,14 @@ export default {
   methods: {
     onlyNumber(n) {
       return n.replace(/\D/g, '')
+    },
+    movePswpToBody() {
+      this.$nextTick(() => {
+        const pswp = document.querySelector('.pswp')
+        if (pswp && pswp.parentElement !== document.body) {
+          document.body.appendChild(pswp)
+        }
+      })
     },
     onTopGalleryClick() {
       if(!this.openGalleryStatus){
@@ -1183,8 +1196,19 @@ export default {
 
    },
   mounted () {
-    // const el = document.getElementById('lightgallery')
-    // window.lightGallery(el)
+    // iOS Safari: move PhotoSwipe para body quando abrir (corrige z-index)
+    this.pswpObserver = new MutationObserver(() => {
+      const pswp = document.querySelector('.pswp.pswp--open')
+      if (pswp && pswp.parentElement !== document.body) {
+        document.body.appendChild(pswp)
+      }
+    })
+    this.pswpObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    })
     const token = localStorage.getItem('token')
     if(this.adsComponent.files.gallery){
       this.items = this.adsComponent.files.gallery
@@ -1211,29 +1235,61 @@ export default {
       this.saveHistory()
       this.getFollowColor()
   },
+  beforeUnmount() {
+    if (this.pswpObserver) {
+      this.pswpObserver.disconnect()
+    }
+  },
 };
 </script>
 <style scoped>
 .ads-page {
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
-.ads-actions-bar {
+.ads-actions-bar-wrapper {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   display: flex;
-  gap: 0.35rem;
-  padding: 0.5rem 0.5rem;
+  justify-content: center;
+  padding: 0.5rem 1rem;
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
-  background: white;
-  border-top: 1px solid #e5e7eb;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
   z-index: 100;
+}
+.ads-actions-bar {
+  display: flex;
+  gap: 0.35rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   justify-content: center;
   flex-wrap: nowrap;
+  padding: 0.4rem 0.6rem;
+  width: auto;
+  max-width: min(420px, calc(100vw - 2rem));
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.ads-actions-bar .ads-action-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+@media (min-width: 768px) {
+  .ads-actions-bar-wrapper {
+    padding: 0.75rem 1.5rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+  .ads-actions-bar {
+    max-width: 480px;
+    padding: 0.5rem 0.75rem;
+  }
 }
 .ads-actions-bar::-webkit-scrollbar {
   display: none;
@@ -1257,7 +1313,8 @@ export default {
   -webkit-tap-highlight-color: transparent;
   text-decoration: none;
 }
-@media (max-width: 360px) {
+/* Celular: apenas ícones, sem texto (evita ficar apertado) */
+@media (max-width: 600px) {
   .ads-action-btn span {
     display: none;
   }
@@ -1631,6 +1688,7 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.08);
 }
 @media (min-width: 768px) {
   .ads-media-grid-photo { aspect-ratio: 3 / 4; }
@@ -1876,6 +1934,11 @@ export default {
   line-height: 1.6;
   margin: 0;
 }
+/* Wrapper da galeria - z-index baixo para não sobrepor o header (PhotoSwipe abre no body com z-index próprio) */
+.ads-gallery-pswp-wrap {
+  position: relative;
+  z-index: 1;
+}
 .ads-gallery {
   display: flex;
   gap: 0.75rem;
@@ -1917,6 +1980,20 @@ export default {
   overflow: hidden;
   margin: 0 !important;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.ads-gallery :deep(figure a) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.ads-gallery :deep(figure img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+  object-position: center;
+  transform: scale(1.08);
 }
 .ads-contact-item {
   display: flex;

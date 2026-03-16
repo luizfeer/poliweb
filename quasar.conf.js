@@ -78,6 +78,7 @@ module.exports = configure(function (ctx) {
     devServer: {
       https: false,
       port: 3050,
+      host: '0.0.0.0', // permite acesso via IP na rede (ex: 192.168.1.x:3050)
       open: true // opens browser window automatically
     },
 

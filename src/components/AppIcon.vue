@@ -59,7 +59,8 @@ import {
   LayoutList,
   Maximize2,
   Video,
-  VideoOff
+  VideoOff,
+  MessageCircle
 } from 'lucide-vue-next'
 
 // Ícones de marca (SVG inline - Lucide não tem brands)
@@ -146,7 +147,8 @@ const iconMap = {
   'videocam': Video,
   'video': Video,
   'videocam-off': VideoOff,
-  'video-off': VideoOff
+  'video-off': VideoOff,
+  chat: MessageCircle
 }
 
 export default {

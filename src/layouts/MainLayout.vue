@@ -390,15 +390,17 @@ slide-enter-active,
   gap: 0.25rem;
   padding: 0.4rem 0.6rem;
   max-width: 280px;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 16px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 .glass-nav-item {
   display: flex;
@@ -413,11 +415,14 @@ slide-enter-active,
   font-weight: 500;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s, background 0.2s;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 .glass-nav-item:hover,
 .glass-nav-item.active {
   color: #059669;
-  background: rgba(5, 150, 105, 0.08);
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(5, 150, 105, 0.2);
 }
 .glass-nav-item :deep(svg) {
   flex-shrink: 0;

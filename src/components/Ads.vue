@@ -477,9 +477,13 @@
       </q-card>
     </q-dialog>
 
-    <!-- Barra de ações fixa (balão centralizado no desktop) -->
+    <!-- Barra de ações fixa (balão vidro transparente) -->
     <div class="ads-actions-bar-wrapper">
       <div class="ads-actions-bar">
+        <router-link to="/" class="ads-action-btn" title="Início">
+          <AppIcon name="home" :size="22" />
+          <span>Início</span>
+        </router-link>
         <button type="button" class="ads-action-btn" @click="copyLink" title="Copiar link">
           <AppIcon name="link" :size="22" />
           <span>Copiar link</span>
@@ -1266,16 +1270,16 @@ export default {
   flex-wrap: nowrap;
   padding: 0.4rem 0.6rem;
   width: auto;
-  max-width: min(420px, calc(100vw - 2rem));
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  max-width: min(480px, calc(100vw - 2rem));
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 4px 20px rgba(0, 0, 0, 0.06),
+    0 2px 12px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .ads-actions-bar .ads-action-btn {
   flex: 0 0 auto;
@@ -1300,8 +1304,8 @@ export default {
   gap: 0.25rem;
   padding: 0.4rem 0.5rem;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  background: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.35);
   color: #4b5563;
   font-size: 0.75rem;
   font-weight: 500;
@@ -1323,8 +1327,9 @@ export default {
     flex: 0 0 auto;
   }
 }
+.ads-action-btn:hover,
 .ads-action-btn:active {
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.5);
 }
 .ads-action-whatsapp {
   background: #25d366 !important;

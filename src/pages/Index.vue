@@ -178,7 +178,7 @@ export default defineComponent({
       if (!Array.isArray(gallery) || !gallery.length) return []
       return gallery
         .filter((g) => !g.deletedAt && g.link)
-        .slice(0, 4)
+        .slice(0, 6)
         .map((g) => g.link)
     },
   },
@@ -315,22 +315,23 @@ export default defineComponent({
 .favorite-gallery16 {
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 18px;
-  background: #020617;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
+  border-radius: 16px;
+  background: #0f172a;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   overflow: hidden;
 }
 
 @media (min-width: 640px) {
   .favorite-gallery16 {
-    max-width: 260px;
+    max-width: 280px;
+    aspect-ratio: 4 / 3;
   }
 }
 
 .favorite-gallery16-inner {
   width: 100%;
   height: 100%;
-  padding: 4px;
+  padding: 5px;
 }
 
 .favorite-gallery16-grid {
@@ -338,31 +339,34 @@ export default defineComponent({
   height: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .favorite-gallery16-img {
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .favorite-gallery16-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .favorite-gallery16-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 14px;
-  border: 1px dashed rgba(148, 163, 184, 0.7);
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  border-radius: 10px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+  background: radial-gradient(circle at top, #1e293b 0, #0f172a 60%);
 }
 
 .category-grid-card {

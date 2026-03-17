@@ -270,27 +270,24 @@ export default defineComponent({
        if(item) this.subcategories(item)
     },
     async getData () {
+      const addressId = this.localization?.id
+      if (!addressId) {
+        this.loading = false
+        return
+      }
       if(!this.categories){
         this.loading = true
       }
-      let gps
-      if(this.localization){
-        gps = `lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}&nonDeleted=true`
-      }
-      this.$api.get(`/categories?${gps ? gps : 'nonDeleted=true'}`)
+      this.$api.get(`/cities/${addressId}/categories?nonDeleted=true`)
       .then((response) => {
           if(response.data){
             try {
-              let categoriesData = response.data.categories
-              categoriesData = categoriesData.filter((item)=>{ return item.addressCity === this.localization.city })
-              console.log('before', categoriesData)
+              let categoriesData = response.data.categories ?? []
               categoriesData.forEach(e => {
                 return e.name = e.name.trim()
               })
-              categoriesData.sort((a, b) => a.name.localeCompare(b.name));
-              console.log('after', categoriesData)
-
-              categoriesData = categoriesData.filter((item)=>{ return !item.deletedAt })
+              categoriesData.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+              categoriesData = categoriesData.filter((item) => !item.deletedAt)
 
               this.categories = categoriesData
             } catch (error) {

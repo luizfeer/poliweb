@@ -7,7 +7,11 @@ import axios from 'axios'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'https://apiv2.poliwebapp.com.br' })
+const baseURL = process.env.DEV
+  ? (process.env.API_URL_LOCAL || 'http://localhost:5000')
+  : (process.env.API_URL || 'https://apiv3.poliwebapp.com.br')
+
+const api = axios.create({ baseURL })
 // const apiCep = axios.create({ baseURL: 'https://www.cepaberto.com/api/v3/nearest?' })
 const AUTH_TOKEN =  localStorage.getItem('token')
 export default boot(({ app }) => {

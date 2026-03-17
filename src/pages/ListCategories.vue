@@ -171,19 +171,20 @@ export default defineComponent({
        if(item) this.subcategories(item)
     },
     async getData () {
+      const addressId = this.localization?.id
+      if (!addressId) {
+        this.loading = false
+        return
+      }
       if(!this.categories){
         this.loading = true
       }
-      let gps
-      if(this.localization){
-        gps = `lat=${this.localization.coordinates.lat}&long=${this.localization.coordinates.long}&nonDeleted=true`
-      }
-      const pagination = `page=${this.pagination.page}&limit=${this.pagination.limit}&`
-      await this.$api.get(`/categories?${pagination}${gps ? gps : 'nonDeleted=true'}`)
+      const pagination = `page=${this.pagination.page}&limit=${this.pagination.limit}`
+      await this.$api.get(`/cities/${addressId}/categories?nonDeleted=true&${pagination}`)
       .then((response) => {
           if(response.data){
-            this.pagination.total = response.data.total
-            let categoriesData = response.data.categories
+            this.pagination.total = response.data.total ?? response.data.categories?.length ?? 0
+            let categoriesData = response.data.categories ?? []
             categoriesData = categoriesData.filter((item)=>{ return !item.deletedAt && item.subcategories.length })
             categoriesData.forEach(e => {
               return e.name = e.name.trim()

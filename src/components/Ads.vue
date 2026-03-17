@@ -6,8 +6,8 @@
         <div
           class="ads-logo-wrapper"
           :class="{
-            'cursor-pointer': admin || hasVideos,
-            'ads-story-ring': hasVideos && !admin
+            'cursor-pointer': admin || mediaItems.length,
+            'ads-story-ring': mediaItems.length && !admin
           }"
           @click="onLogoClick"
         >
@@ -46,7 +46,7 @@
     </div>
     <preview-ecommerce :ecommercePreview="adsComponent.files?.ecommercePreview" :admin="admin" />
 
-    <!-- Galeria de fotos e vídeos -->
+    <!-- Galeria de fotos e vídeos - estilo Stories -->
     <div class="ads-section">
       <div class="ads-gallery">
         <div v-if="admin" class="ads-gallery-add" @click="$refs.gallery?.click()">
@@ -57,25 +57,34 @@
           <AppIcon name="videocam" :size="32" />
           <span>Vídeo</span>
         </div>
-        <!-- Thumbnails de vídeo na galeria horizontal -->
+        <!-- Thumbnails de mídia (fotos + vídeos) na galeria horizontal -->
         <div
-          v-for="(video, i) in storyVideos"
-          :key="'gvt-' + video.id"
+          v-for="(item, i) in mediaItems"
+          :key="'gmt-' + (item.id || i)"
           class="ads-gallery-video-thumb"
           @click="openStoryAt(i)"
         >
-          <AppIcon name="play-circle-filled" :size="32" class="text-white" />
+          <template v-if="item.type === 'video'">
+            <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" alt="" />
+            <video
+              v-else-if="item.link && !videoThumbFailed[String(item.id)]"
+              :data-video-id="String(item.id)"
+              :src="item.link"
+              crossorigin="anonymous"
+              preload="metadata"
+              muted
+              playsinline
+              class="ads-video-thumb-video"
+              @loadeddata="captureVideoThumb"
+              @canplay="captureVideoThumb"
+              @error="onVideoThumbError"
+            />
+            <AppIcon name="play-circle-filled" :size="32" class="text-white" />
+          </template>
+          <template v-else>
+            <img :src="item.thumbnail || item.src" class="ads-video-thumb-img" alt="" loading="lazy" />
+          </template>
           <span class="ads-gallery-video-num">{{ i + 1 }}</span>
-        </div>
-        <div class="ads-gallery-pswp-wrap">
-          <vue-picture-swipe
-            v-if="items && items.length"
-            @click="onTopGalleryClick"
-            @open="movePswpToBody"
-            :items="items"
-            :options="{ bgOpacity: 0.85 }"
-            class="ads-gallery-items"
-          />
         </div>
       </div>
       <q-btn v-if="admin" flat rounded color="primary" label="Editar imagens" size="sm" :to="`/img/${adsComponent.id}`" class="mt-2"/>
@@ -230,13 +239,13 @@
         <div class="admin-divider" />
 
         <!-- Telefone -->
-        <button class="admin-row-btn" @click="expand.phone = true">
+        <button class="admin-row-btn" @click="resetPhone(); expand.phone = true">
           <div class="arb-icon" style="background: linear-gradient(135deg,#22c55e,#16a34a)">
             <q-icon name="phone" color="white" size="18px" />
           </div>
           <div class="arb-info">
-            <span class="arb-label">{{ editPhone.edit ? 'Editar telefone' : 'Adicionar telefone' }}</span>
-            <span class="arb-sub">Gerencie os contatos do perfil</span>
+            <span class="arb-label">Telefones</span>
+            <span class="arb-sub">Adicionar, editar ou remover contatos</span>
           </div>
           <q-icon name="chevron_right" color="grey-5" size="20px" />
         </button>
@@ -276,18 +285,40 @@
 
     <app-bottom-sheet
       v-model="expand.phone"
-      :icon="editPhone.edit ? 'phone' : 'add'"
+      icon="phone"
       icon-color="#22c55e"
-      :title="editPhone.edit ? 'Editar telefone' : 'Adicionar telefone'"
-      subtitle="Gerencie os números de contato"
+      title="Telefones"
+      subtitle="Adicione, edite ou remova os números de contato"
     >
+      <!-- Lista de telefones existentes -->
+      <div v-if="adsComponent.phones?.filter(p => !p.deletedAt).length" class="phone-list">
+        <div
+          v-for="phoneItem in adsComponent.phones.filter(p => !p.deletedAt)"
+          :key="phoneItem.id"
+          class="phone-list-item"
+        >
+          <span class="phone-list-number">{{ phone(phoneItem.phone) }}</span>
+          <span v-if="phoneItem.isWhatsapp" class="phone-list-badge">WhatsApp</span>
+          <div class="phone-list-actions">
+            <q-btn flat dense round size="sm" color="primary" @click="editPhoneData(phoneItem)" title="Editar">
+              <AppIcon name="edit" :size="16" />
+            </q-btn>
+            <q-btn flat dense round size="sm" color="negative" @click="deletePhoneData=phoneItem; confirm=true; expand.phone=false" title="Remover">
+              <AppIcon name="delete" :size="16" />
+            </q-btn>
+          </div>
+        </div>
+      </div>
       <q-form @submit="newPhone" class="phone-form">
+        <p class="phone-form-label">{{ editPhone.edit ? 'Editar telefone' : 'Novo telefone' }}</p>
         <q-input
           outlined
           dense
           v-model="editPhone.phone"
           label="Número"
           name="phone"
+          mask="(##) #####-####"
+          placeholder="(00) 00000-0000"
           class="w-full"
         />
         <label class="phone-check-label">
@@ -299,37 +330,46 @@
         <button class="abs-action-cancel" @click="expand.phone = false; resetPhone()">Cancelar</button>
         <button class="abs-action-confirm" @click="newPhone">
           <q-icon name="check" size="17px" />
-          <span>Salvar</span>
+          <span>{{ editPhone.edit ? 'Salvar' : 'Adicionar' }}</span>
         </button>
       </template>
     </app-bottom-sheet>
 
-    <!-- Grid de mídia estilo Instagram (fotos + vídeos) -->
-    <div class="ads-section" v-if="(items && items.length) || storyVideos.length">
-      <h2 class="ads-card-title mb-3">{{ storyVideos.length && items && items.length ? 'Fotos e vídeos' : storyVideos.length ? 'Vídeos' : 'Fotos' }}</h2>
+    <!-- Grid de mídia estilo Stories (fotos + vídeos) -->
+    <div class="ads-section" v-if="mediaItems.length">
+      <h2 class="ads-card-title mb-3">Fotos e vídeos</h2>
       <div class="ads-photo-grid-bleed">
         <div class="ads-media-grid">
-          <!-- Thumbnails de vídeo no grid -->
           <div
-            v-for="(video, i) in storyVideos"
-            :key="'mgv-' + video.id"
-            class="ads-media-grid-video"
+            v-for="(item, i) in mediaItems"
+            :key="'mgm-' + (item.id || i)"
+            :class="item.type === 'video' ? 'ads-media-grid-video' : 'ads-media-grid-photo'"
             @click="openStoryAt(i)"
           >
-            <div class="ads-media-grid-video-inner">
-              <AppIcon name="play-circle-filled" :size="40" class="text-white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5))" />
-              <span class="ads-media-grid-video-badge">vídeo</span>
-            </div>
+            <template v-if="item.type === 'video'">
+              <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" alt="" />
+              <video
+                v-else-if="item.link && !videoThumbFailed[String(item.id)]"
+                :data-video-id="String(item.id)"
+                :src="item.link"
+                crossorigin="anonymous"
+                preload="metadata"
+                muted
+                playsinline
+                class="ads-video-thumb-video"
+                @loadeddata="captureVideoThumb"
+                @canplay="captureVideoThumb"
+                @error="onVideoThumbError"
+              />
+              <div class="ads-media-grid-video-inner">
+                <AppIcon name="play-circle-filled" :size="40" class="text-white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5))" />
+                <span class="ads-media-grid-video-badge">vídeo</span>
+              </div>
+            </template>
+            <template v-else>
+              <img :src="item.thumbnail || item.src" loading="lazy" class="ads-media-grid-photo-img" />
+            </template>
           </div>
-          <!-- Fotos no grid -->
-          <a
-            v-for="(item, i) in items"
-            :key="'mgp-' + i"
-            class="ads-media-grid-photo"
-            @click.prevent="openGallery(i)"
-          >
-            <img :src="item.thumbnail || item.src" loading="lazy" />
-          </a>
         </div>
       </div>
     </div>
@@ -409,13 +449,13 @@
       </template>
     </app-bottom-sheet>
 
-    <!-- Story viewer - vídeos no perfil estilo Stories -->
+    <!-- Story viewer - fotos e vídeos estilo Stories -->
     <q-dialog v-model="storyOpen" maximized transition-show="fade" transition-hide="fade" class="story-dialog">
       <div class="story-container" @touchstart="onStoryTouchStart" @touchend="onStoryTouchEnd">
         <!-- Barras de progresso -->
         <div class="story-bars">
           <div
-            v-for="(video, i) in storyVideos"
+            v-for="(item, i) in mediaItems"
             :key="i"
             class="story-bar"
           >
@@ -436,15 +476,22 @@
           <button class="story-close-btn" @click="closeStory">✕</button>
         </div>
 
-        <!-- Vídeo -->
+        <!-- Vídeo ou foto -->
         <video
+          v-if="isCurrentVideo"
           ref="storyVideo"
-          class="story-video"
+          class="story-media"
           playsinline
           autoplay
-          :src="storyVideos[storyIndex] && storyVideos[storyIndex].link"
+          :src="currentMediaItem?.link"
           @ended="nextStory"
           @timeupdate="updateStoryProgress"
+        />
+        <img
+          v-else-if="currentMediaItem?.type === 'photo'"
+          :src="currentMediaItem?.src"
+          class="story-media"
+          alt=""
         />
 
         <!-- Áreas de toque para navegar (esquerda / direita) -->
@@ -453,10 +500,10 @@
 
         <!-- Controles inferiores -->
         <div class="story-controls">
-          <button class="story-ctrl-btn" @click.stop="toggleStoryPause">
+          <button v-if="isCurrentVideo" class="story-ctrl-btn" @click.stop="toggleStoryPause">
             <AppIcon :name="storyPaused ? 'play-arrow' : 'pause'" :size="28" class="text-white" />
           </button>
-          <button v-if="admin" class="story-ctrl-btn" @click.stop="confirmStoryDelete = true">
+          <button v-if="admin && isCurrentVideo" class="story-ctrl-btn" @click.stop="confirmStoryDelete = true">
             <AppIcon name="delete" :size="28" class="text-white" />
           </button>
         </div>
@@ -549,8 +596,6 @@
 </template>
 
 <script>
- import VuePictureSwipe from 'vue3-picture-swipe';
-
 import AddAddress from 'components/add/Address'
 import FixInfos from 'components/FixInfos'
 import PreviewEcommerce from 'components/PreviewEcommerce'
@@ -560,7 +605,6 @@ export default {
    components:{
     AddAddress,
     FixInfos,
-    VuePictureSwipe,
     PreviewEcommerce,
     AppBottomSheet
     // Lightgallery,
@@ -582,7 +626,6 @@ export default {
       colors: ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning'],
       slide: 1,
       index: [],
-      openGalleryStatus: false,
       adsComponent: {
           id: '',
           avatar: '',
@@ -622,7 +665,6 @@ export default {
       photoUpload: false,
       confirmGallery: false,
       preview: '',
-      items: '',
       storyOpen: false,
       storyIndex: 0,
       storyProgress: 0,
@@ -634,6 +676,10 @@ export default {
       videoFileName: '',
       videoUploading: false,
       videoDragOver: false,
+      videoThumbs: {},
+      videoThumbFailed: {},
+      storyPhotoDuration: 5000,
+      storyPhotoTimer: null,
     };
   },
   computed: {
@@ -676,36 +722,68 @@ export default {
         }))
       return [...videos, ...photos].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
     },
+    currentMediaItem() {
+      return this.mediaItems[this.storyIndex] || null
+    },
+    isCurrentVideo() {
+      return this.currentMediaItem?.type === 'video'
+    },
+  },
+  watch: {
+    'adsComponent.id': {
+      handler(newId, oldId) {
+        if (oldId !== undefined && newId !== oldId) {
+          this.videoThumbs = {}
+          this.videoThumbFailed = {}
+        }
+      },
+    },
   },
   methods: {
+    captureVideoThumb(e) {
+      const video = e.target
+      const id = video.dataset.videoId
+      if (!id || this.videoThumbs[id]) return
+      const tryCapture = () => {
+        try {
+          const w = video.videoWidth
+          const h = video.videoHeight
+          if (!w || !h) return
+          const canvas = document.createElement('canvas')
+          canvas.width = w
+          canvas.height = h
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(video, 0, 0)
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+          this.videoThumbs = { ...this.videoThumbs, [id]: dataUrl }
+          this.$forceUpdate()
+        } catch (err) {
+          this.onVideoThumbError({ target: video })
+        }
+      }
+      if (video.readyState >= 2 && video.videoWidth > 0) {
+        tryCapture()
+        return
+      }
+      const onSeeked = () => {
+        video.removeEventListener('seeked', onSeeked)
+        tryCapture()
+      }
+      video.addEventListener('seeked', onSeeked)
+      const t = (video.duration > 0 && isFinite(video.duration))
+        ? Math.min(1, video.duration * 0.1)
+        : 0
+      video.currentTime = t
+    },
+    onVideoThumbError(e) {
+      const id = e.target?.dataset?.videoId
+      if (id) {
+        this.videoThumbFailed = { ...this.videoThumbFailed, [id]: true }
+        this.$forceUpdate()
+      }
+    },
     onlyNumber(n) {
       return n.replace(/\D/g, '')
-    },
-    movePswpToBody() {
-      this.$nextTick(() => {
-        const pswp = document.querySelector('.pswp')
-        if (pswp && pswp.parentElement !== document.body) {
-          document.body.appendChild(pswp)
-        }
-      })
-    },
-    onTopGalleryClick() {
-      if(!this.openGalleryStatus){
-        this.sendAction('open-photos')
-        this.openGalleryStatus = true
-      }
-    },
-    openGallery(index = 0){
-      if(!this.openGalleryStatus){
-        this.sendAction('open-photos')
-        this.openGalleryStatus = true
-      }
-      this.$nextTick(() => {
-        const links = this.$el?.querySelectorAll('.ads-gallery-items .my-gallery figure a')
-        if (!links || !links.length) return
-        const safeIndex = Math.min(Math.max(index, 0), links.length - 1)
-        links[safeIndex].click()
-      })
     },
      getFollowColor(){
       let follow = localStorage.getItem("follow")
@@ -914,7 +992,7 @@ export default {
           this.$refs.file.click()
           return
         }
-        if (this.hasVideos) {
+        if (this.mediaItems.length) {
           this.openStory()
         }
       },
@@ -922,32 +1000,67 @@ export default {
         this.openStoryAt(0)
       },
       openStoryAt(index) {
-        this.storyIndex = index
+        this.clearStoryPhotoTimer()
+        this.storyIndex = Math.max(0, Math.min(index, this.mediaItems.length - 1))
         this.storyProgress = 0
         this.storyPaused = false
         this.storyOpen = true
         this.$nextTick(() => {
-          if (this.$refs.storyVideo) {
-            this.$refs.storyVideo.load()
-            this.$refs.storyVideo.play().catch(() => {})
+          const item = this.mediaItems[this.storyIndex]
+          if (item?.type === 'video') {
+            if (this.$refs.storyVideo) {
+              this.$refs.storyVideo.load()
+              this.$refs.storyVideo.play().catch(() => {})
+            }
+          } else if (item?.type === 'photo') {
+            this.startStoryPhotoTimer()
           }
         })
       },
       closeStory() {
         this.storyOpen = false
+        this.clearStoryPhotoTimer()
         if (this.$refs.storyVideo) {
           this.$refs.storyVideo.pause()
         }
       },
+      startStoryPhotoTimer() {
+        this.clearStoryPhotoTimer()
+        const start = Date.now()
+        const tick = () => {
+          if (!this.storyOpen) return
+          const elapsed = Date.now() - start
+          this.storyProgress = Math.min(100, (elapsed / this.storyPhotoDuration) * 100)
+          if (elapsed >= this.storyPhotoDuration) {
+            this.clearStoryPhotoTimer()
+            this.nextStory()
+          } else {
+            this.storyPhotoTimer = setTimeout(tick, 50)
+          }
+        }
+        this.storyPhotoTimer = setTimeout(tick, 50)
+      },
+      clearStoryPhotoTimer() {
+        if (this.storyPhotoTimer) {
+          clearTimeout(this.storyPhotoTimer)
+          this.storyPhotoTimer = null
+        }
+      },
       nextStory() {
-        if (this.storyIndex < this.storyVideos.length - 1) {
+        if (this.storyIndex < this.mediaItems.length - 1) {
+          this.clearStoryPhotoTimer()
           this.storyIndex++
           this.storyProgress = 0
           this.storyPaused = false
           this.$nextTick(() => {
-            if (this.$refs.storyVideo) {
-              this.$refs.storyVideo.load()
-              this.$refs.storyVideo.play().catch(() => {})
+            const item = this.mediaItems[this.storyIndex]
+            if (item?.type === 'video') {
+              if (this.$refs.storyVideo) {
+                this.$refs.storyVideo.load()
+                this.$refs.storyVideo.play().catch(() => {})
+              }
+            } else if (item?.type === 'photo') {
+              this.startStoryPhotoTimer()
             }
           })
         } else {
@@ -956,13 +1069,19 @@ export default {
       },
       prevStory() {
         if (this.storyIndex > 0) {
+          this.clearStoryPhotoTimer()
           this.storyIndex--
           this.storyProgress = 0
           this.storyPaused = false
           this.$nextTick(() => {
-            if (this.$refs.storyVideo) {
-              this.$refs.storyVideo.load()
-              this.$refs.storyVideo.play().catch(() => {})
+            const item = this.mediaItems[this.storyIndex]
+            if (item?.type === 'video') {
+              if (this.$refs.storyVideo) {
+                this.$refs.storyVideo.load()
+                this.$refs.storyVideo.play().catch(() => {})
+              }
+            } else if (item?.type === 'photo') {
+              this.startStoryPhotoTimer()
             }
           })
         }
@@ -996,7 +1115,9 @@ export default {
       },
       deleteStoryVideo() {
         this.confirmStoryDelete = false
-        const video = this.storyVideos[this.storyIndex]
+        const item = this.mediaItems[this.storyIndex]
+        if (!item || item.type !== 'video') return
+        const video = this.storyVideos[item.storyIndex]
         if (!video) return
         this.$q.loading.show()
         this.$api.delete(`/categories/ads/files/${video.id}`)
@@ -1018,9 +1139,11 @@ export default {
         this.expand.phone = true; this.editPhone = {...phone, edit: true};
       },
       resetPhone () {
-        this.editPhone ={
+        this.editPhone = {
           phone: '',
-          isWhatsapp: false
+          isWhatsapp: false,
+          edit: false,
+          id: null
         }
       },
       sendAction(type, subtitle) {
@@ -1083,13 +1206,11 @@ export default {
       },
       newPhone() {
         this.$q.loading.show()
-        let path
-        if(this.editPhone.edit){
-          path = `/categories/ads/phones/${this.editPhone.id}`
-        } else {
-          path = `/categories/ads/${this.adsComponent.id}/phones`
-        }
-        this.$api.post(path, this.editPhone)
+        const payload = { phone: this.onlyNumber(this.editPhone.phone), isWhatsapp: this.editPhone.isWhatsapp }
+        const path = (this.editPhone.edit && this.editPhone.id)
+          ? `/categories/ads/phones/${this.editPhone.id}`
+          : `/categories/ads/${this.adsComponent.id}/phones`
+        this.$api.post(path, payload)
         .then((response) => {
             //  console.log(response.data.addresses)
             if(response.data){
@@ -1200,32 +1321,7 @@ export default {
 
    },
   mounted () {
-    // iOS Safari: move PhotoSwipe para body quando abrir (corrige z-index)
-    this.pswpObserver = new MutationObserver(() => {
-      const pswp = document.querySelector('.pswp.pswp--open')
-      if (pswp && pswp.parentElement !== document.body) {
-        document.body.appendChild(pswp)
-      }
-    })
-    this.pswpObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class']
-    })
     const token = localStorage.getItem('token')
-    if(this.adsComponent.files.gallery){
-      this.items = this.adsComponent.files.gallery
-        .filter(x => !x.deletedAt)
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-        .map(x => ({
-          src: x.link,
-          thumbnail: x.link,
-          w: x.width || 800,
-          h: x.height || 800,
-          createdAt: x.createdAt
-        }))
-    }
     this.headers[0].value = `Bearer ${token}`
     const admin = localStorage.getItem('admin') ? true : false
     let id = localStorage.getItem('id-customer')
@@ -1593,6 +1689,45 @@ export default {
 }
 
 /* Form de telefone no bottom sheet */
+.phone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.phone-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+.phone-list-number {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+}
+.phone-list-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.phone-list-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+.phone-form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+}
 .phone-form {
   display: flex;
   flex-direction: column;
@@ -1638,7 +1773,22 @@ export default {
   background: linear-gradient(135deg, #6c3fc5 0%, #2d6cdf 100%);
   opacity: 0.7;
 }
-.ads-gallery-video-thumb > * { position: relative; z-index: 1; }
+.ads-video-thumb-img,
+.ads-video-thumb-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.ads-video-thumb-video {
+  background: #1a1a1a;
+}
+.ads-gallery-video-thumb > *:not(.ads-video-thumb-img):not(.ads-video-thumb-video) {
+  position: relative;
+  z-index: 1;
+}
 .ads-gallery-video-num {
   color: rgba(255,255,255,0.8);
   font-size: 0.7rem;
@@ -1691,12 +1841,15 @@ export default {
   overflow: hidden;
   display: block;
   cursor: pointer;
+  position: relative;
 }
-.ads-media-grid-photo img {
+.ads-media-grid-photo img,
+.ads-media-grid-photo-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transform: scale(1.08);
+  display: block;
 }
 @media (min-width: 768px) {
   .ads-media-grid-photo { aspect-ratio: 3 / 4; }
@@ -1742,7 +1895,7 @@ export default {
   overflow: hidden;
   user-select: none;
 }
-.story-video {
+.story-media {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -1942,11 +2095,6 @@ export default {
   line-height: 1.6;
   margin: 0;
 }
-/* Wrapper da galeria - z-index baixo para não sobrepor o header (PhotoSwipe abre no body com z-index próprio) */
-.ads-gallery-pswp-wrap {
-  position: relative;
-  z-index: 1;
-}
 .ads-gallery {
   display: flex;
   gap: 0.75rem;
@@ -1973,35 +2121,6 @@ export default {
   color: #9ca3af;
   font-size: 0.75rem;
   cursor: pointer;
-}
-.ads-gallery :deep(.my-gallery),
-.ads-gallery :deep([class*="gallery"]) {
-  display: flex;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-.ads-gallery :deep(figure) {
-  width: 100px !important;
-  min-width: 100px !important;
-  height: 100px !important;
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 0 !important;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-.ads-gallery :deep(figure a) {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-.ads-gallery :deep(figure img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover !important;
-  object-position: center;
-  transform: scale(1.08);
 }
 .ads-contact-item {
   display: flex;

@@ -131,6 +131,7 @@ import {
 import {
     differenceInHours
 } from 'date-fns'
+import { mapState, mapGetters } from 'vuex'
 
 export default defineComponent({
 
@@ -149,7 +150,6 @@ export default defineComponent({
 
         return {
             baseLinks: linksList,
-            categories: ref([]),
             essentialLinks: ref([]),
             leftDrawerOpen,
             loadCategoriesRef,
@@ -159,6 +159,11 @@ export default defineComponent({
         };
     },
     computed: {
+        ...mapState('categories', ['list']),
+        ...mapGetters('categories', ['loading']),
+        categories() {
+            return this.list || [];
+        },
         showGlassNavbar() {
             const p = this.$route.fullPath;
             // Esconde apenas na página de anúncio (/:id ou /:id/:slug)
@@ -167,9 +172,7 @@ export default defineComponent({
         },
     },
     data() {
-        return {
-            loading: false,
-        };
+        return {};
     },
     watch: {
       $route(to, from) {
@@ -196,7 +199,6 @@ export default defineComponent({
     methods: {
         init() {
             this.essentialLinks = this.baseLinks
-            const categories = localStorage.getItem('categories')
             const uuid = localStorage.getItem('uuid')
             let context = localStorage.getItem("context")
             if (!uuid) {
@@ -240,9 +242,11 @@ export default defineComponent({
                     admin = localStorage.getItem('admin') ? true : false
                 }
             }
-            this.categories = categories ? JSON.parse(categories) : []
             const localization = localStorage.getItem("localization")
             this.localization = localization ? JSON.parse(localization) : null
+            if (this.localization) {
+                this.$store.dispatch('localization/setLocalization', this.localization)
+            }
             this.getData()
             if (admin) {
                 this.essentialLinks.push({
@@ -270,49 +274,20 @@ export default defineComponent({
                 return v.toString(16);
             });
         },
-        getData(overrideLocalization) {
+        async getData(overrideLocalization) {
             const loc = overrideLocalization || this.localization
             if (overrideLocalization) this.localization = loc
-            this.loading = true
-
-            let gps = 'nonDeleted=true'
-            if (loc?.coordinates?.lat != null && loc?.coordinates?.long != null) {
-                gps = `lat=${loc.coordinates.lat}&long=${loc.coordinates.long}&nonDeleted=true`
+            try {
+                await this.$store.dispatch('categories/fetchCategories', loc)
+            } catch (err) {
+                const msg = err?.response?.data?.message || 'Erro na conexão!'
+                this.$q.notify({
+                    color: 'negative',
+                    position: 'top',
+                    message: msg,
+                    icon: 'report_problem'
+                })
             }
-
-            const api = this.$api
-            if (!api) {
-                this.loading = false
-                return Promise.resolve()
-            }
-
-            return api.get(`/categories?${gps}`)
-                .then((response) => {
-                    let categoriesData = response?.data?.categories || []
-                    const cityName = loc?.city
-                    if (cityName && Array.isArray(categoriesData)) {
-                        categoriesData = categoriesData.filter((item) => item.addressCity === cityName)
-                    }
-                    if (Array.isArray(categoriesData)) {
-                        categoriesData.forEach(e => { if (e && e.name) e.name = e.name.trim() })
-                        categoriesData.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-                        categoriesData = categoriesData.filter((item) => !item.deletedAt)
-                        this.categories = categoriesData
-                        localStorage.setItem('categories', JSON.stringify(this.categories))
-                    }
-                })
-                .catch((err) => {
-                    const msg = err?.response?.data?.message || 'Erro na conexão!'
-                    this.$q.notify({
-                        color: 'negative',
-                        position: 'top',
-                        message: msg,
-                        icon: 'report_problem'
-                    })
-                })
-                .finally(() => {
-                    this.loading = false
-                })
         },
     }
 });

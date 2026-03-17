@@ -56,6 +56,9 @@
         </div>
       </div>
 
+      <RecentVideosWidget :address-id="addressId" />
+      <CityAdsWidget :address-id="addressId" />
+
       <div v-if="history?.length" class="section mt-6">
         <h2 class="section-title">Veja novamente</h2>
         <CardAds :ads="history" :showAddress="true" :reverse="true" />
@@ -161,17 +164,28 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
+import { mapState } from "vuex";
 import Location from "components/Location";
 import CardAds from "src/components/CardAds.vue";
+import RecentVideosWidget from "src/components/RecentVideosWidget.vue";
+import CityAdsWidget from "src/components/CityAdsWidget.vue";
 
-// export default {
-//   }
 export default defineComponent({
   components: {
     Location,
     CardAds,
+    RecentVideosWidget,
+    CityAdsWidget,
   },
   computed: {
+    ...mapState('categories', ['list']),
+    ...mapState('localization', ['current']),
+    categories() {
+      return this.list || []
+    },
+    addressId() {
+      return this.current?.id ?? this.localization?.id ?? null
+    },
     favoriteImages() {
       const ad = this.favoriteFollow
       const gallery = ad?.files?.gallery
@@ -191,7 +205,6 @@ export default defineComponent({
       }),
       admin: ref(false),
       subCategories: ref([]),
-      categories: ref([]),
       slide: ref("0"),
       loading : ref(true),
       localization: ref({}),
@@ -235,7 +248,7 @@ export default defineComponent({
     },
     async install() {
       this.deferredPrompt.prompt();
-    }
+    },
   },
   mounted(){
      this.admin = localStorage.getItem('admin') ? true : false
@@ -246,8 +259,10 @@ export default defineComponent({
      this.history = history ? JSON.parse(history) : []
      this.follow = follow ? JSON.parse(follow) : []
      this.favoriteFollow = this.follow && this.follow.length ? this.follow[this.follow.length - 1] : null
-     const categories = localStorage.getItem('categories')
-     this.categories = categories ? JSON.parse(categories) : []
+     if (this.localization) {
+       this.$store.dispatch('localization/setLocalization', this.localization)
+       this.$store.dispatch('categories/fetchCategories', this.localization)
+     }
   }
 })
 </script>

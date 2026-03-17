@@ -142,6 +142,7 @@
 import AppIcon from 'components/AppIcon.vue'
 import { timeAgo } from 'src/js/timeAgo'
 import { loadVideoThumbs, setVideoThumb } from 'src/services/videoThumbs'
+import { getCached, setCached, FOUR_MINUTES } from 'src/services/homeCache'
 
 export default {
   name: 'RecentVideosWidget',
@@ -188,8 +189,11 @@ export default {
       handler(id, oldId) {
         if (id === oldId && oldId !== undefined) return
         if (id) {
-          this.loadFromCache(id)
-          this.fetchVideos()
+          this.loadFromCache(id).then((hit) => {
+            if (!hit) {
+              this.fetchVideos()
+            }
+          })
         } else {
           this.videos = []
           this.videoThumbs = {}
@@ -347,17 +351,18 @@ export default {
       if (a.city) parts.push(a.city)
       return parts.length ? parts.join(', ') : ''
     },
-    loadFromCache(addressId) {
+    async loadFromCache(addressId) {
       try {
         const key = `cityVideos_${addressId}`
-        const cached = localStorage.getItem(key)
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          this.videos = Array.isArray(parsed) ? parsed : []
+        const { hit, data } = await getCached(key, FOUR_MINUTES)
+        if (hit && Array.isArray(data)) {
+          this.videos = data
+          return true
         }
       } catch (_) {
         this.videos = []
       }
+      return false
     },
     async fetchVideos() {
       if (!this.addressId || !this.$api) return
@@ -369,9 +374,7 @@ export default {
         const raw = response?.data?.videos ?? []
         const list = Array.isArray(raw) ? raw : []
         this.videos = list
-        try {
-          localStorage.setItem(`cityVideos_${this.addressId}`, JSON.stringify(list))
-        } catch (_) {}
+        setCached(`cityVideos_${this.addressId}`, list).catch(() => {})
       } catch (err) {
         if (this.fetchGen < 0 || fetchId !== this.fetchGen) return
         const msg = err?.response?.data?.message || 'Erro ao carregar vídeos'

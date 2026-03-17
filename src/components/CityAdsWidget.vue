@@ -66,6 +66,7 @@
 <script>
 import AppIcon from 'components/AppIcon.vue'
 import { timeAgo } from 'src/js/timeAgo'
+import { getCached, setCached, FOUR_MINUTES } from 'src/services/homeCache'
 
 export default {
   name: 'CityAdsWidget',
@@ -106,8 +107,11 @@ export default {
       handler(id, oldId) {
         if (id === oldId && oldId !== undefined) return
         if (id) {
-          this.loadFromCache(id)
-          this.fetchAds()
+          this.loadFromCache(id).then((hit) => {
+            if (!hit) {
+              this.fetchAds()
+            }
+          })
         } else {
           this.ads = []
         }
@@ -138,17 +142,18 @@ export default {
         : ''
       return slug ? `/${ad.id}/${slug}` : `/${ad.id}`
     },
-    loadFromCache(addressId) {
+    async loadFromCache(addressId) {
       try {
         const key = `cityAds_${addressId}`
-        const cached = localStorage.getItem(key)
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          this.ads = Array.isArray(parsed) ? parsed : []
+        const { hit, data } = await getCached(key, FOUR_MINUTES)
+        if (hit && Array.isArray(data)) {
+          this.ads = data
+          return true
         }
       } catch (_) {
         this.ads = []
       }
+      return false
     },
     async fetchAds() {
       if (!this.addressId || !this.$api) return
@@ -160,9 +165,7 @@ export default {
         const raw = response?.data?.ads ?? []
         const list = Array.isArray(raw) ? raw : []
         this.ads = list
-        try {
-          localStorage.setItem(`cityAds_${this.addressId}`, JSON.stringify(list))
-        } catch (_) {}
+        setCached(`cityAds_${this.addressId}`, list).catch(() => {})
       } catch (err) {
         if (this.fetchGen < 0 || fetchId !== this.fetchGen) return
         const msg = err?.response?.data?.message || 'Erro ao carregar comércios'

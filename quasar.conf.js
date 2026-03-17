@@ -152,51 +152,39 @@ module.exports = configure(function (ctx) {
       },
 
       manifest: {
-        name: `Poliweb`,
-        start_url: "https://www.poliwebapp.com.br/",
-        short_name: `Poliweb`,
-        description: `Poliweb, agenda de comércios inteligentes.`,
+        name: 'Poliweb',
+        short_name: 'Poliweb',
+        description: 'Poliweb, agenda de comércios inteligentes. Encontre estabelecimentos, serviços e ofertas na sua cidade.',
+        id: '/',
+        start_url: 'https://www.poliwebapp.com.br/',
+        scope: 'https://www.poliwebapp.com.br/',
         display: 'standalone',
-        orientation: 'portrait',
+        display_override: ['standalone', 'minimal-ui', 'browser'],
+        orientation: 'portrait-primary',
+        lang: 'pt-BR',
+        dir: 'ltr',
         background_color: '#ffffff',
-        theme_color: '#027be3',
+        theme_color: '#1976D2',
+        prefer_related_applications: false,
+        categories: ['business', 'lifestyle', 'shopping'],
         icons: [
-          {
-            src: 'icons/icon-128x128.png',
-            sizes: '128x128',
-            type: 'image/png',
-            purpose: "maskable"
-          },
-          {
-            src: 'icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: "maskable"
-          },
-          {
-            src: 'icons/icon-256x256.png',
-            sizes: '256x256',
-            type: 'image/png',
-            purpose: "maskable"
-          },
-          {
-            src: 'icons/icon-384x384.png',
-            sizes: '384x384',
-            type: 'image/png',
-            purpose: "maskable"
-          },
-          {
-            src: 'icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: "maskable"
-          },
-           {
-            src: 'icons/icon-512x512.png',
-            sizes: '520x520',
-            type: 'image/png',
-            purpose: "maskable"
-          }
+          { src: 'icons/icon-128x128.png', sizes: '128x128', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-128x128.png', sizes: '128x128', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-256x256.png', sizes: '256x256', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-256x256.png', sizes: '256x256', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-384x384.png', sizes: '384x384', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-384x384.png', sizes: '384x384', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+        ],
+        shortcuts: [
+          { name: 'Início', short_name: 'Início', url: '/', icons: [{ src: 'icons/favicon-96x96.png', sizes: '96x96', type: 'image/png', purpose: 'any' }] },
+          { name: 'Buscar', short_name: 'Buscar', url: '/buscar', icons: [{ src: 'icons/favicon-96x96.png', sizes: '96x96', type: 'image/png', purpose: 'any' }] },
+          { name: 'Cidades', short_name: 'Cidades', url: '/cidades', icons: [{ src: 'icons/favicon-96x96.png', sizes: '96x96', type: 'image/png', purpose: 'any' }] },
+          { name: 'Perfil', short_name: 'Perfil', url: '/perfil', icons: [{ src: 'icons/favicon-96x96.png', sizes: '96x96', type: 'image/png', purpose: 'any' }] },
+          { name: 'Sobre', short_name: 'Sobre', url: '/sobre', icons: [{ src: 'icons/favicon-96x96.png', sizes: '96x96', type: 'image/png', purpose: 'any' }] }
         ]
       }
     },

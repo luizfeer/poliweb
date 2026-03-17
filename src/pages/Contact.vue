@@ -1,15 +1,31 @@
 <template>
-  <q-page class="bg-blue-100 w-full h-full row justify-center items-center px-3 md:px-20 ">
+  <q-page class="bg-blue-100 w-full min-h-full row justify-center items-start px-3 md:px-20 py-6">
     <div class="column w-full md:max-w-[40rem]">
-      <div class="row">
+      <div class="row mb-2">
         <h5 class="text-h5 text-black q-my-md">Contato</h5>
       </div>
+      <div class="row mb-3">
+        <p class="text-gray-600 text-sm">
+          Entre em contato conosco: <a href="mailto:contato@poliwebapp.com.br" class="text-primary font-medium">contato@poliwebapp.com.br</a>
+        </p>
+      </div>
       <div class="row">
-        <q-form @submit="login" class="w-full">
-
+        <q-form @submit="submitForm" class="w-full">
         <q-card square bordered class="p-2 pt-5 md:p-5 shadow-1">
+            <q-select
+              v-model="form.tipo"
+              :options="tiposSolicitacao"
+              label="Tipo de solicitação"
+              outlined
+              dense
+              class="mb-5"
+              emit-value
+              map-options
+              @update:model-value="onTipoChange"
+            />
             <q-input outlined clearable v-model="form.name" type="text" name="name" label="Nome" class="mb-5"/>
-            <q-input outlined clearable v-model="form.phone"  mask="(##) ##### - ####" name="phone" type="phone" label="Telefone" class="mb-5"/>
+            <q-input outlined clearable v-model="form.email" type="email" name="email" label="Email para contato" class="mb-5"/>
+            <q-input outlined clearable v-model="form.phone" mask="(##) ##### - ####" name="phone" type="phone" label="Telefone" class="mb-5"/>
             <div class="rounded-md mb-5">
                 <q-editor placeholder="Digite sua mensagem.." v-model="form.description" min-height="5rem" />
             </div>
@@ -33,43 +49,68 @@
 <script>
  import { VueRecaptcha } from 'vue-recaptcha';
 export default {
-  name: 'Login',
+  name: 'Contact',
   components: {
     VueRecaptcha,
   },
   data () {
     return {
-      verify:false,
+      verify: false,
       sitekey: '6LduKNwfAAAAAIgmaAoy99hVbahpMg_-MeMGOg_b',
-      form:{
+      tiposSolicitacao: [
+        { label: 'Geral / Dúvidas', value: 'geral' },
+        { label: 'Solicitar exclusão de conta', value: 'exclusao_conta' },
+        { label: 'Suporte técnico', value: 'suporte' },
+      ],
+      form: {
+        tipo: 'geral',
         name: '',
+        email: '',
         phone: '',
         description: ''
       },
-      data:[]
+      data: []
     }
   },
-  methods:{
-    verifyMethod(e){
+  mounted() {
+    try {
+      const ctx = localStorage.getItem('context')
+      if (ctx) {
+        const parsed = JSON.parse(ctx)
+        if (parsed?.email) this.form.email = parsed.email
+        if (parsed?.company) this.form.name = parsed.company
+      }
+    } catch (_) {}
+  },
+  methods: {
+    verifyMethod() {
       this.verify = true
-      console.log(e)
     },
-  login () {
-    if(this.form.description.length<=5){
+    onTipoChange(val) {
+      if (val === 'exclusao_conta') {
+        this.form.description = 'Solicito a exclusão permanente da minha conta e de todos os meus dados pessoais, conforme a Política de Privacidade do Poliweb.'
+      }
+    },
+    submitForm () {
+    if (this.form.description.length <= 5) {
        this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Digite uma menssagem',
+          message: 'Digite uma mensagem',
           icon: 'report_problem'
         })
         return
     }
+    const payload = {
+      ...this.form,
+      description: `[${this.form.tipo.toUpperCase()}]\n\n${this.form.description}\n\n---\nResposta: contato@poliwebapp.com.br`
+    }
     this.$q.loading.show()
-    this.$api.post('/contacts', {...this.form})
+    this.$api.post('/contacts', payload)
       .then((response) => {
         const data = response.data
         console.log(data)
-        this.$router.push({ path: '/' })
+        this.$router.push({ path: this.form.tipo === 'exclusao_conta' ? '/perfil' : '/' })
         this.$q.notify({
           color: 'positive',
           position: 'top',

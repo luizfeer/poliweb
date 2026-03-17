@@ -90,9 +90,9 @@ const linksList = [{
         link: "/buscar",
     },
     {
-        title: "Login",
+        title: "Perfil",
         icon: "account_circle",
-        link: "/login",
+        link: "/perfil",
     },
 
     {

@@ -24,6 +24,18 @@
     <li><span style="color: rgb(68, 68, 68);">B) Não difundir propaganda ou conteúdo de natureza racista, xenofóbica, </span><span style="color: rgb(68, 68, 68);"> ou azar, qualquer tipo de pornografia ilegal, de apologia ao terrorismo ou contra os direitos humanos;</span></li>
     <li><span style="color: rgb(68, 68, 68);">C) Não causar danos aos sistemas físicos (hardwares) e lógicos (softwares) do Poliweb, de seus fornecedores ou terceiros, para introduzir ou disseminar vírus informáticos ou quaisquer outros sistemas de hardware ou software que sejam capazes de causar danos anteriormente mencionados.</span></li>
 </ul>
+<h3><span style="color: rgb(68, 68, 68);"  class="text-xl">Exclusão de conta e dados</span></h3>
+<p><span style="color: rgb(68, 68, 68);">Você tem o direito de solicitar a exclusão permanente da sua conta e de todos os seus dados pessoais a qualquer momento. Para solicitar a exclusão:</span></p>
+<ul>
+    <li><span style="color: rgb(68, 68, 68);">Acesse a seção "Perfil" ou "Minha conta" no aplicativo</span></li>
+    <li><span style="color: rgb(68, 68, 68);">Clique em "Solicitar exclusão da conta"</span></li>
+    <li><span style="color: rgb(68, 68, 68);">Ou entre em contato diretamente pelo email: <a href="mailto:contato@poliwebapp.com.br">contato@poliwebapp.com.br</a></span></li>
+</ul>
+<p><span style="color: rgb(68, 68, 68);">Processaremos sua solicitação em até 30 dias úteis.</span></p>
+
+<h3><span style="color: rgb(68, 68, 68);"  class="text-xl">Contato</span></h3>
+<p><span style="color: rgb(68, 68, 68);">Para dúvidas sobre privacidade, exclusão de dados ou esta política, entre em contato: <a href="mailto:contato@poliwebapp.com.br">contato@poliwebapp.com.br</a></span></p>
+
 <h3><span style="color: rgb(68, 68, 68);"  class="text-xl">Mais informações</span></h3>
 <p><span style="color: rgb(68, 68, 68);">Esperemos que esteja esclarecido e, como mencionado anteriormente, se houver algo que você não tem certeza se precisa ou não, geralmente é mais seguro deixar os cookies ativados, caso interaja com um dos recursos que você usa em nosso site.</span></p>
 <p><span style="color: rgb(68, 68, 68);">Esta política é efetiva a partir de&nbsp;21 January 2023 16:31</span></p>

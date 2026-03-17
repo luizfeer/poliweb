@@ -15,10 +15,10 @@
     </div>
 
     <!-- Conteúdo principal -->
-    <div class="px-4 -mt-8 max-w-lg mx-auto space-y-4">
+    <div class="px-4 mt-20 max-w-lg mx-auto space-y-4">
 
       <!-- Sobre o app -->
-      <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+      <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 ">
         <div class="flex items-center gap-3 mb-3">
           <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
             <q-icon name="info" color="primary" size="1.2rem" />
@@ -88,7 +88,21 @@
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-gray-800 font-medium text-sm mb-0">Fale conosco</p>
-            <p class="text-gray-400 text-xs">Entre em contato com nossa equipe</p>
+            <p class="text-gray-400 text-xs">contato@poliwebapp.com.br</p>
+          </div>
+          <q-icon name="chevron_right" color="grey-4" size="1.2rem" />
+        </router-link>
+
+        <router-link
+          to="/perfil"
+          class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors border-t border-gray-100 no-underline"
+        >
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+            <q-icon name="account_circle" color="indigo-7" size="1.2rem" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-gray-800 font-medium text-sm mb-0">Minha conta</p>
+            <p class="text-gray-400 text-xs">Perfil, exclusão de conta e mais</p>
           </div>
           <q-icon name="chevron_right" color="grey-4" size="1.2rem" />
         </router-link>

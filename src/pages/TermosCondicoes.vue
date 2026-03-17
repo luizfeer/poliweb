@@ -26,6 +26,12 @@
 <p><br></p>
 <h3><span style="color: rgb(68, 68, 68);">Modificações</span></h3>
 <p><span style="color: rgb(68, 68, 68);">O Poliweb pode revisar estes termos de serviço do site a qualquer momento, sem aviso prévio. Ao usar este site, você concorda em ficar vinculado à versão atual desses termos de serviço.</span></p>
+<h3><span style="color: rgb(68, 68, 68);">Encerramento e exclusão de conta</span></h3>
+<p><span style="color: rgb(68, 68, 68);">O usuário pode solicitar a exclusão da sua conta a qualquer momento. A exclusão pode ser solicitada através da seção "Perfil" no aplicativo ou enviando um email para <a href="mailto:contato@poliwebapp.com.br">contato@poliwebapp.com.br</a>. O Poliweb processará a solicitação em até 30 dias úteis.</span></p>
+
+<h3><span style="color: rgb(68, 68, 68);">Contato</span></h3>
+<p><span style="color: rgb(68, 68, 68);">Para dúvidas sobre estes termos, entre em contato: <a href="mailto:contato@poliwebapp.com.br">contato@poliwebapp.com.br</a></span></p>
+
 <h3><span style="color: rgb(68, 68, 68);">Lei aplicável</span></h3>
 <p><span style="color: rgb(68, 68, 68);">Estes termos e condições são regidos e interpretados de acordo com as leis do Poliweb e você se submete irrevogavelmente à jurisdição exclusiva dos tribunais naquele estado ou localidade.</span></p>
 </div>

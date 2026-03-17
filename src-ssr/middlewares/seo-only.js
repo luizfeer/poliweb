@@ -1,0 +1,35 @@
+import { ssrMiddleware } from 'quasar/wrappers'
+
+const ASSET_PATHS = [
+  '/favicon',
+  '/icons/',
+  '/statics/',
+  '/css/',
+  '/js/',
+  '/fonts/',
+  '/img/'
+]
+
+const ASSET_EXTENSIONS = /\.(?:css|js|mjs|map|json|txt|xml|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot)$/i
+
+export default ssrMiddleware(({ app }) => {
+  app.get('*', (req, res, next) => {
+    const routePrefix = process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio'
+    const fallbackBaseUrl = (process.env.SSR_FALLBACK_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
+    const requestPath = req.path || req.url || '/'
+    const acceptsHtml = (req.headers.accept || '').includes('text/html')
+    const isAssetPath = ASSET_PATHS.some((prefix) => requestPath.startsWith(prefix)) || ASSET_EXTENSIONS.test(requestPath)
+
+    if (
+      req.method !== 'GET' ||
+      !acceptsHtml ||
+      isAssetPath ||
+      requestPath.startsWith(routePrefix)
+    ) {
+      next()
+      return
+    }
+
+    res.redirect(302, `${fallbackBaseUrl}${req.originalUrl || requestPath}`)
+  })
+})

@@ -139,8 +139,13 @@ export default {
 
   setup() {
     const display = ref(true);
-    const isIOSWebview = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
-    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined'
+    const userAgent = isBrowser ? navigator.userAgent : ''
+    const isIOSWebview = isBrowser && /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(userAgent)
+    const isPWA = isBrowser && (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone
+    )
     onMounted(() => {
       const dismissed = typeof localStorage !== 'undefined' && localStorage.getItem('poliweb_download_modal_dismissed');
       if (isIOSWebview || isPWA || dismissed) {
@@ -163,9 +168,10 @@ export default {
 
     const detectAndRedirect = () => {
       dismissForever();
-      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+      if (!isBrowser) return
+      if (userAgent.match(/iPhone|iPad|iPod/i)) {
         window.open("https://apps.apple.com/br/app/poliweb-agenda/id1659657349", "_blank");
-      } else if (navigator.userAgent.match(/Android/i)) {
+      } else if (userAgent.match(/Android/i)) {
         window.open("https://play.google.com/store/apps/details?id=br.com.poliwebapp.www.twa&hl=pt_BR&gl=US", "_blank");
       }
     };

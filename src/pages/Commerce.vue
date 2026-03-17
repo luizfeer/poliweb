@@ -230,9 +230,10 @@ export default {
         : String(ad.id || '')
       const slug = rawSlug || computedSlug
 
+      const seoBaseUrl = (process.env.SEO_SITE_URL || process.env.PUBLIC_SITE_URL || 'https://ssr.poliwebapp.com.br').replace(/\/$/, '')
       const canonicalUrl = ad.id
-        ? `https://www.poliwebapp.com.br/comercio/${ad.id}/${encodeURIComponent(slug)}`
-        : 'https://www.poliwebapp.com.br'
+        ? `${seoBaseUrl}/comercio/${ad.id}/${encodeURIComponent(slug)}`
+        : seoBaseUrl
       commerceCanonicalUrl.value = canonicalUrl
 
       const sameAs = [ad.website, ad.facebook, ad.instagram].filter(Boolean)
@@ -357,4 +358,3 @@ export default {
   color: #1d4ed8;
 }
 </style>
-

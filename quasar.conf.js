@@ -10,6 +10,25 @@
 const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers');
 
+function configureModernAssetHash(chain) {
+  const assetRules = ['images', 'fonts', 'media']
+  const compatibleNameByRule = {
+    images: 'img/[name].[md5:contenthash:hex:8].[ext]',
+    fonts: 'fonts/[name].[md5:contenthash:hex:8].[ext]',
+    media: 'media/[name].[md5:contenthash:hex:8].[ext]'
+  }
+
+  assetRules.forEach((ruleName) => {
+    const rule = chain.module.rule(ruleName)
+    if (!rule.uses.has('url-loader')) return
+
+    rule.use('url-loader').tap((options = {}) => ({
+      ...options,
+      name: compatibleNameByRule[ruleName]
+    }))
+  })
+}
+
 module.exports = configure(function (ctx) {
   return {
     // https://v2.quasar.dev/quasar-cli/supporting-ts
@@ -68,12 +87,19 @@ module.exports = configure(function (ctx) {
 
       env: {
         API_URL: process.env.API_URL || 'https://apiv3.poliwebapp.com.br',
-        API_URL_LOCAL: process.env.API_URL_LOCAL || 'http://localhost:5000'
+        API_URL_LOCAL: process.env.API_URL_LOCAL || 'http://127.0.0.1:5001',
+        API_URL_BROWSER: process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv3.poliwebapp.com.br',
+        API_URL_SERVER: process.env.API_URL_SERVER || process.env.API_URL_LOCAL || 'http://127.0.0.1:5001',
+        PUBLIC_SITE_URL: process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br',
+        SEO_SITE_URL: process.env.SEO_SITE_URL || 'https://ssr.poliwebapp.com.br',
+        SSR_ONLY_ROUTE_PREFIX: process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio',
+        SSR_FALLBACK_URL: process.env.SSR_FALLBACK_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br'
       },
 
       // https://v2.quasar.dev/quasar-cli/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
       chainWebpack (chain) {
+        configureModernAssetHash(chain)
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: [ 'js', 'vue' ] }])
       },
@@ -130,12 +156,14 @@ module.exports = configure(function (ctx) {
         // Tell browser when a file from the server should expire from cache (in ms)
 
       chainWebpackWebserver (chain) {
+        configureModernAssetHash(chain)
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
       },
 
       middlewares: [
         ctx.prod ? 'compression' : '',
+        'seo-only',
         'render' // keep this as last one
       ]
     },

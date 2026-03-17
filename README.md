@@ -31,5 +31,25 @@ yarn run lint
 quasar build
 ```
 
+### Build SSR para `/comercio`
+```bash
+pnpm run build:ssr
+pnpm run start:ssr
+```
+
+Variaveis relevantes para o deploy SSR:
+
+- `API_URL_SERVER=http://127.0.0.1:5001`
+- `API_URL_BROWSER=https://apiv3.poliwebapp.com.br`
+- `SEO_SITE_URL=https://ssr.poliwebapp.com.br`
+- `SSR_ONLY_ROUTE_PREFIX=/comercio`
+- `SSR_FALLBACK_URL=https://www.poliwebapp.com.br`
+
+Exemplo com PM2:
+```bash
+pnpm run build:ssr
+pm2 start ecosystem.config.js
+```
+
 ### Customize the configuration
 See [Configuring quasar.conf.js](https://v2.quasar.dev/quasar-cli/quasar-conf-js).

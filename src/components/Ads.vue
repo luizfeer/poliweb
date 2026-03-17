@@ -796,7 +796,12 @@ export default {
       return this.adsComponent.phones.find(p => p.isWhatsapp) || false
     },
     shareUrl() {
-      return `https://www.poliwebapp.com.br/${this.url()}`
+      const publicBaseUrl = (process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
+      const seoBaseUrl = (process.env.SEO_SITE_URL || publicBaseUrl).replace(/\/$/, '')
+      const isCommerceSeoRoute = this.$route?.path?.startsWith('/comercio/')
+      return isCommerceSeoRoute
+        ? `${seoBaseUrl}/comercio/${this.url()}`
+        : `${publicBaseUrl}/${this.url()}`
     },
     storyVideos() {
       return (this.adsComponent?.files?.videos || [])

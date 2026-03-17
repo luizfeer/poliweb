@@ -194,7 +194,9 @@ export default defineComponent({
       showGlassNavbar: {
         immediate: true,
         handler(v) {
-          document.body.classList.toggle('has-glass-navbar', !!v)
+          if (typeof document !== 'undefined') {
+            document.body.classList.toggle('has-glass-navbar', !!v)
+          }
         }
       }
     },
@@ -204,7 +206,9 @@ export default defineComponent({
         this.loadCategoriesRef = (loc) => this.getData(loc)
     },
     beforeUnmount() {
-        document.body.classList.remove('has-glass-navbar')
+        if (typeof document !== 'undefined') {
+            document.body.classList.remove('has-glass-navbar')
+        }
     },
     methods: {
         async init() {

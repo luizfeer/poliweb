@@ -12,7 +12,7 @@
         </div>
 
         <div class="admin-actions" v-if="admin">
-          <router-link :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
+          <router-link v-if="isSuperAdmin()" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
             <q-btn no-caps rounded unelevated color="primary" icon="storefront" label="Cadastrar empresa" class="admin-btn mr-2 mb-2"/>
           </router-link>
           <router-link v-if="!ads.length" :to="`/painel/categorias/add/${$route.params.id}/${$route.params.name}`">
@@ -100,6 +100,7 @@
 <script>
 
 import { ref, watch } from "vue";
+import { isSuperAdmin } from 'src/js/superadmin'
 // import AdsPage from 'components/Ads'
 
 const CATEGORIES_VIEW_KEY = 'poliweb_categories_view_mode'
@@ -121,6 +122,7 @@ export default ({
       colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       ads: ref([]),
       admin: ref(false),
+      isSuperAdmin,
       slide: ref('0'),
       loading : ref(true),
       data: ref({}),

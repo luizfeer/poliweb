@@ -10,6 +10,10 @@ body.has-glass-navbar .q-page,
 body.has-glass-navbar .q-layout__shadow {
   background: transparent !important;
 }
+/* Home: fundo cinza para destacar os cards brancos */
+body.has-glass-navbar .q-page.index-page {
+  background-color: #f3f4f6 !important;
+}
 
 /* WhatsApp chooser dialog (usado em Ads e ViewEcommerce) */
 .wa-dialog-centered .q-dialog__inner {
@@ -54,6 +58,40 @@ body.has-glass-navbar .q-layout__shadow {
 .arb-label { font-weight: 600; font-size: 0.9rem; color: #111827; }
 .arb-sub { font-size: 0.78rem; color: #6b7280; }
 .abs-action-cancel { padding: 0.5rem 1rem; color: #6b7280; font-size: 0.9rem; background: transparent; border: none; cursor: pointer; }
+
+/* Menu modal glass sheet - padrão para modais do Gerenciar perfil */
+.menu-modal-sheet {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-bottom: none;
+  box-shadow:
+    0 -2px 0 rgba(0, 0, 0, 0.04),
+    0 -12px 48px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+.menu-modal-handle {
+  width: 32px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.14);
+  border-radius: 99px;
+  margin: 0 auto 0.75rem;
+}
+@media (min-width: 520px) {
+  .menu-modal-handle { display: none; }
+}
+
+/* Backdrop blur para modais do menu */
+.edit-categories-modal .q-dialog__backdrop,
+.postar-media-modal .q-dialog__backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.abs-dialog .q-dialog__backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 
 /* PhotoSwipe: z-index alto para iOS/Safari (evita galeria ficar atrás de header, barra fixa, etc) */
 .pswp {

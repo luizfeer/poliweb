@@ -28,6 +28,7 @@
                 </div>
               </div>
             </div>
+            <span v-if="favoritePostedAt" class="favorite-gallery16-time">{{ timeAgo(favoritePostedAt) }}</span>
           </div>
 
           <!-- Texto e ações -->
@@ -169,6 +170,7 @@ import Location from "components/Location";
 import CardAds from "src/components/CardAds.vue";
 import RecentVideosWidget from "src/components/RecentVideosWidget.vue";
 import CityAdsWidget from "src/components/CityAdsWidget.vue";
+import { timeAgo } from "src/js/timeAgo";
 
 export default defineComponent({
   components: {
@@ -194,6 +196,13 @@ export default defineComponent({
         .filter((g) => !g.deletedAt && g.link)
         .slice(0, 6)
         .map((g) => g.link)
+    },
+    favoritePostedAt() {
+      const ad = this.favoriteFollow
+      const gallery = ad?.files?.gallery
+      if (!Array.isArray(gallery) || !gallery.length) return null
+      const sorted = [...gallery].filter((g) => !g.deletedAt && g.createdAt).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      return sorted[0]?.createdAt || null
     },
   },
   name: "PageIndex",
@@ -226,6 +235,7 @@ export default defineComponent({
     });
   },
   methods: {
+    timeAgo,
     open(){
       this.$router.push(`/buscar/${this.searchInput}`)
     },
@@ -270,6 +280,7 @@ export default defineComponent({
 <style scoped>
 .index-page {
   padding-bottom: env(safe-area-inset-bottom);
+  background-color: #f3f4f6;
 }
 .section-title {
   font-size: 1.125rem;
@@ -328,12 +339,42 @@ export default defineComponent({
 }
 
 .favorite-gallery16 {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 16px;
   background: #0f172a;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   overflow: hidden;
+}
+.favorite-gallery16::before,
+.favorite-gallery16::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+.favorite-gallery16::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+}
+.favorite-gallery16::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+}
+
+.favorite-gallery16-time {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  z-index: 2;
 }
 
 @media (min-width: 640px) {

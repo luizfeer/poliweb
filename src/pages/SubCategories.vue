@@ -56,7 +56,7 @@
                     >
                       <q-menu auto-close @click.stop>
                         <q-list dense style="min-width: 190px">
-                          <q-item clickable v-ripple @click.stop="goToNewAd(item)">
+                          <q-item v-if="isSuperAdmin" clickable v-ripple @click.stop="goToNewAd(item)">
                             <q-item-section avatar><AppIcon name="storefront" :size="18" /></q-item-section>
                             <q-item-section>Novo anúncio</q-item-section>
                           </q-item>
@@ -129,7 +129,7 @@
                     >
                       <q-menu auto-close @click.stop>
                         <q-list dense style="min-width: 190px">
-                          <q-item clickable v-ripple @click.stop="goToNewAd(item)">
+                          <q-item v-if="isSuperAdmin" clickable v-ripple @click.stop="goToNewAd(item)">
                             <q-item-section avatar><AppIcon name="storefront" :size="18" /></q-item-section>
                             <q-item-section>Novo anúncio</q-item-section>
                           </q-item>
@@ -165,6 +165,7 @@
 <script>
 import { defineComponent } from "vue";
 import Location from "components/Location";
+import { isSuperAdmin } from 'src/js/superadmin';
 
 // export default {
 //   }
@@ -187,6 +188,7 @@ export default defineComponent({
       loading : true,
       localization: {},
       isMaster: false,
+      isSuperAdmin: false,
     };
   },
   async mounted(){
@@ -204,8 +206,9 @@ export default defineComponent({
 
      this.admin = localStorage.getItem('admin') ? true : false
      let context = localStorage.getItem('context')
-     context = JSON.parse(context)
+     context = context ? JSON.parse(context) : null
      this.isMaster = (context||{}).isMaster ? true : false
+     this.isSuperAdmin = isSuperAdmin()
      // move to store
      const localization = localStorage.getItem("localization")
      this.localization =  JSON.parse(localization)

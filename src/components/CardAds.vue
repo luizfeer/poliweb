@@ -42,6 +42,7 @@
             <h2 class="card-ads-city">
               {{ showAddress && item.addresses && item.addresses.length ? lastAddress(item.addresses).city : '' }}
             </h2>
+            <span v-if="lastPostedAt(item)" class="card-ads-time">{{ timeAgo(lastPostedAt(item)) }}</span>
           </div>
         </div>
       </router-link>
@@ -50,6 +51,8 @@
 </template>
 
 <script>
+import { timeAgo } from 'src/js/timeAgo'
+
     export default {
         props:{
             ads: {
@@ -82,6 +85,13 @@
             }
         },
         methods: {
+            timeAgo,
+            lastPostedAt(item) {
+              const g = item?.files?.gallery
+              if (!Array.isArray(g) || !g.length) return item?.createdAt || null
+              const withDate = g.filter((x) => x.createdAt).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              return withDate[0]?.createdAt || item?.createdAt || null
+            },
              lastAddress(addresses){
                 return addresses[addresses.length-1]
             },
@@ -178,5 +188,11 @@
   color: #9ca3af;
   margin: 0.25rem 0 0 0;
   min-height: 1.1em;
+}
+
+.card-ads-time {
+  font-size: 0.68rem;
+  color: #6366f1;
+  margin-top: 0.2rem;
 }
 </style>

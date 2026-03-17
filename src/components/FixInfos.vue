@@ -32,7 +32,10 @@
 
 <script>
 import { ref } from "vue";
+import { mapState } from "vuex";
+
 export default {
+    emits: ['updated'],
     props:{
         data: {
            type: Object,
@@ -42,24 +45,52 @@ export default {
     setup () { 
         return {
             formData: ref({
+             id: null,
              name: '',
              description: '',
              facebook: '',
              instagram: '',
              website: '',
              email: '',
-             avatar: null
+             avatar: null,
+             categoryIds: []
             })            
         }
       },
-      mounted () {       
-          this.formData = this.data        
+      computed: {
+        ...mapState('categories', ['list']),
+        categories() {
+          return this.list || [];
+        },
+      },
+      async mounted () {
+          const d = this.data;
+          let ids = Array.isArray(d.categoryIds)
+            ? [...d.categoryIds]
+            : d.categoryId != null
+              ? [Number(d.categoryId)]
+              : Array.isArray(d.categories)
+                ? d.categories.map((c) => Number(c.id))
+                : [];
+          Object.assign(this.formData, {
+            ...d,
+            categoryIds: ids,
+          });
+          if (!this.categories.length) {
+            try {
+              await this.$store.dispatch('categories/fetchCategories');
+            } catch (_) {}
+          }
       },
       methods: {
         setAddress(){
               this.$q.loading.show()            
 
-              this.$api.post(`/categories/ads/${this.formData.id}`, {...this.formData})
+              const payload = { ...this.formData };
+              if (Array.isArray(payload.categoryIds)) {
+                payload.categoryIds = payload.categoryIds.map(Number);
+              }
+              this.$api.post(`/categories/ads/${this.formData.id}`, payload)
               .then((response) => {
                   //  console.log(response.data.addresses)
                   if(response.data){                 

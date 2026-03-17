@@ -48,7 +48,9 @@ export default {
          this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
          localStorage.setItem("token", data.token)
          localStorage.setItem("id-customer",  JSON.stringify(data.context.id))
-         localStorage.setItem("context",  JSON.stringify({...data.context, when: new Date()}))
+         const ctx = { ...data.context, when: new Date() }
+         if (!ctx.email && this.form?.email) ctx.email = this.form.email
+         localStorage.setItem("context", JSON.stringify(ctx))
          localStorage.setItem('admin', true)
 
          this.$router.push({ path: '/' })

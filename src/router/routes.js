@@ -1,41 +1,10 @@
 
-import {citysData} from 'src/js/citys'
-import axios from 'axios'
+import { isSuperAdmin } from 'src/js/superadmin'
+
 const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    beforeEnter: async (to, from) => {
-      let geo = {}
-      const options = {
-        method: 'GET',
-        url: 'https://ipapi.co/json/',
-        // headers: {
-        //   'X-RapidAPI-Host': 'ip-geolocation-and-threat-detection.p.rapidapi.com',
-        //   'X-RapidAPI-Key': '40d9ffead9msh25fc9428d1adbecp1f7159jsnb6b98cfcc60b'
-        // }
-      };
-
-      const citys = citysData.sort((a, b) => a.city.localeCompare(b.city))
-
-      const localization = localStorage.getItem("localization")
-      if(!localization){
-         axios.request(options).then(function (response) {
-           geo = response.data;
-           console.log(geo)
-         }).catch(function (error) {
-           console.error(error);
-         });
-         const hasLimit = citys.findIndex(x => {return x.city === geo.city})
-
-         if(hasLimit>0){
-           localStorage.setItem("localization", JSON.stringify(citysData[hasLimit]))
-         } else{
-          localStorage.setItem("localization", JSON.stringify(citysData[1]))
-         }
-
-       }
-     },
      children: [
       { path: '', component: () => import('pages/Index.vue') },
       {
@@ -170,6 +139,10 @@ const routes = [
       },
 
       {
+        path: '/comercio/:id/:slug?',
+        component: () => import('pages/Commerce.vue')
+      },
+      {
         path: '/:id/:name?',
        component: () => import('pages/Ads.vue')
       },
@@ -235,7 +208,17 @@ const routes = [
 
       { path: 'categorias/edit/:id/:name/:icon', component: () => import('pages/categories/Edit.vue') },
 
-      { path: 'ads/add/:id?/:name?', component: () => import('pages/ads/Add.vue') },
+      {
+        path: 'ads/add/:id?/:name?',
+        component: () => import('pages/ads/Add.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isSuperAdmin()) {
+            next('/')
+          } else {
+            next()
+          }
+        }
+      },
     ]
   },
 

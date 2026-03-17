@@ -13,7 +13,6 @@ const baseURL = process.env.DEV
 
 const api = axios.create({ baseURL })
 // const apiCep = axios.create({ baseURL: 'https://www.cepaberto.com/api/v3/nearest?' })
-const AUTH_TOKEN =  localStorage.getItem('token')
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
   app.config.globalProperties.$axios = axios
@@ -22,8 +21,12 @@ export default boot(({ app }) => {
   
   app.config.globalProperties.$api = api
   api.defaults.headers.post['Content-Type'] = 'application/json';
-  if(AUTH_TOKEN){
-    api.defaults.headers.common['Authorization'] = 'Bearer ' + AUTH_TOKEN
+  // SSR-safe: localStorage só existe no browser
+  if (typeof window !== 'undefined') {
+    const AUTH_TOKEN = window.localStorage?.getItem('token')
+    if (AUTH_TOKEN) {
+      api.defaults.headers.common['Authorization'] = 'Bearer ' + AUTH_TOKEN
+    }
   }
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API

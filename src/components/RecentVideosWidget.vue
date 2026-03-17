@@ -12,7 +12,7 @@
     <div v-else-if="videos.length" class="recent-videos-scroll-wrapper">
       <div class="recent-videos-scroll flex pb-2 -mb-2">
       <div
-        v-for="(video, i) in videos"
+        v-for="(video, i) in videosWithId"
         :key="video.id"
         class="recent-video-card flex-shrink-0"
         @click="openStoryAt(i)"
@@ -20,8 +20,8 @@
           <div class="recent-video-header">
             <div class="recent-video-avatar">
               <q-img
-                v-if="video.ad?.logoLink"
-                :src="video.ad.logoLink"
+                v-if="video.avatarLink || video.ad?.avatarLink"
+                :src="video.avatarLink || video.ad?.avatarLink"
                 class="avatar-img"
                 ratio="1"
                 spinner-color="gray-300"
@@ -61,20 +61,13 @@
               @loadeddata="captureVideoThumb"
               @error="onVideoThumbError"
             />
-            <q-img
-              v-else-if="video.ad?.logoLink"
-              :src="video.ad.logoLink"
-              class="recent-video-thumb-img"
-              ratio="1"
-              spinner-color="gray-300"
-              spinner-size="24px"
-            />
             <div v-else class="recent-video-thumb-placeholder">
               <AppIcon name="videocam" :size="32" class="text-gray-400" />
             </div>
             <div class="recent-video-play-overlay">
               <AppIcon name="play-circle-filled" :size="48" class="text-white opacity-90" />
             </div>
+            <span v-if="video.createdAt" class="recent-video-time">{{ timeAgo(video.createdAt) }}</span>
           </div>
           <p v-if="addressSummary(video.ad)" class="recent-video-address">{{ addressSummary(video.ad) }}</p>
       </div>
@@ -85,8 +78,9 @@
     <!-- Story viewer - formato Stories como no Ads -->
     <q-dialog v-model="storyOpen" maximized transition-show="fade" transition-hide="fade" class="story-dialog">
       <div class="story-container" @touchstart="onStoryTouchStart" @touchend="onStoryTouchEnd">
+        <div class="story-gradient-top" aria-hidden="true" />
         <div class="story-bars">
-          <div v-for="(v, i) in videos" :key="v.id" class="story-bar">
+          <div v-for="(v, i) in videosWithId" :key="v.id" class="story-bar">
             <div
               class="story-bar-fill"
               :style="{ width: i < storyIndex ? '100%' : i === storyIndex ? storyProgress + '%' : '0%' }"
@@ -95,18 +89,21 @@
         </div>
         <div class="story-header">
           <div class="story-header-avatar">
-            <img v-if="currentStoryAd?.logoLink" :src="currentStoryAd.logoLink" class="story-avatar-img" />
+            <img v-if="currentStoryAvatar" :src="currentStoryAvatar" class="story-avatar-img" />
             <div v-else class="story-avatar-fallback">
               {{ (currentStoryAd?.name || '').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?' }}
             </div>
           </div>
-          <button
-            type="button"
-            class="story-header-name story-header-name-btn"
-            @click.stop="goToAd"
-          >
-            {{ currentStoryAd?.name || 'Comércio' }}
-          </button>
+          <div class="story-header-name-wrap">
+            <button
+              type="button"
+              class="story-header-name story-header-name-btn"
+              @click.stop="goToAd"
+            >
+              {{ currentStoryAd?.name || 'Comércio' }}
+            </button>
+            <span v-if="videosWithId[storyIndex]?.createdAt" class="story-header-time">{{ timeAgo(videosWithId[storyIndex].createdAt) }}</span>
+          </div>
           <a
             v-if="currentStoryAd?.whatsappPhone"
             :href="whatsappLink(currentStoryAd.whatsappPhone)"
@@ -124,7 +121,7 @@
           class="story-video"
           playsinline
           autoplay
-          :src="videos[storyIndex]?.link"
+          :src="videosWithId[storyIndex]?.link"
           @ended="nextStory"
           @timeupdate="updateStoryProgress"
         />
@@ -143,6 +140,8 @@
 
 <script>
 import AppIcon from 'components/AppIcon.vue'
+import { timeAgo } from 'src/js/timeAgo'
+import { loadVideoThumbs, setVideoThumb } from 'src/services/videoThumbs'
 
 export default {
   name: 'RecentVideosWidget',
@@ -165,11 +164,22 @@ export default {
       storyPaused: false,
       videoThumbs: {},
       videoThumbFailed: {},
+      fetchGen: 0,
     }
   },
+  beforeUnmount() {
+    this.fetchGen = -1
+  },
   computed: {
+    videosWithId() {
+      return this.videos.filter((v) => v && v.id != null)
+    },
     currentStoryAd() {
-      return this.videos[this.storyIndex]?.ad || null
+      return this.videosWithId[this.storyIndex]?.ad || null
+    },
+    currentStoryAvatar() {
+      const v = this.videosWithId[this.storyIndex]
+      return v?.avatarLink || v?.ad?.avatarLink || null
     },
   },
   watch: {
@@ -177,8 +187,10 @@ export default {
       immediate: true,
       handler(id, oldId) {
         if (id === oldId && oldId !== undefined) return
-        if (id) this.fetchVideos()
-        else {
+        if (id) {
+          this.loadFromCache(id)
+          this.fetchVideos()
+        } else {
           this.videos = []
           this.videoThumbs = {}
           this.videoThumbFailed = {}
@@ -186,13 +198,23 @@ export default {
       },
     },
     videos: {
-      handler() {
-        this.videoThumbs = {}
-        this.videoThumbFailed = {}
+      async handler() {
+        if (this.fetchGen >= 0) {
+          this.videoThumbs = {}
+          this.videoThumbFailed = {}
+          const ids = this.videosWithId.map((v) => v.id)
+          if (ids.length) {
+            const cached = await loadVideoThumbs(ids)
+            if (this.fetchGen >= 0 && Object.keys(cached).length) {
+              this.videoThumbs = { ...this.videoThumbs, ...cached }
+            }
+          }
+        }
       },
     },
   },
   methods: {
+    timeAgo,
     openStoryAt(index) {
       this.storyIndex = index
       this.storyProgress = 0
@@ -212,7 +234,7 @@ export default {
       }
     },
     nextStory() {
-      if (this.storyIndex < this.videos.length - 1) {
+      if (this.storyIndex < this.videosWithId.length - 1) {
         this.storyIndex++
         this.storyProgress = 0
         this.storyPaused = false
@@ -267,6 +289,7 @@ export default {
       this._touchStartX = null
     },
     captureVideoThumb(e) {
+      if (this.fetchGen < 0) return
       const video = e.target
       const id = video.dataset.videoId
       if (!id || this.videoThumbs[id]) return
@@ -279,8 +302,10 @@ export default {
           const ctx = canvas.getContext('2d')
           ctx.drawImage(video, 0, 0)
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
-          this.videoThumbs[id] = dataUrl
-          this.$forceUpdate()
+          if (this.fetchGen >= 0) {
+            this.videoThumbs = { ...this.videoThumbs, [id]: dataUrl }
+            setVideoThumb(id, dataUrl)
+          }
         } catch (err) {
           this.onVideoThumbError({ target: video })
         }
@@ -291,13 +316,14 @@ export default {
       video.currentTime = t
     },
     onVideoThumbError(e) {
+      if (this.fetchGen < 0) return
       const id = e.target?.dataset?.videoId
       if (id) {
         this.videoThumbFailed = { ...this.videoThumbFailed, [id]: true }
       }
     },
     goToAd() {
-      const video = this.videos[this.storyIndex]
+      const video = this.videosWithId[this.storyIndex]
       const adId = video?.categoryAdId
       const name = video?.ad?.name
       if (!adId) return
@@ -321,19 +347,38 @@ export default {
       if (a.city) parts.push(a.city)
       return parts.length ? parts.join(', ') : ''
     },
+    loadFromCache(addressId) {
+      try {
+        const key = `cityVideos_${addressId}`
+        const cached = localStorage.getItem(key)
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          this.videos = Array.isArray(parsed) ? parsed : []
+        }
+      } catch (_) {
+        this.videos = []
+      }
+    },
     async fetchVideos() {
       if (!this.addressId || !this.$api) return
-      this.loading = true
+      const fetchId = ++this.fetchGen
+      if (!this.videos.length) this.loading = true
       try {
         const response = await this.$api.get(`/cities/${this.addressId}/videos`)
+        if (this.fetchGen < 0 || fetchId !== this.fetchGen) return
         const raw = response?.data?.videos ?? []
-        this.videos = Array.isArray(raw) ? raw : []
+        const list = Array.isArray(raw) ? raw : []
+        this.videos = list
+        try {
+          localStorage.setItem(`cityVideos_${this.addressId}`, JSON.stringify(list))
+        } catch (_) {}
       } catch (err) {
+        if (this.fetchGen < 0 || fetchId !== this.fetchGen) return
         const msg = err?.response?.data?.message || 'Erro ao carregar vídeos'
         this.$q.notify({ color: 'negative', position: 'top', message: msg, icon: 'report_problem' })
         this.videos = []
       } finally {
-        this.loading = false
+        if (this.fetchGen >= 0 && fetchId === this.fetchGen) this.loading = false
       }
     },
   },
@@ -483,6 +528,17 @@ export default {
   background: rgba(0, 0, 0, 0.25);
 }
 
+.recent-video-time {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
 .recent-video-address {
   font-size: 0.7rem;
   color: #6b7280;
@@ -509,6 +565,16 @@ export default {
   justify-content: center;
   overflow: hidden;
   user-select: none;
+}
+.story-gradient-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
 }
 .story-video {
   width: 100%;
@@ -551,9 +617,9 @@ export default {
   z-index: 10;
 }
 .story-header-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.8);
   flex-shrink: 0;
@@ -569,18 +635,30 @@ export default {
 }
 .story-avatar-fallback {
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
+}
+.story-header-name-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .story-header-name {
   flex: 1;
   color: #fff;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1.15rem;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.story-header-time {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 .story-header-name-btn {
   background: none;

@@ -1,7 +1,7 @@
 <template>
 <div class="ads-page-wrapper">
     <!-- <router-link @click="$router.go(-1)"  class="cursor-pointer ml-2 "> <q-icon name="arrow_back" /> Voltar</router-link> -->
-    <ads-page v-if="!loading" :data-ads="data" />
+    <ads-page v-if="!loading" :data-ads="data" @updated="getData" />
     <div v-else class="p-3">
         <q-card>
             <q-item>
@@ -166,34 +166,170 @@ export default {
         console.log('123', data.value.files)
 
         useMeta(() => {
+            const ad = data.value
+            const name = ad.name || ''
+            const description = ad.description || ''
+
+            // Melhor imagem disponível: galeria ou logo
+            const logoImg = ad.files?.logo?.filter(l => !l.deletedAt)?.[0]?.link || null
+            const galleryImg = ad.files?.gallery?.filter(g => !g.deletedAt)?.[0]?.link || null
+            const firstImage = galleryImg || logoImg
+
+            // Endereço (o campo pode vir como 'address' ou 'addresses')
+            const addresses = ad.address || ad.addresses || []
+            const lastAddress = addresses.length ? addresses[addresses.length - 1] : null
+            const city = lastAddress?.city || ''
+            const state = lastAddress?.state || ''
+            const zipCode = lastAddress?.zipCode || ''
+            const street = lastAddress?.street || ''
+            const number = lastAddress?.number || ''
+
+            // Telefones
+            const activePhonesArr = (ad.phones || []).filter(p => !p.deletedAt)
+            const phonesStr = activePhonesArr.map(p => p.phone).join(', ')
+            const firstPhone = activePhonesArr[0]?.phone || ''
+
+            // Título rico: "Nome em Cidade, Estado"
+            const locationParts = [city, state].filter(Boolean).join(', ')
+            const pageTitle = locationParts ? `${name} em ${locationParts}` : name
+
+            // Descrição meta concatenada (máx 160 chars)
+            const descParts = [
+                description ? description.slice(0, 100) : name,
+                city && state ? `Localizado em ${city}, ${state}.` : city ? `Em ${city}.` : '',
+                firstPhone ? `Tel: ${firstPhone}.` : '',
+                'Encontre no Poliweb.'
+            ].filter(Boolean)
+            const metaDesc = descParts.join(' ').slice(0, 160)
+
+            // Palavras-chave: nome + cidade + estado + descrição + telefones + categoria
+            const keywordParts = [
+                name,
+                city,
+                state,
+                locationParts ? `${name} ${city}` : '',
+                description ? description.slice(0, 80) : '',
+                phonesStr,
+                'Poliweb',
+                'anúncio',
+                'negócio local'
+            ].filter(Boolean)
+
+            // URL canônica
+            const adSlug = name
+                ? name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()
+                : String(ad.id || '')
+            const canonicalUrl = ad.id
+                ? `https://www.poliwebapp.com.br/${ad.id}/${adSlug}`
+                : 'https://www.poliwebapp.com.br'
+
+            // JSON-LD LocalBusiness para Google Rich Results
+            const sameAs = [ad.website, ad.facebook, ad.instagram].filter(Boolean)
+            const jsonLd = {
+                '@context': 'https://schema.org',
+                '@type': 'LocalBusiness',
+                name: name || undefined,
+                description: description || undefined,
+                ...(firstImage ? { image: firstImage } : {}),
+                url: ad.website || canonicalUrl,
+                ...(firstPhone ? { telephone: firstPhone } : {}),
+                ...(ad.email ? { email: ad.email } : {}),
+                ...(lastAddress ? {
+                    address: {
+                        '@type': 'PostalAddress',
+                        streetAddress: [street, number].filter(Boolean).join(', '),
+                        addressLocality: city,
+                        addressRegion: state,
+                        postalCode: zipCode,
+                        addressCountry: 'BR'
+                    }
+                } : {}),
+                ...(lastAddress?.coordinates?.lat != null && lastAddress?.coordinates?.long != null ? {
+                    geo: {
+                        '@type': 'GeoCoordinates',
+                        latitude: lastAddress.coordinates.lat,
+                        longitude: lastAddress.coordinates.long
+                    }
+                } : {}),
+                ...(sameAs.length ? { sameAs } : {})
+            }
+
             return {
-                title: data.value.name,
-                // optional; sets final title as "Index Page - My Website", useful for multiple level meta
+                title: pageTitle || 'Poliweb',
                 titleTemplate: title => `${title} - Poliweb`,
+                link: {
+                    canonical: { rel: 'canonical', href: canonicalUrl }
+                },
                 meta: {
                     description: {
-                        name: data.value.name,
-                        content: data.value.description
+                        name: 'description',
+                        content: metaDesc
                     },
                     keywords: {
                         name: 'keywords',
-                        content: `${data.value.description}`
+                        content: keywordParts.join(', ')
+                    },
+                    // Open Graph
+                    ogTitle: {
+                        property: 'og:title',
+                        content: pageTitle
                     },
                     ogDesc: {
-                        name: 'og:description',
-                        content: data.value.description
+                        property: 'og:description',
+                        content: metaDesc
                     },
                     ogImage: {
-                        name: 'og:image',
-                        content: (data.value.files.gallery && data.value.files.gallery.length > 0) ? data.value.files.gallery[0].link : null
+                        property: 'og:image',
+                        content: firstImage || ''
                     },
-
+                    ogImageAlt: {
+                        property: 'og:image:alt',
+                        content: name
+                    },
+                    ogUrl: {
+                        property: 'og:url',
+                        content: canonicalUrl
+                    },
+                    ogType: {
+                        property: 'og:type',
+                        content: 'business.business'
+                    },
+                    ogSiteName: {
+                        property: 'og:site_name',
+                        content: 'Poliweb'
+                    },
+                    ogLocale: {
+                        property: 'og:locale',
+                        content: 'pt_BR'
+                    },
+                    // Twitter Card
+                    twitterCard: {
+                        name: 'twitter:card',
+                        content: 'summary_large_image'
+                    },
+                    twitterTitle: {
+                        name: 'twitter:title',
+                        content: pageTitle
+                    },
+                    twitterDesc: {
+                        name: 'twitter:description',
+                        content: metaDesc
+                    },
+                    twitterImage: {
+                        name: 'twitter:image',
+                        content: firstImage || ''
+                    }
                 },
+                script: name ? [{
+                    type: 'application/ld+json',
+                    innerHTML: JSON.stringify(jsonLd)
+                }] : []
             }
         })
         return {
             data,
-            loading
+            loading,
+            getData
         };
     }
 }

@@ -3,10 +3,13 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
     :persistent="persistent"
+    position="bottom"
+    transition-show="slide-up"
+    transition-hide="slide-down"
     class="abs-dialog"
   >
     <div class="abs-backdrop" @click.self="!persistent && $emit('update:modelValue', false)">
-      <div class="abs-sheet">
+      <div class="abs-sheet menu-modal-sheet">
         <!-- Handle bar (mobile) -->
         <div class="abs-handle" />
 
@@ -119,29 +122,24 @@ export default {
   position: relative;
   width: 100%;
   max-width: 440px;
-  border-radius: 18px 18px 0 0;
-  padding: 0.875rem 1rem 1.25rem;
-  /* iOS light glass */
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-bottom: none;
-  box-shadow:
-    0 -2px 0 rgba(0,0,0,0.04),
-    0 -12px 48px rgba(0,0,0,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.95);
+  max-height: 90vh;
+  max-height: 90dvh;
+  border-radius: 20px 20px 0 0;
+  padding: 0.875rem 1rem;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0;
+  overflow: hidden;
 }
 
 @media (min-width: 520px) {
   .abs-sheet {
     border-radius: 22px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.9);
-    padding: 2rem 2rem 1.75rem;
+    padding: 2rem 2rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -210,6 +208,10 @@ export default {
 /* Body */
 .abs-body {
   width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Ações */

@@ -60,6 +60,10 @@
             </router-link>
         </nav>
     </div>
+    <SelectCityModal
+      v-model="showCityModal"
+      :confirm-handler="onCityConfirm"
+    />
     <Download />
 </q-layout>
 </template>
@@ -68,6 +72,7 @@
 import EssentialLink from "components/EssentialLink.vue";
 import Download from "components/Download.vue";
 import AppIcon from "components/AppIcon.vue";
+import SelectCityModal from "components/SelectCityModal.vue";
 
 const linksList = [{
         title: "Home",
@@ -140,15 +145,18 @@ export default defineComponent({
     components: {
         EssentialLink,
         Download,
-        AppIcon
+        AppIcon,
+        SelectCityModal,
     },
 
     setup() {
         const leftDrawerOpen = ref(false);
         const loadCategoriesRef = ref(null);
+        const showCityModal = ref(false);
         provide('loadCategories', loadCategoriesRef);
 
         return {
+            showCityModal,
             baseLinks: linksList,
             essentialLinks: ref([]),
             leftDrawerOpen,
@@ -166,9 +174,11 @@ export default defineComponent({
         },
         showGlassNavbar() {
             const p = this.$route.fullPath;
-            // Esconde apenas na página de anúncio (/:id ou /:id/:slug)
-            const isAdPage = /^\/\d+(\/.*)?$/.test(p.replace(/\?.*$/, ''));
-            return !isAdPage;
+            // Esconde na página de anúncio (/123/...) e na página SEO (/comercio/123/slug)
+            const clean = p.replace(/\?.*$/, '')
+            const isAdPage = /^\/\d+(\/.*)?$/.test(clean)
+            const isCommerceSeoPage = /^\/comercio\/\d+(\/.*)?$/.test(clean)
+            return !(isAdPage || isCommerceSeoPage);
         },
     },
     data() {
@@ -197,7 +207,7 @@ export default defineComponent({
         document.body.classList.remove('has-glass-navbar')
     },
     methods: {
-        init() {
+        async init() {
             this.essentialLinks = this.baseLinks
             const uuid = localStorage.getItem('uuid')
             let context = localStorage.getItem("context")
@@ -246,8 +256,13 @@ export default defineComponent({
             this.localization = localization ? JSON.parse(localization) : null
             if (this.localization) {
                 this.$store.dispatch('localization/setLocalization', this.localization)
+                this.getData()
+            } else {
+                const setFromCommerce = await this.trySetCityFromCommercePage()
+                if (!setFromCommerce) {
+                    this.showCityModal = true
+                }
             }
-            this.getData()
             if (admin) {
                 this.essentialLinks.push({
                     title: "Usuários",
@@ -274,9 +289,49 @@ export default defineComponent({
                 return v.toString(16);
             });
         },
+        async trySetCityFromCommercePage() {
+            const path = this.$route?.path || ''
+            const commerceMatch = path.match(/^\/(\d+)(?:\/|$)|^\/comercio\/(\d+)(?:\/|$)/)
+            if (!commerceMatch) return false
+            const adId = commerceMatch[1] || commerceMatch[2]
+            try {
+                const res = await this.$api.get(`/categories/ads/${adId}?nonDeleted=true`)
+                const ad = res?.data
+                if (!ad?.deletedAt) {
+                    const addrs = ad?.address || ad?.addresses
+                    const addr = Array.isArray(addrs) && addrs.length ? addrs[addrs.length - 1] : addrs
+                    const cityName = addr?.city || addr?.addressCity
+                    const { citysData } = await import('src/js/citys')
+                    let city = addr?.addressId ? citysData.find((c) => c.id === addr.addressId) : null
+                    if (!city && cityName) {
+                        const n = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        const nCity = n(cityName)
+                        city = citysData.find((c) => n(c.city) === nCity || n(c.city).includes(nCity) || nCity.includes(n(c.city)))
+                    }
+                    if (city) {
+                        localStorage.setItem('localization', JSON.stringify(city))
+                        this.localization = city
+                        this.$store.dispatch('localization/setLocalization', city)
+                        await this.getData(city)
+                        return true
+                    }
+                }
+            } catch {
+                // ignore
+            }
+            return false
+        },
+        async onCityConfirm(city) {
+            if (!city) return
+            localStorage.setItem('localization', JSON.stringify(city))
+            this.localization = city
+            this.$store.dispatch('localization/setLocalization', city)
+            await this.getData(city)
+        },
         async getData(overrideLocalization) {
             const loc = overrideLocalization || this.localization
             if (overrideLocalization) this.localization = loc
+            if (!loc) return
             try {
                 await this.$store.dispatch('categories/fetchCategories', loc)
             } catch (err) {

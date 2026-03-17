@@ -1,11 +1,12 @@
 <template>
     <q-form
+      :id="formId"
       @submit="setAddress"
-      class="p-4"
+      class="address-form"
     >
-      <div class="">
-        <div class="title">
-          Cadastre o endereço
+      <div class="address-form-fields">
+        <div v-if="!hideTitle" class="address-form-title">
+          {{ edit ? 'Atualize o endereço' : 'Cadastre o endereço' }}
         </div>
         <div class="row">      
           <q-input filled v-model="formAddress.zipCode" type="text" lazy-rules label="CEP" class="w-full py-2" />
@@ -32,13 +33,13 @@
           <q-input filled v-model="formAddress.neighborhood" type="text" lazy-rules label="Bairro" class="w-full py-2" />
         </div>
       </div>
-      <q-btn label="Salvar" type="submit" color="primary"/>         
     </q-form>
 </template>
 
 <script>
 import { ref } from "vue";
 export default {
+    emits: ['saved'],
     props:{
         adId: {
            type: Number,
@@ -52,10 +53,16 @@ export default {
         },
         edit:{
           type: Boolean,
-        }
+        },
+        hideTitle: {
+          type: Boolean,
+          default: false,
+        },
     },
-    setup () { 
+    setup (props) { 
+        const formId = `address-form-${props.edit ? 'edit' : 'add'}`
         return {
+            formId,
             formAddress: ref({
                 zipCode: "37860000",
                 city: "Nova Resende",
@@ -73,8 +80,8 @@ export default {
         }
       },
       mounted () {
-        if(this.address){
-          this.formAddress = this.address
+        if (this.address) {
+          Object.assign(this.formAddress, this.address)
         }
       },
       methods: {
@@ -93,8 +100,8 @@ export default {
                   position: 'top',
                   message: 'Endereço salvo com sucesso!',         
                   })
+                  this.$emit('saved')
                   }                
-                    // this.$router.go(0)                  
               })
               .catch((err) => {
                   let msg
@@ -119,5 +126,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.address-form {
+  padding: 0 0.5rem;
+}
+.address-form-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+.address-form-fields .row {
+  margin-bottom: 0.5rem;
+}
 </style>

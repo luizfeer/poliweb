@@ -17,6 +17,7 @@
             <q-img
               v-if="adsComponent.files?.logo?.length"
               :src="pathImg()"
+              :alt="adsComponent.name + ' - logo'"
               :ratio="1"
               class="h-full w-full object-cover"
               spinner-color="gray-300"
@@ -65,7 +66,7 @@
           @click="openStoryAt(i)"
         >
           <template v-if="item.type === 'video'">
-            <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" alt="" />
+            <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" :alt="adsComponent.name + ' - vídeo ' + (i + 1)" />
             <video
               v-else-if="item.link && !videoThumbFailed[String(item.id)]"
               :data-video-id="String(item.id)"
@@ -82,7 +83,7 @@
             <AppIcon name="play-circle-filled" :size="32" class="text-white" />
           </template>
           <template v-else>
-            <img :src="item.thumbnail || item.src" class="ads-video-thumb-img" alt="" loading="lazy" />
+            <img :src="item.thumbnail || item.src" class="ads-video-thumb-img" :alt="adsComponent.name + ' - foto ' + (i + 1)" loading="lazy" />
           </template>
           <span class="ads-gallery-video-num">{{ i + 1 }}</span>
         </div>
@@ -96,6 +97,23 @@
       <div class="ads-card">
         <h2 class="ads-card-title">Descrição</h2>
         <p class="ads-card-text">{{ adsComponent.description }}</p>
+      </div>
+    </div>
+
+    <!-- Categorias -->
+    <div class="ads-section" v-if="adCategories.length">
+      <div class="ads-card">
+        <h2 class="ads-card-title">Categorias</h2>
+        <div class="ads-categories-tags">
+          <router-link
+            v-for="cat in adCategories"
+            :key="cat.id"
+            :to="categoryLink(cat)"
+            class="ads-category-tag"
+          >
+            {{ cat.name }}
+          </router-link>
+        </div>
       </div>
     </div>
 
@@ -149,8 +167,8 @@
     </div>
 
     <!-- Endereço -->
-    <div class="ads-section" v-if="lastAddress || admin">
-      <div v-if="lastAddress" class="ads-card ads-address-card">
+    <div class="ads-section" v-if="lastAddress">
+      <div class="ads-card ads-address-card">
         <a
           @click="sendAction('open-map')"
           :href="`https://maps.google.com/maps?q=${encodeURIComponent(adsComponent.name + ',' + (lastAddress.street || '') + ',' + (lastAddress.number || '') + ',' + (lastAddress.city || '') + ' ' + (lastAddress.state || '') + ',' + (lastAddress.zipCode || ''))}`"
@@ -164,18 +182,6 @@
           </div>
           <AppIcon name="open-in-new" :size="18" class="text-gray-400" />
         </a>
-        <q-btn
-          v-if="admin"
-          flat
-          dense
-          color="primary"
-          size="sm"
-          @click.prevent="editAddress = true"
-          class="mt-2"
-        >
-          <AppIcon name="edit" :size="18" />
-          <span class="q-ml-xs">Editar endereço</span>
-        </q-btn>
         <!-- Mapa embutido -->
         <div v-if="lastAddress?.coordinates?.lat != null && lastAddress?.coordinates?.long != null" class="ads-map-wrapper mt-4 rounded-xl overflow-hidden border border-gray-200">
           <iframe
@@ -190,18 +196,6 @@
             referrerpolicy="no-referrer-when-downgrade"
           />
         </div>
-      </div>
-      <div v-else-if="admin" class="ads-card">
-        <button class="admin-row-btn" @click="expand.address = true">
-          <div class="arb-icon" style="background: linear-gradient(135deg,#f59e0b,#d97706)">
-            <q-icon name="place" color="white" size="18px" />
-          </div>
-          <div class="arb-info">
-            <span class="arb-label">Cadastrar endereço</span>
-            <span class="arb-sub">Adicione a localização do seu negócio</span>
-          </div>
-          <q-icon name="chevron_right" color="grey-5" size="20px" />
-        </button>
       </div>
     </div>
 
@@ -224,6 +218,38 @@
 
         <div class="admin-divider" />
 
+        <!-- Cadastrar / Editar endereço -->
+        <button
+          v-if="lastAddress"
+          class="admin-row-btn"
+          @click="editAddress = true"
+        >
+          <div class="arb-icon" style="background: linear-gradient(135deg,#f59e0b,#d97706)">
+            <q-icon name="edit_location" color="white" size="18px" />
+          </div>
+          <div class="arb-info">
+            <span class="arb-label">Editar endereço</span>
+            <span class="arb-sub">Atualize a localização do seu negócio</span>
+          </div>
+          <q-icon name="chevron_right" color="grey-5" size="20px" />
+        </button>
+        <button
+          v-else
+          class="admin-row-btn"
+          @click="expand.address = true"
+        >
+          <div class="arb-icon" style="background: linear-gradient(135deg,#f59e0b,#d97706)">
+            <q-icon name="place" color="white" size="18px" />
+          </div>
+          <div class="arb-info">
+            <span class="arb-label">Cadastrar endereço</span>
+            <span class="arb-sub">Adicione a localização do seu negócio</span>
+          </div>
+          <q-icon name="chevron_right" color="grey-5" size="20px" />
+        </button>
+
+        <div class="admin-divider" />
+
         <!-- Editar informações -->
         <button class="admin-row-btn" @click="expand.basic = true">
           <div class="arb-icon" style="background: linear-gradient(135deg,#3b82f6,#2563eb)">
@@ -232,6 +258,20 @@
           <div class="arb-info">
             <span class="arb-label">Editar informações</span>
             <span class="arb-sub">Nome, descrição, redes sociais</span>
+          </div>
+          <q-icon name="chevron_right" color="grey-5" size="20px" />
+        </button>
+
+        <div class="admin-divider" />
+
+        <!-- Postar mídia -->
+        <button class="admin-row-btn" @click="expand.postarMedia = true">
+          <div class="arb-icon" style="background: linear-gradient(135deg,#ec4899,#db2777)">
+            <q-icon name="photo_camera" color="white" size="18px" />
+          </div>
+          <div class="arb-info">
+            <span class="arb-label">Postar mídia</span>
+            <span class="arb-sub">Adicionar fotos ou vídeos à galeria</span>
           </div>
           <q-icon name="chevron_right" color="grey-5" size="20px" />
         </button>
@@ -249,8 +289,34 @@
           </div>
           <q-icon name="chevron_right" color="grey-5" size="20px" />
         </button>
+
+        <template v-if="isSuperAdmin">
+          <div class="admin-divider" />
+          <button class="admin-row-btn" @click="expand.editCategories = true">
+            <div class="arb-icon" style="background: linear-gradient(135deg,#8b5cf6,#7c3aed)">
+              <q-icon name="category" color="white" size="18px" />
+            </div>
+            <div class="arb-info">
+              <span class="arb-label">Editar categorias</span>
+              <span class="arb-sub">Adicionar ou remover categorias do anúncio</span>
+            </div>
+            <q-icon name="chevron_right" color="grey-5" size="20px" />
+          </button>
+        </template>
       </div>
     </div>
+
+    <EditCategoriesModal
+      v-model="expand.editCategories"
+      :ad-id="adsComponent.id"
+      :categories="categories"
+      @updated="loadAdCategories(); $emit('updated')"
+    />
+
+    <PostarMediaModal
+      v-model="expand.postarMedia"
+      @select="onPostarMediaSelect"
+    />
 
     <!-- Bottom sheets admin -->
     <app-bottom-sheet
@@ -260,17 +326,31 @@
       title="Cadastrar endereço"
       subtitle="Informe a localização do seu negócio"
     >
-      <add-address :ad-id="adsComponent.id" />
+      <add-address :ad-id="adsComponent.id" hide-title @saved="expand.address = false; $emit('updated')" />
+      <template #actions>
+        <button type="button" class="abs-action-cancel" @click="expand.address = false">Cancelar</button>
+        <button type="submit" :form="'address-form-add'" class="abs-action-confirm abs-action-confirm-amber">
+          <q-icon name="check" size="17px" />
+          <span>Salvar</span>
+        </button>
+      </template>
     </app-bottom-sheet>
 
     <app-bottom-sheet
       v-model="editAddress"
-      icon="edit-location"
+      icon="place"
       icon-color="#f59e0b"
       title="Editar endereço"
       subtitle="Atualize a localização do seu negócio"
     >
-      <add-address :edit="true" :address="lastAddress" :ad-id="adsComponent.id" />
+      <add-address :edit="true" :address="lastAddress" :ad-id="adsComponent.id" hide-title @saved="editAddress = false; $emit('updated')" />
+      <template #actions>
+        <button type="button" class="abs-action-cancel" @click="editAddress = false">Cancelar</button>
+        <button type="submit" :form="'address-form-edit'" class="abs-action-confirm abs-action-confirm-amber">
+          <q-icon name="check" size="17px" />
+          <span>Salvar</span>
+        </button>
+      </template>
     </app-bottom-sheet>
 
     <app-bottom-sheet
@@ -347,7 +427,7 @@
             @click="openStoryAt(i)"
           >
             <template v-if="item.type === 'video'">
-              <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" alt="" />
+              <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" :alt="adsComponent.name + ' - vídeo ' + (i + 1)" />
               <video
                 v-else-if="item.link && !videoThumbFailed[String(item.id)]"
                 :data-video-id="String(item.id)"
@@ -367,7 +447,7 @@
               </div>
             </template>
             <template v-else>
-              <img :src="item.thumbnail || item.src" loading="lazy" class="ads-media-grid-photo-img" />
+              <img :src="item.thumbnail || item.src" loading="lazy" class="ads-media-grid-photo-img" :alt="adsComponent.name + ' - foto ' + (i + 1)" />
             </template>
           </div>
         </div>
@@ -452,6 +532,7 @@
     <!-- Story viewer - fotos e vídeos estilo Stories -->
     <q-dialog v-model="storyOpen" maximized transition-show="fade" transition-hide="fade" class="story-dialog">
       <div class="story-container" @touchstart="onStoryTouchStart" @touchend="onStoryTouchEnd">
+        <div class="story-gradient-top" aria-hidden="true" />
         <!-- Barras de progresso -->
         <div class="story-bars">
           <div
@@ -469,10 +550,13 @@
         <!-- Cabeçalho -->
         <div class="story-header">
           <div class="story-header-avatar">
-            <img v-if="pathImg()" :src="pathImg()" class="story-avatar-img" />
+            <img v-if="pathImg()" :src="pathImg()" class="story-avatar-img" :alt="adsComponent.name" />
             <div v-else class="story-avatar-fallback">{{ (adsComponent.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) }}</div>
           </div>
-          <span class="story-header-name">{{ adsComponent.name }}</span>
+          <div class="story-header-name-wrap">
+            <span class="story-header-name">{{ adsComponent.name }}</span>
+            <span v-if="currentMediaItem?.createdAt" class="story-header-time">{{ timeAgo(currentMediaItem.createdAt) }}</span>
+          </div>
           <button class="story-close-btn" @click="closeStory">✕</button>
         </div>
 
@@ -491,7 +575,7 @@
           v-else-if="currentMediaItem?.type === 'photo'"
           :src="currentMediaItem?.src"
           class="story-media"
-          alt=""
+          :alt="adsComponent.name + ' - foto ' + (storyIndex + 1)"
         />
 
         <!-- Áreas de toque para navegar (esquerda / direita) -->
@@ -600,13 +684,21 @@ import AddAddress from 'components/add/Address'
 import FixInfos from 'components/FixInfos'
 import PreviewEcommerce from 'components/PreviewEcommerce'
 import AppBottomSheet from 'components/AppBottomSheet'
+import EditCategoriesModal from 'components/EditCategoriesModal'
+import PostarMediaModal from 'components/PostarMediaModal'
+import { timeAgo as formatTimeAgo } from 'src/js/timeAgo'
+import { isSuperAdmin } from 'src/js/superadmin'
+import { mapState } from 'vuex'
+import { getAdCategories } from 'src/services/adsCategories'
 
 export default {
    components:{
     AddAddress,
     FixInfos,
     PreviewEcommerce,
-    AppBottomSheet
+    AppBottomSheet,
+    EditCategoriesModal,
+    PostarMediaModal
     // Lightgallery,
   },
   props:{
@@ -651,7 +743,9 @@ export default {
         action: false,
         basic: false,
         address: false,
-        phone: false
+        phone: false,
+        editCategories: false,
+        postarMedia: false
       },
       editAddress: false,
       editPhone: {
@@ -680,9 +774,18 @@ export default {
       videoThumbFailed: {},
       storyPhotoDuration: 5000,
       storyPhotoTimer: null,
+      adCategories: [],
     };
   },
+  emits: ['updated'],
   computed: {
+    ...mapState('categories', ['list']),
+    categories() {
+      return this.list || []
+    },
+    isSuperAdmin() {
+      return isSuperAdmin()
+    },
     lastAddress(){
       const addrs = this.adsComponent?.addresses
       if (!addrs || !addrs.length) return null
@@ -730,6 +833,15 @@ export default {
     },
   },
   watch: {
+    dataAds: {
+      handler(val) {
+        if (val && val.id) {
+          this.adsComponent = { ...val }
+          this.loadAdCategories()
+        }
+      },
+      deep: true,
+    },
     'adsComponent.id': {
       handler(newId, oldId) {
         if (oldId !== undefined && newId !== oldId) {
@@ -831,10 +943,35 @@ export default {
     },
     pathImg () {
       const logo = this.adsComponent?.files?.logo
-      if(!logo?.length) return ''
-      return logo[0].link
+      if (!logo?.length) return ''
+      const active = logo.filter((l) => !l.deletedAt)
+      if (!active.length) return ''
+      return active[0].link
       // let last = this.adsComponent.files.logo.length - 1
       // this.adsComponent.files.logo[-1 ? ].link
+    },
+    categoryLink(cat) {
+      const id = cat.categoryId ?? cat.id
+      const name = (cat.name || 'categoria').trim()
+      return `/categorias/${id}/${encodeURIComponent(name)}`
+    },
+    onPostarMediaSelect(type) {
+      this.$nextTick(() => {
+        if (type === 'gallery') {
+          this.$refs.gallery?.click()
+        } else if (type === 'video') {
+          this.sendVideo = true
+        }
+      })
+    },
+    async loadAdCategories() {
+      if (!this.adsComponent?.id) return
+      try {
+        const res = await getAdCategories(this.adsComponent.id)
+        this.adCategories = res?.data?.categories ?? []
+      } catch (_) {
+        this.adCategories = []
+      }
     },
     url(){
       let url = encodeURIComponent(this.adsComponent.name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase())
@@ -1113,6 +1250,9 @@ export default {
         }
         this._touchStartX = null
       },
+      timeAgo(dateStr) {
+        return formatTimeAgo(dateStr)
+      },
       deleteStoryVideo() {
         this.confirmStoryDelete = false
         const item = this.mediaItems[this.storyIndex]
@@ -1320,7 +1460,7 @@ export default {
     console.table(this.adsComponent)
 
    },
-  mounted () {
+  async mounted () {
     const token = localStorage.getItem('token')
     this.headers[0].value = `Bearer ${token}`
     const admin = localStorage.getItem('admin') ? true : false
@@ -1332,8 +1472,14 @@ export default {
     if(this.adsComponent.customerId === id){
       this.admin = true
     }
-      this.saveHistory()
-      this.getFollowColor()
+    this.saveHistory()
+    this.getFollowColor()
+    if (this.admin && isSuperAdmin() && !this.categories.length) {
+      try {
+        await this.$store.dispatch('categories/fetchCategories')
+      } catch (_) {}
+    }
+    this.loadAdCategories()
   },
   beforeUnmount() {
     if (this.pswpObserver) {
@@ -1613,6 +1759,13 @@ export default {
   transition: box-shadow 0.2s;
 }
 .abs-action-confirm:hover { box-shadow: 0 5px 18px rgba(124, 58, 237, 0.5); }
+.abs-action-confirm-amber {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  box-shadow: 0 3px 12px rgba(245, 158, 11, 0.35) !important;
+}
+.abs-action-confirm-amber:hover {
+  box-shadow: 0 5px 18px rgba(245, 158, 11, 0.5) !important;
+}
 .abs-action-disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -1794,6 +1947,16 @@ export default {
   font-size: 0.7rem;
   font-weight: 600;
 }
+.ads-gallery-video-time {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  z-index: 1;
+}
 
 /* Grid de mídia (fotos + vídeos) */
 .ads-media-grid {
@@ -1895,6 +2058,16 @@ export default {
   overflow: hidden;
   user-select: none;
 }
+.story-gradient-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
 .story-media {
   width: 100%;
   height: 100%;
@@ -1957,6 +2130,13 @@ export default {
   font-size: 0.75rem;
   font-weight: 700;
 }
+.story-header-name-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .story-header-name {
   flex: 1;
   color: #fff;
@@ -1966,6 +2146,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.story-header-time {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .story-close-btn {
   color: #fff;
@@ -2080,6 +2265,27 @@ export default {
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   border: 1px solid #e5e7eb;
+}
+.ads-categories-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.ads-category-tag {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.12);
+  color: #6d28d9;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.ads-category-tag:hover,
+.ads-category-tag:active {
+  background: rgba(124, 58, 237, 0.22);
+  color: #5b21b6;
 }
 .ads-card-title {
   font-size: 1rem;

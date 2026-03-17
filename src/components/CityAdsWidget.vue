@@ -38,20 +38,23 @@
             </a>
             <span v-else class="city-ads-phone city-ads-phone-empty">Sem telefone</span>
           </div>
-          <div class="city-ads-grid">
-            <template v-if="ad.photos.length">
-              <img
-                v-for="(url, i) in ad.photos"
-                :key="i"
-                :src="url"
-                loading="lazy"
-                class="city-ads-thumb"
-                alt=""
-              />
-            </template>
-            <div v-else class="city-ads-grid-placeholder">
-              <AppIcon name="image-plus" :size="24" class="text-gray-400" />
+          <div class="city-ads-grid-wrap">
+            <div class="city-ads-grid">
+              <template v-if="ad.photos.length">
+                <img
+                  v-for="(url, i) in ad.photos"
+                  :key="i"
+                  :src="url"
+                  loading="lazy"
+                  class="city-ads-thumb"
+                  alt=""
+                />
+              </template>
+              <div v-else class="city-ads-grid-placeholder">
+                <AppIcon name="image-plus" :size="24" class="text-gray-400" />
+              </div>
             </div>
+            <span v-if="ad.createdAt" class="city-ads-time">{{ timeAgo(ad.createdAt) }}</span>
           </div>
         </router-link>
       </div>
@@ -62,6 +65,7 @@
 
 <script>
 import AppIcon from 'components/AppIcon.vue'
+import { timeAgo } from 'src/js/timeAgo'
 
 export default {
   name: 'CityAdsWidget',
@@ -78,16 +82,22 @@ export default {
     return {
       ads: [],
       loading: false,
+      fetchGen: 0,
     }
+  },
+  beforeUnmount() {
+    this.fetchGen = -1
   },
   computed: {
     adsWithPhotos() {
-      return this.ads.map((ad) => ({
-        ...ad,
-        photos: (ad.photoLinks && Array.isArray(ad.photoLinks))
-          ? ad.photoLinks.slice(0, 6)
-          : [],
-      }))
+      return this.ads
+        .filter((ad) => ad && ad.id != null)
+        .map((ad) => ({
+          ...ad,
+          photos: (ad.photoLinks && Array.isArray(ad.photoLinks))
+            ? ad.photoLinks.slice(0, 6)
+            : [],
+        }))
     },
   },
   watch: {
@@ -95,12 +105,17 @@ export default {
       immediate: true,
       handler(id, oldId) {
         if (id === oldId && oldId !== undefined) return
-        if (id) this.fetchAds()
-        else this.ads = []
+        if (id) {
+          this.loadFromCache(id)
+          this.fetchAds()
+        } else {
+          this.ads = []
+        }
       },
     },
   },
   methods: {
+    timeAgo,
     formatPhone(phone) {
       const n = String(phone || '').replace(/\D/g, '')
       if (n.length === 13 && n.startsWith('55')) {
@@ -123,19 +138,38 @@ export default {
         : ''
       return slug ? `/${ad.id}/${slug}` : `/${ad.id}`
     },
+    loadFromCache(addressId) {
+      try {
+        const key = `cityAds_${addressId}`
+        const cached = localStorage.getItem(key)
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          this.ads = Array.isArray(parsed) ? parsed : []
+        }
+      } catch (_) {
+        this.ads = []
+      }
+    },
     async fetchAds() {
       if (!this.addressId || !this.$api) return
-      this.loading = true
+      const fetchId = ++this.fetchGen
+      if (!this.ads.length) this.loading = true
       try {
         const response = await this.$api.get(`/cities/${this.addressId}/ads`)
+        if (this.fetchGen < 0 || fetchId !== this.fetchGen) return
         const raw = response?.data?.ads ?? []
-        this.ads = Array.isArray(raw) ? raw : []
+        const list = Array.isArray(raw) ? raw : []
+        this.ads = list
+        try {
+          localStorage.setItem(`cityAds_${this.addressId}`, JSON.stringify(list))
+        } catch (_) {}
       } catch (err) {
+        if (this.fetchGen < 0 || fetchId !== this.fetchGen) return
         const msg = err?.response?.data?.message || 'Erro ao carregar comércios'
         this.$q.notify({ color: 'negative', position: 'top', message: msg, icon: 'report_problem' })
         this.ads = []
       } finally {
-        this.loading = false
+        if (this.fetchGen >= 0 && fetchId === this.fetchGen) this.loading = false
       }
     },
   },
@@ -252,11 +286,23 @@ export default {
   color: #9ca3af;
 }
 
+.city-ads-grid-wrap {
+  position: relative;
+  padding: 0 8px 8px;
+}
 .city-ads-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
-  padding: 0 8px 8px;
+}
+.city-ads-time {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  z-index: 2;
 }
 
 .city-ads-thumb {

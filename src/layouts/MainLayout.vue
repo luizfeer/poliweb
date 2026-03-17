@@ -1,5 +1,5 @@
 <template>
-<q-layout view="lHh Lpr lFf">
+<q-layout view="lHh Lpr lFf" :class="{ 'has-glass-navbar': showGlassNavbar }">
     <q-header elevated reveal class="z-50 header-mobile">
         <q-toolbar class="flex-col px-0 min-h-[56px]">
             <div class="w-full flex items-center py-3 px-2">
@@ -47,15 +47,15 @@
     <div v-if="showGlassNavbar" class="glass-navbar-wrapper">
         <nav class="glass-navbar">
             <router-link to="/" class="glass-nav-item" :class="{ active: $route.fullPath === '/' }">
-                <AppIcon name="home" :size="22" />
+                <span class="glass-nav-icon"><AppIcon name="home" :size="22" /></span>
                 <span>Home</span>
             </router-link>
             <router-link to="/encontre" class="glass-nav-item" :class="{ active: $route.fullPath === '/encontre' }">
-                <AppIcon name="storefront" :size="22" />
+                <span class="glass-nav-icon"><AppIcon name="storefront" :size="22" /></span>
                 <span>Categorias</span>
             </router-link>
             <router-link to="/buscar" class="glass-nav-item" :class="{ active: $route.fullPath.startsWith('/buscar') }">
-                <AppIcon name="search" :size="22" />
+                <span class="glass-nav-icon"><AppIcon name="search" :size="22" /></span>
                 <span>Buscar</span>
             </router-link>
         </nav>
@@ -171,18 +171,27 @@ export default defineComponent({
             loading: false,
         };
     },
-     watch:{
-      $route (to, from){
-          if(from.fullPath === '/login'){
-            console.log('change router')
-             this.init()
-          }
+    watch: {
+      $route(to, from) {
+        if (from.fullPath === '/login') {
+          console.log('change router')
+          this.init()
+        }
+      },
+      showGlassNavbar: {
+        immediate: true,
+        handler(v) {
+          document.body.classList.toggle('has-glass-navbar', !!v)
+        }
       }
     },
     mounted() {
         console.log('mount')
         this.init()
         this.loadCategoriesRef = (loc) => this.getData(loc)
+    },
+    beforeUnmount() {
+        document.body.classList.remove('has-glass-navbar')
     },
     methods: {
         init() {
@@ -367,7 +376,7 @@ slide-enter-active,
     transform: translateX(-30%);
 }
 
-/* Navbar balão centralizado (estilo Apple) - mobile e desktop */
+/* Navbar balão estilo Apple - frosted glass refinado */
 .glass-navbar-wrapper {
   position: fixed;
   bottom: 0;
@@ -375,10 +384,11 @@ slide-enter-active,
   right: 0;
   display: flex;
   justify-content: center;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   z-index: 50;
   pointer-events: none;
+  isolation: isolate;
 }
 .glass-navbar-wrapper > nav {
   pointer-events: auto;
@@ -387,53 +397,75 @@ slide-enter-active,
   display: flex;
   justify-content: space-around;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
   padding: 0.4rem 0.6rem;
-  max-width: 280px;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(28px) saturate(200%);
-  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  max-width: 300px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 16px rgba(255, 255, 255, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 2px 12px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 .glass-nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 12px;
-  color: #6b7280;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0;
+  color: #4b5563;
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: 500;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.2s, background 0.2s;
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
 }
-.glass-nav-item:hover,
+.glass-nav-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.glass-nav-item:hover {
+  color: #374151;
+}
+.glass-nav-item:hover .glass-nav-icon {
+  background: rgba(255, 255, 255, 0.5);
+}
 .glass-nav-item.active {
-  color: #059669;
-  background: rgba(255, 255, 255, 0.4);
-  border-color: rgba(5, 150, 105, 0.2);
+  color: #2563eb;
+}
+.glass-nav-item.active .glass-nav-icon {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(37, 99, 235, 0.25);
 }
 .glass-nav-item :deep(svg) {
   flex-shrink: 0;
 }
-/* Celular: apenas ícones na navbar */
+/* Celular: apenas ícones em círculos */
 @media (max-width: 600px) {
-  .glass-nav-item span {
+  .glass-nav-item span:not(.glass-nav-icon) {
     display: none;
   }
-  .glass-nav-item {
-    padding: 0.5rem;
+  .glass-nav-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 .has-glass-navbar {

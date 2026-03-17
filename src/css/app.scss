@@ -3,6 +3,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Transparência para navbar glass na home - remove fundo branco que bloqueia o efeito */
+body.has-glass-navbar .q-layout,
+body.has-glass-navbar .q-page-container,
+body.has-glass-navbar .q-page,
+body.has-glass-navbar .q-layout__shadow,
+body.has-glass-navbar [class*="q-layout"] {
+  background: transparent !important;
+}
+
 /* WhatsApp chooser dialog (usado em Ads e ViewEcommerce) */
 .wa-dialog-centered .q-dialog__inner {
   justify-content: center;

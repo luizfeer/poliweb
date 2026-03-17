@@ -1271,15 +1271,17 @@ export default {
   padding: 0.4rem 0.6rem;
   width: auto;
   max-width: min(480px, calc(100vw - 2rem));
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.06),
-    0 2px 12px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 2px 12px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 .ads-actions-bar .ads-action-btn {
   flex: 0 0 auto;
@@ -1300,31 +1302,32 @@ export default {
 }
 .ads-action-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.35);
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.3);
   color: #4b5563;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  flex: 1 1 0;
-  min-width: 0;
-  justify-content: center;
+  flex: 0 0 auto;
   -webkit-tap-highlight-color: transparent;
   text-decoration: none;
+  transition: background 0.2s ease;
 }
-/* Celular: apenas ícones, sem texto (evita ficar apertado) */
 @media (max-width: 600px) {
   .ads-action-btn span {
     display: none;
   }
   .ads-action-btn {
     padding: 0.5rem;
-    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 .ads-action-btn:hover,

@@ -195,3 +195,9 @@ Se ainda quebrar, confira:
 - Em caso de falha do SSR, o fallback para SPA ainda funciona para usuário,
   mas o ideal é manter SSR estável para o Google indexar.
 
+## Sitemap
+
+- A geração de sitemap foi movida para o backend `poliwebapp-api`
+- O motivo é evitar cascata de requests no SSR e gerar o XML direto do PostgreSQL
+- A documentação operacional do sitemap ficou no backend:
+  - `poliwebapp-api/README-SITEMAP.md`

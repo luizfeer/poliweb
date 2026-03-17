@@ -321,6 +321,17 @@ export default defineComponent({
 <style scoped>
 .header-mobile {
   padding-top: env(safe-area-inset-top);
+  background: rgba(37, 99, 235, 0.92) !important;
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.header-mobile :deep(.q-toolbar),
+.header-mobile :deep(.q-btn) {
+  color: white !important;
+}
+.header-mobile :deep(.q-toolbar-title) {
+  color: white !important;
 }
 .categories-scroll {
   -webkit-overflow-scrolling: touch;

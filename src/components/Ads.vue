@@ -825,7 +825,7 @@ export default {
     storyVideos() {
       return (this.adsComponent?.files?.videos || [])
         .filter(v => !v.deletedAt)
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     },
     hasVideos() {
       return this.storyVideos.length > 0
@@ -847,7 +847,7 @@ export default {
           src: p.link,
           thumbnail: p.link
         }))
-      return [...videos, ...photos].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      return [...videos, ...photos].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     },
     currentMediaItem() {
       return this.mediaItems[this.storyIndex] || null

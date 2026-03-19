@@ -20,9 +20,9 @@
           <div class="recent-video-header">
             <div class="recent-video-avatar">
               <img
-                v-if="logoUrl(video)"
+                v-if="avatarUrl(video)"
                 :key="'avatar-' + video.id"
-                :src="resolveUrl(logoUrl(video))"
+                :src="resolveUrl(avatarUrl(video))"
                 class="avatar-img"
                 alt=""
               />
@@ -46,8 +46,8 @@
             <!-- Camada de baixo: foto do perfil (sempre visível) -->
             <div class="recent-video-thumb-bg">
               <img
-                v-if="logoUrl(video)"
-                :src="resolveUrl(logoUrl(video))"
+                v-if="avatarUrl(video)"
+                :src="resolveUrl(avatarUrl(video))"
                 class="recent-video-thumb-bg-img"
                 alt=""
               />
@@ -196,7 +196,7 @@ export default {
     },
     currentStoryAvatar() {
       const v = this.videosWithId[this.storyIndex]
-      return v ? this.logoUrl(v) : null
+      return v ? this.avatarUrl(v) : null
     },
   },
   watch: {
@@ -239,9 +239,9 @@ export default {
   },
   methods: {
     timeAgo,
-    logoUrl(video) {
+    avatarUrl(video) {
       if (!video) return null
-      return video.ad?.logoLink || video.categoryAd?.logoLink || null
+      return video.avatarLink || video.ad?.avatarLink || null
     },
     resolveUrl(url) {
       if (!url || typeof url !== 'string') return url

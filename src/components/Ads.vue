@@ -182,10 +182,10 @@
           </div>
           <AppIcon name="open-in-new" :size="18" class="text-gray-400" />
         </a>
-        <!-- Mapa embutido -->
-        <div v-if="lastAddress?.coordinates?.lat != null && lastAddress?.coordinates?.long != null" class="ads-map-wrapper mt-4 rounded-xl overflow-hidden border border-gray-200">
+        <!-- Mapa embutido: usa coordenadas quando disponível, senão usa endereço -->
+        <div v-if="mapEmbedQuery" class="ads-map-wrapper mt-4 rounded-xl overflow-hidden border border-gray-200">
           <iframe
-            :src="`https://maps.google.com/maps?q=${lastAddress.coordinates.lat},${lastAddress.coordinates.long}&z=15&output=embed`"
+            :src="mapEmbedSrc"
             class="ads-map-iframe"
             width="100%"
             height="200"
@@ -790,6 +790,25 @@ export default {
       const addrs = this.adsComponent?.addresses
       if (!addrs || !addrs.length) return null
       return addrs[addrs.length - 1]
+    },
+    mapEmbedQuery() {
+      const addr = this.lastAddress
+      if (!addr) return null
+      const parts = [
+        this.adsComponent?.name,
+        addr.street,
+        addr.number,
+        addr.neighborhood,
+        addr.city,
+        addr.state,
+        addr.zipCode
+      ].filter(Boolean)
+      return parts.length ? parts.join(', ') : null
+    },
+    mapEmbedSrc() {
+      const q = this.mapEmbedQuery
+      if (!q) return ''
+      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed`
     },
     phoneZap() {
       if(!this.adsComponent?.phones?.length) return false

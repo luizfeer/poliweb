@@ -7,6 +7,23 @@
 // https://v2.quasar.dev/quasar-cli/quasar-conf-js
 
 /* eslint-env node */
+const path = require('path')
+const fs = require('fs')
+// Carrega .env manualmente (não disponível em quasar.config.js por padrão)
+const envPath = path.resolve(__dirname, '.env')
+if (fs.existsSync(envPath)) {
+  const content = fs.readFileSync(envPath, 'utf8').replace(/\r\n/g, '\n')
+  content.split('\n').forEach((line) => {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) return
+    const eq = trimmed.indexOf('=')
+    if (eq > 0) {
+      const key = trimmed.slice(0, eq).trim()
+      const val = trimmed.slice(eq + 1).trim().replace(/\r$/, '')
+      if (key) process.env[key] = val
+    }
+  })
+}
 const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers');
 

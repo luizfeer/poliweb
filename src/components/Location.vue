@@ -22,7 +22,7 @@
       <q-card class="location-card rounded-t-2xl">
         <q-card-section class="flex flex-row items-center justify-between pb-2">
           <h2 class="text-lg font-semibold m-0">Onde você está?</h2>
-          <q-btn flat round dense v-close-popup size="md" class="min-w-[44px] min-h-[44px]"><template #icon><AppIcon name="close" :size="24" /></template></q-btn>
+          <q-btn flat round dense icon="close" v-close-popup size="md" class="min-w-[44px] min-h-[44px]" aria-label="Fechar" />
         </q-card-section>
 
         <q-card-section class="q-pt-none">

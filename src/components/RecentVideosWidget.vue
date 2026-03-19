@@ -19,13 +19,12 @@
       >
           <div class="recent-video-header">
             <div class="recent-video-avatar">
-              <q-img
-                v-if="video.avatarLink || video.ad?.avatarLink"
-                :src="video.avatarLink || video.ad?.avatarLink"
+              <img
+                v-if="logoUrl(video)"
+                :key="'avatar-' + video.id"
+                :src="resolveUrl(logoUrl(video))"
                 class="avatar-img"
-                ratio="1"
-                spinner-color="gray-300"
-                spinner-size="20px"
+                alt=""
               />
               <div v-else class="avatar-placeholder">
                 <AppIcon name="storefront" :size="20" class="text-gray-400" />
@@ -44,25 +43,42 @@
             </a>
           </div>
           <div class="recent-video-thumb">
-            <img
-              v-if="videoThumbs[video.id]"
-              :src="videoThumbs[video.id]"
-              class="recent-video-thumb-img"
-              alt=""
-            />
-            <video
-              v-else-if="video.link && !videoThumbFailed[video.id]"
-              :data-video-id="video.id"
-              :src="video.link"
-              preload="auto"
-              muted
-              playsinline
-              class="recent-video-thumb-video"
-              @loadeddata="captureVideoThumb"
-              @error="onVideoThumbError"
-            />
-            <div v-else class="recent-video-thumb-placeholder">
-              <AppIcon name="videocam" :size="32" class="text-gray-400" />
+            <!-- Camada de baixo: foto do perfil (sempre visível) -->
+            <div class="recent-video-thumb-bg">
+              <img
+                v-if="logoUrl(video)"
+                :src="resolveUrl(logoUrl(video))"
+                class="recent-video-thumb-bg-img"
+                alt=""
+              />
+              <div v-else class="recent-video-thumb-bg-placeholder">
+                <AppIcon name="storefront" :size="32" class="text-gray-400" />
+              </div>
+            </div>
+            <!-- Camada de cima: thumbnail do vídeo -->
+            <div class="recent-video-thumb-overlay">
+              <img
+                v-if="videoThumbs[video.id]"
+                :src="videoThumbs[video.id]"
+                class="recent-video-thumb-img"
+                alt=""
+              />
+              <video
+                v-else-if="video.link && !videoThumbFailed[video.id]"
+                :data-video-id="String(video.id)"
+                :src="resolveUrl(video.link)"
+                crossorigin="anonymous"
+                preload="metadata"
+                muted
+                playsinline
+                class="recent-video-thumb-video"
+                @loadeddata="captureVideoThumb"
+                @canplay="captureVideoThumb"
+                @error="onVideoThumbError"
+              />
+              <div v-else class="recent-video-thumb-placeholder">
+                <AppIcon name="videocam" :size="32" class="text-gray-400" />
+              </div>
             </div>
             <div class="recent-video-play-overlay">
               <AppIcon name="play-circle-filled" :size="48" class="text-white opacity-90" />
@@ -89,7 +105,7 @@
         </div>
         <div class="story-header">
           <div class="story-header-avatar">
-            <img v-if="currentStoryAvatar" :src="currentStoryAvatar" class="story-avatar-img" />
+            <img v-if="currentStoryAvatar" :src="resolveUrl(currentStoryAvatar)" class="story-avatar-img" />
             <div v-else class="story-avatar-fallback">
               {{ (currentStoryAd?.name || '').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?' }}
             </div>
@@ -121,7 +137,7 @@
           class="story-video"
           playsinline
           autoplay
-          :src="videosWithId[storyIndex]?.link"
+          :src="resolveUrl(videosWithId[storyIndex]?.link)"
           @ended="nextStory"
           @timeupdate="updateStoryProgress"
         />
@@ -180,7 +196,7 @@ export default {
     },
     currentStoryAvatar() {
       const v = this.videosWithId[this.storyIndex]
-      return v?.avatarLink || v?.ad?.avatarLink || null
+      return v ? this.logoUrl(v) : null
     },
   },
   watch: {
@@ -210,7 +226,11 @@ export default {
           if (ids.length) {
             const cached = await loadVideoThumbs(ids)
             if (this.fetchGen >= 0 && Object.keys(cached).length) {
-              this.videoThumbs = { ...this.videoThumbs, ...cached }
+              const normalized = {}
+              Object.entries(cached).forEach(([k, v]) => {
+                normalized[String(k)] = v
+              })
+              this.videoThumbs = { ...this.videoThumbs, ...normalized }
             }
           }
         }
@@ -219,6 +239,18 @@ export default {
   },
   methods: {
     timeAgo,
+    logoUrl(video) {
+      if (!video) return null
+      return video.ad?.logoLink || video.categoryAd?.logoLink || null
+    },
+    resolveUrl(url) {
+      if (!url || typeof url !== 'string') return url
+      if (url.startsWith('http://') || url.startsWith('https://')) return url
+      const base = this.$api?.defaults?.baseURL || process.env.API_URL || 'https://apiv3.poliwebapp.com.br'
+      const baseClean = base.replace(/\/$/, '')
+      const path = url.startsWith('/') ? url : `/${url}`
+      return `${baseClean}${path}`
+    },
     openStoryAt(index) {
       this.storyIndex = index
       this.storyProgress = 0
@@ -297,6 +329,7 @@ export default {
       const video = e.target
       const id = video.dataset.videoId
       if (!id || this.videoThumbs[id]) return
+      if (video.readyState < 2) return
       const seek = () => {
         video.removeEventListener('seeked', onSeeked)
         try {
@@ -323,7 +356,7 @@ export default {
       if (this.fetchGen < 0) return
       const id = e.target?.dataset?.videoId
       if (id) {
-        this.videoThumbFailed = { ...this.videoThumbFailed, [id]: true }
+        this.videoThumbFailed = { ...this.videoThumbFailed, [String(id)]: true }
       }
     },
     goToAd() {
@@ -454,11 +487,11 @@ export default {
   background: #f3f4f6;
 }
 
-.recent-video-avatar .avatar-img,
-.recent-video-avatar :deep(.q-img) {
+.recent-video-avatar .avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .avatar-placeholder {
@@ -497,23 +530,22 @@ export default {
   width: 100%;
   aspect-ratio: 1;
   background: #f3f4f6;
+  overflow: hidden;
 }
 
-.recent-video-thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.recent-video-thumb-video {
+.recent-video-thumb-bg {
   position: absolute;
   inset: 0;
+  z-index: 0;
+}
+
+.recent-video-thumb-bg-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #1a1a1a;
 }
 
-.recent-video-thumb-placeholder {
+.recent-video-thumb-bg-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -522,13 +554,45 @@ export default {
   background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
 }
 
+.recent-video-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.recent-video-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recent-video-thumb-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: transparent;
+}
+
+.recent-video-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
 .recent-video-play-overlay {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
 }
 
 .recent-video-time {

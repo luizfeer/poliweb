@@ -132,6 +132,8 @@ function findCityByIpInfo(citys, ipCity) {
   })
 }
 
+const FALLBACK_CITY_NAME = 'São Sebastião do Paraíso'
+
 export default {
   name: 'SelectCityModal',
   components: { AppIcon },
@@ -200,6 +202,7 @@ export default {
       this.fetchIpInfo()
     },
     async fetchIpInfo() {
+      const fallback = this.citys.find((c) => c.city === FALLBACK_CITY_NAME)
       try {
         const res = await fetch('https://ipinfo.io/json')
         const data = await res.json()
@@ -209,9 +212,11 @@ export default {
         if (match) {
           this.suggestedCity = match
           this.selectedCity = match
+        } else if (fallback) {
+          this.selectedCity = fallback
         }
       } catch {
-        // ignore
+        if (fallback) this.selectedCity = fallback
       } finally {
         this.loadingIp = false
       }

@@ -555,7 +555,7 @@
           </div>
           <div class="story-header-name-wrap">
             <span class="story-header-name">{{ adsComponent.name }}</span>
-            <span v-if="currentMediaItem?.createdAt" class="story-header-time">{{ timeAgo(currentMediaItem.createdAt) }}</span>
+            <span v-if="showStoryTime" class="story-header-time">{{ timeAgo(currentMediaItem?.createdAt) }}</span>
           </div>
           <button class="story-close-btn" @click="closeStory">✕</button>
         </div>
@@ -851,6 +851,14 @@ export default {
     },
     currentMediaItem() {
       return this.mediaItems[this.storyIndex] || null
+    },
+    showStoryTime() {
+      const createdAt = this.currentMediaItem?.createdAt
+      if (!createdAt) return false
+      const d = new Date(createdAt)
+      if (isNaN(d.getTime())) return false
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+      return d.getTime() >= oneWeekAgo
     },
     isCurrentVideo() {
       return this.currentMediaItem?.type === 'video'

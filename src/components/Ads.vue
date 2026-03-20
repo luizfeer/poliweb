@@ -1787,15 +1787,18 @@ export default {
   background: white;
   padding: 1rem 1rem 1.25rem;
   border-bottom: 1px solid #e5e7eb;
+  overflow: visible;
 }
 .ads-header-content {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
+  overflow: visible;
 }
 .ads-logo-wrapper {
   position: relative;
   flex-shrink: 0;
+  overflow: visible;
 }
 .ads-logo-edit {
   position: absolute;
@@ -2167,11 +2170,13 @@ export default {
 
 /* Story ring no logo de perfil */
 .ads-story-ring {
-  padding: 3px;
+  padding: 4px;
+  margin: -4px;
   border-radius: 50%;
   background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #833ab4, #5851db, #405de6);
   background-size: 300% 300%;
   animation: story-ring-spin 3s linear infinite;
+  box-sizing: content-box;
 }
 .ads-story-logo {
   border: 2.5px solid white;

@@ -1,5 +1,8 @@
 
-import { isSuperAdmin } from 'src/js/superadmin'
+function isAdmin() {
+  if (typeof localStorage === 'undefined') return false
+  return !!localStorage.getItem('admin')
+}
 
 const routes = [
   {
@@ -212,7 +215,7 @@ const routes = [
         path: 'ads/add/:id?/:name?',
         component: () => import('pages/ads/Add.vue'),
         beforeEnter: (to, from, next) => {
-          if (!isSuperAdmin()) {
+          if (!isAdmin()) {
             next('/')
           } else {
             next()

@@ -67,13 +67,10 @@
               v-else-if="item.link && !videoThumbFailed[String(item.id)]"
               :data-video-id="String(item.id)"
               :src="item.link"
-              crossorigin="anonymous"
-              preload="metadata"
+              preload="none"
               muted
               playsinline
               class="ads-video-thumb-video"
-              @loadeddata="captureVideoThumb"
-              @canplay="captureVideoThumb"
               @error="onVideoThumbError"
             />
             <AppIcon name="play-circle-filled" :size="32" class="text-white" />
@@ -428,13 +425,10 @@
                 v-else-if="item.link && !videoThumbFailed[String(item.id)]"
                 :data-video-id="String(item.id)"
                 :src="item.link"
-                crossorigin="anonymous"
-                preload="metadata"
+                preload="none"
                 muted
                 playsinline
                 class="ads-video-thumb-video"
-                @loadeddata="captureVideoThumb"
-                @canplay="captureVideoThumb"
                 @error="onVideoThumbError"
               />
               <div class="ads-media-grid-video-inner">

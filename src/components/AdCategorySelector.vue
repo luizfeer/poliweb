@@ -16,7 +16,7 @@
         <q-avatar v-if="cat.iconLink" class="ad-category-chip-avatar">
           <q-img :src="cat.iconLink" :ratio="1" />
         </q-avatar>
-        {{ cat.name }}
+        {{ categoryLabel(cat) }}
       </q-chip>
     </div>
 
@@ -84,6 +84,23 @@ export default {
       emit('update:modelValue', [...categoryIds.value])
     }
 
+    function findCategoryById(categoryId, list = props.categories) {
+      for (const item of list || []) {
+        if (Number(item.id) === Number(categoryId)) return item
+        const found = findCategoryById(categoryId, item.subcategories || [])
+        if (found) return found
+      }
+      return null
+    }
+
+    function categoryLabel(category) {
+      const parentId = category?.categoryId
+      if (!parentId) return category?.name || ''
+
+      const parent = findCategoryById(parentId)
+      return parent?.name ? `${parent.name} / ${category.name}` : category.name
+    }
+
     async function onAdd(categoryId) {
       if (!categoryId) return
       const prev = [...categoryIds.value]
@@ -121,6 +138,7 @@ export default {
       availableOptions,
       newCategoryId,
       errorMsg,
+      categoryLabel,
       onAdd,
       onRemove,
     }

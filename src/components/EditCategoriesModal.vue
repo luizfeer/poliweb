@@ -32,7 +32,7 @@
               <q-avatar v-if="cat.iconLink" size="24px">
                 <q-img :src="cat.iconLink" :ratio="1" />
               </q-avatar>
-              {{ cat.name }}
+              {{ categoryLabel(cat) }}
             </q-chip>
             <p v-if="!currentCategories.length && !loading" class="text-gray-500 text-sm">Nenhuma categoria.</p>
           </div>
@@ -98,8 +98,25 @@ export default {
     const filterText = ref('')
 
     const selectedIds = computed(() =>
-      currentCategories.value.map((c) => Number(c.categoryId ?? c.id))
+      currentCategories.value.map((c) => Number(c.id))
     )
+
+    function findCategoryById(categoryId, list = props.categories) {
+      for (const item of list || []) {
+        if (Number(item.id) === Number(categoryId)) return item
+        const found = findCategoryById(categoryId, item.subcategories || [])
+        if (found) return found
+      }
+      return null
+    }
+
+    function categoryLabel(category) {
+      const parentId = category?.categoryId
+      if (!parentId) return category?.name || ''
+
+      const parent = findCategoryById(parentId)
+      return parent?.name ? `${parent.name} / ${category.name}` : category.name
+    }
 
     function matchesFilter(item, filter) {
       if (!filter || !filter.trim()) return true
@@ -165,7 +182,7 @@ export default {
 
     async function onRemove(adCategory) {
       if (currentCategories.value.length <= 1) return
-      const categoryId = Number(adCategory.categoryId ?? adCategory.id)
+      const categoryId = Number(adCategory.id)
       errorMsg.value = ''
       try {
         await removeAdCategory(props.adId, categoryId)
@@ -192,6 +209,7 @@ export default {
       filterText,
       selectedIds,
       filteredCategories,
+      categoryLabel,
       onAdd,
       onRemove,
     }

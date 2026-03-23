@@ -111,7 +111,7 @@
             :to="categoryLink(cat)"
             class="ads-category-tag"
           >
-            {{ cat.name }}
+            {{ categoryLabel(cat) }}
           </router-link>
         </div>
       </div>
@@ -956,9 +956,26 @@ export default {
       // this.adsComponent.files.logo[-1 ? ].link
     },
     categoryLink(cat) {
-      const id = cat.categoryId ?? cat.id
+      const id = cat.id
       const name = (cat.name || 'categoria').trim()
       return `/categorias/${id}/${encodeURIComponent(name)}`
+    },
+    findCategoryById(categoryId, list = this.categories) {
+      for (const item of list || []) {
+        if (Number(item.id) === Number(categoryId)) return item
+        const found = this.findCategoryById(categoryId, item.subcategories || [])
+        if (found) return found
+      }
+      return null
+    },
+    categoryLabel(cat) {
+      const parentId = cat.categoryId
+      if (!parentId) return cat.name
+
+      const parent = this.findCategoryById(parentId)
+      if (!parent?.name) return cat.name
+
+      return `${parent.name} / ${cat.name}`
     },
     onPostarMediaSelect(type) {
       this.$nextTick(() => {

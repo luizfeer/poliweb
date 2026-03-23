@@ -159,6 +159,8 @@
 </template>
 
 <script>
+import { clearAuthSession } from 'src/boot/axios';
+
 export default {
   name: 'Perfil',
   data() {
@@ -183,13 +185,8 @@ export default {
   },
   methods: {
     logout() {
-      localStorage.removeItem('token');
+      clearAuthSession();
       localStorage.removeItem('id-customer');
-      localStorage.removeItem('context');
-      localStorage.removeItem('admin');
-      if (this.$api?.defaults?.headers?.common) {
-        delete this.$api.defaults.headers.common.Authorization;
-      }
       this.$router.push('/');
       this.$q.notify({
         color: 'positive',

@@ -48,6 +48,8 @@
 </template>
 
 <script>
+import { persistAuthSession } from 'src/boot/axios'
+
 export default {
   name: 'Login',
   data () {
@@ -74,10 +76,8 @@ export default {
         console.log(data)
         if(data){
           try {
-            this.$api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-            localStorage.setItem("token", data.token)
+            persistAuthSession(data, { isAdmin: false })
             localStorage.setItem("id-customer",  JSON.stringify(data.context.id))
-            localStorage.setItem("context",  JSON.stringify({...data.context, when: new Date()}))
             localStorage.removeItem('admin')
             const path = data.context.categoryAdId ? `/${data.context.categoryAdId}` : '/'
             this.$router.push({ path: path })

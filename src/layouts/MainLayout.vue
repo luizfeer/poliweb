@@ -133,9 +133,6 @@ import {
     ref,
     provide
 } from "vue";
-import {
-    differenceInHours
-} from 'date-fns'
 import { mapState, mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -221,40 +218,16 @@ export default defineComponent({
             let admin
             if (context) {
                 context = JSON.parse(context)
-                const result = differenceInHours(
-                    new Date(),
-                    new Date(context.when)
-                )
-                console.log(result)
-                if (result > 23) {
-                    this.$q.notify({
-                        color: 'negative',
-                        position: 'bottom',
-                        message: 'Seu login está expirado, faça login novamente!',
-                        actions: [{
-                            label: 'Login',
-                            color: 'white',
-                            handler: () => {
-                                this.$router.push({
-                                    path: '/login'
-                                })
-                            }
-                        }]
-                    })
-                    localStorage.removeItem('admin')
-                    localStorage.removeItem('context')
-                } else {
-                    if ((context || {}).company !== null) {
-                        this.essentialLinks = [{
-                                title: context.company,
-                                icon: "business",
-                                link: `/${context.categoryAdId}`,
-                            },
-                            ...this.essentialLinks
-                        ]
-                    }
-                    admin = localStorage.getItem('admin') ? true : false
+                if ((context || {}).company !== null) {
+                    this.essentialLinks = [{
+                            title: context.company,
+                            icon: "business",
+                            link: `/${context.categoryAdId}`,
+                        },
+                        ...this.essentialLinks
+                    ]
                 }
+                admin = localStorage.getItem('admin') ? true : false
             }
             const localization = localStorage.getItem("localization")
             this.localization = localization ? JSON.parse(localization) : null

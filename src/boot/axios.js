@@ -73,6 +73,7 @@ export const clearAuthSession = () => {
 }
 
 let refreshPromise = null
+let sessionExpiredModalOpen = false
 
 const refreshAccessToken = async () => {
   const refreshToken = getStoredRefreshToken()
@@ -143,14 +144,18 @@ export default boot(({ app, router }) => {
         const isAdmin = !!window.localStorage?.getItem(ADMIN_STORAGE_KEY)
         clearAuthSession()
 
-        app.config.globalProperties.$q?.notify({
-          color: 'negative',
-          position: 'top',
-          message: 'Sua sessão expirou. Faça login novamente.',
-          icon: 'report_problem'
-        })
+        if (typeof window !== 'undefined' && !sessionExpiredModalOpen) {
+          sessionExpiredModalOpen = true
+          window.dispatchEvent(
+            new CustomEvent('poliweb:session-expired', {
+              detail: { isAdmin }
+            })
+          )
+          window.setTimeout(() => {
+            sessionExpiredModalOpen = false
+          }, 500)
+        }
 
-        router.push(isAdmin ? '/adm/login' : '/login')
         return Promise.reject(refreshError)
       }
     }

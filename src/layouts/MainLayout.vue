@@ -64,6 +64,7 @@
       v-model="showCityModal"
       :confirm-handler="onCityConfirm"
     />
+    <SessionExpiredModal />
     <Download />
 </q-layout>
 </template>
@@ -72,6 +73,7 @@
 import EssentialLink from "components/EssentialLink.vue";
 import Download from "components/Download.vue";
 import AppIcon from "components/AppIcon.vue";
+import SessionExpiredModal from "components/SessionExpiredModal.vue";
 import SelectCityModal from "components/SelectCityModal.vue";
 
 const linksList = [{
@@ -143,6 +145,7 @@ export default defineComponent({
         EssentialLink,
         Download,
         AppIcon,
+        SessionExpiredModal,
         SelectCityModal,
     },
 

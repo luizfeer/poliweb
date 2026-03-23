@@ -88,7 +88,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-gray-800 font-medium text-sm mb-0">Fale conosco</p>
-            <p class="text-gray-400 text-xs">contato@poliwebapp.com.br</p>
+            <p class="text-gray-400 text-xs">aplicativopoliweb@gmail.com</p>
           </div>
           <q-icon name="chevron_right" color="grey-4" size="1.2rem" />
         </router-link>

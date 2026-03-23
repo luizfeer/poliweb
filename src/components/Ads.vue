@@ -50,13 +50,9 @@
     <!-- Galeria de fotos e vídeos - estilo Stories -->
     <div class="ads-section">
       <div class="ads-gallery">
-        <div v-if="admin" class="ads-gallery-add" @click="$refs.gallery?.click()">
-          <AppIcon name="add-photo-alternate" :size="32" />
-          <span>Foto</span>
-        </div>
-        <div v-if="admin" class="ads-gallery-add ads-gallery-add-video" @click="sendVideo = true">
-          <AppIcon name="videocam" :size="32" />
-          <span>Vídeo</span>
+        <div class="ads-gallery-add ads-gallery-add-unified" @click="$refs.gallery?.click()">
+          <AppIcon name="add-photo-alternate" :size="28" />
+          <span>Fotos e vídeos</span>
         </div>
         <!-- Thumbnails de mídia (fotos + vídeos) na galeria horizontal -->
         <div
@@ -89,7 +85,7 @@
         </div>
       </div>
       <q-btn v-if="admin" flat rounded color="primary" label="Editar imagens" size="sm" :to="`/img/${adsComponent.id}`" class="mt-2"/>
-      <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden"/>
+      <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
     </div>
 
     <!-- Descrição -->
@@ -182,10 +178,10 @@
           </div>
           <AppIcon name="open-in-new" :size="18" class="text-gray-400" />
         </a>
-        <!-- Mapa embutido -->
-        <div v-if="lastAddress?.coordinates?.lat != null && lastAddress?.coordinates?.long != null" class="ads-map-wrapper mt-4 rounded-xl overflow-hidden border border-gray-200">
+        <!-- Mapa embutido: usa coordenadas quando disponível, senão usa endereço -->
+        <div v-if="mapEmbedQuery" class="ads-map-wrapper mt-4 rounded-xl overflow-hidden border border-gray-200">
           <iframe
-            :src="`https://maps.google.com/maps?q=${lastAddress.coordinates.lat},${lastAddress.coordinates.long}&z=15&output=embed`"
+            :src="mapEmbedSrc"
             class="ads-map-iframe"
             width="100%"
             height="200"
@@ -467,21 +463,81 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-      <q-dialog v-model="confirmGallery" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar color="primary" text-color="white"><AppIcon name="file-upload" :size="20" /></q-avatar>
-          <span class="q-ml-sm">Deseja enviar essa imagem?</span>
-          <q-img
-            :src="preview"
-            spinner-color="primary"
-            spinner-size="82px"
-          />
+      <q-dialog v-model="confirmGallery" persistent class="gallery-upload-dialog" transition-show="scale" transition-hide="scale">
+      <q-card class="gallery-upload-card">
+        <div class="gallery-upload-header">
+          <div class="gallery-upload-header-icon">
+            <AppIcon name="cloud-upload" :size="28" />
+          </div>
+          <h3 class="gallery-upload-title">Enviar mídia</h3>
+          <p class="gallery-upload-subtitle">
+            {{ galleryItems.length }} arquivo(s) · Fotos e vídeos
+          </p>
+        </div>
+        <q-card-section class="q-pt-none">
+          <div class="gallery-upload-grid">
+            <div
+              v-for="(item, i) in galleryItems"
+              :key="i"
+              class="gallery-upload-cell"
+            >
+              <div class="gallery-upload-thumb-wrap">
+                <img v-if="item.file.type.startsWith('image/')" :src="item.thumb" class="gallery-upload-thumb" :alt="item.file.name" />
+                <video v-else :src="item.thumb" class="gallery-upload-thumb" muted playsinline preload="metadata" />
+                <div class="gallery-upload-thumb-overlay" :class="{ 'gallery-upload-visible': galleryUploadResults[i] || galleryUploading }">
+                  <AppIcon
+                    v-if="galleryUploadResults[i]?.ok === true"
+                    name="check-circle"
+                    :size="28"
+                    class="text-positive"
+                  />
+                  <AppIcon
+                    v-else-if="galleryUploadResults[i]?.ok === false"
+                    name="report_problem"
+                    :size="28"
+                    class="text-negative"
+                  />
+                  <AppIcon
+                    v-else-if="galleryUploading"
+                    name="cloud-upload"
+                    :size="24"
+                    class="text-white animate-pulse"
+                  />
+                </div>
+                <q-btn
+                  v-if="!galleryUploading && !galleryUploadResults.length"
+                  flat
+                  round
+                  dense
+                  icon="close"
+                  size="sm"
+                  class="gallery-upload-remove"
+                  @click="removeGalleryItem(i)"
+                />
+              </div>
+              <span v-if="galleryUploadResults[i]?.ok === false && galleryUploadResults[i]?.message" class="gallery-upload-cell-error">{{ galleryUploadResults[i].message }}</span>
+            </div>
+            <div
+              v-if="!galleryUploading && !galleryUploadResults.length"
+              class="gallery-upload-cell gallery-upload-add-more"
+              @click="$refs.gallery?.click()"
+            >
+              <AppIcon name="add-photo-alternate" :size="32" />
+              <span>Adicionar mais</span>
+            </div>
+          </div>
         </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn flat @click="sendGallery" label="Enviar" color="primary" />
+        <q-card-actions class="gallery-upload-actions">
+          <q-btn flat label="Cancelar" color="grey-7" :disable="galleryUploading" @click="confirmGallery = false; resetGalleryModal()" />
+          <q-btn
+            unelevated
+            rounded
+            :label="galleryUploadResults.length && !galleryUploading ? 'Concluído' : 'Enviar'"
+            color="primary"
+            :loading="galleryUploading"
+            :disable="!galleryItems.length"
+            @click="galleryUploadResults.length && !galleryUploading ? closeGalleryModal() : sendGallery()"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -555,7 +611,7 @@
           </div>
           <div class="story-header-name-wrap">
             <span class="story-header-name">{{ adsComponent.name }}</span>
-            <span v-if="currentMediaItem?.createdAt" class="story-header-time">{{ timeAgo(currentMediaItem.createdAt) }}</span>
+            <span v-if="showStoryTime" class="story-header-time">{{ timeAgo(currentMediaItem?.createdAt) }}</span>
           </div>
           <button class="story-close-btn" @click="closeStory">✕</button>
         </div>
@@ -587,7 +643,7 @@
           <button v-if="isCurrentVideo" class="story-ctrl-btn" @click.stop="toggleStoryPause">
             <AppIcon :name="storyPaused ? 'play-arrow' : 'pause'" :size="28" class="text-white" />
           </button>
-          <button v-if="admin && isCurrentVideo" class="story-ctrl-btn" @click.stop="confirmStoryDelete = true">
+          <button v-if="admin && currentMediaItem" class="story-ctrl-btn story-ctrl-delete" @click.stop="confirmStoryDelete = true">
             <AppIcon name="delete" :size="28" class="text-white" />
           </button>
         </div>
@@ -599,11 +655,11 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar color="negative" text-color="white"><AppIcon name="delete" :size="20" /></q-avatar>
-          <span class="q-ml-sm">Tem certeza que deseja deletar esse vídeo?</span>
+          <span class="q-ml-sm">{{ isCurrentVideo ? 'Tem certeza que deseja deletar esse vídeo?' : 'Tem certeza que deseja deletar essa imagem?' }}</span>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn flat label="Deletar" color="negative" @click="deleteStoryVideo" />
+          <q-btn flat label="Deletar" color="negative" @click="deleteStoryMedia" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -759,6 +815,9 @@ export default {
       photoUpload: false,
       confirmGallery: false,
       preview: '',
+      galleryItems: [],
+      galleryUploadResults: [],
+      galleryUploading: false,
       storyOpen: false,
       storyIndex: 0,
       storyProgress: 0,
@@ -791,6 +850,25 @@ export default {
       if (!addrs || !addrs.length) return null
       return addrs[addrs.length - 1]
     },
+    mapEmbedQuery() {
+      const addr = this.lastAddress
+      if (!addr) return null
+      const parts = [
+        this.adsComponent?.name,
+        addr.street,
+        addr.number,
+        addr.neighborhood,
+        addr.city,
+        addr.state,
+        addr.zipCode
+      ].filter(Boolean)
+      return parts.length ? parts.join(', ') : null
+    },
+    mapEmbedSrc() {
+      const q = this.mapEmbedQuery
+      if (!q) return ''
+      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed`
+    },
     phoneZap() {
       if(!this.adsComponent?.phones?.length) return false
       return this.adsComponent.phones.find(p => p.isWhatsapp) || false
@@ -806,7 +884,7 @@ export default {
     storyVideos() {
       return (this.adsComponent?.files?.videos || [])
         .filter(v => !v.deletedAt)
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     },
     hasVideos() {
       return this.storyVideos.length > 0
@@ -828,10 +906,18 @@ export default {
           src: p.link,
           thumbnail: p.link
         }))
-      return [...videos, ...photos].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      return [...videos, ...photos].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     },
     currentMediaItem() {
       return this.mediaItems[this.storyIndex] || null
+    },
+    showStoryTime() {
+      const createdAt = this.currentMediaItem?.createdAt
+      if (!createdAt) return false
+      const d = new Date(createdAt)
+      if (isNaN(d.getTime())) return false
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+      return d.getTime() >= oneWeekAgo
     },
     isCurrentVideo() {
       return this.currentMediaItem?.type === 'video'
@@ -979,11 +1065,7 @@ export default {
     },
     onPostarMediaSelect(type) {
       this.$nextTick(() => {
-        if (type === 'gallery') {
-          this.$refs.gallery?.click()
-        } else if (type === 'video') {
-          this.sendVideo = true
-        }
+        this.$refs.gallery?.click()
       })
     },
     async loadAdCategories() {
@@ -1096,10 +1178,39 @@ export default {
         this.photoUpload = true
         this.adsComponent.files.logo[this.adsComponent.files.logo.length-1].link = URL.createObjectURL(file);
       },
-      galleryUpload () {
-        const file = this.$refs.gallery.files[0];
-        this.preview = URL.createObjectURL(file);
-        this.confirmGallery = true
+      galleryUpload() {
+        const input = this.$refs.gallery
+        const files = input?.files
+        if (!files?.length) return
+        const fileList = Array.from(files)
+        const newItems = fileList.map((f) => ({ file: f, thumb: URL.createObjectURL(f) }))
+        if (this.confirmGallery) {
+          this.galleryItems.push(...newItems)
+        } else {
+          this.galleryItems = newItems
+          this.confirmGallery = true
+        }
+        this.galleryUploadResults = []
+        if (input) input.value = ''
+      },
+      removeGalleryItem(index) {
+        const item = this.galleryItems[index]
+        if (item?.thumb) URL.revokeObjectURL(item.thumb)
+        this.galleryItems.splice(index, 1)
+      },
+      resetGalleryModal() {
+        this.galleryItems.forEach((item) => {
+          if (item?.thumb) URL.revokeObjectURL(item.thumb)
+        })
+        this.galleryItems = []
+        this.galleryUploadResults = []
+        this.preview = ''
+        if (this.$refs.gallery) this.$refs.gallery.value = ''
+      },
+      closeGalleryModal() {
+        this.confirmGallery = false
+        this.resetGalleryModal()
+        this.$emit('updated')
       },
       onVideoSelected() {
         const file = this.$refs.videoInput?.files?.[0]
@@ -1137,7 +1248,7 @@ export default {
         .then(() => {
           this.$q.notify({ type: 'positive', message: 'Vídeo enviado com sucesso!' })
           this.cancelVideoUpload()
-          location.reload()
+          this.$emit('updated')
         })
         .catch(() => {
           this.$q.notify({ type: 'negative', message: 'Erro ao enviar o vídeo' })
@@ -1275,23 +1386,29 @@ export default {
       timeAgo(dateStr) {
         return formatTimeAgo(dateStr)
       },
-      deleteStoryVideo() {
+      deleteStoryMedia() {
         this.confirmStoryDelete = false
         const item = this.mediaItems[this.storyIndex]
-        if (!item || item.type !== 'video') return
-        const video = this.storyVideos[item.storyIndex]
-        if (!video) return
-        this.$q.loading.show()
-        this.$api.delete(`/categories/ads/files/${video.id}`)
+        if (!item?.id) return
+        const source = item.type === 'video'
+          ? this.adsComponent?.files?.videos?.find((v) => v.id === item.id)
+          : this.adsComponent?.files?.gallery?.find((p) => p.id === item.id)
+        const prevDeletedAt = source?.deletedAt
+        if (source) {
+          source.deletedAt = new Date().toISOString()
+        }
+        this.storyOpen = false
+        this.$q.notify({ color: 'secondary', position: 'top', message: item.type === 'video' ? 'Vídeo apagado com sucesso!' : 'Imagem apagada com sucesso!' })
+        this.$api.delete(`/categories/ads/files/${item.id}`)
           .then(() => {
-            this.$q.notify({ color: 'secondary', position: 'top', message: 'Vídeo apagado com sucesso!' })
-            location.reload()
+            this.$emit('updated')
           })
-          .catch(err => {
-            const msg = err.response?.data?.message || 'Erro na conexão!'
+          .catch((err) => {
+            if (source) source.deletedAt = prevDeletedAt
+            const msg = err?.response?.data?.message || 'Erro na conexão!'
             this.$q.notify({ color: 'negative', position: 'top', message: msg, icon: 'report_problem' })
+            this.$emit('updated')
           })
-          .finally(() => this.$q.loading.hide())
       },
       openFile () {
         if (!this.admin) return
@@ -1346,7 +1463,7 @@ export default {
             }
             this.resetPhone()
             this.expand.phone = false
-            this.$router.go(0)
+            this.$emit('updated')
         })
         .catch((err) => {
             let msg
@@ -1384,7 +1501,7 @@ export default {
             }
             this.resetPhone()
             this.expand.phone = false
-            this.$router.go(0)
+            this.$emit('updated')
         })
         .catch((err) => {
             let msg
@@ -1404,41 +1521,65 @@ export default {
             this.$q.loading.hide()
         })
       },
-      sendGallery () {
-        this.$q.loading.show()
-        let data = new FormData();
-        data.append('name', 'gallery');
-        data.append('file', this.$refs.gallery.files[0]);
-        this.$api.post(`/categories/ads/${this.adsComponent.id}/files/gallery`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
-        .then((response) => {
-            //  console.log(response.data.addresses)
-            if(response.data){
-              this.$q.notify({
-              color: 'secondary',
-              position: 'top',
-              message: 'Imagem salva com sucesso!',
-              })
-            this.$router.go(0)
+      async sendGallery() {
+        const files = this.galleryItems.map((i) => i.file)
+        if (!files?.length) return
+        this.galleryUploading = true
+        const images = files.filter((f) => (f.type || '').startsWith('image/'))
+        const videos = files.filter((f) => (f.type || '').startsWith('video/'))
+        const results = []
+        try {
+          if (images.length) {
+            const formData = new FormData()
+            formData.append('name', 'gallery')
+            images.forEach((f) => formData.append('file', f))
+            const res = await this.$api.post(
+              `/categories/ads/${this.adsComponent.id}/files/gallery`,
+              formData,
+              { headers: { 'Content-Type': 'multipart/form-data' } }
+            ).then((r) => r.data)
+            if (res?.batch && Array.isArray(res.results)) {
+              res.results.forEach((r, i) => results.push({ ...r, index: i, fileName: images[i]?.name }))
+            } else if (res?.id) {
+              results.push({ index: 0, fileName: images[0]?.name, ok: true, id: res.id })
             }
-            // $router.go(0)
-        })
-        .catch((err) => {
-            let msg
-            if( err.response){
-            msg =  err.response.data.message
-            }else {
-                msg = 'Erro na conexão!'
+          }
+          for (let i = 0; i < videos.length; i++) {
+            const v = videos[i]
+            const formData = new FormData()
+            formData.append('file_path ', v)
+            try {
+              await this.$api.post(
+                `/categories/ads/${this.adsComponent.id}/files/videos`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+              )
+              results.push({ index: images.length + i, fileName: v.name, ok: true })
+            } catch (e) {
+              results.push({ index: images.length + i, fileName: v.name, ok: false, message: e?.response?.data?.message || 'Erro ao enviar' })
             }
-            this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: msg,
-            icon: 'report_problem'
-            })
-        })
-        .finally(() => {
-            this.$q.loading.hide()
-        })
+          }
+          this.galleryUploadResults = results.length ? results : files.map((f, i) => ({ index: i, fileName: f.name, ok: false, message: 'Não processado' }))
+          const okCount = this.galleryUploadResults.filter((r) => r.ok).length
+          const failCount = this.galleryUploadResults.filter((r) => !r.ok).length
+          if (failCount === 0) {
+            this.$q.notify({ color: 'positive', position: 'top', message: `${okCount} arquivo(s) enviado(s) com sucesso!` })
+            this.$emit('updated')
+          } else if (okCount > 0) {
+            this.$q.notify({ color: 'warning', position: 'top', message: `${okCount} enviado(s), ${failCount} falha(s).` })
+            this.$emit('updated')
+          } else {
+            this.$q.notify({ color: 'negative', position: 'top', message: 'Falha ao enviar.', icon: 'report_problem' })
+          }
+        } catch (err) {
+          const msg = err?.response?.data?.message || 'Erro na conexão!'
+          this.$q.notify({ color: 'negative', position: 'top', message: msg, icon: 'report_problem' })
+          this.confirmGallery = false
+          this.galleryItems = []
+          this.galleryUploadResults = []
+        } finally {
+          this.galleryUploading = false
+        }
       },
       setAtt(){
         this.$q.loading.show()
@@ -1454,8 +1595,8 @@ export default {
               position: 'top',
               message: 'Cadastro salvo com sucesso!',
               })
+              this.$emit('updated')
             }
-            // $router.go(0)
         })
         .catch((err) => {
             let msg
@@ -1663,15 +1804,18 @@ export default {
   background: white;
   padding: 1rem 1rem 1.25rem;
   border-bottom: 1px solid #e5e7eb;
+  overflow: visible;
 }
 .ads-header-content {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
+  overflow: visible;
 }
 .ads-logo-wrapper {
   position: relative;
   flex-shrink: 0;
+  overflow: visible;
 }
 .ads-logo-edit {
   position: absolute;
@@ -2043,11 +2187,13 @@ export default {
 
 /* Story ring no logo de perfil */
 .ads-story-ring {
-  padding: 3px;
+  padding: 4px;
+  margin: -4px;
   border-radius: 50%;
   background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #833ab4, #5851db, #405de6);
   background-size: 300% 300%;
   animation: story-ring-spin 3s linear infinite;
+  box-sizing: content-box;
 }
 .ads-story-logo {
   border: 2.5px solid white;
@@ -2219,6 +2365,10 @@ export default {
   align-items: center;
   justify-content: center;
 }
+.story-ctrl-delete:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+}
 .ads-info {
   flex: 1;
   min-width: 0;
@@ -2333,6 +2483,22 @@ export default {
 }
 .ads-gallery::-webkit-scrollbar {
   height: 4px;
+}
+.gallery-batch-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.gallery-batch-item {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.gallery-batch-item:last-child {
+  border-bottom: none;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ads-gallery-add {
   flex-shrink: 0;
@@ -2526,6 +2692,139 @@ export default {
     max-width: none;
     object-fit: contain;
 }
+
+/* Modal de upload de galeria - UI moderna */
+.gallery-upload-dialog .q-dialog__backdrop {
+  backdrop-filter: blur(4px);
+}
+.gallery-upload-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.12);
+  max-width: 420px;
+}
+.gallery-upload-header {
+  padding: 24px 24px 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+.gallery-upload-header-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.gallery-upload-title {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+.gallery-upload-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+.gallery-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.gallery-upload-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.gallery-upload-thumb-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #e2e8f0;
+}
+.gallery-upload-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.gallery-upload-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.gallery-upload-thumb-overlay.gallery-upload-visible {
+  opacity: 1;
+}
+.gallery-upload-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.6) !important;
+  color: #fff !important;
+  min-width: 28px;
+  min-height: 28px;
+}
+.gallery-upload-remove:hover {
+  background: rgba(220,38,38,0.9) !important;
+}
+.gallery-upload-cell-error {
+  display: block;
+  font-size: 0.7rem;
+  color: #ef4444;
+  margin-top: 2px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gallery-upload-add-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 2px dashed #94a3b8;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.gallery-upload-add-more:hover {
+  background: #e2e8f0;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.gallery-upload-add-more span {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.gallery-upload-actions {
+  padding: 16px 20px;
+  border-top: 1px solid #e2e8f0;
+  gap: 12px;
+}
+.animate-pulse {
+  animation: gallery-pulse 1.5s ease-in-out infinite;
+}
+@keyframes gallery-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
  @import 'lightgallery/css/lightgallery.css';
   @import 'lightgallery/css/lg-thumbnail.css';
   @import 'lightgallery/css/lg-zoom.css';

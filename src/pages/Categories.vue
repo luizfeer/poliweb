@@ -12,11 +12,17 @@
         </div>
 
         <div class="admin-actions" v-if="admin">
-          <router-link v-if="isSuperAdmin()" :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
-            <q-btn no-caps rounded unelevated color="primary" icon="storefront" label="Cadastrar empresa" class="admin-btn mr-2 mb-2"/>
+          <router-link :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
+            <q-btn no-caps rounded unelevated class="admin-btn admin-btn-primary">
+              <q-icon name="add_business" size="18px" class="q-mr-xs" />
+              Novo anúncio
+            </q-btn>
           </router-link>
           <router-link v-if="!ads.length" :to="`/painel/categorias/add/${$route.params.id}/${$route.params.name}`">
-            <q-btn no-caps rounded unelevated color="secondary" icon="category" label="Cadastrar sub-categoria" class="admin-btn mb-2"/>
+            <q-btn no-caps rounded unelevated class="admin-btn admin-btn-secondary">
+              <q-icon name="category" size="18px" class="q-mr-xs" />
+              Nova sub-categoria
+            </q-btn>
           </router-link>
         </div>
 
@@ -100,7 +106,6 @@
 <script>
 
 import { ref, watch } from "vue";
-import { isSuperAdmin } from 'src/js/superadmin'
 // import AdsPage from 'components/Ads'
 
 const CATEGORIES_VIEW_KEY = 'poliweb_categories_view_mode'
@@ -122,7 +127,6 @@ export default ({
       colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
       ads: ref([]),
       admin: ref(false),
-      isSuperAdmin,
       slide: ref('0'),
       loading : ref(true),
       data: ref({}),
@@ -242,7 +246,8 @@ export default ({
 .admin-actions {
   display: flex;
   flex-wrap: wrap;
-  margin: 12px 0 4px;
+  gap: 8px;
+  margin: 12px 0 8px;
 }
 
 .view-toggle-wrap {
@@ -389,5 +394,29 @@ export default ({
 .admin-btn {
   font-weight: 600;
   letter-spacing: 0;
+  font-size: 0.85rem;
+  padding: 6px 16px;
+  min-height: 36px;
+  border-radius: 999px;
+}
+
+.admin-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.admin-btn-primary:active {
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
+}
+
+.admin-btn-secondary {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+}
+
+.admin-btn-secondary:active {
+  box-shadow: 0 2px 6px rgba(8, 145, 178, 0.2);
 }
 </style>

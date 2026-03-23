@@ -6,7 +6,7 @@
       </div>
       <div class="row mb-3">
         <p class="text-gray-600 text-sm">
-          Entre em contato conosco: <a href="mailto:contato@poliwebapp.com.br" class="text-primary font-medium">contato@poliwebapp.com.br</a>
+          Entre em contato conosco: <a href="mailto:aplicativopoliweb@gmail.com" class="text-primary font-medium">aplicativopoliweb@gmail.com</a>
         </p>
       </div>
       <div class="row">
@@ -103,7 +103,7 @@ export default {
     }
     const payload = {
       ...this.form,
-      description: `[${this.form.tipo.toUpperCase()}]\n\n${this.form.description}\n\n---\nResposta: contato@poliwebapp.com.br`
+      description: `[${this.form.tipo.toUpperCase()}]\n\n${this.form.description}\n\n---\nResposta: aplicativopoliweb@gmail.com`
     }
     this.$q.loading.show()
     this.$api.post('/contacts', payload)

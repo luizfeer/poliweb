@@ -60,7 +60,7 @@
               </div>
               <div class="text-left">
                 <p class="text-gray-800 font-medium text-sm mb-0">Fale conosco</p>
-                <p class="text-gray-400 text-xs">contato@poliwebapp.com.br</p>
+                <p class="text-gray-400 text-xs">aplicativopoliweb@gmail.com</p>
               </div>
             </div>
             <q-icon name="chevron_right" color="grey-4" />
@@ -93,7 +93,7 @@
           <div class="px-5 py-4">
             <p class="text-gray-500 text-sm mb-4">
               Você pode solicitar a exclusão permanente da sua conta e de todos os seus dados. 
-              Enviaremos sua solicitação para nossa equipe em contato@poliwebapp.com.br.
+              Enviaremos sua solicitação para nossa equipe em aplicativopoliweb@gmail.com.
             </p>
             <q-btn
               outline
@@ -145,7 +145,7 @@
         <q-card-section>
           <div class="text-h6">Solicitar exclusão da conta</div>
           <p class="text-gray-600 text-sm q-mt-sm">
-            Sua solicitação será enviada para nossa equipe em <strong>contato@poliwebapp.com.br</strong>. 
+            Sua solicitação será enviada para nossa equipe em <strong>aplicativopoliweb@gmail.com</strong>. 
             Processaremos sua requisição em até 30 dias. Deseja continuar?
           </p>
         </q-card-section>
@@ -205,7 +205,7 @@ export default {
       const payload = {
         name: company,
         phone: '',
-        email: 'contato@poliwebapp.com.br',
+        email: 'aplicativopoliweb@gmail.com',
         description: `[SOLICITAÇÃO DE EXCLUSÃO DE CONTA]\n\nUsuário ID: ${customerId}\nEmail da conta: ${email}\nEmpresa: ${company}\n\nSolicito a exclusão permanente da minha conta e de todos os meus dados pessoais conforme a Política de Privacidade.`,
       };
 
@@ -217,7 +217,7 @@ export default {
           this.$q.notify({
             color: 'positive',
             position: 'top',
-            message: 'Solicitação enviada! Entraremos em contato em contato@poliwebapp.com.br',
+            message: 'Solicitação enviada! Entraremos em contato em aplicativopoliweb@gmail.com',
             icon: 'check',
           });
         })
@@ -227,7 +227,7 @@ export default {
           this.$q.notify({
             color: 'positive',
             position: 'top',
-            message: 'Solicitação registrada. Entre em contato: contato@poliwebapp.com.br',
+            message: 'Solicitação registrada. Entre em contato: aplicativopoliweb@gmail.com',
             icon: 'mail',
           });
         })

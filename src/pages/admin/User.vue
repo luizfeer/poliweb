@@ -198,13 +198,22 @@
               <div class="text-caption text-grey-7 q-mb-sm">
                 {{ format(commerce.createdAt) }}
               </div>
-              <q-btn
-                flat
-                color="primary"
-                label="Abrir"
-                no-caps
-                @click="$router.push(`/${commerce.id}`)"
-              />
+              <div class="row q-gutter-sm">
+                <q-btn
+                  outline
+                  color="secondary"
+                  label="Selecionar"
+                  no-caps
+                  @click="selectCommerce(commerce)"
+                />
+                <q-btn
+                  flat
+                  color="primary"
+                  label="Abrir"
+                  no-caps
+                  @click="$router.push(`/${commerce.id}`)"
+                />
+              </div>
             </q-item-section>
           </q-item>
           <q-item v-if="!commercesLoading && !commerces.length">
@@ -514,6 +523,23 @@ export default {
         this.fetchCategoryOptions(),
         this.fetchCommerces(customer.id)
       ])
+    },
+    selectCommerce(commerce) {
+      this.commerceForm = {
+        categoryId: commerce.categoryId || null,
+        name: commerce.name || '',
+        description: commerce.description || '',
+        facebook: commerce.facebook || '',
+        instagram: commerce.instagram || '',
+        website: commerce.website || '',
+        email: commerce.email || ''
+      }
+
+      this.$q.notify({
+        color: 'secondary',
+        position: 'top',
+        message: 'Dados do comércio carregados no formulário.'
+      })
     },
     async createCommerce() {
       if (!this.selectedCustomer.id) return

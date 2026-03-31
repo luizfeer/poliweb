@@ -1,5 +1,34 @@
 <template>
   <div class="q-pa-md">
+    <div class="row q-col-gutter-md q-mb-md">
+      <div class="col-12 col-md-5">
+        <q-input
+          v-model="filters.name"
+          filled
+          label="Buscar por nome"
+          clearable
+          @keyup.enter="applyFilters"
+        />
+      </div>
+      <div class="col-12 col-md-4">
+        <q-select
+          v-model="filters.city"
+          :options="cityOptions"
+          filled
+          emit-value
+          map-options
+          option-value="city"
+          option-label="city"
+          label="Filtrar por cidade"
+          clearable
+        />
+      </div>
+      <div class="col-12 col-md-3 row items-center q-gutter-sm">
+        <q-btn color="primary" label="Filtrar" no-caps @click="applyFilters" />
+        <q-btn flat color="grey-7" label="Limpar" no-caps @click="clearFilters" />
+      </div>
+    </div>
+
     <q-table
       v-model:pagination="pagination"
       title="Contas"
@@ -174,7 +203,7 @@
                 color="primary"
                 label="Abrir"
                 no-caps
-                @click="$router.push(`/comercio/${commerce.id}`)"
+                @click="$router.push(`/${commerce.id}`)"
               />
             </q-item-section>
           </q-item>
@@ -196,6 +225,7 @@
 
 <script>
 import { date } from 'quasar'
+import { citysData } from 'src/js/citys'
 
 function format(val) {
   return date.formatDate(val, 'DD/MM/YY HH:mm')
@@ -243,6 +273,10 @@ export default {
       commerces: [],
       categoryOptions: [],
       selectedCustomer: {},
+      filters: {
+        name: '',
+        city: null
+      },
       dialogs: {
         user: false,
         password: false,
@@ -268,6 +302,7 @@ export default {
         email: ''
       },
       commerceForm: createEmptyCommerceForm(),
+      cityOptions: [...citysData].sort((a, b) => a.city.localeCompare(b.city)),
       headers: [
         {
           name: 'name',
@@ -359,7 +394,9 @@ export default {
           params: {
             page: pagination.page,
             limit: pagination.rowsPerPage,
-            nonDeleted: true
+            nonDeleted: true,
+            name: this.filters.name ? `%${this.filters.name.trim()}%` : undefined,
+            city: this.filters.city || undefined
           }
         })
 
@@ -376,6 +413,20 @@ export default {
     },
     onRequest(props) {
       this.fetchUsers(props.pagination)
+    },
+    applyFilters() {
+      const nextPagination = {
+        ...this.pagination,
+        page: 1
+      }
+      this.fetchUsers(nextPagination)
+    },
+    clearFilters() {
+      this.filters = {
+        name: '',
+        city: null
+      }
+      this.applyFilters()
     },
     async updateUser() {
       this.$q.loading.show()

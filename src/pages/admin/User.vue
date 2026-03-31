@@ -1,337 +1,492 @@
 <template>
-<div class="q-pa-md">
+  <div class="q-pa-md">
     <q-table
-      title="Treats"
+      v-model:pagination="pagination"
+      title="Contas"
       :rows="customers"
       :columns="headers"
-      color="primary"
-      row-key="name"
-      :pagination="{rowsPerPage: 15 }"
-      :filter="filter"
+      row-key="id"
+      :loading="loading"
+      :rows-per-page-options="[10, 15, 25, 50]"
+      @request="onRequest"
     >
-      <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Procurar">
-          <template v-slot:append>
-            <AppIcon name="search" :size="20" />
-          </template>
-        </q-input>
-        <!-- <q-btn
-          color="primary"
-          icon-right="archive"
-          label="Baixar"
-          no-caps
-          @click="exportTable"
-        />       -->
-      </template>
-      
-      <template v-slot:body-cell-edit="props">        
-          <q-td key="edit" :props="props">
-            <q-btn             
+      <template v-slot:body-cell-edit="props">
+        <q-td :props="props" class="text-center">
+          <div class="row justify-center q-gutter-sm">
+            <q-btn
               round
               color="secondary"
+              icon="edit"
               @click="edit(props.row)"
-              icon="ion-create"
-              class="mr-3"
             />
-             <q-btn             
+            <q-btn
               round
               color="primary"
-              @click="editPass(props.row)"
               icon="lock"
+              @click="editPass(props.row)"
             />
-            
-          </q-td>        
+          </div>
+        </q-td>
       </template>
-      <template v-slot:body-cell-createdAt="props">        
-          <q-td key="createdAt" :props="props">
-            {{ format(props.row.createdAt)}}
-          </q-td>
-      </template>      
+
+      <template v-slot:body-cell-createdAt="props">
+        <q-td :props="props" class="text-center">
+          {{ format(props.row.createdAt) }}
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-commerces="props">
+        <q-td :props="props">
+          <div v-if="props.row.commercesCount" class="column q-gutter-xs">
+            <div class="row q-gutter-xs">
+              <q-chip
+                v-for="commerce in props.row.commercesPreview"
+                :key="commerce"
+                dense
+                color="primary"
+                text-color="white"
+              >
+                {{ commerce }}
+              </q-chip>
+            </div>
+            <div class="text-caption text-grey-7">
+              {{ props.row.commercesCount }} comércio(s)
+            </div>
+          </div>
+          <div v-else class="text-grey-6">
+            Nenhum comércio
+          </div>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-manageCommerces="props">
+        <q-td :props="props" class="text-center">
+          <q-btn
+            color="primary"
+            label="Comércios"
+            no-caps
+            @click="openCommercesModal(props.row)"
+          />
+        </q-td>
+      </template>
     </q-table>
   </div>
-  <q-dialog ref="dialog" @hide="onDialogHide">
+
+  <q-dialog v-model="dialogs.user">
     <q-card class="q-dialog-plugin">
-      <q-form
-            @submit="updateUser"
-            class="p-6"
-          >
-          <div class="mt-10">
-            <div class="row">      
-              <q-input filled v-model="formUser.email" type="email" lazy-rules label="Email" class="w-full py-2" />
-              </div>
-              <div class="row">      
-                <q-input filled v-model="formUser.name" lazy-rules label="Nome" class="w-full py-2" />
-              </div>      
-               <div class="row">      
-                <q-input filled v-model="formUser.phone" lazy-rules label="Celular" class="w-full py-2" />
-              </div>          
-          </div>
-          <q-btn label="Salvar" type="submit" color="primary"/>
-        </q-form>
+      <q-form @submit="updateUser" class="p-6">
+        <div class="text-h6 q-mb-md">Editar conta</div>
+        <q-input filled v-model="formUser.email" type="email" label="Email" class="q-mb-md" />
+        <q-input filled v-model="formUser.name" label="Nome" class="q-mb-md" />
+        <q-input filled v-model="formUser.phone" label="Celular" class="q-mb-md" />
+        <div class="row justify-end q-gutter-sm">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+          <q-btn label="Salvar" type="submit" color="primary" />
+        </div>
+      </q-form>
     </q-card>
   </q-dialog>
-  <q-dialog ref="dialogPass" @hide="onDialogHide">
+
+  <q-dialog v-model="dialogs.password">
     <q-card class="q-dialog-plugin">
-      <q-form
-            @submit="updatePass"
-            class="p-6"
-          >
-          <div class="mt-10">
-            <div class="row">   
-              Troca de senha de {{ formPass.name }}
-              <div class="row">      
-                <q-input filled v-model="formPass.password" type="passowrd" lazy-rules label="Senha" class="w-full py-2" />
-              </div>
-              <div class="row">      
-                <q-input filled v-model="formPass.confirmPassword"  type="passowrd" lazy-rules label="Confirmar senha" class="w-full py-2" />
-              </div>  
-            </div>          
-                    
+      <q-form @submit="updatePass" class="p-6">
+        <div class="text-h6 q-mb-md">Troca de senha de {{ formPass.name }}</div>
+        <q-input filled v-model="formPass.password" type="password" label="Senha" class="q-mb-md" />
+        <q-input filled v-model="formPass.confirmPassword" type="password" label="Confirmar senha" class="q-mb-md" />
+        <div class="row justify-end q-gutter-sm">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+          <q-btn label="Salvar" type="submit" color="primary" />
+        </div>
+      </q-form>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="dialogs.commerces" maximized>
+    <q-card>
+      <q-card-section class="row items-center justify-between">
+        <div>
+          <div class="text-h6">Comércios da conta</div>
+          <div class="text-subtitle2 text-grey-7">
+            {{ selectedCustomer.name || selectedCustomer.email }}
           </div>
-          <q-btn label="Salvar" type="submit" color="primary"/>
+        </div>
+        <q-btn flat round dense icon="close" v-close-popup />
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section class="q-gutter-md">
+        <q-form @submit="createCommerce" class="row q-col-gutter-md items-start">
+          <div class="col-12 col-md-3">
+            <q-select
+              filled
+              v-model="commerceForm.categoryId"
+              :options="categoryOptions"
+              emit-value
+              map-options
+              option-value="value"
+              option-label="label"
+              label="Categoria"
+              :loading="categoriesLoading"
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input filled v-model="commerceForm.name" label="Nome do comércio" />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input filled v-model="commerceForm.email" type="email" label="Email" />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input filled v-model="commerceForm.website" label="Site" />
+          </div>
+          <div class="col-12 col-md-6">
+            <q-input filled v-model="commerceForm.description" label="Descrição" />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input filled v-model="commerceForm.instagram" label="Instagram" />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input filled v-model="commerceForm.facebook" label="Facebook" />
+          </div>
+          <div class="col-12">
+            <q-btn color="primary" label="Criar comércio" no-caps type="submit" :loading="creatingCommerce" />
+          </div>
         </q-form>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section>
+        <q-list bordered separator>
+          <q-item v-for="commerce in commerces" :key="commerce.id">
+            <q-item-section>
+              <q-item-label>{{ commerce.name }}</q-item-label>
+              <q-item-label caption>
+                {{ commerce.description || commerce.email || 'Sem descrição' }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side class="items-end">
+              <div class="text-caption text-grey-7 q-mb-sm">
+                {{ format(commerce.createdAt) }}
+              </div>
+              <q-btn
+                flat
+                color="primary"
+                label="Abrir"
+                no-caps
+                @click="$router.push(`/comercio/${commerce.id}`)"
+              />
+            </q-item-section>
+          </q-item>
+          <q-item v-if="!commercesLoading && !commerces.length">
+            <q-item-section class="text-grey-6">
+              Nenhum comércio cadastrado nessa conta.
+            </q-item-section>
+          </q-item>
+          <q-item v-if="commercesLoading">
+            <q-item-section class="text-grey-6">
+              Carregando comércios...
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
-import { exportFile, useQuasar } from 'quasar'
 import { date } from 'quasar'
 
-function format (val) {
+function format(val) {
   return date.formatDate(val, 'DD/MM/YY HH:mm')
 }
 
-function wrapCsvValue (val, formatFn) {
-  let formatted = formatFn !== void 0
-    ? formatFn(val)
-    : val
+function flattenLeafCategories(categories, parentPath = []) {
+  const leaves = []
 
-  formatted = formatted === void 0 || formatted === null
-    ? ''
-    : String(formatted)
+  categories.forEach((category) => {
+    const currentPath = [...parentPath, category.name]
+    if (category.subcategories && category.subcategories.length) {
+      leaves.push(...flattenLeafCategories(category.subcategories, currentPath))
+      return
+    }
 
-  formatted = formatted.split('"').join('""')
-  /**
-   * Excel accepts \n and \r in strings, but some other CSV parsers do not
-   * Uncomment the next two lines to escape new lines
-   */
-  // .split('\n').join('\\n')
-  // .split('\r').join('\\r')
+    leaves.push({
+      label: currentPath.join(' > '),
+      value: category.id
+    })
+  })
 
-  return `"${formatted}"`
+  return leaves
+}
+
+function createEmptyCommerceForm(customer = {}) {
+  return {
+    categoryId: null,
+    name: customer.name || '',
+    description: '',
+    facebook: '',
+    instagram: '',
+    website: '',
+    email: customer.email || ''
+  }
 }
 
 export default {
   data() {
     return {
-      filter: '',
       loading: false,
+      commercesLoading: false,
+      categoriesLoading: false,
+      creatingCommerce: false,
       customers: [],
+      commerces: [],
+      categoryOptions: [],
+      selectedCustomer: {},
+      dialogs: {
+        user: false,
+        password: false,
+        commerces: false
+      },
+      pagination: {
+        sortBy: 'id',
+        descending: true,
+        page: 1,
+        rowsPerPage: 15,
+        rowsNumber: 0
+      },
       formPass: {
-        password: "",
-        confirmPassword: ""
+        id: null,
+        name: '',
+        password: '',
+        confirmPassword: ''
       },
       formUser: {
-        name: null,
-        phone: null,
-        email: "",
+        id: null,
+        name: '',
+        phone: '',
+        email: ''
       },
+      commerceForm: createEmptyCommerceForm(),
       headers: [
         {
-          name: 'nome',
+          name: 'name',
           required: true,
           label: 'Nome',
-          align: 'center',
+          align: 'left',
           field: 'name',
-          sortable: true
+          sortable: false
         },
-        { name: 'edit', label: 'Editar', field: 'id',  align: 'center', },       
-        { name: 'email', align: 'center', label: 'Email', field: 'email', sortable: true },
-        { name: 'phone', label: 'Telefone', field: 'phone', sortable: true,  align: 'center', },
-        { name: 'createdAt', label: 'Criação', field: 'createdAt', sortable: true,  align: 'center',  },       
-        // { name: 'id', label: 'ID', field: 'id' },       
-        // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-        // { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
+        {
+          name: 'email',
+          label: 'Email',
+          align: 'left',
+          field: 'email',
+          sortable: false
+        },
+        {
+          name: 'phone',
+          label: 'Telefone',
+          align: 'center',
+          field: 'phone',
+          sortable: false
+        },
+        {
+          name: 'commerces',
+          label: 'Comércios',
+          align: 'left',
+          field: 'commercesPreview',
+          sortable: false
+        },
+        {
+          name: 'manageCommerces',
+          label: 'Gerenciar',
+          align: 'center',
+          field: 'id',
+          sortable: false
+        },
+        {
+          name: 'createdAt',
+          label: 'Criação',
+          align: 'center',
+          field: 'createdAt',
+          sortable: false
+        },
+        {
+          name: 'edit',
+          label: 'Conta',
+          align: 'center',
+          field: 'id',
+          sortable: false
+        }
       ]
     }
   },
   methods: {
     format,
-    edit(item){
-      this.formUser = { 
+    notifyError(err) {
+      const message = err?.response?.data?.message || 'Erro na conexão!'
+      this.$q.notify({
+        color: 'negative',
+        position: 'top',
+        message,
+        icon: 'report_problem'
+      })
+    },
+    edit(item) {
+      this.formUser = {
+        id: item.id,
         name: item.name,
         phone: item.phone,
-        email: item.email,
-        id: item.id
+        email: item.email
       }
-
-      this.show()
+      this.dialogs.user = true
     },
-    editPass(item){
-      this.formPass = { 
-        name: item.name,
+    editPass(item) {
+      this.formPass = {
         id: item.id,
-        password:'',
-        confirmPassword:''
+        name: item.name,
+        password: '',
+        confirmPassword: ''
       }
-
-      this.$refs.dialogPass.show()
-
+      this.dialogs.password = true
     },
-    show () {
-      this.$refs.dialog.show()
-    },
-    hide () {
-      this.$refs.dialog.hide()
-    },
-    
-    updateUser(){
-      this.$q.loading.show()
-      this.$api.post(`/customers/${this.formUser.id}`, {...this.formUser})
-      .then((response) => {
-        //  console.log(response.data.addresses)
-          this.getUsers()
+    async fetchUsers(pagination = this.pagination) {
+      this.loading = true
 
-        if(response.data){
-          this.$q.notify({
-            color: 'secondary',
-          position: 'top',
-          message: 'Editado com sucesso!',         
-        })
-        this.$refs.dialog.hide()
-
-        }
-      })
-      .catch((err) => {
-        let msg
-        if( err.response){
-          msg =  err.response.data.message
-        }else {
-            msg = 'Erro na conexão!'
-        }
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: msg,
-          icon: 'report_problem'
-        })
-      })
-      .finally(() => {
-        this.$q.loading.hide()
-
-      })
-      },
-      updatePass(){
-      this.$q.loading.show()
-      this.$api.post(`/customers/${this.formPass.id}/password`, {...this.formPass})
-      .then((response) => {
-        //  console.log(response.data.addresses)
-          this.getUsers()
-        if(response.data){
-          this.$q.notify({
-            color: 'secondary',
-          position: 'top',
-          message: 'Nova senha salva com sucesso!',         
-        })
-          this.$refs.dialogPass.hide()
-
-        }
-      })
-      .catch((err) => {
-        let msg
-        if( err.response){
-          msg =  err.response.data.message
-        }else {
-            msg = 'Erro na conexão!'
-        }
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: msg,
-          icon: 'report_problem'
-        })
-      })
-      .finally(() => {
-        this.$q.loading.hide()
-
-      })
-      },
-      getUsers(){
-        this.loading = true
-        this.$api.get(`/customers?nonDeleted=true`)
-        .then((response) => {
-            if(response.data){
-            const customers = response.data.customers 
-            this.customers = customers.filter((item)=>{ return !item.deletedAt })   
-      
-            }
-        })
-        .catch((err) => {
-          let msg
-          if( err.response){
-            msg =  err.response.data.message
-          }else {
-            msg = 'Erro na conexão!'
+      try {
+        const response = await this.$api.get('/customers', {
+          params: {
+            page: pagination.page,
+            limit: pagination.rowsPerPage,
+            nonDeleted: true
           }
-          this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: msg,
-            icon: 'report_problem'
-          })
         })
-        .finally(() => {
-          this.loading = false
-        })
-      }
-  },
-  beforeMount() {
-   this.getUsers()
-   },
-   
-  setup () {
-    const $q = useQuasar()
 
-    return {
-      date, 
-      exportTable () {
-        // naive encoding to csv format
-        const content = [columns.map(col => wrapCsvValue(col.label))].concat(
-          rows.map(row => columns.map(col => wrapCsvValue(
-            typeof col.field === 'function'
-              ? col.field(row)
-              : row[ col.field === void 0 ? col.name : col.field ],
-            col.format
-          )).join(','))
-        ).join('\r\n')
-
-        const status = exportFile(
-          'table-export.csv',
-          content,
-          'text/csv'
-        )
-
-        if (status !== true) {
-          $q.notify({
-            message: 'Browser denied file download...',
-            color: 'negative',
-            icon: 'warning'
-          })
+        this.customers = response.data.customers || []
+        this.pagination = {
+          ...pagination,
+          rowsNumber: response.data.total || 0
         }
+      } catch (err) {
+        this.notifyError(err)
+      } finally {
+        this.loading = false
+      }
+    },
+    onRequest(props) {
+      this.fetchUsers(props.pagination)
+    },
+    async updateUser() {
+      this.$q.loading.show()
+      try {
+        await this.$api.post(`/customers/${this.formUser.id}`, { ...this.formUser })
+        this.$q.notify({
+          color: 'secondary',
+          position: 'top',
+          message: 'Conta editada com sucesso!'
+        })
+        this.dialogs.user = false
+        await this.fetchUsers()
+      } catch (err) {
+        this.notifyError(err)
+      } finally {
+        this.$q.loading.hide()
+      }
+    },
+    async updatePass() {
+      this.$q.loading.show()
+      try {
+        await this.$api.post(`/customers/${this.formPass.id}/password`, { ...this.formPass })
+        this.$q.notify({
+          color: 'secondary',
+          position: 'top',
+          message: 'Nova senha salva com sucesso!'
+        })
+        this.dialogs.password = false
+      } catch (err) {
+        this.notifyError(err)
+      } finally {
+        this.$q.loading.hide()
+      }
+    },
+    async fetchCategoryOptions() {
+      if (this.categoryOptions.length || this.categoriesLoading) return
+
+      this.categoriesLoading = true
+      try {
+        const response = await this.$api.get('/categories', {
+          params: {
+            nonDeleted: true
+          }
+        })
+        this.categoryOptions = flattenLeafCategories(response.data.categories || [])
+      } catch (err) {
+        this.notifyError(err)
+      } finally {
+        this.categoriesLoading = false
+      }
+    },
+    async fetchCommerces(customerId) {
+      this.commercesLoading = true
+      try {
+        const response = await this.$api.get('/categories/ads', {
+          params: {
+            customerId,
+            nonDeleted: true
+          }
+        })
+        this.commerces = response.data.ads || []
+      } catch (err) {
+        this.notifyError(err)
+      } finally {
+        this.commercesLoading = false
+      }
+    },
+    async openCommercesModal(customer) {
+      this.selectedCustomer = customer
+      this.commerceForm = createEmptyCommerceForm(customer)
+      this.dialogs.commerces = true
+      await Promise.all([
+        this.fetchCategoryOptions(),
+        this.fetchCommerces(customer.id)
+      ])
+    },
+    async createCommerce() {
+      if (!this.selectedCustomer.id) return
+
+      this.creatingCommerce = true
+      try {
+        await this.$api.post(`/categories/${this.commerceForm.categoryId}/ads`, {
+          customerId: this.selectedCustomer.id,
+          name: this.commerceForm.name,
+          description: this.commerceForm.description || null,
+          facebook: this.commerceForm.facebook || null,
+          instagram: this.commerceForm.instagram || null,
+          website: this.commerceForm.website || null,
+          email: this.commerceForm.email || null
+        })
+
+        this.$q.notify({
+          color: 'secondary',
+          position: 'top',
+          message: 'Comércio criado com sucesso!'
+        })
+
+        this.commerceForm = createEmptyCommerceForm(this.selectedCustomer)
+        await Promise.all([
+          this.fetchCommerces(this.selectedCustomer.id),
+          this.fetchUsers()
+        ])
+      } catch (err) {
+        this.notifyError(err)
+      } finally {
+        this.creatingCommerce = false
       }
     }
+  },
+  mounted() {
+    this.fetchUsers()
   }
 }
-
 </script>
-<style>
-.my-table-details {
-  font-size: 0.85em;
-  font-style: italic;
-  max-width: 200px;
-  white-space: normal;
-  color: #555;
-  margin-top: 4px;
-}
-</style>

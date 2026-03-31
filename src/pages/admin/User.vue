@@ -415,12 +415,24 @@ export default {
 
       this.categoriesLoading = true
       try {
-        const response = await this.$api.get('/categories', {
-          params: {
-            nonDeleted: true
-          }
-        })
-        this.categoryOptions = flattenLeafCategories(response.data.categories || [])
+        const localization =
+          typeof localStorage !== 'undefined'
+            ? JSON.parse(localStorage.getItem('localization') || 'null')
+            : null
+
+        const addressId = localization?.id
+
+        if (addressId) {
+          const response = await this.$api.get(`/cities/${addressId}/categories`)
+          this.categoryOptions = flattenLeafCategories(response.data.categories || [])
+        } else {
+          const response = await this.$api.get('/categories', {
+            params: {
+              nonDeleted: true
+            }
+          })
+          this.categoryOptions = flattenLeafCategories(response.data.categories || [])
+        }
       } catch (err) {
         this.notifyError(err)
       } finally {

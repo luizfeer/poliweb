@@ -2,6 +2,18 @@
   <div class="ads-page-wrapper">
     <ads-page v-if="!loading && data" :data-ads="data" @updated="getData" />
     <div v-if="!loading && data" class="seo-content-wrapper">
+      <q-card class="seo-breadcrumb-card">
+        <nav class="seo-breadcrumb" aria-label="Breadcrumb">
+          <router-link to="/" class="seo-breadcrumb-link">Início</router-link>
+          <span class="seo-breadcrumb-sep">/</span>
+          <router-link v-if="cityLabel" :to="cityCategoryLink()" class="seo-breadcrumb-link">{{ cityLabel }}</router-link>
+          <span v-if="cityLabel" class="seo-breadcrumb-sep">/</span>
+          <router-link v-if="primaryCategory" :to="categoryLink(primaryCategory)" class="seo-breadcrumb-link">{{ categoryLabel(primaryCategory) }}</router-link>
+          <span v-if="primaryCategory" class="seo-breadcrumb-sep">/</span>
+          <span class="seo-breadcrumb-current">{{ commerceName }}</span>
+        </nav>
+      </q-card>
+
       <q-card class="seo-info-card">
         <div class="seo-info-head">
           <div>
@@ -22,7 +34,7 @@
           >
             <span class="seo-category-name">{{ categoryLabel(category) }}</span>
             <span class="seo-category-sub">
-              Ver {{ commerceName }} em {{ category.name }}
+              {{ categoryCityCta(category) }}
             </span>
           </router-link>
         </div>
@@ -39,12 +51,18 @@
         </div>
       </q-card>
 
+      <q-card class="seo-summary-card">
+        <p class="seo-eyebrow">Resumo local</p>
+        <h2 class="seo-section-title">{{ summaryTitle }}</h2>
+        <p class="seo-section-text">{{ localSummary }}</p>
+      </q-card>
+
       <q-card class="seo-faq-card">
         <div class="seo-faq-head">
           <p class="seo-eyebrow">Perguntas frequentes</p>
-          <h2 class="seo-section-title">O que mais perguntam sobre {{ commerceName }}</h2>
+          <h2 class="seo-section-title">O que mais perguntam sobre {{ commerceName }}{{ citySuffix }}</h2>
           <p class="seo-section-text">
-            Reunimos as dúvidas mais comuns sobre contato, localização, categorias e presença digital deste comércio.
+            Reunimos as dúvidas mais comuns sobre contato, localização, categorias e presença digital deste comércio{{ citySuffix }}.
           </p>
         </div>
 
@@ -148,6 +166,17 @@ export default {
     const adCategories = ref([])
 
     const commerceName = computed(() => data.value?.name || 'este comércio')
+    const cityLabel = computed(() => lastAddress.value?.city || '')
+    const stateLabel = computed(() => lastAddress.value?.state || '')
+    const cityStateLabel = computed(() =>
+      [cityLabel.value, stateLabel.value].filter(Boolean).join(', ')
+    )
+    const citySuffix = computed(() =>
+      cityStateLabel.value ? ` em ${cityStateLabel.value}` : ''
+    )
+    const primaryCategory = computed(() =>
+      adCategories.value.find((category) => category.isPrimary) || adCategories.value[0] || null
+    )
 
     const lastAddress = computed(() => {
       const ad = data.value || {}
@@ -176,11 +205,38 @@ export default {
         return `${commerceName.value} está publicado no Poliweb com página pública pronta para busca e indexação.`
       }
 
-      const city = lastAddress.value?.city
       const topCategories = categoryNames.value.slice(0, 3).join(', ')
-      return city
-        ? `${commerceName.value} aparece em buscas como ${topCategories} em ${city}. Explore as categorias abaixo para encontrar empresas parecidas, serviços próximos e outras opções da mesma região.`
+      return cityLabel.value
+        ? `${commerceName.value} aparece em buscas como ${topCategories} em ${cityLabel.value}. Explore as categorias abaixo para encontrar empresas parecidas, serviços próximos e outras opções da mesma região.`
         : `${commerceName.value} aparece em buscas como ${topCategories}. Explore as categorias abaixo para navegar por serviços relacionados e comércios parecidos.`
+    })
+
+    const summaryTitle = computed(() => {
+      if (primaryCategory.value && cityStateLabel.value) {
+        return `${commerceName.value}: ${categoryLabel(primaryCategory.value)} em ${cityStateLabel.value}`
+      }
+      if (primaryCategory.value) {
+        return `${commerceName.value}: ${categoryLabel(primaryCategory.value)}`
+      }
+      return `${commerceName.value} no Poliweb`
+    })
+
+    const localSummary = computed(() => {
+      const categoryText = categoryNames.value.length
+        ? categoryNames.value.join(', ')
+        : 'categorias ainda não informadas'
+      const channels = [
+        whatsappPhone.value ? 'WhatsApp' : '',
+        regularPhone.value ? 'telefone' : '',
+        data.value?.email ? 'email' : '',
+        data.value?.website ? 'site' : '',
+      ].filter(Boolean)
+      const channelsText = channels.length ? ` Os principais canais públicos incluem ${channels.join(', ')}.` : ''
+
+      if (cityStateLabel.value) {
+        return `${commerceName.value} é um comércio localizado em ${cityStateLabel.value} e aparece no Poliweb nas categorias ${categoryText}.${channelsText}`
+      }
+      return `${commerceName.value} aparece no Poliweb nas categorias ${categoryText}.${channelsText}`
     })
 
     const faqItems = computed(() => {
@@ -208,53 +264,53 @@ export default {
 
       return [
         {
-          question: `Como chegar e qual o mapa da ${commerceName.value}?`,
+          question: `Como chegar e qual o mapa da ${commerceName.value}${citySuffix.value}?`,
           answer: address
             ? `Você pode chegar até ${commerceName.value} pelo endereço ${[address.street, address.number, address.neighborhood, address.city, address.state, address.zipCode].filter(Boolean).join(', ')}. ${mapUrl ? `Abra o mapa em ${maybeLink(mapUrl, 'Google Maps')}.` : ''}`
             : `${commerceName.value} ainda não informou um endereço completo para navegação por mapa.`
         },
         {
-          question: `Quais os principais produtos, serviços ou categorias da ${commerceName.value}?`,
+          question: `Quais os principais produtos, serviços ou categorias da ${commerceName.value}${citySuffix.value}?`,
           answer: adCategories.value.length
-            ? `${commerceName.value} está relacionado às seguintes categorias no Poliweb: ${categoriesText}. Essas categorias ajudam a encontrar o comércio nas buscas do Google e dentro da plataforma.`
+            ? `${commerceName.value} está relacionado às seguintes categorias no Poliweb: ${categoriesText}. Essas categorias ajudam a encontrar o comércio nas buscas do Google e dentro da plataforma${citySuffix.value}.`
             : `${commerceName.value} ainda não possui categorias públicas adicionais detalhadas nesta página.`
         },
         {
-          question: `Qual o horário de funcionamento e o email da ${commerceName.value}?`,
+          question: `Qual o horário de funcionamento e o email da ${commerceName.value}${citySuffix.value}?`,
           answer: email
             ? `${commerceName.value} informa o email ${maybeLink(`mailto:${email}`, email)} para contato. O horário de funcionamento não foi publicado nesta página; vale confirmar diretamente com o estabelecimento antes de visitar.`
             : `${commerceName.value} ainda não publicou horário de funcionamento nem email detalhado nesta página.`
         },
         {
-          question: `Qual o WhatsApp comercial da ${commerceName.value}?`,
+          question: `Qual o WhatsApp comercial da ${commerceName.value}${citySuffix.value}?`,
           answer: whatsappPhone.value
             ? `O WhatsApp comercial disponível para ${commerceName.value} é ${whatsappPhone.value}. Você também pode iniciar o contato direto pela página do comércio.`
             : `${commerceName.value} não informou um número de WhatsApp comercial nesta página.`
         },
         {
-          question: `Qual o telefone celular da ${commerceName.value}?`,
+          question: `Qual o telefone celular da ${commerceName.value}${citySuffix.value}?`,
           answer: regularPhone.value
             ? `O telefone disponível de ${commerceName.value} é ${regularPhone.value}.`
             : `${commerceName.value} não informou telefone celular adicional nesta página.`
         },
         {
-          question: `Quero ver fotos e vídeos da ${commerceName.value}. A empresa possui Instagram e Facebook?`,
+          question: `Quero ver fotos e vídeos da ${commerceName.value}${citySuffix.value}. A empresa possui Instagram e Facebook?`,
           answer: `${galleryCount || videoCount ? `${commerceName.value} possui ${galleryCount} foto(s) e ${videoCount} vídeo(s) publicados nesta página.` : `${commerceName.value} ainda não possui fotos ou vídeos publicados em quantidade visível nesta página.`} ${instagram ? `Instagram: ${maybeLink(instagram, instagram)}.` : 'Instagram não informado.'} ${facebook ? `Facebook: ${maybeLink(facebook, facebook)}.` : 'Facebook não informado.'}`
         },
         {
-          question: `Qual o site, landing page ou blog da empresa ${commerceName.value}?`,
+          question: `Qual o site, landing page ou blog da empresa ${commerceName.value}${citySuffix.value}?`,
           answer: site
             ? `O endereço digital informado por ${commerceName.value} é ${maybeLink(site, site)}.`
             : `${commerceName.value} não informou site, landing page ou blog nesta página.`
         },
         {
-          question: `Qual o contato do setor de vendas e financeiro da ${commerceName.value}?`,
+          question: `Qual o contato do setor de vendas e financeiro da ${commerceName.value}${citySuffix.value}?`,
           answer: email || regularPhone.value || whatsappPhone.value
             ? `Os canais públicos disponíveis de ${commerceName.value} são ${[email ? `email ${email}` : '', regularPhone.value ? `telefone ${regularPhone.value}` : '', whatsappPhone.value ? `WhatsApp ${whatsappPhone.value}` : ''].filter(Boolean).join(', ')}. Caso exista setor financeiro ou comercial separado, o ideal é solicitar o direcionamento pelo canal principal.`
             : `${commerceName.value} não divulgou um contato específico para vendas ou financeiro nesta página.`
         },
         {
-          question: `Qual o contato para deixar currículo e participar de entrevista na ${commerceName.value}?`,
+          question: `Qual o contato para deixar currículo e participar de entrevista na ${commerceName.value}${citySuffix.value}?`,
           answer: email
             ? `Se você deseja enviar currículo para ${commerceName.value}, o canal público disponível nesta página é ${maybeLink(`mailto:${email}`, email)}. Recomendamos confirmar por esse contato se há vagas abertas.`
             : regularPhone.value || whatsappPhone.value
@@ -390,6 +446,7 @@ export default {
       const activePhonesArr = (ad.phones || []).filter(p => !p.deletedAt)
       const phonesStr = activePhonesArr.map(p => p.phone).join(', ')
       const firstPhone = activePhonesArr[0]?.phone || ''
+      const primaryCategoryName = primaryCategory.value ? categoryLabel(primaryCategory.value) : ''
       const faqEntities = faqItems.value.map((item) => ({
         '@type': 'Question',
         name: item.question,
@@ -400,12 +457,14 @@ export default {
       }))
 
       const locationParts = [city, state].filter(Boolean).join(', ')
-      const pageTitle = locationParts ? `${name} em ${locationParts}` : name
+      const pageTitle = [name, locationParts ? `em ${locationParts}` : '', primaryCategoryName].filter(Boolean).join(' | ')
 
       const descParts = [
-        description ? description.slice(0, 100) : name,
+        description ? description.slice(0, 90) : name,
+        primaryCategoryName ? `${primaryCategoryName}.` : '',
         city && state ? `Localizado em ${city}, ${state}.` : city ? `Em ${city}.` : '',
         firstPhone ? `Tel: ${firstPhone}.` : '',
+        categoryNames.value.length ? `Categorias: ${categoryNames.value.slice(0, 3).join(', ')}.` : '',
         'Encontre no Poliweb.'
       ].filter(Boolean)
       const metaDesc = descParts.join(' ').slice(0, 160)
@@ -415,6 +474,8 @@ export default {
         city,
         state,
         locationParts ? `${name} ${city}` : '',
+        primaryCategoryName,
+        city ? `${primaryCategoryName} em ${city}` : '',
         description ? description.slice(0, 80) : '',
         phonesStr,
         'Poliweb',
@@ -436,6 +497,12 @@ export default {
       commerceCanonicalUrl.value = canonicalUrl
 
       const sameAs = [ad.website, ad.facebook, ad.instagram].filter(Boolean)
+      const breadcrumbItems = [
+        { name: 'Início', item: seoBaseUrl },
+        ...(cityLabel.value ? [{ name: cityLabel.value, item: `${seoBaseUrl}/buscar` }] : []),
+        ...(primaryCategoryName ? [{ name: primaryCategoryName, item: `${seoBaseUrl}${primaryCategory.value ? categoryLink(primaryCategory.value) : '/buscar'}` }] : []),
+        { name, item: canonicalUrl },
+      ]
       const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'LocalBusiness',
@@ -445,6 +512,7 @@ export default {
         url: ad.website || canonicalUrl,
         ...(firstPhone ? { telephone: firstPhone } : {}),
         ...(ad.email ? { email: ad.email } : {}),
+        ...(primaryCategoryName ? { keywords: [primaryCategoryName, ...categoryNames.value].join(', ') } : {}),
         ...(lastAddress ? {
           address: {
             '@type': 'PostalAddress',
@@ -455,6 +523,8 @@ export default {
             addressCountry: 'BR'
           }
         } : {}),
+        ...(lastAddress ? { hasMap: `https://maps.google.com/maps?q=${encodeURIComponent([name, street, number, city, state, zipCode].filter(Boolean).join(', '))}` } : {}),
+        ...(city ? { areaServed: { '@type': 'City', name: city } } : {}),
         ...(lastAddress?.coordinates?.lat != null && lastAddress?.coordinates?.long != null ? {
           geo: {
             '@type': 'GeoCoordinates',
@@ -466,6 +536,19 @@ export default {
       }
 
       const jsonLdScripts = [jsonLd]
+
+      if (breadcrumbItems.length) {
+        jsonLdScripts.push({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: breadcrumbItems.map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.name,
+            item: item.item
+          }))
+        })
+      }
 
       if (faqEntities.length) {
         jsonLdScripts.push({
@@ -523,6 +606,13 @@ export default {
     const categoryLink = (category) =>
       `/categorias/${category.id}/${encodeURIComponent(category.name || 'categoria')}`
 
+    const cityCategoryLink = () => '/buscar'
+
+    const categoryCityCta = (category) =>
+      cityLabel.value
+        ? `Ver ${commerceName.value} em ${categoryLabel(category)} em ${cityLabel.value}`
+        : `Ver ${commerceName.value} em ${categoryLabel(category)}`
+
     const copyCommerceLink = async () => {
       try {
         const link = commerceCanonicalUrl.value || (typeof window !== 'undefined' ? window.location.href : '')
@@ -543,10 +633,17 @@ export default {
       copyCommerceLink,
       adCategories,
       commerceName,
+      cityLabel,
+      citySuffix,
+      primaryCategory,
       categoriesLeadText,
+      summaryTitle,
+      localSummary,
       faqItems,
       categoryLabel,
-      categoryLink
+      categoryLink,
+      cityCategoryLink,
+      categoryCityCta
     }
   }
 }
@@ -561,16 +658,39 @@ export default {
 .seo-cta-wrapper {
   padding: 0 1rem 1rem;
 }
+.seo-breadcrumb-card,
 .seo-info-card,
+.seo-summary-card,
 .seo-faq-card,
 .seo-cta-card {
   border-radius: 14px;
   border: 1px solid #e5e7eb;
 }
+.seo-breadcrumb-card,
 .seo-info-card,
+.seo-summary-card,
 .seo-faq-card {
   margin-bottom: 1rem;
   padding: 1rem;
+}
+.seo-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.92rem;
+}
+.seo-breadcrumb-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+.seo-breadcrumb-sep {
+  color: #94a3b8;
+}
+.seo-breadcrumb-current {
+  color: #0f172a;
+  font-weight: 700;
 }
 .seo-info-head,
 .seo-faq-head {
@@ -698,7 +818,9 @@ export default {
   color: #1d4ed8;
 }
 @media (max-width: 640px) {
+  .seo-breadcrumb-card,
   .seo-info-card,
+  .seo-summary-card,
   .seo-faq-card {
     padding: 0.9rem;
   }

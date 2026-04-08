@@ -57,6 +57,26 @@ export default {
             })            
         }
       },
+      watch: {
+        data: {
+          immediate: true,
+          deep: true,
+          handler(d) {
+            if (!d) return;
+            let ids = Array.isArray(d.categoryIds)
+              ? [...d.categoryIds]
+              : d.categoryId != null
+                ? [Number(d.categoryId)]
+                : Array.isArray(d.categories)
+                  ? d.categories.map((c) => Number(c.id))
+                  : [];
+            Object.assign(this.formData, {
+              ...d,
+              categoryIds: ids,
+            });
+          },
+        },
+      },
       computed: {
         ...mapState('categories', ['list']),
         categories() {
@@ -64,18 +84,6 @@ export default {
         },
       },
       async mounted () {
-          const d = this.data;
-          let ids = Array.isArray(d.categoryIds)
-            ? [...d.categoryIds]
-            : d.categoryId != null
-              ? [Number(d.categoryId)]
-              : Array.isArray(d.categories)
-                ? d.categories.map((c) => Number(c.id))
-                : [];
-          Object.assign(this.formData, {
-            ...d,
-            categoryIds: ids,
-          });
           if (!this.categories.length) {
             try {
               await this.$store.dispatch('categories/fetchCategories');

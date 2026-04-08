@@ -1073,8 +1073,21 @@ export default {
       try {
         const res = await getAdCategories(this.adsComponent.id)
         this.adCategories = res?.data?.categories ?? []
+        this.adsComponent = {
+          ...this.adsComponent,
+          categories: [...this.adCategories],
+          categoryIds: this.adCategories.map((category) => Number(category.id)),
+        }
       } catch (_) {
         this.adCategories = []
+        this.adsComponent = {
+          ...this.adsComponent,
+          categories: [],
+          categoryIds:
+            this.adsComponent?.categoryId != null
+              ? [Number(this.adsComponent.categoryId)]
+              : [],
+        }
       }
     },
     url(){

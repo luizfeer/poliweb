@@ -30,6 +30,11 @@
           </div>
         </div>
         <div class="ads-info">
+          <div v-if="openingStatus.configured" class="ads-status-chip" :class="openingStatus.isOpen ? 'ads-status-chip--open' : 'ads-status-chip--closed'">
+            <AppIcon :name="openingStatus.isOpen ? 'schedule' : 'do-not-disturb-on'" :size="16" />
+            <span>{{ openingStatus.label }}</span>
+          </div>
+          <p v-if="openingStatus.detail" class="ads-status-detail">{{ openingStatus.detail }}</p>
           <h1 class="ads-name">{{ adsComponent.name }}</h1>
           <p class="ads-desc" v-if="adsComponent.description">{{ adsComponent.description }}</p>
         </div>
@@ -93,6 +98,21 @@
       <div class="ads-card">
         <h2 class="ads-card-title">Descrição</h2>
         <p class="ads-card-text">{{ adsComponent.description }}</p>
+      </div>
+    </div>
+
+    <div class="ads-section" v-if="hasOpeningHours">
+      <div class="ads-card">
+        <div class="ads-hours-header">
+          <h2 class="ads-card-title">Horário de funcionamento</h2>
+          <span class="ads-hours-today">{{ openingStatus.today ? formatOpeningHours(openingStatus.today) : '' }}</span>
+        </div>
+        <div class="ads-hours-list">
+          <div v-for="dayConfig in openingHoursList" :key="dayConfig.day" class="ads-hours-row">
+            <span class="ads-hours-day">{{ dayConfig.label }}</span>
+            <span class="ads-hours-value">{{ formatOpeningHours(dayConfig) }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -767,6 +787,11 @@ import PreviewEcommerce from 'components/PreviewEcommerce'
 import AppBottomSheet from 'components/AppBottomSheet'
 import EditCategoriesModal from 'components/EditCategoriesModal'
 import PostarMediaModal from 'components/PostarMediaModal'
+import {
+  formatOpeningHours,
+  getOpeningStatus,
+  normalizeOpeningHours,
+} from 'src/js/openingHours'
 import { timeAgo as formatTimeAgo } from 'src/js/timeAgo'
 import { isSuperAdmin } from 'src/js/superadmin'
 import { mapState } from 'vuex'
@@ -809,6 +834,7 @@ export default {
           facebook: '',
           instagram: '',
           name: '',
+          openingHours: [],
           website: '',
           createdAt: '',
           updatedAt: '',
@@ -948,6 +974,15 @@ export default {
     isCurrentVideo() {
       return this.currentMediaItem?.type === 'video'
     },
+    openingHoursList() {
+      return normalizeOpeningHours(this.adsComponent?.openingHours)
+    },
+    hasOpeningHours() {
+      return this.openingHoursList.some((item) => item.enabled && item.intervals?.length)
+    },
+    openingStatus() {
+      return getOpeningStatus(this.adsComponent?.openingHours)
+    },
   },
   watch: {
     dataAds: {
@@ -1004,6 +1039,7 @@ export default {
         : 0
       video.currentTime = t
     },
+    formatOpeningHours,
     onVideoThumbError(e) {
       const id = e.target?.dataset?.videoId
       if (id) {
@@ -2907,6 +2943,75 @@ export default {
 @keyframes gallery-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+.ads-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.ads-status-chip--open {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ads-status-chip--closed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ads-status-detail {
+  margin: -2px 0 8px;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.ads-hours-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ads-hours-today {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.ads-hours-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ads-hours-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ads-hours-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ads-hours-day {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.ads-hours-value {
+  color: #64748b;
+  text-align: right;
 }
 
  @import 'lightgallery/css/lightgallery.css';

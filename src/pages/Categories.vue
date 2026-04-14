@@ -7,18 +7,18 @@
             <AppIcon name="arrow-back" :size="22" />
             <span>Voltar</span>
           </button>
-          <h1 class="category-title">Comércios da categoria</h1>
-          <p class="category-subtitle">Escolha como deseja visualizar os estabelecimentos.</p>
+          <h1 class="category-title">{{ headingPrimary }}</h1>
+          <p class="category-subtitle">{{ headingSecondary }}</p>
         </div>
 
         <div class="admin-actions" v-if="admin">
-          <router-link :to="`/painel/ads/add/${$route.params.id}/${$route.params.name}`">
+          <router-link :to="`/painel/ads/add/${$route.params.id}/${encodeURIComponent(adminCategoryParam)}`">
             <q-btn no-caps rounded unelevated class="admin-btn admin-btn-primary">
               <q-icon name="add_business" size="18px" class="q-mr-xs" />
               Novo anúncio
             </q-btn>
           </router-link>
-          <router-link v-if="!ads.length" :to="`/painel/categorias/add/${$route.params.id}/${$route.params.name}`">
+          <router-link v-if="!ads.length" :to="`/painel/categorias/add/${$route.params.id}/${encodeURIComponent(adminCategoryParam)}`">
             <q-btn no-caps rounded unelevated class="admin-btn admin-btn-secondary">
               <q-icon name="category" size="18px" class="q-mr-xs" />
               Nova sub-categoria
@@ -45,7 +45,7 @@
 
         <div v-if="ads.length === 0" class="empty-state">Nenhum comércio cadastrado nessa categoria.</div>
 
-        <div class="ads-grid" :class="`ads-grid-${viewMode}`">
+        <div v-else class="ads-grid" :class="`ads-grid-${viewMode}`">
           <router-link
             v-for="item in ads"
             :key="item.id"
@@ -104,18 +104,69 @@
 </template>
 
 <script>
-
-import { ref, watch } from "vue";
-// import AdsPage from 'components/Ads'
+import { ref, watch, computed, onMounted, onServerPrefetch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import { useMeta, useQuasar } from 'quasar'
+import { api } from 'boot/axios'
+import { citysData } from 'src/js/citys'
 
 const CATEGORIES_VIEW_KEY = 'poliweb_categories_view_mode'
 
-export default ({
-  components: {
-  //  AdsPage
-  },
-  name: "PageIndex",
-  setup() {
+function normalizeCity (s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+}
+
+function findCityIdByName (cityName) {
+  if (!cityName) return null
+  const n = normalizeCity(cityName)
+  const city = citysData.find((c) => {
+    const nc = normalizeCity(c.city)
+    return nc === n || nc.includes(n) || n.includes(nc)
+  })
+  return city?.id ?? null
+}
+
+function findCategoryWithParent (list, id, parent = null) {
+  for (const item of list || []) {
+    if (Number(item.id) === Number(id)) return { category: item, parent }
+    const sub = findCategoryWithParent(item.subcategories || [], id, item)
+    if (sub) return sub
+  }
+  return null
+}
+
+function pickCityFromAds (ads) {
+  for (const ad of ads || []) {
+    const addrs = ad.address || ad.addresses
+    const arr = Array.isArray(addrs) ? addrs : [addrs].filter(Boolean)
+    if (arr.length) {
+      const last = arr[arr.length - 1]
+      const c = last?.city || last?.addressCity
+      if (c) return String(c).trim()
+    }
+  }
+  return ''
+}
+
+function pickOgImageFromAds (ads) {
+  for (const ad of ads || []) {
+    const g = ad?.files?.gallery?.filter((x) => !x.deletedAt && x.link)?.[0]?.link
+    if (g) return g
+    const l = ad?.files?.logo?.filter((x) => !x.deletedAt && x.link)?.[0]?.link
+    if (l) return l
+  }
+  return ''
+}
+
+export default {
+  name: 'CategoriesPage',
+  setup () {
+    const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
+    const $q = useQuasar()
+
     const stored = typeof localStorage !== 'undefined' && localStorage.getItem(CATEGORIES_VIEW_KEY)
     const viewMode = ref(stored === 'grid' || stored === 'list' ? stored : 'list')
     watch(viewMode, (val) => {
@@ -123,78 +174,273 @@ export default ({
         localStorage.setItem(CATEGORIES_VIEW_KEY, val)
       } catch (_) {}
     })
-    return {
-      colors: ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']),
-      ads: ref([]),
-      admin: ref(false),
-      slide: ref('0'),
-      loading : ref(true),
-      data: ref({}),
-      viewMode
-    };
-  },
-  methods: {
-    initials(name) {
-      if (!name) return ""
-      return name.split(" ").map((n)=>n[0]).join("").toUpperCase().slice(0, 2)
-    },
-    formatDesc(str) {
-      if(!str) return
-      if (str.length > 50) {
-        return str.slice(0, 50) + "...";
-      } else {
-        return str;
+
+    const colors = ref(['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning'])
+    const ads = ref([])
+    const admin = ref(false)
+    const loading = ref(true)
+    const categoryName = ref('')
+    const cityLabel = ref('')
+
+    const adminCategoryParam = computed(() => {
+      const n = categoryName.value?.trim()
+      if (n) return n
+      const p = route.params.name
+      if (!p) return 'categoria'
+      try {
+        return decodeURIComponent(String(p))
+      } catch {
+        return 'categoria'
       }
-    },
-   showAds(item){
-        this.data = {...item};
-        this.slide= '1'
-      },
-    getLogo(item) {
+    })
+
+    const headingPrimary = computed(() => {
+      const cat = categoryName.value?.trim()
+      const city = cityLabel.value?.trim()
+      if (cat && city) return `Empresas de ${cat} em ${city}`
+      if (cat) return `Empresas de ${cat}`
+      return 'Comércios da categoria'
+    })
+
+    const headingSecondary = computed(() => {
+      const city = cityLabel.value?.trim()
+      const n = ads.value.length
+      if (city && n) {
+        return `${n} estabelecimento${n !== 1 ? 's' : ''} em ${city}. Escolha lista ou grade abaixo.`
+      }
+      if (n) return `${n} estabelecimento${n !== 1 ? 's' : ''}. Escolha lista ou grade abaixo.`
+      return 'Escolha como deseja visualizar os estabelecimentos.'
+    })
+
+    const decodeRouteName = () => {
+      const p = route.params.name
+      if (!p) return ''
+      try {
+        return decodeURIComponent(String(p)).trim()
+      } catch {
+        return String(p).trim()
+      }
+    }
+
+    const resolveCategoryLabel = async (categoryId, routeNameOverride, adsList) => {
+      if (routeNameOverride) return routeNameOverride
+
+      const loc = store.state.localization?.current
+      let cityId = loc?.id
+      const cityFromAds = pickCityFromAds(adsList)
+      if (!cityId && cityFromAds) {
+        cityId = findCityIdByName(cityFromAds)
+      }
+      if (!cityId) return ''
+
+      try {
+        const res = await api.get(`/cities/${cityId}/categories?nonDeleted=true`)
+        const cats = res?.data?.categories || []
+        const found = findCategoryWithParent(cats, categoryId)
+        const raw = found?.category?.name
+        return raw ? String(raw).trim() : ''
+      } catch {
+        return ''
+      }
+    }
+
+    const loadPage = async () => {
+      loading.value = true
+      const categoryId = route.params.id
+      try {
+        const response = await api.get(`/categories/${categoryId}/ads?nonDeleted=true`)
+        const raw = response?.data?.categoryAds || []
+        ads.value = raw.filter((item) => !item.deletedAt)
+
+        const routeNm = decodeRouteName()
+        cityLabel.value = pickCityFromAds(ads.value) || store.state.localization?.current?.city || ''
+
+        let resolved = routeNm
+        if (!resolved) {
+          resolved = await resolveCategoryLabel(categoryId, '', ads.value)
+        }
+        categoryName.value = resolved || 'Comércios locais'
+      } catch (err) {
+        ads.value = []
+        const msg = err?.response?.data?.message || 'Erro na conexão!'
+        if (typeof window !== 'undefined') {
+          $q.notify({
+            color: 'negative',
+            position: 'top',
+            message: msg,
+            icon: 'report_problem'
+          })
+        }
+        if (typeof window !== 'undefined') {
+          router.push({ path: '/' })
+        }
+      } finally {
+        loading.value = false
+      }
+    }
+
+    onServerPrefetch(async () => {
+      await loadPage()
+    })
+
+    onMounted(() => {
+      admin.value = !!localStorage.getItem('admin')
+      if (!ads.value.length) {
+        loadPage()
+      }
+    })
+
+    watch(
+      () => [route.params.id, route.params.name],
+      () => {
+        loadPage()
+      }
+    )
+
+    useMeta(() => {
+      const seoBase = (process.env.SEO_SITE_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
+      const catId = route.params.id || ''
+      const slugPiece = (categoryName.value || 'categoria').trim() || 'categoria'
+      const canonicalUrl = `${seoBase}/categorias/${catId}/${encodeURIComponent(slugPiece)}`
+
+      const city = (cityLabel.value || '').trim()
+      const cat = (categoryName.value || '').trim()
+      const pageTitle =
+        city && cat && cat !== 'Comércios locais'
+          ? `Empresas de ${cat} em ${city}`
+          : cat && cat !== 'Comércios locais'
+            ? `Empresas de ${cat}`
+            : 'Categorias'
+
+      const count = ads.value.length
+      const descParts = [
+        city && cat && cat !== 'Comércios locais'
+          ? `Encontre empresas e comércios de ${cat} em ${city} no Poliweb.`
+          : cat && cat !== 'Comércios locais'
+            ? `Encontre empresas e comércios de ${cat} no Poliweb.`
+            : 'Lista de comércios e empresas locais no Poliweb.',
+        count ? `${count} estabelecimento${count !== 1 ? 's' : ''} nesta categoria.` : '',
+        'Agenda de negócios locais.'
+      ].filter(Boolean)
+      const metaDesc = descParts.join(' ').slice(0, 160)
+
+      const keywordParts = [
+        cat,
+        city,
+        cat && city ? `${cat} em ${city}` : '',
+        cat && city ? `empresas de ${cat} em ${city}` : '',
+        'Poliweb',
+        'comércios',
+        'empresas'
+      ].filter(Boolean)
+
+      const ogImage = pickOgImageFromAds(ads.value)
+
+      const itemList = ads.value.slice(0, 24).map((ad, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: ad.name,
+        url: ad.id ? `${seoBase}/${ad.id}` : undefined
+      }))
+
+      const jsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: pageTitle,
+          numberOfItems: ads.value.length,
+          ...(itemList.length ? { itemListElement: itemList } : {})
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Início', item: seoBase },
+            ...(city ? [{ '@type': 'ListItem', position: 2, name: city, item: `${seoBase}/buscar` }] : []),
+            ...(cat && cat !== 'Comércios locais'
+              ? [{ '@type': 'ListItem', position: city ? 3 : 2, name: cat, item: canonicalUrl }]
+              : [])
+          ]
+        }
+      ]
+
+      return {
+        title: pageTitle,
+        titleTemplate: (title) => `${title} - Poliweb`,
+        link: {
+          canonical: { rel: 'canonical', href: canonicalUrl }
+        },
+        meta: {
+          description: { name: 'description', content: metaDesc },
+          keywords: { name: 'keywords', content: keywordParts.join(', ') },
+          ogTitle: { property: 'og:title', content: pageTitle },
+          ogDesc: { property: 'og:description', content: metaDesc },
+          ogImage: { property: 'og:image', content: ogImage },
+          ogImageAlt: { property: 'og:image:alt', content: pageTitle },
+          ogUrl: { property: 'og:url', content: canonicalUrl },
+          ogType: { property: 'og:type', content: 'website' },
+          ogSiteName: { property: 'og:site_name', content: 'Poliweb' },
+          ogLocale: { property: 'og:locale', content: 'pt_BR' },
+          twitterCard: { name: 'twitter:card', content: 'summary_large_image' },
+          twitterTitle: { name: 'twitter:title', content: pageTitle },
+          twitterDesc: { name: 'twitter:description', content: metaDesc },
+          twitterImage: { name: 'twitter:image', content: ogImage }
+        },
+        script: jsonLd.map((item) => ({
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(item)
+        }))
+      }
+    })
+
+    const initials = (name) => {
+      if (!name) return ''
+      return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    }
+
+    const formatDesc = (str) => {
+      if (!str) return
+      if (str.length > 50) {
+        return str.slice(0, 50) + '...'
+      }
+      return str
+    }
+
+    const getLogo = (item) => {
       if (!item?.files?.logo?.length) return null
       const logos = item.files.logo
         .filter((logo) => !logo.deletedAt && logo.link)
         .sort((b, a) => new Date(a.createdAt) - new Date(b.createdAt))
       return logos.length ? logos[0].link : null
-    },
-    getGalleryBackdrop(item) {
+    }
+
+    const getGalleryBackdrop = (item) => {
       if (!item?.files?.gallery?.length) return null
       const gallery = item.files.gallery
         .filter((img) => !img.deletedAt && img.link)
         .sort((b, a) => new Date(a.createdAt) - new Date(b.createdAt))
       return gallery.length ? gallery[0].link : null
-    },
-  },
-  mounted(){
-     this.admin = localStorage.getItem('admin') ? true : false
-  },
-  beforeMount () {
-    this.loading = true
-    this.$api.get(`/categories/${this.$route.params.id}/ads?nonDeleted=true`)
-     .then((response) => {
-        if(response.data){
-          this.ads = response.data.categoryAds.filter((item)=>{ return !item.deletedAt })
-        }
-      })
-      .catch((err) => {
-        let msg
-        if( err.response){
-          msg =  err.response.data.message
-        }else {
-          msg = 'Erro na conexão!'
-        }
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: msg,
-          icon: 'report_problem'
-        })
-      })
-      .finally(() => {
-        this.loading = false
-      })
-  },
-  })
+    }
+
+    return {
+      colors,
+      ads,
+      admin,
+      loading,
+      viewMode,
+      categoryName,
+      cityLabel,
+      headingPrimary,
+      headingSecondary,
+      adminCategoryParam,
+      initials,
+      formatDesc,
+      getLogo,
+      getGalleryBackdrop,
+      encodeURIComponent
+    }
+  }
+}
 </script>
 
 <style scoped>

@@ -298,6 +298,18 @@
             </div>
             <q-icon name="chevron_right" color="grey-5" size="20px" />
           </button>
+
+          <div class="admin-divider" />
+          <button class="admin-row-btn" @click="confirmDeleteAd = true">
+            <div class="arb-icon" style="background: linear-gradient(135deg,#ef4444,#dc2626)">
+              <q-icon name="delete_forever" color="white" size="18px" />
+            </div>
+            <div class="arb-info">
+              <span class="arb-label">Apagar anúncio</span>
+              <span class="arb-sub">Remove o anúncio das listagens</span>
+            </div>
+            <q-icon name="chevron_right" color="grey-5" size="20px" />
+          </button>
         </template>
       </div>
     </div>
@@ -460,6 +472,19 @@
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
           <q-btn flat label="Deletar" color="negative" @click="deletePhone()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="confirmDeleteAd" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar color="negative" text-color="white"><AppIcon name="delete" :size="20" /></q-avatar>
+          <span class="q-ml-sm">Tem certeza que deseja apagar este anúncio?</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
+          <q-btn flat label="Apagar anúncio" color="negative" @click="deleteAd()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -811,6 +836,7 @@ export default {
       follow: false,
       admin: false,
       confirm: false,
+      confirmDeleteAd: false,
       deletePhoneData: {},
       photoUpload: false,
       confirmGallery: false,
@@ -1495,6 +1521,51 @@ export default {
         .finally(() => {
             this.$q.loading.hide()
         })
+      },
+      deleteAd() {
+        if (!this.isSuperAdmin || !this.adsComponent?.id) {
+          this.confirmDeleteAd = false
+          return
+        }
+
+        this.$q.loading.show()
+        this.$api.delete(`/categories/ads/${this.adsComponent.id}`)
+          .then(() => {
+            this.confirmDeleteAd = false
+            this.$q.notify({
+              color: 'secondary',
+              position: 'top',
+              message: 'Anúncio apagado com sucesso!',
+            })
+
+            const fallbackCategoryId = this.adsComponent.categoryId
+            const targetCategory = this.adCategories[0] || this.findCategoryById(fallbackCategoryId)
+
+            if (targetCategory?.id) {
+              this.$router.push(this.categoryLink(targetCategory))
+              return
+            }
+
+            this.$router.push('/')
+          })
+          .catch((err) => {
+            let msg
+            if (err.response) {
+              msg = err.response.data.message
+            } else {
+              msg = 'Erro na conexão!'
+            }
+
+            this.$q.notify({
+              color: 'negative',
+              position: 'top',
+              message: msg,
+              icon: 'report_problem'
+            })
+          })
+          .finally(() => {
+            this.$q.loading.hide()
+          })
       },
       newPhone() {
         this.$q.loading.show()

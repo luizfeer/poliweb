@@ -212,7 +212,7 @@ export default defineComponent({
     },
     methods: {
         async init() {
-            this.essentialLinks = this.baseLinks
+            this.essentialLinks = this.baseLinks.map((link) => ({ ...link }))
             const uuid = localStorage.getItem('uuid')
             let context = localStorage.getItem("context")
             if (!uuid) {
@@ -232,6 +232,17 @@ export default defineComponent({
                 }
                 admin = localStorage.getItem('admin') ? true : false
             }
+
+            const isLoggedIn = !!context || !!localStorage.getItem('admin')
+            this.essentialLinks = this.essentialLinks.map((link) =>
+                link.link === '/perfil'
+                    ? {
+                        ...link,
+                        title: isLoggedIn ? 'Minha conta' : 'Login/Senha',
+                    }
+                    : link
+            )
+
             const localization = localStorage.getItem("localization")
             this.localization = localization ? JSON.parse(localization) : null
             if (this.localization) {

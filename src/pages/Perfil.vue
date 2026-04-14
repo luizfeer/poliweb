@@ -455,8 +455,8 @@ export default {
   min-height: 100%;
   padding-bottom: 96px;
   background:
-    radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 38%),
-    linear-gradient(180deg, #f8fafc 0%, #eff6ff 48%, #f8fafc 100%);
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.14), transparent 34%),
+    linear-gradient(180deg, #e5e7eb 0%, #eef2f7 44%, #e5e7eb 100%);
 }
 
 .perfil-hero {

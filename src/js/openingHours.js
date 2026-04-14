@@ -245,6 +245,10 @@ function expandDayToken(token) {
     .trim()
   const compact = normalized.replace(/\./g, '')
 
+  // Check full token first (handles compound names like "terca-feira", "segunda-feira")
+  const directMatch = DAY_ALIASES[compact]
+  if (directMatch) return [directMatch]
+
   if (compact.includes('-')) {
     const [fromRaw, toRaw] = compact.split('-').map((value) => value.trim())
     const fromDay = DAY_ALIASES[fromRaw]
@@ -263,8 +267,7 @@ function expandDayToken(token) {
     return days
   }
 
-  const single = DAY_ALIASES[compact]
-  return single ? [single] : []
+  return []
 }
 
 export function parseOpeningHoursText(text) {
@@ -294,7 +297,7 @@ export function parseOpeningHoursText(text) {
       .replace(/\s+/g, ' ')
       .trim()
 
-    const tabMatch = normalizedLine.match(/^([^\t]+)\t+(.+)$/)
+    const tabMatch = line.match(/^([^\t]+)\t+(.+)$/)
     const colonMatch = normalizedLine.match(/^([^:]+):\s*(.+)$/)
     const dashMatch = line.match(
       /^([A-Za-zÀ-ÿ.\-\s]+?)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*[–—−-]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?(?:\s*[;,]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*[–—−-]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?)*)$/i

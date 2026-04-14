@@ -1,15 +1,9 @@
 <template>
   <q-form @submit="saveHours" class="fix-infos-form">
     <div class="fix-card">
-      <div class="fix-card__header">
-        <div>
-          <p class="fix-card__eyebrow">Horário de funcionamento</p>
-          <h3 class="fix-card__title">Preencha manualmente ou cole do Google</h3>
-          <p class="fix-card__subtitle">
-            Exemplos: <code>Segunda: 08:00-18:00</code> ou <code>Seg-Sex: 08:00-18:00</code>
-          </p>
-        </div>
-      </div>
+      <p class="fix-card__hint">
+        Exemplos: <code>Segunda: 08:00-18:00</code> ou <code>Seg-Sex: 08:00-18:00</code>
+      </p>
 
       <q-input
         filled
@@ -183,60 +177,55 @@ export default {
 <style scoped>
 .fix-infos-form {
   display: grid;
-  gap: 16px;
-  padding: 8px;
+  gap: 12px;
+  padding: 0;
 }
 
 .fix-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 16px;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
-.fix-card__header {
-  margin-bottom: 14px;
-}
-
-.fix-card__eyebrow {
-  margin: 0 0 4px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.fix-card__hint {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
   color: #64748b;
+  line-height: 1.4;
 }
 
-.fix-card__title {
-  margin: 0;
-  font-size: 1rem;
-  color: #0f172a;
-  font-weight: 700;
-}
-
-.fix-card__subtitle {
-  margin: 6px 0 0;
-  font-size: 0.84rem;
-  color: #64748b;
+.fix-card__hint code {
+  font-size: 0.78em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.06);
 }
 
 .fix-import-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 12px 0 14px;
+  gap: 8px;
+  margin: 8px 0 10px;
 }
 
 .fix-hours-list {
   display: grid;
-  gap: 10px;
+  gap: 0;
 }
 
 .fix-hours-row {
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 12px;
-  background: #f8fafc;
+  border: none;
+  border-radius: 0;
+  padding: 10px 0;
+  background: transparent;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.fix-hours-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .fix-hours-row__top {
@@ -254,13 +243,13 @@ export default {
 }
 
 .fix-hours-row__value {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-size: 0.82rem;
   color: #64748b;
 }
 
 .fix-hours-row__inputs {
-  margin-top: 12px;
+  margin-top: 8px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;

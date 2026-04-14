@@ -279,10 +279,16 @@ export function parseOpeningHoursText(text) {
   const parsed = [...base]
 
   lines.forEach((line) => {
-    const parts = line.split(':')
-    if (parts.length < 2) return
+    const tabMatch = line.match(/^([^\t]+)\t+(.+)$/)
+    const colonMatch = line.match(/^([^:]+):\s*(.+)$/)
+    const dashMatch = line.match(
+      /^([A-Za-zÀ-ÿ.\-\s]+?)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*[–—−-]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?(?:\s*[;,]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*[–—−-]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?)*)$/i
+    )
 
-    const dayRaw = parts.shift().trim().toLowerCase()
+    const extracted = tabMatch || colonMatch || dashMatch
+    if (!extracted) return
+
+    const dayRaw = extracted[1].trim().toLowerCase()
     const normalizedDayRaw = dayRaw
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -292,7 +298,7 @@ export function parseOpeningHoursText(text) {
     const dayKeys = expandDayToken(normalizedDayRaw)
     if (!dayKeys.length) return
 
-    const scheduleText = parts.join(':').trim()
+    const scheduleText = extracted[2].trim()
     const result = parseIntervalsText(scheduleText)
 
     dayKeys.forEach((dayKey) => {

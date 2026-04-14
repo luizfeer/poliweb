@@ -34,9 +34,9 @@
             <AppIcon :name="openingStatus.isOpen ? 'schedule' : 'do-not-disturb-on'" :size="16" />
             <span>{{ openingStatus.label }}</span>
           </div>
-          <p v-if="openingStatus.detail" class="ads-status-detail">{{ openingStatus.detail }}</p>
           <h1 class="ads-name">{{ adsComponent.name }}</h1>
           <p class="ads-desc" v-if="adsComponent.description">{{ adsComponent.description }}</p>
+          <p v-if="openingStatus.detail" class="ads-status-detail">{{ openingStatus.detail }}</p>
         </div>
       </div>
       <div class="ads-actions">
@@ -280,6 +280,19 @@
 
         <div class="admin-divider" />
 
+        <button class="admin-row-btn" @click="expand.openingHours = true">
+          <div class="arb-icon" style="background: linear-gradient(135deg,#0ea5e9,#0284c7)">
+            <q-icon name="schedule" color="white" size="18px" />
+          </div>
+          <div class="arb-info">
+            <span class="arb-label">Horário de funcionamento</span>
+            <span class="arb-sub">Defina quando o negócio está aberto</span>
+          </div>
+          <q-icon name="chevron_right" color="grey-5" size="20px" />
+        </button>
+
+        <div class="admin-divider" />
+
         <!-- Postar mídia -->
         <button class="admin-row-btn" @click="expand.postarMedia = true">
           <div class="arb-icon" style="background: linear-gradient(135deg,#ec4899,#db2777)">
@@ -389,6 +402,19 @@
       subtitle="Atualize os dados do seu perfil"
     >
       <fix-infos :data="adsComponent" />
+    </app-bottom-sheet>
+
+    <app-bottom-sheet
+      v-model="expand.openingHours"
+      icon="schedule"
+      icon-color="#0ea5e9"
+      title="Horário de funcionamento"
+      subtitle="Preencha manualmente ou cole os horários"
+    >
+      <opening-hours-editor
+        :data="adsComponent"
+        @saved="expand.openingHours = false; $emit('updated')"
+      />
     </app-bottom-sheet>
 
     <app-bottom-sheet
@@ -783,6 +809,7 @@
 <script>
 import AddAddress from 'components/add/Address'
 import FixInfos from 'components/FixInfos'
+import OpeningHoursEditor from 'components/OpeningHoursEditor'
 import PreviewEcommerce from 'components/PreviewEcommerce'
 import AppBottomSheet from 'components/AppBottomSheet'
 import EditCategoriesModal from 'components/EditCategoriesModal'
@@ -801,6 +828,7 @@ export default {
    components:{
     AddAddress,
     FixInfos,
+    OpeningHoursEditor,
     PreviewEcommerce,
     AppBottomSheet,
     EditCategoriesModal,
@@ -849,6 +877,7 @@ export default {
       expand: {
         action: false,
         basic: false,
+        openingHours: false,
         address: false,
         phone: false,
         editCategories: false,
@@ -1774,6 +1803,8 @@ export default {
 <style scoped>
 .ads-page {
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #eef2f6 0%, #e5e7eb 100%);
+  min-height: 100%;
 }
 .ads-actions-bar-wrapper {
   position: fixed;
@@ -1921,10 +1952,11 @@ export default {
   width: 100%;
 }
 .ads-header {
-  background: white;
+  background: rgba(255, 255, 255, 0.94);
   padding: 1rem 1rem 1.25rem;
   border-bottom: 1px solid #e5e7eb;
   overflow: visible;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
 }
 .ads-header-content {
   display: flex;
@@ -2552,10 +2584,10 @@ export default {
   padding: 1rem;
 }
 .ads-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.96);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
   border: 1px solid #e5e7eb;
 }
 .ads-categories-tags {

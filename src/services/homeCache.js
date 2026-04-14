@@ -4,6 +4,7 @@ const STORE = 'homeCache'
 
 // TTL em ms (4 minutos)
 export const FOUR_MINUTES = 4 * 60 * 1000
+export const FIVE_HOURS = 5 * 60 * 60 * 1000
 
 export async function getCached(key, maxAgeMs = FOUR_MINUTES) {
   try {
@@ -30,4 +31,3 @@ export async function setCached(key, data) {
     // ignore storage errors
   }
 }
-

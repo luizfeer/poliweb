@@ -57,6 +57,7 @@
         </div>
       </div>
 
+      <TopRankedAdsWidget :address-id="addressId" />
       <RecentVideosWidget :address-id="addressId" />
       <CityAdsWidget :address-id="addressId" />
 
@@ -169,6 +170,7 @@ import { mapState } from "vuex";
 import Location from "components/Location";
 import CardAds from "src/components/CardAds.vue";
 import RecentVideosWidget from "src/components/RecentVideosWidget.vue";
+import TopRankedAdsWidget from "src/components/TopRankedAdsWidget.vue";
 import CityAdsWidget from "src/components/CityAdsWidget.vue";
 import { timeAgo } from "src/js/timeAgo";
 
@@ -177,6 +179,7 @@ export default defineComponent({
     Location,
     CardAds,
     RecentVideosWidget,
+    TopRankedAdsWidget,
     CityAdsWidget,
   },
   computed: {

@@ -159,13 +159,14 @@
               <div class="perfil-commerce-card__categories">
                 <p class="perfil-commerce-card__categories-title">Categorias</p>
                 <div v-if="commerce.categories?.length" class="perfil-chip-row">
-                  <span
+                  <router-link
                     v-for="category in commerce.categories"
                     :key="`${commerce.id}-${category.id}`"
                     class="perfil-chip"
+                    :to="categoryLink(category)"
                   >
                     {{ categoryLabel(category) }}
-                  </span>
+                  </router-link>
                 </div>
                 <p v-else class="perfil-muted perfil-muted--small">Nenhuma categoria vinculada.</p>
               </div>
@@ -333,24 +334,35 @@ export default {
         })
 
         const ads = response?.data?.ads || []
-        const categoriesByAd = await Promise.all(
+        const detailedCommerces = await Promise.all(
           ads.map(async (commerce) => {
+            let detailedCommerce = commerce
+
+            try {
+              const detailResponse = await this.$api.get(
+                `/categories/ads/${commerce.id}?nonDeleted=true`
+              )
+              if (detailResponse?.data) {
+                detailedCommerce = detailResponse.data
+              }
+            } catch (_) {}
+
             try {
               const categoriesResponse = await getAdCategories(commerce.id)
               return {
-                ...commerce,
+                ...detailedCommerce,
                 categories: categoriesResponse?.data?.categories || [],
               }
             } catch (_) {
               return {
-                ...commerce,
+                ...detailedCommerce,
                 categories: [],
               }
             }
           })
         )
 
-        this.commerces = categoriesByAd.sort((a, b) => a.name.localeCompare(b.name))
+        this.commerces = detailedCommerces.sort((a, b) => a.name.localeCompare(b.name))
       } catch (err) {
         const msg = err?.response?.data?.message || 'Erro na conexão!'
         this.$q.notify({
@@ -387,6 +399,9 @@ export default {
     },
     activePhonesCount(commerce) {
       return (commerce?.phones || []).filter((item) => !item.deletedAt).length
+    },
+    categoryLink(category) {
+      return `/categorias/${category.id}/${encodeURIComponent(category.name || 'categoria')}`
     },
     categoryLabel(category) {
       if (!category?.name) return 'Categoria'
@@ -730,6 +745,7 @@ export default {
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.25;
+  text-decoration: none;
 }
 
 .perfil-link-row {

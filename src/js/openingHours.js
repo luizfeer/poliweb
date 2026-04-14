@@ -273,19 +273,37 @@ export function parseOpeningHoursText(text) {
 
   const lines = String(text)
     .split('\n')
-    .map((line) => line.trim())
+    .map((line) =>
+      line
+        .replace(/\u00a0/g, ' ')
+        .replace(/\u2007/g, ' ')
+        .replace(/\u202f/g, ' ')
+        .replace(/\r/g, '')
+        .trim()
+    )
     .filter(Boolean)
 
   const parsed = [...base]
 
   lines.forEach((line) => {
-    const tabMatch = line.match(/^([^\t]+)\t+(.+)$/)
-    const colonMatch = line.match(/^([^:]+):\s*(.+)$/)
+    const normalizedLine = line
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u2007/g, ' ')
+      .replace(/\u202f/g, ' ')
+      .replace(/[–—−]/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    const tabMatch = normalizedLine.match(/^([^\t]+)\t+(.+)$/)
+    const colonMatch = normalizedLine.match(/^([^:]+):\s*(.+)$/)
     const dashMatch = line.match(
       /^([A-Za-zÀ-ÿ.\-\s]+?)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*[–—−-]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?(?:\s*[;,]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*[–—−-]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?)*)$/i
     )
+    const normalizedDashMatch = normalizedLine.match(
+      /^([A-Za-zÀ-ÿ.\-\s]+?)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*-\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?(?:\s*[;,]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*-\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?)*)$/i
+    )
 
-    const extracted = tabMatch || colonMatch || dashMatch
+    const extracted = tabMatch || colonMatch || normalizedDashMatch || dashMatch
     if (!extracted) return
 
     const dayRaw = extracted[1].trim().toLowerCase()
@@ -298,7 +316,11 @@ export function parseOpeningHoursText(text) {
     const dayKeys = expandDayToken(normalizedDayRaw)
     if (!dayKeys.length) return
 
-    const scheduleText = extracted[2].trim()
+    const scheduleText = extracted[2]
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u2007/g, ' ')
+      .replace(/\u202f/g, ' ')
+      .trim()
     const result = parseIntervalsText(scheduleText)
 
     dayKeys.forEach((dayKey) => {

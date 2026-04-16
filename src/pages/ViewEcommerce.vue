@@ -136,10 +136,10 @@
                             <h4 class="cart-item-name">{{ item.name }}</h4>
                             <div class="cart-item-row">
                                 <div class="cart-qty">
-                                    <button type="button" class="cart-qty-btn" @click="sub(item)" :disabled="item.quantity <= 1">
+                                    <button type="button" class="cart-qty-btn" @click="sub(item)">
                                         <AppIcon :name="item.quantity <= 1 ? 'close' : 'remove'" :size="14" />
                                     </button>
-                                    <input type="number" min="1" v-model.number="item.quantity" class="cart-qty-input" @change="updateQuantity(item)">
+                                    <input type="number" min="0" v-model.number="item.quantity" class="cart-qty-input" @change="updateQuantity(item)">
                                     <button type="button" class="cart-qty-btn" @click="add(item)">
                                         <AppIcon name="add" :size="14" />
                                     </button>
@@ -457,7 +457,16 @@ export default {
             }
         },
         updateQuantity(item) {
-            const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+            const qty = parseInt(item.quantity, 10);
+            if (!Number.isFinite(qty)) {
+                item.quantity = 1;
+                db.cart.where({ id: item.id }).modify(i => { i.quantity = 1; });
+                return;
+            }
+            if (qty <= 0) {
+                db.cart.where({ id: item.id }).delete();
+                return;
+            }
             item.quantity = qty;
             db.cart.where({ id: item.id }).modify(i => { i.quantity = qty; });
         },

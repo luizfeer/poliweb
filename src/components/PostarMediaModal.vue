@@ -16,13 +16,26 @@
       <p class="postar-media-subtitle">Escolha o tipo de mídia para adicionar à galeria do anúncio.</p>
 
       <div class="postar-media-options">
+        <button type="button" class="postar-media-option" @click="onSelect('camera')">
+          <div class="postar-media-option-icon" style="background: linear-gradient(135deg,#0ea5e9,#0284c7)">
+            <AppIcon name="add-a-photo" :size="24" class="text-white" />
+          </div>
+          <div class="postar-media-option-info">
+            <span class="postar-media-option-label">Câmera</span>
+            <span class="postar-media-option-sub">Tirar uma foto agora</span>
+          </div>
+          <AppIcon name="chevron-right" :size="20" class="text-gray-400" />
+        </button>
+
+        <div class="postar-media-divider" />
+
         <button type="button" class="postar-media-option" @click="onSelect('gallery')">
           <div class="postar-media-option-icon" style="background: linear-gradient(135deg,#3b82f6,#2563eb)">
             <AppIcon name="add-photo-alternate" :size="24" class="text-white" />
           </div>
           <div class="postar-media-option-info">
-            <span class="postar-media-option-label">Foto</span>
-            <span class="postar-media-option-sub">Adicionar imagem à galeria</span>
+            <span class="postar-media-option-label">Galeria</span>
+            <span class="postar-media-option-sub">Escolher foto do celular</span>
           </div>
           <AppIcon name="chevron-right" :size="20" class="text-gray-400" />
         </button>

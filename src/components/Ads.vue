@@ -91,6 +91,7 @@
       </div>
       <q-btn v-if="admin" flat rounded color="primary" label="Editar imagens" size="sm" :to="`/img/${adsComponent.id}`" class="mt-2"/>
       <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
+      <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
     </div>
 
     <!-- Descrição -->
@@ -1156,6 +1157,14 @@ export default {
     },
     onPostarMediaSelect(type) {
       this.$nextTick(() => {
+        if (type === 'camera') {
+          this.$refs.cameraGallery?.click()
+          return
+        }
+        if (type === 'video') {
+          this.sendVideo = true
+          return
+        }
         this.$refs.gallery?.click()
       })
     },

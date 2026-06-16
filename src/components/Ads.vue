@@ -52,56 +52,15 @@
     </div>
     <preview-ecommerce :ecommercePreview="adsComponent.files?.ecommercePreview" :admin="admin" />
 
-    <!-- Galeria de fotos e vídeos - estilo Stories -->
-    <div class="ads-section">
-      <div class="ads-gallery">
-        <div class="ads-gallery-add ads-gallery-add-unified" @click="$refs.gallery?.click()">
-          <AppIcon name="add-photo-alternate" :size="28" />
-          <span>Fotos e vídeos</span>
-        </div>
-        <!-- Thumbnails de mídia (fotos + vídeos) na galeria horizontal -->
-        <div
-          v-for="(item, i) in mediaItems"
-          :key="'gmt-' + (item.id || i)"
-          class="ads-gallery-video-thumb"
-          @click="openStoryAt(i)"
-        >
-          <template v-if="item.type === 'video'">
-            <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" :alt="adsComponent.name + ' - vídeo ' + (i + 1)" />
-            <video
-              v-else-if="item.link && !videoThumbFailed[String(item.id)]"
-              :data-video-id="String(item.id)"
-              :src="item.link"
-              crossorigin="anonymous"
-              preload="metadata"
-              muted
-              playsinline
-              class="ads-video-thumb-video"
-              @loadeddata="captureVideoThumb"
-              @canplay="captureVideoThumb"
-              @error="onVideoThumbError"
-            />
-            <AppIcon name="play-circle-filled" :size="32" class="text-white" />
-          </template>
-          <template v-else>
-            <img :src="item.thumbnail || item.src" class="ads-video-thumb-img" :alt="adsComponent.name + ' - foto ' + (i + 1)" loading="lazy" />
-          </template>
-          <span class="ads-gallery-video-num">{{ i + 1 }}</span>
-        </div>
-      </div>
-      <q-btn v-if="admin" flat rounded color="primary" label="Editar imagens" size="sm" :to="`/img/${adsComponent.id}`" class="mt-2"/>
-      <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
-      <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
-    </div>
+    <!-- inputs ocultos para upload (mantidos para funcionalidade) -->
+    <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
+    <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
 
 
-    <!-- Feed de fotos estilo Instagram -->
+    <!-- Feed de posts estilo Instagram -->
     <div class="ads-section">
-      <div class="ads-card-header">
-        <h2 class="ads-card-title">Fotos</h2>
-        <q-btn v-if="admin" flat no-caps dense color="primary" icon="settings" label="Gerenciar" size="sm" :to="`/posts/${adsComponent.id}`" />
-      </div>
-      <photo-feed :ad-id="adsComponent.id" />
+      <h2 class="ads-card-title">Posts</h2>
+      <photo-feed :ad-id="adsComponent.id" :ad-name="adsComponent.name" />
     </div>
 
     <!-- Descrição -->
@@ -317,6 +276,20 @@
         </button>
 
         <div class="admin-divider" />
+
+        <div class="admin-divider" />
+
+        <!-- Posts -->
+        <router-link :to="`/posts/${adsComponent.id}`" class="admin-row-btn">
+          <div class="arb-icon" style="background: linear-gradient(135deg,#f43f5e,#e11d48)">
+            <q-icon name="add_photo_alternate" color="white" size="18px" />
+          </div>
+          <div class="arb-info">
+            <span class="arb-label">Posts</span>
+            <span class="arb-sub">Publicar fotos com legenda</span>
+          </div>
+          <q-icon name="chevron_right" color="grey-5" size="20px" />
+        </router-link>
 
         <!-- Telefone -->
         <button class="admin-row-btn" @click="resetPhone(); expand.phone = true">

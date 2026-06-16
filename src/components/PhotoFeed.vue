@@ -1,52 +1,63 @@
 <template>
-  <div class="photo-feed">
-    <div v-if="loading" class="photo-feed__loading">
+  <div class="pf">
+    <div v-if="loading" class="pf__loading">
       <q-spinner color="primary" size="32px" />
     </div>
 
-    <div v-else-if="!posts.length" class="photo-feed__empty">
+    <div v-else-if="!posts.length" class="pf__empty">
       <q-icon name="photo_library" size="48px" color="grey-4" />
-      <p>Nenhuma foto publicada ainda</p>
+      <p>Nenhum post ainda</p>
     </div>
 
     <div v-else>
-      <div class="photo-feed__grid">
+      <div class="pf__grid">
         <div
           v-for="(post, i) in posts"
           :key="post.id"
-          class="photo-feed__item"
+          class="pf__cell"
           @click="openAt(i)"
         >
-          <img :src="post.link" :alt="postCaption(post)" loading="lazy" class="photo-feed__img" />
-          <div v-if="postCaption(post)" class="photo-feed__overlay">
-            <q-icon name="chat_bubble_outline" size="16px" />
+          <img :src="post.link" :alt="caption(post)" loading="lazy" class="pf__img" />
+          <div v-if="caption(post)" class="pf__badge">
+            <q-icon name="chat_bubble" size="12px" />
           </div>
         </div>
       </div>
 
-      <div v-if="hasMore" class="photo-feed__load-more">
+      <div v-if="hasMore" class="pf__more">
         <q-btn flat no-caps color="primary" label="Ver mais" :loading="loadingMore" @click="loadMore" />
       </div>
     </div>
 
     <!-- Lightbox -->
-    <q-dialog v-model="dialog" maximized>
-      <div class="photo-feed__lightbox" @click.self="dialog = false">
-        <q-btn round flat color="white" icon="close" class="photo-feed__lightbox-close" @click="dialog = false" />
-
-        <div class="photo-feed__lightbox-content">
-          <q-btn round flat color="white" icon="chevron_left" class="photo-feed__nav photo-feed__nav--left" @click="prev" :disable="current === 0" />
-
-          <div class="photo-feed__lightbox-inner">
-            <img :src="currentPost.link" :alt="postCaption(currentPost)" class="photo-feed__lightbox-img" />
-            <div v-if="postCaption(currentPost) || currentPost.title" class="photo-feed__lightbox-caption">
-              <p v-if="currentPost.title" class="photo-feed__lightbox-title">{{ currentPost.title }}</p>
-              <p v-if="postCaption(currentPost)" class="photo-feed__lightbox-desc">{{ postCaption(currentPost) }}</p>
-              <p class="photo-feed__lightbox-date">{{ formatDate(currentPost.createdAt) }}</p>
+    <q-dialog v-model="dialog" maximized transition-show="fade" transition-hide="fade">
+      <div class="pf__lb" @click.self="dialog = false">
+        <div class="pf__lb-card">
+          <!-- Header -->
+          <div class="pf__lb-header">
+            <div class="pf__lb-avatar">{{ initials }}</div>
+            <div class="pf__lb-meta">
+              <span class="pf__lb-name">{{ adName }}</span>
+              <span class="pf__lb-date">{{ formatDate(currentPost.createdAt) }}</span>
             </div>
+            <q-btn flat round dense icon="close" color="grey-7" @click="dialog = false" />
           </div>
 
-          <q-btn round flat color="white" icon="chevron_right" class="photo-feed__nav photo-feed__nav--right" @click="next" :disable="current === posts.length - 1" />
+          <!-- Image -->
+          <img :src="currentPost.link" :alt="caption(currentPost)" class="pf__lb-img" />
+
+          <!-- Caption -->
+          <div v-if="caption(currentPost)" class="pf__lb-caption">
+            <span class="pf__lb-caption-name">{{ adName }}</span>
+            {{ caption(currentPost) }}
+          </div>
+
+          <!-- Nav -->
+          <div class="pf__lb-nav">
+            <q-btn flat round dense icon="chevron_left" :disable="current === 0" @click="prev" />
+            <span class="pf__lb-count">{{ current + 1 }} / {{ posts.length }}</span>
+            <q-btn flat round dense icon="chevron_right" :disable="current === posts.length - 1" @click="next" />
+          </div>
         </div>
       </div>
     </q-dialog>
@@ -54,117 +65,85 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 
 export default {
   props: {
     adId: { type: [Number, String], required: true },
+    adName: { type: String, default: '' },
   },
-  setup(props) {
-    const posts = ref([])
-    const loading = ref(true)
-    const loadingMore = ref(false)
-    const offset = ref(0)
-    const hasMore = ref(false)
-    const dialog = ref(false)
-    const current = ref(0)
-    const LIMIT = 12
-
-    return { posts, loading, loadingMore, offset, hasMore, dialog, current, LIMIT }
+  setup() {
+    return {
+      posts: ref([]),
+      loading: ref(true),
+      loadingMore: ref(false),
+      hasMore: ref(false),
+      offset: ref(0),
+      dialog: ref(false),
+      current: ref(0),
+    }
   },
   computed: {
-    currentPost() {
-      return this.posts[this.current] || {}
+    currentPost() { return this.posts[this.current] || {} },
+    initials() {
+      return (this.adName || '').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     },
   },
-  mounted() {
-    this.fetchPosts(true)
-  },
+  mounted() { this.fetch(true) },
   watch: {
-    adId() {
-      this.posts = []
-      this.offset = 0
-      this.fetchPosts(true)
-    },
+    adId() { this.posts = []; this.offset = 0; this.fetch(true) },
   },
   methods: {
-    async fetchPosts(reset = false) {
-      if (reset) {
-        this.loading = true
-        this.offset = 0
-      } else {
-        this.loadingMore = true
-      }
-
+    async fetch(reset = false) {
+      reset ? (this.loading = true, this.offset = 0) : (this.loadingMore = true)
       try {
-        const res = await this.$api.get(`/categories/ads/${this.adId}/posts`, {
-          params: { limit: this.LIMIT, offset: this.offset },
+        const { data } = await this.$api.get(`/categories/ads/${this.adId}/posts`, {
+          params: { limit: 12, offset: this.offset },
         })
-        const data = res.data || []
-        if (reset) {
-          this.posts = data
-        } else {
-          this.posts = [...this.posts, ...data]
-        }
-        this.hasMore = data.length === this.LIMIT
+        this.posts = reset ? data : [...this.posts, ...data]
+        this.hasMore = data.length === 12
         this.offset += data.length
-      } catch {
-        // silent
-      } finally {
-        this.loading = false
-        this.loadingMore = false
-      }
+      } catch { /* silent */ }
+      finally { this.loading = false; this.loadingMore = false }
     },
-    loadMore() {
-      this.fetchPosts(false)
-    },
-    openAt(i) {
-      this.current = i
-      this.dialog = true
-    },
-    prev() {
-      if (this.current > 0) this.current--
-    },
-    next() {
-      if (this.current < this.posts.length - 1) this.current++
-    },
-    postCaption(post) {
+    loadMore() { this.fetch(false) },
+    openAt(i) { this.current = i; this.dialog = true },
+    prev() { if (this.current > 0) this.current-- },
+    next() { if (this.current < this.posts.length - 1) this.current++ },
+    caption(post) {
       if (!post?.meta) return ''
       try {
         const m = typeof post.meta === 'string' ? JSON.parse(post.meta) : post.meta
         return m?.caption || ''
-      } catch {
-        return ''
-      }
+      } catch { return '' }
     },
-    formatDate(date) {
-      if (!date) return ''
-      return new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+    formatDate(d) {
+      if (!d) return ''
+      return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
     },
   },
 }
 </script>
 
 <style scoped>
-.photo-feed__loading,
-.photo-feed__empty {
+.pf__loading,
+.pf__empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   padding: 32px 0;
   color: #94a3b8;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
-.photo-feed__grid {
+.pf__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
 }
 
-.photo-feed__item {
+.pf__cell {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
@@ -172,7 +151,7 @@ export default {
   background: #f1f5f9;
 }
 
-.photo-feed__img {
+.pf__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -180,103 +159,121 @@ export default {
   transition: transform 0.2s;
 }
 
-.photo-feed__item:hover .photo-feed__img {
-  transform: scale(1.04);
-}
+.pf__cell:hover .pf__img { transform: scale(1.04); }
 
-.photo-feed__overlay {
+.pf__badge {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  opacity: 0;
-  transition: opacity 0.2s;
+  color: #fff;
 }
 
-.photo-feed__item:hover .photo-feed__overlay {
-  opacity: 1;
-}
-
-.photo-feed__load-more {
+.pf__more {
   display: flex;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
-.photo-feed__lightbox {
+/* Lightbox */
+.pf__lb {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
+  background: rgba(0,0,0,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  padding: 16px;
 }
 
-.photo-feed__lightbox-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
+.pf__lb-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.photo-feed__lightbox-content {
+.pf__lb-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 600px;
-  padding: 0 8px;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.photo-feed__lightbox-inner {
+.pf__lb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pf__lb-meta {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #000;
 }
 
-.photo-feed__lightbox-img {
-  width: 100%;
-  max-height: 70vh;
-  object-fit: contain;
-  display: block;
-}
-
-.photo-feed__lightbox-caption {
-  width: 100%;
-  background: #fff;
-  padding: 12px 16px;
-}
-
-.photo-feed__lightbox-title {
-  margin: 0 0 4px;
+.pf__lb-name {
+  font-size: 0.88rem;
   font-weight: 700;
-  font-size: 0.9rem;
   color: #0f172a;
+  line-height: 1.2;
 }
 
-.photo-feed__lightbox-desc {
-  margin: 0 0 4px;
-  font-size: 0.85rem;
-  color: #334155;
-  white-space: pre-line;
-}
-
-.photo-feed__lightbox-date {
-  margin: 0;
+.pf__lb-date {
   font-size: 0.75rem;
   color: #94a3b8;
 }
 
-.photo-feed__nav {
-  flex-shrink: 0;
+.pf__lb-img {
+  width: 100%;
+  max-height: 55vh;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
+.pf__lb-caption {
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  line-height: 1.5;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pf__lb-caption-name {
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.pf__lb-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pf__lb-count {
+  font-size: 0.8rem;
+  color: #64748b;
 }
 </style>

@@ -1,49 +1,48 @@
 <template>
-  <q-page class="mp-page">
+  <q-page class="mp">
     <div class="mp-header">
-      <q-btn flat round icon="arrow_back" @click="$router.back()" />
-      <h1 class="mp-header__title">Fotos do perfil</h1>
-      <q-btn flat round icon="add_a_photo" @click="triggerUpload" />
+      <q-btn flat round dense icon="arrow_back" color="grey-8" @click="$router.back()" />
+      <span class="mp-header__title">Posts</span>
+      <q-btn unelevated round dense icon="add_a_photo" color="primary" @click="$refs.fileInput.click()" />
     </div>
 
-    <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="onFilesSelected" />
+    <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="onFiles" />
 
-    <!-- Upload preview queue -->
-    <div v-if="uploadQueue.length" class="mp-queue">
-      <div v-for="(item, i) in uploadQueue" :key="i" class="mp-queue__item">
+    <!-- Fila de upload -->
+    <div v-if="queue.length" class="mp-queue">
+      <div v-for="(item, i) in queue" :key="i" class="mp-queue__item">
         <img :src="item.preview" class="mp-queue__img" />
-        <div class="mp-queue__info">
+        <div class="mp-queue__body">
           <q-input
             v-model="item.caption"
             dense
-            filled
+            outlined
             label="Legenda"
+            type="textarea"
             autogrow
-            class="mp-queue__caption"
+            class="mp-queue__input"
           />
           <div class="mp-queue__actions">
-            <q-btn flat no-caps dense color="negative" label="Remover" @click="removeFromQueue(i)" />
-            <q-btn no-caps dense unelevated color="primary" label="Publicar" :loading="item.loading" @click="uploadPost(i)" />
+            <q-btn flat no-caps dense color="negative" label="Remover" size="sm" @click="queue.splice(i, 1)" />
+            <q-btn unelevated no-caps dense color="primary" label="Publicar" size="sm" :loading="item.loading" @click="publish(i)" />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Existing posts grid -->
+    <!-- Grid de posts -->
     <div v-if="loading" class="mp-loading">
       <q-spinner color="primary" size="32px" />
     </div>
-
-    <div v-else-if="!posts.length && !uploadQueue.length" class="mp-empty">
+    <div v-else-if="!posts.length && !queue.length" class="mp-empty">
       <q-icon name="photo_library" size="56px" color="grey-4" />
-      <p>Nenhuma foto publicada. Toque em <b>+</b> para adicionar.</p>
+      <p>Nenhum post. Toque em <q-icon name="add_a_photo" size="16px" /> para publicar.</p>
     </div>
-
     <div v-else class="mp-grid">
-      <div v-for="post in posts" :key="post.id" class="mp-grid__item" @click="openEdit(post)">
-        <img :src="post.link" :alt="postCaption(post)" loading="lazy" class="mp-grid__img" />
-        <div class="mp-grid__overlay">
-          <q-icon name="edit" size="20px" color="white" />
+      <div v-for="post in posts" :key="post.id" class="mp-cell" @click="openEdit(post)">
+        <img :src="post.link" class="mp-cell__img" loading="lazy" />
+        <div v-if="caption(post)" class="mp-cell__badge">
+          <q-icon name="chat_bubble" size="11px" />
         </div>
       </div>
     </div>
@@ -52,26 +51,18 @@
       <q-btn flat no-caps color="primary" label="Ver mais" :loading="loadingMore" @click="loadMore" />
     </div>
 
-    <!-- Edit dialog -->
+    <!-- Modal editar -->
     <q-dialog v-model="editDialog">
-      <q-card class="mp-edit-card">
-        <q-card-section class="mp-edit-card__img-wrap">
-          <img :src="editPost.link" class="mp-edit-card__img" />
+      <q-card class="mp-edit">
+        <img :src="editPost.link" class="mp-edit__img" />
+        <q-card-section class="q-pt-sm q-pb-sm">
+          <q-input v-model="editCaption" outlined label="Legenda" type="textarea" autogrow />
         </q-card-section>
-        <q-card-section>
-          <q-input
-            v-model="editCaption"
-            filled
-            label="Legenda"
-            autogrow
-            type="textarea"
-          />
-        </q-card-section>
-        <q-card-actions align="between">
-          <q-btn flat no-caps color="negative" label="Excluir" :loading="deleting" @click="deletePost" />
-          <div class="row gap-2">
+        <q-card-actions class="q-pt-none" align="between">
+          <q-btn flat no-caps color="negative" label="Excluir" :loading="deleting" @click="remove" />
+          <div class="row q-gutter-sm">
             <q-btn flat no-caps label="Cancelar" @click="editDialog = false" />
-            <q-btn no-caps unelevated color="primary" label="Salvar" :loading="saving" @click="saveEdit" />
+            <q-btn unelevated no-caps color="primary" label="Salvar" :loading="saving" @click="save" />
           </div>
         </q-card-actions>
       </q-card>
@@ -90,7 +81,7 @@ export default {
       loadingMore: ref(false),
       hasMore: ref(false),
       offset: ref(0),
-      uploadQueue: ref([]),
+      queue: ref([]),
       editDialog: ref(false),
       editPost: ref({}),
       editCaption: ref(''),
@@ -99,70 +90,65 @@ export default {
     }
   },
   computed: {
-    adId() {
-      return this.$route.params.id
-    },
+    adId() { return this.$route.params.id },
   },
-  mounted() {
-    this.fetchPosts(true)
-  },
+  mounted() { this.fetchPosts(true) },
   methods: {
     async fetchPosts(reset = false) {
-      if (reset) { this.loading = true; this.offset = 0 }
-      else this.loadingMore = true
-
+      reset ? (this.loading = true, this.offset = 0) : (this.loadingMore = true)
       try {
-        const res = await this.$api.get(`/categories/ads/${this.adId}/posts`, {
+        const { data } = await this.$api.get(`/categories/ads/${this.adId}/posts`, {
           params: { limit: 12, offset: this.offset },
         })
-        const data = res.data || []
         this.posts = reset ? data : [...this.posts, ...data]
         this.hasMore = data.length === 12
         this.offset += data.length
-      } catch (e) {
-        this.$q.notify({ color: 'negative', position: 'top', message: 'Erro ao carregar fotos' })
+      } catch {
+        this.$q.notify({ color: 'negative', position: 'top', message: 'Erro ao carregar posts' })
       } finally {
         this.loading = false
         this.loadingMore = false
       }
     },
     loadMore() { this.fetchPosts(false) },
-    triggerUpload() { this.$refs.fileInput.click() },
-    onFilesSelected(e) {
-      const files = Array.from(e.target.files || [])
-      files.forEach((file) => {
+    onFiles(e) {
+      Array.from(e.target.files || []).forEach(file => {
         const reader = new FileReader()
-        reader.onload = (ev) => {
-          this.uploadQueue.push({ file, preview: ev.target.result, caption: '', loading: false })
-        }
+        reader.onload = ev => this.queue.push({ file, preview: ev.target.result, caption: '', loading: false })
         reader.readAsDataURL(file)
       })
       e.target.value = ''
     },
-    removeFromQueue(i) { this.uploadQueue.splice(i, 1) },
-    async uploadPost(i) {
-      const item = this.uploadQueue[i]
+    async publish(i) {
+      const item = this.queue[i]
       item.loading = true
-
       const form = new FormData()
       form.append('file', item.file)
-
       try {
-        const meta = item.caption ? JSON.stringify({ caption: item.caption }) : null
-        const params = meta ? `?meta=${encodeURIComponent(meta)}` : ''
-        await this.$api.post(`/categories/ads/${this.adId}/files/post${params}`, form, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-        this.$q.notify({ color: 'secondary', position: 'top', message: 'Foto publicada!' })
-        this.uploadQueue.splice(i, 1)
+        // Upload the file with type=post
+        const uploadRes = await this.$api.post(
+          `/categories/ads/${this.adId}/files/post`,
+          form,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        )
+        // Save caption via update if provided
+        if (item.caption.trim() && uploadRes.data?.id) {
+          await this.$api.post(`/categories/ads/files/${uploadRes.data.id}`, {
+            title: null,
+            subtitle: null,
+            label: null,
+            meta: { caption: item.caption.trim() },
+          })
+        }
+        this.$q.notify({ color: 'secondary', position: 'top', message: 'Post publicado!' })
+        this.queue.splice(i, 1)
         this.fetchPosts(true)
       } catch (e) {
-        const msg = e.response?.data?.message || 'Erro ao publicar'
-        this.$q.notify({ color: 'negative', position: 'top', message: msg })
+        this.$q.notify({ color: 'negative', position: 'top', message: e.response?.data?.message || 'Erro ao publicar' })
         item.loading = false
       }
     },
-    postCaption(post) {
+    caption(post) {
       if (!post?.meta) return ''
       try {
         const m = typeof post.meta === 'string' ? JSON.parse(post.meta) : post.meta
@@ -171,10 +157,10 @@ export default {
     },
     openEdit(post) {
       this.editPost = post
-      this.editCaption = this.postCaption(post)
+      this.editCaption = this.caption(post)
       this.editDialog = true
     },
-    async saveEdit() {
+    async save() {
       this.saving = true
       try {
         await this.$api.post(`/categories/ads/files/${this.editPost.id}`, {
@@ -186,31 +172,21 @@ export default {
         this.$q.notify({ color: 'secondary', position: 'top', message: 'Salvo!' })
         this.editDialog = false
         this.fetchPosts(true)
-      } catch (e) {
-        const msg = e.response?.data?.message || 'Erro ao salvar'
-        this.$q.notify({ color: 'negative', position: 'top', message: msg })
-      } finally {
-        this.saving = false
-      }
+      } catch {
+        this.$q.notify({ color: 'negative', position: 'top', message: 'Erro ao salvar' })
+      } finally { this.saving = false }
     },
-    async deletePost() {
-      this.$q.dialog({
-        title: 'Excluir foto',
-        message: 'Tem certeza que deseja excluir esta foto?',
-        cancel: true,
-        persistent: true,
-      }).onOk(async () => {
+    remove() {
+      this.$q.dialog({ title: 'Excluir post', message: 'Tem certeza?', cancel: true }).onOk(async () => {
         this.deleting = true
         try {
           await this.$api.delete(`/categories/ads/files/${this.editPost.id}`)
-          this.$q.notify({ color: 'secondary', position: 'top', message: 'Foto excluída' })
+          this.$q.notify({ color: 'secondary', position: 'top', message: 'Post excluído' })
           this.editDialog = false
           this.fetchPosts(true)
         } catch {
           this.$q.notify({ color: 'negative', position: 'top', message: 'Erro ao excluir' })
-        } finally {
-          this.deleting = false
-        }
+        } finally { this.deleting = false }
       })
     },
   },
@@ -218,59 +194,55 @@ export default {
 </script>
 
 <style scoped>
-.mp-page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 0 0 40px;
-}
+.mp { max-width: 600px; margin: 0 auto; padding-bottom: 40px; }
 
 .mp-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 8px 4px;
+  padding: 8px 12px;
   position: sticky;
   top: 0;
   background: #fff;
   z-index: 10;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .mp-header__title {
-  margin: 0;
   font-size: 1rem;
   font-weight: 700;
+  color: #0f172a;
 }
 
 .mp-queue {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px 12px 0;
+  gap: 10px;
+  padding: 12px;
 }
 
 .mp-queue__item {
   display: flex;
   gap: 12px;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
 }
 
 .mp-queue__img {
-  width: 96px;
-  height: 96px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   flex-shrink: 0;
 }
 
-.mp-queue__info {
+.mp-queue__body {
   flex: 1;
-  padding: 8px 8px 8px 0;
+  padding: 10px 10px 10px 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .mp-queue__actions {
@@ -279,27 +251,24 @@ export default {
   gap: 6px;
 }
 
-.mp-loading,
-.mp-empty {
+.mp-loading, .mp-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   padding: 48px 16px;
   color: #94a3b8;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .mp-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
-  margin-top: 2px;
 }
 
-.mp-grid__item {
+.mp-cell {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
@@ -307,7 +276,7 @@ export default {
   background: #f1f5f9;
 }
 
-.mp-grid__img {
+.mp-cell__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -315,50 +284,33 @@ export default {
   transition: transform 0.2s;
 }
 
-.mp-grid__item:hover .mp-grid__img {
-  transform: scale(1.04);
-}
+.mp-cell:hover .mp-cell__img { transform: scale(1.04); }
 
-.mp-grid__overlay {
+.mp-cell__badge {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
+  color: #fff;
 }
 
-.mp-grid__item:hover .mp-grid__overlay {
-  opacity: 1;
-}
+.mp-more { display: flex; justify-content: center; margin-top: 12px; }
 
-.mp-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-}
+.mp-edit { width: 100%; max-width: 480px; border-radius: 12px; overflow: hidden; }
 
-.mp-edit-card {
+.mp-edit__img {
   width: 100%;
-  max-width: 480px;
-  border-radius: 12px;
-}
-
-.mp-edit-card__img-wrap {
-  padding: 0;
-}
-
-.mp-edit-card__img {
-  width: 100%;
-  max-height: 300px;
+  max-height: 280px;
   object-fit: contain;
   background: #000;
   display: block;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 </style>

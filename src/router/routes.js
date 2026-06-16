@@ -114,6 +114,10 @@ const routes = [
 
       },
       {
+        path: '/posts/:id',
+        component: () => import('pages/ManagePosts.vue')
+      },
+      {
         path: '/ecommerce/:id',
        component: () => import('pages/EditEcommerce.vue')
 

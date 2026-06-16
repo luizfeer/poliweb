@@ -94,6 +94,16 @@
       <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
     </div>
 
+
+    <!-- Feed de fotos estilo Instagram -->
+    <div class="ads-section">
+      <div class="ads-card-header">
+        <h2 class="ads-card-title">Fotos</h2>
+        <q-btn v-if="admin" flat no-caps dense color="primary" icon="settings" label="Gerenciar" size="sm" :to="`/posts/${adsComponent.id}`" />
+      </div>
+      <photo-feed :ad-id="adsComponent.id" />
+    </div>
+
     <!-- Descrição -->
     <div class="ads-section" v-if="adsComponent.description">
       <div class="ads-card">
@@ -815,6 +825,7 @@ import PreviewEcommerce from 'components/PreviewEcommerce'
 import AppBottomSheet from 'components/AppBottomSheet'
 import EditCategoriesModal from 'components/EditCategoriesModal'
 import PostarMediaModal from 'components/PostarMediaModal'
+import PhotoFeed from 'components/PhotoFeed'
 import {
   formatOpeningHours,
   getOpeningStatus,
@@ -833,7 +844,8 @@ export default {
     PreviewEcommerce,
     AppBottomSheet,
     EditCategoriesModal,
-    PostarMediaModal
+    PostarMediaModal,
+    PhotoFeed
     // Lightgallery,
   },
   props:{

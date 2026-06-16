@@ -251,7 +251,7 @@ export default defineComponent({
             } else {
                 const setFromCommerce = await this.trySetCityFromCommercePage()
                 if (!setFromCommerce) {
-                    const setFromGeo = await this.trySetCityFromGeolocation()
+                    const setFromGeo = await this.trySetCityFromIp()
                     if (!setFromGeo) {
                         this.showCityModal = true
                     }
@@ -283,26 +283,11 @@ export default defineComponent({
                 return v.toString(16);
             });
         },
-        async trySetCityFromGeolocation() {
-            if (typeof navigator === 'undefined' || !navigator.geolocation) return false
+        async trySetCityFromIp() {
             try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        timeout: 8000,
-                        maximumAge: 300000,
-                    })
-                })
-                const { latitude, longitude } = position.coords
-                const res = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=pt-BR`,
-                    { headers: { 'Accept-Language': 'pt-BR' } }
-                )
+                const res = await fetch('https://ipinfo.io/json')
                 const data = await res.json()
-                const cityName =
-                    data?.address?.city ||
-                    data?.address?.town ||
-                    data?.address?.village ||
-                    data?.address?.municipality
+                const cityName = data?.city
                 if (!cityName) return false
                 const { citysData } = await import('src/js/citys')
                 const n = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()

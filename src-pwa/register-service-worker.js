@@ -1,5 +1,15 @@
 import { register } from 'register-service-worker'
 import { Notify } from 'quasar'
+
+let refreshing = false
+
+if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return
+    refreshing = true
+    window.location.reload()
+  })
+}
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
@@ -34,8 +44,12 @@ if (process.env.DEV) {
     // console.log('New content is downloading.')
   },
 
-  updated (/* registration */) {
+  updated (registration) {
     if (process.env.DEV) return
+
+    if (registration?.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+    }
 
     Notify.create({
       message: 'Nova Atualizacao Disponivel!',
@@ -51,7 +65,6 @@ if (process.env.DEV) {
         }
       ]
     })
-    console.log('New content is available; please refresh.')
   },
 
   offline () {

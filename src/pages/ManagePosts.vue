@@ -176,18 +176,18 @@ export default {
         this.$q.notify({ color: 'negative', position: 'top', message: 'Erro ao salvar' })
       } finally { this.saving = false }
     },
-    remove() {
-      this.$q.dialog({ title: 'Excluir post', message: 'Tem certeza?', cancel: true }).onOk(async () => {
-        this.deleting = true
-        try {
-          await this.$api.delete(`/categories/ads/files/${this.editPost.id}`)
-          this.$q.notify({ color: 'secondary', position: 'top', message: 'Post excluído' })
-          this.editDialog = false
-          this.fetchPosts(true)
-        } catch {
-          this.$q.notify({ color: 'negative', position: 'top', message: 'Erro ao excluir' })
-        } finally { this.deleting = false }
-      })
+    async remove() {
+      if (!window.confirm('Excluir este post?')) return
+      this.deleting = true
+      try {
+        await this.$api.delete(`/categories/ads/files/${this.editPost.id}`)
+        this.$q.notify({ color: 'secondary', position: 'top', message: 'Post excluído' })
+        this.editDialog = false
+        this.fetchPosts(true)
+      } catch (e) {
+        console.error('delete error', e?.response?.status, e?.response?.data)
+        this.$q.notify({ color: 'negative', position: 'top', message: e?.response?.data?.message || 'Erro ao excluir' })
+      } finally { this.deleting = false }
     },
   },
 }

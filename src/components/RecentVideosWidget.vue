@@ -246,7 +246,7 @@ export default {
     resolveUrl(url) {
       if (!url || typeof url !== 'string') return url
       if (url.startsWith('http://') || url.startsWith('https://')) return url
-      const base = this.$api?.defaults?.baseURL || process.env.API_URL || 'https://apiv3.poliwebapp.com.br'
+      const base = this.$api?.defaults?.baseURL || process.env.API_URL || 'https://apiv4.poliwebapp.com.br'
       const baseClean = base.replace(/\/$/, '')
       const path = url.startsWith('/') ? url : `/${url}`
       return `${baseClean}${path}`

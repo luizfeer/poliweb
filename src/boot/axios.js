@@ -13,7 +13,7 @@ const baseURL = process.env.DEV
   : (
       process.env.SERVER
         ? (process.env.API_URL_SERVER || process.env.API_URL || 'http://127.0.0.1:5001')
-        : (process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv3.poliwebapp.com.br')
+        : (process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv4.poliwebapp.com.br')
     )
 
 const api = axios.create({ baseURL })

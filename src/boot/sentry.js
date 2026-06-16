@@ -8,20 +8,18 @@ export default boot(({ app, router }) => {
 
   Sentry.init({
     app,
-    dsn: process.env.SENTRY_DSN || SENTRY_DSN,
-    environment: process.env.NODE_ENV || (process.env.DEV ? 'development' : 'production'),
+    dsn: SENTRY_DSN,
+    environment: 'production',
     integrations: [
       Sentry.browserTracingIntegration({ router })
     ],
-    tracesSampleRate: process.env.DEV ? 1.0 : 0.1,
+    tracesSampleRate: 0.1,
     beforeSend(event) {
       if (event.request?.headers) {
         delete event.request.headers.Authorization
         delete event.request.headers.authorization
       }
-
       return event
     }
   })
 })
-

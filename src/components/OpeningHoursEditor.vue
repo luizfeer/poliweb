@@ -33,31 +33,59 @@
             <q-toggle v-model="dayConfig.enabled" color="primary" />
           </div>
 
-          <div v-if="dayConfig.enabled" class="fix-hours-row__inputs">
-            <q-input
-              filled
-              dense
-              type="time"
-              v-model="dayConfig.intervals[0].open"
-              label="Abre"
-              class="fix-hours-row__input"
-            />
-            <q-input
-              filled
-              dense
-              type="time"
-              v-model="dayConfig.intervals[0].close"
-              label="Fecha"
-              class="fix-hours-row__input"
-            />
-            <q-btn
-              flat
-              no-caps
-              color="primary"
-              label="Copiar para todos"
-              class="fix-hours-row__copy"
-              @click="copyDayToAll(index)"
-            />
+          <div v-if="dayConfig.enabled" class="fix-hours-row__intervals">
+            <div
+              v-for="(interval, iIdx) in dayConfig.intervals"
+              :key="iIdx"
+              class="fix-hours-row__inputs"
+            >
+              <q-input
+                filled
+                dense
+                type="time"
+                v-model="interval.open"
+                label="Abre"
+                class="fix-hours-row__input"
+              />
+              <q-input
+                filled
+                dense
+                type="time"
+                v-model="interval.close"
+                label="Fecha"
+                class="fix-hours-row__input"
+              />
+              <q-btn
+                v-if="dayConfig.intervals.length > 1"
+                flat
+                round
+                dense
+                color="negative"
+                icon="remove_circle_outline"
+                class="fix-hours-row__remove"
+                @click="removeInterval(index, iIdx)"
+              />
+            </div>
+
+            <div class="fix-hours-row__actions">
+              <q-btn
+                flat
+                no-caps
+                dense
+                color="primary"
+                icon="add"
+                label="Adicionar faixa"
+                @click="addInterval(index)"
+              />
+              <q-btn
+                flat
+                no-caps
+                color="grey-7"
+                label="Copiar para todos"
+                class="fix-hours-row__copy"
+                @click="copyDayToAll(index)"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -103,6 +131,15 @@ export default {
   methods: {
     daySummary(dayConfig) {
       return formatOpeningHours(dayConfig)
+    },
+    addInterval(dayIndex) {
+      this.openingHours[dayIndex].intervals.push({ open: '08:00', close: '18:00' })
+    },
+    removeInterval(dayIndex, intervalIndex) {
+      this.openingHours[dayIndex].intervals.splice(intervalIndex, 1)
+      if (this.openingHours[dayIndex].intervals.length === 0) {
+        this.openingHours[dayIndex].intervals.push({ open: '08:00', close: '18:00' })
+      }
     },
     copyDayToAll(index) {
       const source = this.openingHours[index]
@@ -248,16 +285,32 @@ export default {
   color: #64748b;
 }
 
-.fix-hours-row__inputs {
+.fix-hours-row__intervals {
   margin-top: 8px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fix-hours-row__inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
   gap: 10px;
+  align-items: center;
+}
+
+.fix-hours-row__remove {
+  justify-self: center;
+}
+
+.fix-hours-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
 }
 
 .fix-hours-row__copy {
-  grid-column: 1 / -1;
-  justify-self: flex-start;
+  margin-left: auto;
 }
 
 .fix-actions {

@@ -105,9 +105,9 @@ module.exports = configure(function (ctx) {
       // extractCSS: false,
 
       env: {
-        API_URL: process.env.API_URL || 'https://apiv3.poliwebapp.com.br',
+        API_URL: process.env.API_URL || 'https://apiv4.poliwebapp.com.br',
         API_URL_LOCAL: process.env.API_URL_LOCAL || 'http://127.0.0.1:5001',
-        API_URL_BROWSER: process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv3.poliwebapp.com.br',
+        API_URL_BROWSER: process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv4.poliwebapp.com.br',
         API_URL_SERVER: process.env.API_URL_SERVER || process.env.API_URL_LOCAL || 'http://127.0.0.1:5001',
         PUBLIC_SITE_URL: process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br',
         SEO_SITE_URL: process.env.SEO_SITE_URL || 'https://ssr.poliwebapp.com.br',

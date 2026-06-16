@@ -107,6 +107,7 @@ export default {
         this.posts = reset ? data : [...this.posts, ...data]
         this.hasMore = data.length === 12
         this.offset += data.length
+        if (reset) this.$emit('loaded', this.posts.length)
       } catch { /* silent */ }
       finally { this.loading = false; this.loadingMore = false }
     },

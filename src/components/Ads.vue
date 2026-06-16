@@ -58,9 +58,9 @@
 
 
     <!-- Feed de posts estilo Instagram -->
-    <div class="ads-section">
+    <div class="ads-section" v-if="hasPosts">
       <h2 class="ads-card-title">Posts</h2>
-      <photo-feed :ad-id="adsComponent.id" :ad-name="adsComponent.name" :ad-logo="pathImg()" />
+      <photo-feed :ad-id="adsComponent.id" :ad-name="adsComponent.name" :ad-logo="pathImg()" @loaded="onPostsLoaded" />
     </div>
 
     <!-- Descrição -->
@@ -884,6 +884,7 @@ export default {
       galleryUploadResults: [],
       galleryUploading: false,
       storyOpen: false,
+      hasPosts: false,
       storyIndex: 0,
       storyProgress: 0,
       storyPaused: false,
@@ -1365,6 +1366,7 @@ export default {
       openStory() {
         this.openStoryAt(0)
       },
+      onPostsLoaded(count) { this.hasPosts = count > 0 },
       prefetchStoryItem(index) {
         const item = this.mediaItems[index]
         if (!item) return

@@ -122,6 +122,21 @@ module.exports = configure(function (ctx) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: [ 'js', 'vue' ] }])
       },
+
+      extendWebpack (cfg) {
+        if (ctx.dev || !cfg.optimization?.minimizer) return
+
+        cfg.optimization.minimizer.forEach((minimizer) => {
+          const options = minimizer.options?.minimizer?.options || minimizer.options?.terserOptions
+          if (!options) return
+
+          options.compress = {
+            ...(options.compress || {}),
+            drop_console: true,
+            drop_debugger: true
+          }
+        })
+      },
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer

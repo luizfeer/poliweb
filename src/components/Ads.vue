@@ -1365,12 +1365,27 @@ export default {
       openStory() {
         this.openStoryAt(0)
       },
-      openStoryAt(index) {
+      prefetchStoryItem(index) {
+        const item = this.mediaItems[index]
+        if (!item) return
+        if (item.type === 'photo' && item.src) {
+          const img = new Image()
+          img.src = item.src
+        } else if (item.type === 'video' && item.link) {
+          const link = document.createElement('link')
+          link.rel = 'prefetch'
+          link.as = 'video'
+          link.href = item.link
+          document.head.appendChild(link)
+        }
+      },
+            openStoryAt(index) {
         this.clearStoryPhotoTimer()
         this.storyIndex = Math.max(0, Math.min(index, this.mediaItems.length - 1))
         this.storyProgress = 0
         this.storyPaused = false
         this.storyOpen = true
+        this.prefetchStoryItem(this.storyIndex + 1)
         this.$nextTick(() => {
           const item = this.mediaItems[this.storyIndex]
           if (item?.type === 'video') {
@@ -1418,6 +1433,7 @@ export default {
           this.storyIndex++
           this.storyProgress = 0
           this.storyPaused = false
+          this.prefetchStoryItem(this.storyIndex + 1)
           this.$nextTick(() => {
             const item = this.mediaItems[this.storyIndex]
             if (item?.type === 'video') {

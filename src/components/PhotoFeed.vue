@@ -111,9 +111,29 @@ export default {
       finally { this.loading = false; this.loadingMore = false }
     },
     loadMore() { this.fetch(false) },
-    openAt(i) { this.current = i; this.dialog = true },
-    prev() { if (this.current > 0) this.current-- },
-    next() { if (this.current < this.posts.length - 1) this.current++ },
+    prefetch(i) {
+      const post = this.posts[i]
+      if (!post?.link) return
+      const img = new Image()
+      img.src = post.link
+    },
+    openAt(i) {
+      this.current = i
+      this.dialog = true
+      this.prefetch(i + 1)
+    },
+    prev() {
+      if (this.current > 0) {
+        this.current--
+        this.prefetch(this.current - 1)
+      }
+    },
+    next() {
+      if (this.current < this.posts.length - 1) {
+        this.current++
+        this.prefetch(this.current + 1)
+      }
+    },
     caption(post) {
       if (!post?.meta) return ''
       try {

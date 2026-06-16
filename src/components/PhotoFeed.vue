@@ -35,7 +35,10 @@
         <div class="pf__lb-card">
           <!-- Header -->
           <div class="pf__lb-header">
-            <div class="pf__lb-avatar">{{ initials }}</div>
+            <div class="pf__lb-avatar">
+              <img v-if="adLogo" :src="adLogo" class="pf__lb-avatar-img" :alt="adName" />
+              <span v-else>{{ initials }}</span>
+            </div>
             <div class="pf__lb-meta">
               <span class="pf__lb-name">{{ adName }}</span>
               <span class="pf__lb-date">{{ formatDate(currentPost.createdAt) }}</span>
@@ -71,6 +74,7 @@ export default {
   props: {
     adId: { type: [Number, String], required: true },
     adName: { type: String, default: '' },
+    adLogo: { type: String, default: '' },
   },
   setup() {
     return {
@@ -209,6 +213,13 @@ export default {
   gap: 10px;
   padding: 10px 12px;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.pf__lb-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .pf__lb-avatar {

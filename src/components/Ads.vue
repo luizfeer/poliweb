@@ -60,7 +60,7 @@
     <!-- Feed de posts estilo Instagram -->
     <div class="ads-section">
       <h2 class="ads-card-title">Posts</h2>
-      <photo-feed :ad-id="adsComponent.id" :ad-name="adsComponent.name" />
+      <photo-feed :ad-id="adsComponent.id" :ad-name="adsComponent.name" :ad-logo="pathImg()" />
     </div>
 
     <!-- Descrição -->
@@ -274,8 +274,6 @@
           </div>
           <q-icon name="chevron_right" color="grey-5" size="20px" />
         </button>
-
-        <div class="admin-divider" />
 
         <div class="admin-divider" />
 

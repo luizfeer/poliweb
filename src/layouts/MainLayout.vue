@@ -251,7 +251,10 @@ export default defineComponent({
             } else {
                 const setFromCommerce = await this.trySetCityFromCommercePage()
                 if (!setFromCommerce) {
-                    this.showCityModal = true
+                    const setFromGeo = await this.trySetCityFromGeolocation()
+                    if (!setFromGeo) {
+                        this.showCityModal = true
+                    }
                 }
             }
             if (admin) {
@@ -279,6 +282,43 @@ export default defineComponent({
                     v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
+        },
+        async trySetCityFromGeolocation() {
+            if (typeof navigator === 'undefined' || !navigator.geolocation) return false
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        timeout: 8000,
+                        maximumAge: 300000,
+                    })
+                })
+                const { latitude, longitude } = position.coords
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=pt-BR`,
+                    { headers: { 'Accept-Language': 'pt-BR' } }
+                )
+                const data = await res.json()
+                const cityName =
+                    data?.address?.city ||
+                    data?.address?.town ||
+                    data?.address?.village ||
+                    data?.address?.municipality
+                if (!cityName) return false
+                const { citysData } = await import('src/js/citys')
+                const n = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()
+                const nCity = n(cityName)
+                const city =
+                    citysData.find((c) => n(c.city) === nCity) ||
+                    citysData.find((c) => n(c.city).includes(nCity) || nCity.includes(n(c.city)))
+                if (!city) return false
+                localStorage.setItem('localization', JSON.stringify(city))
+                this.localization = city
+                this.$store.dispatch('localization/setLocalization', city)
+                await this.getData(city)
+                return true
+            } catch {
+                return false
+            }
         },
         async trySetCityFromCommercePage() {
             const path = this.$route?.path || ''

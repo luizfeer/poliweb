@@ -16,6 +16,16 @@ const baseURL = process.env.DEV
         : (process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv4.poliwebapp.com.br')
     )
 
+
+const baseURLSource = process.env.DEV
+  ? (process.env.API_URL_LOCAL ? 'API_URL_LOCAL' : process.env.API_URL_SERVER ? 'API_URL_SERVER' : 'fallback-dev')
+  : process.env.SERVER
+    ? (process.env.API_URL_SERVER ? 'API_URL_SERVER' : process.env.API_URL ? 'API_URL' : 'fallback-server')
+    : (process.env.API_URL_BROWSER ? 'API_URL_BROWSER' : process.env.API_URL ? 'API_URL' : 'fallback-browser')
+
+if (typeof window !== 'undefined') {
+  console.info('[API] baseURL:', baseURL, '| source:', baseURLSource)
+}
 const api = axios.create({ baseURL })
 const TOKEN_STORAGE_KEY = 'token'
 const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken'

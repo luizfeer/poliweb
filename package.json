@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@sentry/vue": "^10.58.0",
+    "@tanstack/vue-query": "^5.101.0",
     "@vueuse/rxjs": "^9.7.0",
     "axios": "^0.21.1",
     "collect.js": "^4.33.0",

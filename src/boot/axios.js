@@ -1,5 +1,6 @@
 import { boot } from 'quasar/wrappers'
 import axios from 'axios'
+import * as Sentry from '@sentry/vue'
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -86,6 +87,28 @@ const refreshAccessToken = async () => {
   persistAuthSession(data)
   return data.accessToken || data.token
 }
+
+const captureApiError = (error) => {
+  if (typeof window === 'undefined') return
+
+  const config = error.config || {}
+  const response = error.response || {}
+  const url = config.url || ''
+
+  Sentry.withScope((scope) => {
+    scope.setTag('api.status', response.status || 'network')
+    scope.setTag('api.method', String(config.method || 'GET').toUpperCase())
+    scope.setContext('api', {
+      baseURL: config.baseURL,
+      url,
+      method: config.method,
+      status: response.status,
+      statusText: response.statusText
+    })
+
+    Sentry.captureException(error)
+  })
+}
 // const apiCep = axios.create({ baseURL: 'https://www.cepaberto.com/api/v3/nearest?' })
 export default boot(({ app, router }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
@@ -128,6 +151,7 @@ export default boot(({ app, router }) => {
         url.includes('/auth/refresh')
 
       if (status !== 401 || !originalRequest || originalRequest._retry || isAuthEndpoint) {
+        captureApiError(error)
         return Promise.reject(error)
       }
 
@@ -156,6 +180,7 @@ export default boot(({ app, router }) => {
           }, 500)
         }
 
+        captureApiError(refreshError)
         return Promise.reject(refreshError)
       }
     }

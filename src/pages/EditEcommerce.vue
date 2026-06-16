@@ -42,56 +42,36 @@
                 </div>
             </q-btn>
             <template v-if="adsComponent.files && adsComponent.files.ecommerceFiltered && (Object.keys(adsComponent.files.ecommerceFiltered).length)">
-                <div class="mb-10 " v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
-                    <div class="row">
-                        <h1 class="text-h4">{{ category[0].label.category.label }}</h1>
+                <div class="admin-ecommerce-category" v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
+                    <div class="admin-ecommerce-category-header">
+                        <h2 class="admin-ecommerce-category-title">{{ category[0].label.category.label }}</h2>
 
-                        <q-btn color="secondary" flat v-if="admin" @click="addCategory(category[0].label.category)">
-                            <div class="row items-center no-wrap">
-                                <AppIcon name="add-circle" :size="20" class="mr-2" />
-                            </div>
-                        </q-btn>
+                        <button type="button" class="admin-ecommerce-add-category" v-if="admin" @click="addCategory(category[0].label.category)">
+                            <AppIcon name="add-circle" :size="18" />
+                        </button>
                     </div>
 
-                    <div class="q-pa-md row items-start q-gutter-md">
-                        <div v-for="item in category" :key="item.id">
-                            <!-- <div class="q-gutter-md row items-start">
-                          <q-img  class="h-[90px] w-[90px] md:h-[180px] md:w-[180px] " fit="cover">
-                              <div class="absolute-bottom text-subtitle1 text-center">
-                              </div>
-                          </q-img>
-                      </div>
-                    </div> -->
-                            <q-card class="my-card">
-                                <q-img :src="item.link" style="max-height: 150px;" />
-                                <q-card-section>
-                                    <div class="row no-wrap items-center">
-                                        <div class="col text-h6 ellipsis">
-                                            <!-- {{ item.label.category.label }} -->
-                                            {{ item.title.name }}
-                                        </div>
+                    <div class="admin-ecommerce-grid">
+                        <article class="admin-ecommerce-card" v-for="item in category" :key="item.id">
+                            <div class="admin-ecommerce-card-img">
+                                <q-img :src="item.link" :ratio="1" fit="cover" />
+                            </div>
+                            <div class="admin-ecommerce-card-body">
+                                <h3 class="admin-ecommerce-card-title">{{ item.title.name }}</h3>
+                                <div class="admin-ecommerce-card-desc" v-if="item.title.description" v-html="safeHtml(item.title.description)"></div>
+                                <div class="admin-ecommerce-card-footer">
+                                    <p class="admin-ecommerce-card-price">R$ {{ item.subtitle.value }}</p>
+                                    <div class="admin-ecommerce-card-actions">
+                                        <button type="button" class="admin-ecommerce-icon-btn danger" title="Apagar" @click="openConfirmDelete(item)">
+                                            <AppIcon name="delete" :size="18" />
+                                        </button>
+                                        <button type="button" class="admin-ecommerce-icon-btn" title="Editar" @click="openConfirmEdit(item)">
+                                            <AppIcon name="edit" :size="18" />
+                                        </button>
                                     </div>
-                                    <!-- <q-rating v-model="stars" :max="5" size="32px" /> -->
-                                </q-card-section>
-                                <q-card-section class="q-pt-none">
-                                    <div class="text-subtitle1">
-                                        R$ {{ item.subtitle.value }}
-                                    </div>
-                                    <div class="text-caption text-grey">
-                                        {{ item.title.description }}
-                                    </div>
-                                </q-card-section>
-                                <q-separator />
-                                <q-card-actions>
-                                    <!-- <q-btn flat round icon="event" />
-                        <q-btn flat color="primary">
-                          Reserve
-                        </q-btn> -->
-                                    <q-btn push color="primary" size="xs" label="Apagar" @click="openConfirmDelete(item)" />
-                                    <q-btn push color="primary" size="xs" label="Editar" @click="openConfirmEdit(item)" />
-                                </q-card-actions>
-                            </q-card>
-                        </div>
+                                </div>
+                            </div>
+                        </article>
                     </div>
 
                 </div>
@@ -143,8 +123,18 @@
                     <div class="row">
                         <q-input filled :rules="required" ref="name" v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-4" />
                     </div>
-                    <div class="row">
-                        <q-input filled :rules="required" ref="description" v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-4" />
+                    <div class="row product-description-editor-wrap">
+                        <label class="product-description-label">Descrição do produto</label>
+                        <q-editor
+                          v-model="form.title.description"
+                          min-height="8rem"
+                          placeholder="Escreva a descrição do produto..."
+                          :toolbar="editorToolbar"
+                          class="w-full product-description-editor"
+                          :class="{ 'product-description-editor-error': descriptionError }"
+                          @update:model-value="descriptionError = false"
+                        />
+                        <div v-if="descriptionError" class="product-description-error">Campo obrigatório</div>
                     </div>
                     <div class="row">
                         <q-input filled :rules="required" ref="value" v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-4" mask="#.##" fill-mask="0" reverse-fill-mask />
@@ -154,9 +144,9 @@
                     </div>
                 </q-form>
 
-                <q-card-actions align="right">
-                    <q-btn flat label="Cancelar" color="warning" v-close-popup />
-                    <q-btn flat @click="sendGallery" label="Enviar" color="primary" />
+                <q-card-actions align="right" class="product-dialog-actions">
+                    <q-btn outline label="Cancelar" color="warning" v-close-popup />
+                    <q-btn unelevated @click="sendGallery" label="Enviar" color="primary" />
                 </q-card-actions>
             </q-card>
         </q-dialog>
@@ -190,8 +180,18 @@
                     <div class="row">
                         <q-input filled :rules="required" ref="name" v-model="form.title.name" type="text" lazy-rules label="Titulo do produto" class="w-full py-4" />
                     </div>
-                    <div class="row">
-                        <q-input filled :rules="required" ref="description" v-model="form.title.description" type="text" lazy-rules label="Descrição do produto" class="w-full py-4" />
+                    <div class="row product-description-editor-wrap">
+                        <label class="product-description-label">Descrição do produto</label>
+                        <q-editor
+                          v-model="form.title.description"
+                          min-height="8rem"
+                          placeholder="Escreva a descrição do produto..."
+                          :toolbar="editorToolbar"
+                          class="w-full product-description-editor"
+                          :class="{ 'product-description-editor-error': descriptionError }"
+                          @update:model-value="descriptionError = false"
+                        />
+                        <div v-if="descriptionError" class="product-description-error">Campo obrigatório</div>
                     </div>
                     <div class="row">
                         <q-input filled :rules="required" ref="value" v-model="form.subtitle.value" lazy-rules label="Valor do produto" class="w-full py-4" mask="#.##" fill-mask="0" reverse-fill-mask />
@@ -201,9 +201,9 @@
                     </div>
                 </q-form>
 
-                <q-card-actions align="right">
-                    <q-btn flat label="Cancelar" color="warning" v-close-popup />
-                    <q-btn flat @click="saveProduct()" label="Salvar" color="primary" />
+                <q-card-actions align="right" class="product-dialog-actions">
+                    <q-btn outline label="Cancelar" color="warning" v-close-popup />
+                    <q-btn unelevated @click="saveProduct()" label="Salvar" color="primary" />
                 </q-card-actions>
             </q-card>
         </q-dialog>
@@ -267,6 +267,13 @@ export default {
             }),
             loading: ref(true),
             confirmEdit: ref(false),
+            descriptionError: ref(false),
+            editorToolbar: ref([
+                ['bold', 'italic', 'underline'],
+                ['unordered', 'ordered'],
+                ['link'],
+                ['undo', 'redo']
+            ]),
             preview: ref(''),
             maximizedToggle: ref(true),
             admin: ref(false),
@@ -310,7 +317,7 @@ export default {
             if (!(this.adsComponent.phones||{}).length) return false
             for (let index = 0; index < this.adsComponent.phones.length; index++) {
                 const element = this.adsComponent.phones[index];
-                if (element.isWhatsapp) {
+                if (element.isWhatsapp && !element.deletedAt) {
                     return element
                 }
             }
@@ -339,11 +346,27 @@ export default {
         galleryUpload() {
             const file = this.$refs.gallery.files[0];
             this.preview = URL.createObjectURL(file);
+            this.descriptionError = false
             this.confirmGallery = true
         },
         openFile() {
             if (!this.admin) return
             this.$refs.file.click()
+        },
+        hasDescription() {
+            const value = String(this.form.title?.description || '')
+                .replace(/<[^>]*>/g, '')
+                .replace(/&nbsp;/g, ' ')
+                .trim()
+            this.descriptionError = !value
+            return !this.descriptionError
+        },
+        safeHtml(value) {
+            return String(value || '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/\son\w+="[^"]*"/gi, '')
+                .replace(/\son\w+='[^']*'/gi, '')
+                .replace(/\sjavascript:/gi, '')
         },
 
         deleteImg() {
@@ -382,10 +405,10 @@ export default {
             this.$refs.name.validate()
             this.$refs.category.validate()
             this.$refs.value.validate()
-            this.$refs.description.validate()
+            const descriptionValid = this.hasDescription()
 
-            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || this.$refs.description.hasError) {
-                $q.notify({
+            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || !descriptionValid) {
+                this.$q.notify({
                     color: 'negative',
                     message: 'Você precisa preencher todos os campos!',
                 })
@@ -438,10 +461,10 @@ export default {
             this.$refs.name.validate()
             this.$refs.category.validate()
             this.$refs.value.validate()
-            this.$refs.description.validate()
+            const descriptionValid = this.hasDescription()
 
-            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || this.$refs.description.hasError) {
-                $q.notify({
+            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || !descriptionValid) {
+                this.$q.notify({
                     color: 'negative',
                     message: 'Você precisa preencher todos os campos!',
                 })
@@ -543,6 +566,7 @@ export default {
         },
         openConfirmEdit(item) {
             this.confirmEdit = true
+            this.descriptionError = false
             this.edit = {
                 ...item,
                 preview: item.link,
@@ -595,6 +619,8 @@ export default {
                         },
                         ...response.data
                     }
+                    filtered.phones = this.filterDeleted(filtered.phones)
+                    filtered.files.logo = this.filterDeleted(filtered.files.logo)
                     filtered.files.ecommerce = this.filterDeleted(filtered.files.ecommerce)
                     filtered.files.ecommerce = this.sortAb(filtered.files.ecommerce)
                     filtered.files.ecommerceFiltered = this.filterEatchType(filtered.files.ecommerce)
@@ -647,6 +673,216 @@ export default {
 </script>
 
 <style scoped>
+.product-dialog-actions {
+    gap: 0.5rem;
+    padding: 1rem 1.25rem 1.25rem;
+}
+
+.product-dialog-actions :deep(.q-btn) {
+    min-width: 104px;
+    font-weight: 700;
+}
+
+.product-description-editor-wrap {
+    display: block;
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.product-description-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.product-description-editor {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.product-description-editor-error {
+    border-color: #c10015;
+}
+
+.product-description-error {
+    margin-top: 0.35rem;
+    color: #c10015;
+    font-size: 0.75rem;
+}
+
+.admin-ecommerce-category {
+    margin-bottom: 2.5rem;
+}
+
+.admin-ecommerce-category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.admin-ecommerce-category-title {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.15rem;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.admin-ecommerce-add-category {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #d1fae5;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #059669;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.admin-ecommerce-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.9rem;
+}
+
+@media (min-width: 640px) {
+    .admin-ecommerce-grid {
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    }
+}
+
+.admin-ecommerce-card {
+    overflow: hidden;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-ecommerce-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.admin-ecommerce-card-img {
+    aspect-ratio: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+}
+
+.admin-ecommerce-card-img :deep(.q-img__content),
+.admin-ecommerce-card-img :deep(img) {
+    object-fit: cover !important;
+    object-position: center;
+}
+
+.admin-ecommerce-card-body {
+    padding: 0.75rem;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-ecommerce-card-title {
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.admin-ecommerce-card-desc {
+    color: #6b7280;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.admin-ecommerce-card-desc :deep(p),
+.admin-ecommerce-card-desc :deep(ul),
+.admin-ecommerce-card-desc :deep(ol) {
+    margin: 0;
+}
+
+.admin-ecommerce-card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.admin-ecommerce-card-price {
+    color: #059669;
+    font-size: 1rem;
+    line-height: 1.2;
+    font-weight: 800;
+    margin: 0;
+}
+
+.admin-ecommerce-card-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.admin-ecommerce-icon-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #d1fae5;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #059669;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-ecommerce-icon-btn:hover {
+    background: #059669;
+    border-color: #059669;
+    color: white;
+}
+
+.admin-ecommerce-icon-btn.danger {
+    border-color: #fee2e2;
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.admin-ecommerce-icon-btn.danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+}
+
+.admin-ecommerce-icon-btn:active {
+    transform: scale(0.94);
+}
+
 .my-card {
     width: 100%;
     min-width: 280px;

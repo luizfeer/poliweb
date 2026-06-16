@@ -109,9 +109,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { useMeta, useQuasar } from 'quasar'
 import { api } from 'boot/axios'
+import { queryClient } from 'boot/vue-query'
 import { citysData } from 'src/js/citys'
 
 const CATEGORIES_VIEW_KEY = 'poliweb_categories_view_mode'
+const CATEGORY_ADS_STALE_TIME = 1000 * 60 * 5
 
 function normalizeCity (s) {
   return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
@@ -234,8 +236,7 @@ export default {
       if (!cityId) return ''
 
       try {
-        const res = await api.get(`/cities/${cityId}/categories?nonDeleted=true`)
-        const cats = res?.data?.categories || []
+        const cats = await store.dispatch('categories/fetchCategories', { loc: { id: cityId } })
         const found = findCategoryWithParent(cats, categoryId)
         const raw = found?.category?.name
         return raw ? String(raw).trim() : ''
@@ -244,26 +245,46 @@ export default {
       }
     }
 
+    const applyPageData = async (categoryId, list) => {
+      ads.value = (Array.isArray(list) ? list : []).filter((item) => !item.deletedAt)
+
+      const routeNm = decodeRouteName()
+      cityLabel.value = pickCityFromAds(ads.value) || store.state.localization?.current?.city || ''
+
+      let resolved = routeNm
+      if (!resolved) {
+        resolved = await resolveCategoryLabel(categoryId, '', ads.value)
+      }
+      categoryName.value = resolved || 'Comércios locais'
+    }
+
     const loadPage = async () => {
-      loading.value = true
       const categoryId = route.params.id
+      const queryKey = ['category-ads', String(categoryId)]
+      const cachedAds = queryClient.getQueryData(queryKey)
+
+      if (Array.isArray(cachedAds)) {
+        await applyPageData(categoryId, cachedAds)
+        loading.value = false
+      } else {
+        loading.value = true
+      }
+
       try {
-        const response = await api.get(`/categories/${categoryId}/ads?nonDeleted=true`)
-        const raw = response?.data?.categoryAds || []
-        ads.value = raw.filter((item) => !item.deletedAt)
-
-        const routeNm = decodeRouteName()
-        cityLabel.value = pickCityFromAds(ads.value) || store.state.localization?.current?.city || ''
-
-        let resolved = routeNm
-        if (!resolved) {
-          resolved = await resolveCategoryLabel(categoryId, '', ads.value)
-        }
-        categoryName.value = resolved || 'Comércios locais'
+        const list = await queryClient.fetchQuery({
+          queryKey,
+          staleTime: CATEGORY_ADS_STALE_TIME,
+          queryFn: async () => {
+            const response = await api.get(`/categories/${categoryId}/ads?nonDeleted=true`)
+            const raw = response?.data?.categoryAds || []
+            return Array.isArray(raw) ? raw : []
+          },
+        })
+        await applyPageData(categoryId, list)
       } catch (err) {
-        ads.value = []
+        if (!Array.isArray(cachedAds)) ads.value = []
         const msg = err?.response?.data?.message || 'Erro na conexão!'
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && !Array.isArray(cachedAds)) {
           $q.notify({
             color: 'negative',
             position: 'top',
@@ -271,7 +292,7 @@ export default {
             icon: 'report_problem'
           })
         }
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && !Array.isArray(cachedAds)) {
           router.push({ path: '/' })
         }
       } finally {

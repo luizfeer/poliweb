@@ -1,0 +1,27 @@
+import { boot } from 'quasar/wrappers'
+import * as Sentry from '@sentry/vue'
+
+const SENTRY_DSN = 'https://3ad4431af3964cc0906883485e60bdb0@o4511572791984128.ingest.us.sentry.io/4511572793753600'
+
+export default boot(({ app, router }) => {
+  if (typeof window === 'undefined') return
+
+  Sentry.init({
+    app,
+    dsn: process.env.SENTRY_DSN || SENTRY_DSN,
+    environment: process.env.NODE_ENV || (process.env.DEV ? 'development' : 'production'),
+    integrations: [
+      Sentry.browserTracingIntegration({ router })
+    ],
+    tracesSampleRate: process.env.DEV ? 1.0 : 0.1,
+    beforeSend(event) {
+      if (event.request?.headers) {
+        delete event.request.headers.Authorization
+        delete event.request.headers.authorization
+      }
+
+      return event
+    }
+  })
+})
+

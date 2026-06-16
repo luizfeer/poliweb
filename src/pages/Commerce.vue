@@ -332,7 +332,7 @@ export default {
     const filterEatchType = (arr) => {
       if (!arr) return
       const productsFiltered = []
-      const items = arr.length > 4 ? 4 : arr.length
+      const items = arr.length > 20 ? 20 : arr.length
       try {
         for (let i = 0; i < items; i++) {
           let label = false

@@ -21,10 +21,36 @@
                 <AppIcon name="share" :size="22" />
                 <span>Compartilhar</span>
             </button>
-            <button type="button" class="ecommerce-action-btn ecommerce-action-whatsapp" @click="openWhatsappChooser" title="Enviar no WhatsApp">
+            <button type="button" class="ecommerce-action-btn ecommerce-action-whatsapp" :class="{ disabled: !phoneZap }" @click="openWhatsappChooser" title="Enviar no WhatsApp">
                 <AppIcon name="whatsapp" :size="22" />
                 <span>WhatsApp</span>
             </button>
+        </div>
+
+        <div class="ecommerce-shop-tools" v-if="totalProducts && !selectedProduct">
+            <div class="ecommerce-shop-summary">
+                <span>{{ totalProducts }} produtos</span>
+                <span>{{ ecommerceCategories.length }} categorias</span>
+            </div>
+            <label class="ecommerce-search">
+                <AppIcon name="search" :size="18" class="text-gray-400" />
+                <input v-model="productSearch" type="search" placeholder="Buscar produto" />
+            </label>
+            <div class="ecommerce-category-tabs" v-if="ecommerceCategories.length > 1">
+                <button type="button" class="ecommerce-category-tab" :class="{ active: !selectedCategory }" @click="setSelectedCategory('')">
+                    Todos
+                </button>
+                <button
+                  v-for="category in ecommerceCategories"
+                  :key="category.key"
+                  type="button"
+                  class="ecommerce-category-tab"
+                  :class="{ active: selectedCategory === category.key }"
+                  @click="setSelectedCategory(category.key)"
+                >
+                    {{ category.label }}
+                </button>
+            </div>
         </div>
 
         <div class="ecommerce-actions">
@@ -79,10 +105,72 @@
     </q-dialog>
 
     <div class="ecommerce-content">
-        <template v-if="(adsComponent.files && adsComponent.files.ecommerceFiltered)">
-            <div class="ecommerce-category" v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
+        <section v-if="selectedProduct" class="product-detail">
+            <button type="button" class="product-detail-back" @click="backToStore">
+                <AppIcon name="arrow-back" :size="20" />
+                <span>Voltar para loja</span>
+            </button>
+
+            <div class="product-detail-main">
+                <div class="product-detail-media" @click="openModalImg(selectedProduct)">
+                    <q-img :src="selectedProduct.link" :ratio="1" />
+                </div>
+                <div class="product-detail-info">
+                    <p class="product-detail-category">{{ selectedProduct.label?.category?.label || 'Produto' }}</p>
+                    <h2 class="product-detail-title">{{ selectedProduct.title?.name }}</h2>
+                    <div v-if="selectedProduct.title?.description" class="product-detail-description" v-html="safeHtml(selectedProduct.title.description)"></div>
+                    <p class="product-detail-price">R$ {{ selectedProduct.subtitle?.value }}</p>
+
+                    <div class="product-detail-actions">
+                        <button type="button" class="product-buy-btn" :disabled="!phoneZap" @click="buyNow(selectedProduct)">
+                            Comprar agora
+                        </button>
+                        <button type="button" class="product-cart-btn" @click="addToCart(selectedProduct)">
+                            <AppIcon name="add-shopping-cart" :size="20" />
+                            <span>Adicionar</span>
+                            <strong v-if="selectedProduct.quantityCart > 0">{{ selectedProduct.quantityCart }}</strong>
+                        </button>
+                    </div>
+                    <p v-if="!phoneZap" class="product-detail-warning">Esta loja nao possui WhatsApp ativo para receber pedidos.</p>
+                </div>
+            </div>
+
+            <div class="product-info-panel">
+                <h3>Informacoes do produto</h3>
+                <div class="product-info-grid">
+                    <div v-for="info in selectedProductInfo" :key="info.label" class="product-info-item">
+                        <span>{{ info.label }}</span>
+                        <strong>{{ info.value }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="recommendedProducts.length" class="product-recommendations">
+                <div class="product-recommendations-header">
+                    <h3>Recomendados</h3>
+                    <button type="button" @click="backToStore">Ver todos</button>
+                </div>
+                <div class="product-recommendations-grid">
+                    <article
+                      v-for="item in recommendedProducts"
+                      :key="item.id"
+                      class="product-recommendation-card"
+                      @click="goToProduct(item)"
+                    >
+                        <q-img :src="item.link" :ratio="1" />
+                        <div>
+                            <h4>{{ item.title?.name }}</h4>
+                            <p>R$ {{ item.subtitle?.value }}</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <template v-else-if="filteredEcommerceCategories.length">
+            <div class="ecommerce-category" v-for="category in filteredEcommerceCategories" :key="categoryKey(category)">
                 <div class="ecommerce-category-header">
-                    <h2 class="ecommerce-category-title">{{ category[0].label.category.label }}</h2>
+                    <h2 class="ecommerce-category-title">{{ categoryLabel(category) }}</h2>
                     <div class="ecommerce-view-toggle">
                         <button type="button" class="ecommerce-view-btn" :class="{ active: viewMode === 'card' }" @click="setViewMode('card')" title="Cards">
                             <AppIcon name="layout-grid" :size="18" />
@@ -96,24 +184,40 @@
                     </div>
                 </div>
                 <div class="ecommerce-grid" :class="'view-' + viewMode">
-                    <div class="ecommerce-card" v-for="item in category" :key="item.id">
-                        <div class="ecommerce-card-img" @click="openModalImg(item)">
-                            <q-img :src="item.link" :ratio="1" />
+                    <div class="ecommerce-card" v-for="item in category" :key="item.id" @click="goToProduct(item)">
+                        <div class="ecommerce-card-img">
+                            <q-img :src="item.link" :ratio="1" fit="cover" />
                         </div>
                         <div class="ecommerce-card-body">
                             <h3 class="ecommerce-card-title">{{ item.title.name }}</h3>
-                            <p class="ecommerce-card-desc" v-if="item.title.description && viewMode !== 'compact'">{{ item.title.description }}</p>
-                            <p class="ecommerce-card-price">R$ {{ item.subtitle.value }}</p>
-                            <q-btn :color="item.quantityCart > 0 ? 'secondary' : 'primary'" size="sm" unelevated class="ecommerce-card-btn" @click="addToCart(item)">
-                                <q-badge v-if="item.quantityCart > 0" color="white" text-color="secondary" floating>{{ item.quantityCart }}</q-badge>
-                                <AppIcon name="add-shopping-cart" :size="16" class="mr-1" />
-                                {{ viewMode === 'compact' ? '+' : (item.quantityCart > 0 ? 'Adicionar mais' : 'Adicionar') }}
-                            </q-btn>
+                            <div class="ecommerce-card-desc" v-if="item.title.description && viewMode !== 'compact'" v-html="safeHtml(item.title.description)"></div>
+                            <div class="ecommerce-card-footer">
+                                <p class="ecommerce-card-price">R$ {{ item.subtitle.value }}</p>
+                                <button
+                                  type="button"
+                                  class="ecommerce-card-add"
+                                  :class="{ active: item.quantityCart > 0 }"
+                                  :aria-label="item.quantityCart > 0 ? 'Adicionar mais um item' : 'Adicionar ao carrinho'"
+                                  @click.stop="addToCart(item)"
+                                >
+                                    <AppIcon name="add-shopping-cart" :size="18" />
+                                    <span v-if="item.quantityCart > 0" class="ecommerce-card-qty">{{ item.quantityCart }}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </template>
+        <div v-else-if="totalProducts" class="ecommerce-empty-state">
+            <AppIcon name="search" :size="42" class="text-gray-300" />
+            <p>Nenhum produto encontrado</p>
+            <button type="button" @click="productSearch = ''; selectedCategory = ''">Limpar filtros</button>
+        </div>
+        <div v-else class="ecommerce-empty-state">
+            <AppIcon name="shopping-basket" :size="42" class="text-gray-300" />
+            <p>Esta loja ainda nao possui produtos disponiveis.</p>
+        </div>
 
         <q-btn color="grey-8" flat @click="backPage()" class="ecommerce-back">
             <AppIcon name="arrow-back" :size="20" class="mr-2" />
@@ -154,7 +258,8 @@
                         <span>Total</span>
                         <span class="cart-total-value">{{ RS(total) }}</span>
                     </div>
-                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated @click="botaoPedido()" />
+                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap" @click="botaoPedido()" />
+                    <p v-if="!phoneZap" class="cart-checkout-warning">A loja nao possui WhatsApp ativo para receber pedidos.</p>
                 </div>
             </div>
             <div v-else class="cart-empty">
@@ -176,7 +281,7 @@
 
             <q-card-actions align="right">
                 <q-btn flat label="Não" v-close-popup />
-                <a :href="`https://wa.me/55${phoneZap}?text=${pedido}`" target="_blank" class="text-green-700 font-bold p-4">SIM</a>
+                <a v-if="phoneZap" :href="`https://wa.me/55${phoneZap}?text=${pedido}`" target="_blank" class="text-green-700 font-bold p-4">SIM</a>
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -247,6 +352,8 @@ export default {
             confirmPedido: ref(false),
             rightDrawerOpen: ref(false),
             whatsappChooser: ref(false),
+            productSearch: ref(''),
+            selectedCategory: ref(''),
             preview: ref(''),
             maximizedToggle: ref(true),
             admin: ref(false),
@@ -295,21 +402,126 @@ export default {
         isMobile() {
             return this.$q.screen.lt.sm;
         },
-         phoneZap() {
-            if (!this.adsComponent?.phones?.length) return false
-            for (let index = 0; index < this.adsComponent.phones.length; index++) {
-                const element = this.adsComponent.phones[index];
-                if (element.isWhatsapp) {
-                    return element.phone.replace(/[^0-9]/g, '')
-                }
-            }
-            return false
+        activePhones() {
+            return (this.adsComponent?.phones || []).filter((phone) => !phone.deletedAt)
+        },
+        phoneZap() {
+            const whatsapp = this.activePhones.find((phone) => phone.isWhatsapp && phone.phone)
+            return whatsapp ? whatsapp.phone.replace(/[^0-9]/g, '') : false
+        },
+        ecommerceCategories() {
+            const filtered = this.adsComponent?.files?.ecommerceFiltered
+            if (!filtered) return []
+            return Object.values(filtered)
+                .filter((category) => Array.isArray(category) && category.length)
+                .map((category) => ({
+                    key: this.categoryKey(category),
+                    label: this.categoryLabel(category),
+                    items: category
+                }))
+        },
+        allProducts() {
+            return this.ecommerceCategories.flatMap((category) => category.items)
+        },
+        totalProducts() {
+            return this.ecommerceCategories.reduce((total, category) => total + category.items.length, 0)
+        },
+        selectedProduct() {
+            const productId = this.$route.params.productId
+            if (!productId) return null
+            return this.allProducts.find((item) => String(item.id) === String(productId)) || null
+        },
+        selectedProductInfo() {
+            const item = this.selectedProduct
+            if (!item) return []
+            return [
+                { label: 'Produto', value: item.title?.name || '-' },
+                { label: 'Categoria', value: item.label?.category?.label || '-' },
+                { label: 'Valor', value: item.subtitle?.value ? this.RS(Number(item.subtitle.value)) : '-' },
+                { label: 'Codigo', value: String(item.id || '-') },
+                { label: 'Loja', value: this.adsComponent?.name || '-' }
+            ]
+        },
+        recommendedProducts() {
+            const item = this.selectedProduct
+            if (!item) return []
+            const sameCategory = this.allProducts.filter((product) =>
+                product.id !== item.id &&
+                product.label?.category?.category === item.label?.category?.category
+            )
+            const fallback = this.allProducts.filter((product) => product.id !== item.id)
+            return (sameCategory.length ? sameCategory : fallback).slice(0, 6)
+        },
+        filteredEcommerceCategories() {
+            const search = this.normalizeText(this.productSearch)
+            return this.ecommerceCategories
+                .filter((category) => !this.selectedCategory || category.key === this.selectedCategory)
+                .map((category) => ({
+                    ...category,
+                    items: category.items.filter((item) => this.productMatchesSearch(item, search))
+                }))
+                .filter((category) => category.items.length)
+                .map((category) => category.items)
         },
         shareUrl() {
-            return typeof window !== 'undefined' ? `${window.location.origin}/loja/${this.$route.params.id}` : ''
+            return typeof window !== 'undefined' ? `${window.location.origin}${this.$route.fullPath}` : ''
         },
     },
     methods: {
+        categoryKey(category) {
+            return String(category?.[0]?.label?.category?.category || category?.[0]?.label?.category?.label || 'sem-categoria')
+        },
+        categoryLabel(category) {
+            return category?.[0]?.label?.category?.label || 'Produtos'
+        },
+        setSelectedCategory(categoryKey) {
+            this.selectedCategory = categoryKey
+        },
+        normalizeText(value) {
+            return String(value || '')
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/&nbsp;/g, ' ')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim()
+        },
+        safeHtml(value) {
+            return String(value || '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/\son\w+="[^"]*"/gi, '')
+                .replace(/\son\w+='[^']*'/gi, '')
+                .replace(/\sjavascript:/gi, '')
+        },
+        productMatchesSearch(item, search) {
+            if (!search) return true
+            const haystack = [
+                item?.title?.name,
+                item?.title?.description,
+                item?.label?.category?.label,
+                item?.subtitle?.value
+            ].map((value) => this.normalizeText(value)).join(' ')
+            return haystack.includes(search)
+        },
+        productRoute(item) {
+            return `/loja/${this.$route.params.id}/produto/${item.id}`
+        },
+        goToProduct(item) {
+            if (!item?.id) return
+            this.$router.push(this.productRoute(item))
+        },
+        backToStore() {
+            this.$router.push(`/loja/${this.$route.params.id}`)
+        },
+        syncProductQuantities(cartItems = this.queries.cart) {
+            const byProductId = {}
+            ;(cartItems || []).forEach((cartItem) => {
+                byProductId[String(cartItem.idProd)] = Number(cartItem.quantity || 0)
+            })
+            this.allProducts.forEach((product) => {
+                product.quantityCart = byProductId[String(product.id)] || 0
+            })
+        },
         setViewMode(mode) {
             this.viewMode = mode
             try {
@@ -363,6 +575,15 @@ export default {
             }
         },
         openWhatsappChooser() {
+            if (!this.phoneZap) {
+                this.$q.notify({
+                    color: 'warning',
+                    message: 'A loja nao possui WhatsApp ativo.',
+                    icon: 'report_problem',
+                    position: 'bottom'
+                })
+                return
+            }
             this.whatsappChooser = true
         },
         shareToWhatsappFriend() {
@@ -380,8 +601,30 @@ export default {
             this.$router.go(-1)
         },
         async botaoPedido() {
+            if (!this.phoneZap) {
+                this.$q.notify({
+                    color: 'warning',
+                    message: 'A loja nao possui WhatsApp ativo para receber pedidos.',
+                    icon: 'report_problem',
+                    position: 'bottom'
+                })
+                return
+            }
             this.pedido = await this.geraPedidoWhatsapp()
             this.confirmPedido = true
+        },
+        async buyNow(item) {
+            if (!this.phoneZap) {
+                this.$q.notify({
+                    color: 'warning',
+                    message: 'A loja nao possui WhatsApp ativo para receber pedidos.',
+                    icon: 'report_problem',
+                    position: 'bottom'
+                })
+                return
+            }
+            await this.addToCart(item)
+            await this.botaoPedido()
         },
         async geraPedidoWhatsapp() {
             let pedido = '* 🚨POLIWEB ECOMMERCE*' + '\n';
@@ -410,6 +653,7 @@ export default {
                 (items) => {
                     queryRefs.cart.value = items;
                     queryRefs.itemsError.value = null;
+                    this.syncProductQuantities(items)
                 },
                 (error) => {
                     queryRefs.itemsError.value = error;
@@ -418,13 +662,13 @@ export default {
 
         },
         async addToCart(item) {
-            item.quantityCart++
+            item.quantityCart = Number(item.quantityCart || 0) + 1
             const quantityCount = await db.cart.where({
                 ad: this.idAd,
                 idProd: item.id
             }).first();
             let quantity = quantityCount ? quantityCount.quantity + 1 : 1;
-            db.cart.put({
+            await db.cart.put({
                 ...(quantityCount && {
                     id: quantityCount.id
                 }),
@@ -437,6 +681,9 @@ export default {
                 idProd: item.id,
                 quantity: quantity
             })
+            const cartItems = await db.cart.where({ ad: this.idAd }).toArray()
+            this.queries.cart = cartItems
+            this.syncProductQuantities(cartItems)
         },
         RS(value) {
             return value.toLocaleString('pt-BR', {
@@ -525,7 +772,7 @@ export default {
         pathImg() {
             const logo = this.adsComponent?.files?.logo
             if (!logo?.length) return ''
-            return logo[0].link
+            return logo.filter((item) => !item.deletedAt && item.link)[0]?.link || ''
         }
     },
     created() {
@@ -560,9 +807,12 @@ export default {
                         ...response.data
                     }
                     filtered.files.ecommerce = this.filterDeleted(filtered.files.ecommerce)
+                    filtered.phones = this.filterDeleted(filtered.phones)
+                    filtered.files.logo = this.filterDeleted(filtered.files.logo)
                     filtered.files.ecommerce = this.sortAb(filtered.files.ecommerce)
                     filtered.files.ecommerceFiltered = this.filterEatchType(filtered.files.ecommerce)
                     this.adsComponent = filtered
+                    this.syncProductQuantities()
                     console.log(filtered)
 
                     this.loading = false
@@ -663,6 +913,73 @@ export default {
   background: #25d366 !important;
   border-color: #25d366 !important;
   color: white !important;
+}
+.ecommerce-action-btn.disabled {
+  opacity: 0.55;
+}
+.ecommerce-shop-tools {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.65rem;
+}
+.ecommerce-shop-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.ecommerce-shop-summary span {
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(243, 244, 246, 0.9);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+}
+.ecommerce-search {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(209, 213, 219, 0.9);
+}
+.ecommerce-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #374151;
+  font-size: 0.9rem;
+}
+.ecommerce-category-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ecommerce-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+.ecommerce-category-tab {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #4b5563;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ecommerce-category-tab.active {
+  color: white;
+  border-color: #059669;
+  background: #059669;
 }
 .ecommerce-header-inner {
   display: flex;
@@ -812,8 +1129,9 @@ export default {
 .ecommerce-grid.view-list .ecommerce-card-price {
   margin: 0;
 }
-.ecommerce-grid.view-list .ecommerce-card-btn {
+.ecommerce-grid.view-list .ecommerce-card-footer {
   margin: 0 0 0 auto;
+  flex: 0 0 auto;
 }
 /* Compacto: grid mais denso */
 .ecommerce-grid.view-compact {
@@ -837,10 +1155,9 @@ export default {
 .ecommerce-grid.view-compact .ecommerce-card-price {
   font-size: 0.875rem;
 }
-.ecommerce-grid.view-compact .ecommerce-card-btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  min-height: 32px;
+.ecommerce-grid.view-compact .ecommerce-card-add {
+  width: 32px;
+  height: 32px;
 }
 @media (min-width: 640px) {
   .ecommerce-grid.view-compact {
@@ -855,6 +1172,12 @@ export default {
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ecommerce-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05);
 }
 .ecommerce-card-img {
   aspect-ratio: 1;
@@ -867,7 +1190,7 @@ export default {
 }
 .ecommerce-card-img :deep(.q-img__content),
 .ecommerce-card-img :deep(img) {
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center;
 }
 .ecommerce-card-body {
@@ -898,18 +1221,302 @@ export default {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.ecommerce-card-desc :deep(p),
+.ecommerce-card-desc :deep(ul),
+.ecommerce-card-desc :deep(ol) {
+  margin: 0;
+}
 .ecommerce-card-price {
   font-size: 1rem;
   font-weight: 700;
   color: #059669;
   margin: 0;
 }
-.ecommerce-card-btn {
+.ecommerce-card-footer {
   margin-top: auto;
-  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.ecommerce-card-add {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 999px;
+  border: 1px solid #d1fae5;
+  background: #ecfdf5;
+  color: #059669;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.ecommerce-card-add:hover,
+.ecommerce-card-add.active {
+  background: #059669;
+  border-color: #059669;
+  color: white;
+}
+.ecommerce-card-add:active {
+  transform: scale(0.94);
+}
+.ecommerce-card-qty {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #2563eb;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 18px;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.32);
+}
+.product-detail {
+  display: grid;
+  gap: 1rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.product-detail-back {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  background: transparent;
+  color: #4b5563;
+  font-weight: 700;
+  cursor: pointer;
+}
+.product-detail-main {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.product-detail-media {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: zoom-in;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+.product-detail-media :deep(img) {
+  object-fit: contain !important;
+}
+.product-detail-info,
+.product-info-panel,
+.product-recommendations {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+}
+.product-detail-category {
+  margin: 0 0 0.35rem;
+  color: #059669;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.product-detail-title {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.55rem;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.product-detail-description {
+  margin: 0.75rem 0 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+.product-detail-description :deep(p) {
+  margin: 0 0 0.65rem;
+}
+.product-detail-description :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.product-detail-description :deep(ul),
+.product-detail-description :deep(ol) {
+  margin: 0.65rem 0;
+  padding-left: 1.25rem;
+}
+.product-detail-price {
+  margin: 1rem 0 0;
+  color: #059669;
+  font-size: 1.65rem;
+  font-weight: 900;
+}
+.product-detail-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+.product-buy-btn,
+.product-cart-btn {
+  min-height: 46px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.product-buy-btn {
+  border: 0;
+  color: white;
+  background: #059669;
+}
+.product-buy-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.product-cart-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #d1fae5;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0 0.9rem;
+}
+.product-cart-btn strong {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: white;
+  font-size: 0.72rem;
+  line-height: 20px;
+}
+.product-detail-warning {
+  margin: 0.75rem 0 0;
+  color: #b45309;
+  font-size: 0.85rem;
+}
+.product-info-panel h3,
+.product-recommendations h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.product-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+.product-info-item {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+}
+.product-info-item span {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+.product-info-item strong {
+  color: #374151;
+  font-size: 0.9rem;
+}
+.product-recommendations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+.product-recommendations-header button {
+  border: 0;
+  background: transparent;
+  color: #059669;
+  font-weight: 800;
+  cursor: pointer;
+}
+.product-recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+.product-recommendation-card {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+}
+.product-recommendation-card :deep(img) {
+  object-fit: contain !important;
+}
+.product-recommendation-card div {
+  padding: 0.65rem;
+}
+.product-recommendation-card h4 {
+  margin: 0;
+  color: #374151;
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+.product-recommendation-card p {
+  margin: 0.35rem 0 0;
+  color: #059669;
+  font-weight: 800;
+}
+@media (max-width: 720px) {
+  .product-detail-main {
+    grid-template-columns: 1fr;
+  }
+  .product-detail-title {
+    font-size: 1.3rem;
+  }
+  .product-detail-actions {
+    grid-template-columns: 1fr;
+  }
 }
 .ecommerce-back {
   margin-top: 1rem;
+}
+.ecommerce-empty-state {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+  color: #6b7280;
+  background: white;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+}
+.ecommerce-empty-state p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.ecommerce-empty-state button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 0.9rem;
+  color: white;
+  background: #059669;
+  font-weight: 700;
+  cursor: pointer;
 }
 .ecommerce-spacer {
   height: 1rem;
@@ -1085,6 +1692,12 @@ export default {
   width: 100%;
   min-height: 48px;
   font-weight: 600;
+}
+.cart-checkout-warning {
+  margin: 0.65rem 0 0;
+  color: #b45309;
+  font-size: 0.8rem;
+  text-align: center;
 }
 .cart-empty {
   flex: 1;

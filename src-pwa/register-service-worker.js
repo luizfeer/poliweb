@@ -4,7 +4,14 @@ import { Notify } from 'quasar'
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
 
-register(process.env.SERVICE_WORKER_FILE, {
+if (process.env.DEV) {
+  if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
+    navigator.serviceWorker.getRegistrations()
+      .then((registrations) => registrations.forEach((registration) => registration.unregister()))
+      .catch(() => {})
+  }
+} else {
+  register(process.env.SERVICE_WORKER_FILE, {
   // The registrationOptions object will be passed as the second argument
   // to ServiceWorkerContainer.register()
   // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter
@@ -28,14 +35,21 @@ register(process.env.SERVICE_WORKER_FILE, {
   },
 
   updated (/* registration */) {
-     Notify.create({
-      message: 'Nova Atualização Disponível!',
+    if (process.env.DEV) return
+
+    Notify.create({
+      message: 'Nova Atualizacao Disponivel!',
       icon: 'cloud_download',
-      closeBtn: 'Atualizar',
       timeout: 10000,
-      onDismiss () {
-        location.reload(true)
-      }
+      actions: [
+        {
+          label: 'Atualizar',
+          color: 'white',
+          handler () {
+            window.location.reload()
+          }
+        }
+      ]
     })
     console.log('New content is available; please refresh.')
   },
@@ -47,4 +61,5 @@ register(process.env.SERVICE_WORKER_FILE, {
   error (/* err */) {
     // console.error('Error during service worker registration:', err)
   }
-})
+  })
+}

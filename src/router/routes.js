@@ -119,6 +119,11 @@ const routes = [
 
       },
       {
+        path: '/loja/:id/produto/:productId',
+       component: () => import('pages/ViewEcommerce.vue')
+
+      },
+      {
         path: '/loja/:id',
        component: () => import('pages/ViewEcommerce.vue')
 

@@ -104,7 +104,9 @@ export default defineComponent({
 
         })
         }
-        this.$router.push({ path: '/' })
+        this.$store.dispatch('categories/fetchCategories', { force: true }).finally(() => {
+          this.$router.push({ path: '/' })
+        })
 
       })
       .catch((err) => {

@@ -1871,8 +1871,12 @@ export default {
   }
   .ads-media-column {
     position: sticky;
-    top: 1rem;
+    top: 5rem;
     align-self: start;
+  }
+  .ads-media-grid-photo,
+  .ads-media-grid-video {
+    cursor: pointer;
   }
   .ads-main-column .ads-section,
   .ads-media-column .ads-section,

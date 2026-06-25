@@ -2,10 +2,13 @@ name = "poliweb-commerce-router"
 main = "src/index.js"
 compatibility_date = "2026-03-17"
 
+routes = [
+  { pattern = "www.poliwebapp.com.br/comercio/*", zone_name = "poliwebapp.com.br" }
+]
+
 # Configure estes valores via `wrangler secret put` / `wrangler kv:namespace` se preferir.
 [vars]
 # Origin "DNS only" da sua VPS/SSR, ex: https://ssr.poliwebapp.com.br
 SSR_ORIGIN = "https://ssr.poliwebapp.com.br"
 # Tempo padrão de cache (segundos) para HTML do /comercio/*
 CACHE_TTL_SECONDS = "900"
-

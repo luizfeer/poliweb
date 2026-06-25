@@ -663,6 +663,16 @@ export default {
 .seo-cta-wrapper {
   padding: 0 1rem 1rem;
 }
+@media (min-width: 1024px) {
+  .seo-content-wrapper,
+  .seo-cta-wrapper {
+    width: min(1180px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
 .seo-breadcrumb-card,
 .seo-info-card,
 .seo-summary-card,

@@ -175,11 +175,10 @@ export default defineComponent({
         },
         showGlassNavbar() {
             const p = this.$route.fullPath;
-            // Esconde na página de anúncio (/123/...) e na página SEO (/comercio/123/slug)
+            // Esconde só na rota antiga de anúncio (/123/...). Em /comercio mantém menu.
             const clean = p.replace(/\?.*$/, '')
             const isAdPage = /^\/\d+(\/.*)?$/.test(clean)
-            const isCommerceSeoPage = /^\/comercio\/\d+(\/.*)?$/.test(clean)
-            return !(isAdPage || isCommerceSeoPage);
+            return !isAdPage;
         },
     },
     data() {

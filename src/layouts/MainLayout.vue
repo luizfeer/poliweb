@@ -540,4 +540,28 @@ slide-enter-active,
 .has-glass-navbar {
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
+@media (min-width: 1024px) {
+  .header-mobile {
+    display: none;
+  }
+  .glass-navbar-wrapper {
+    display: none;
+  }
+  .drawer-mobile {
+    border-right: 1px solid #e5e7eb;
+    background: #ffffff !important;
+  }
+  .drawer-mobile :deep(.q-list) {
+    position: sticky;
+    top: 0;
+  }
+  .drawer-mobile :deep(.q-item) {
+    min-height: 42px;
+    margin: 0.15rem 0.6rem;
+    border-radius: 8px;
+  }
+  .has-glass-navbar {
+    padding-bottom: 0 !important;
+  }
+}
 </style>

@@ -275,6 +275,14 @@
                                 </div>
                                 <span class="cart-item-price">{{ RS(item.value * item.quantity) }}</span>
                             </div>
+                            <textarea
+                              v-model="item.note"
+                              class="cart-item-note"
+                              rows="2"
+                              maxlength="180"
+                              placeholder="Observacao do item"
+                              @change="updateCartNote(item)"
+                            ></textarea>
                         </div>
                     </div>
                 </div>
@@ -320,6 +328,14 @@
                                 </div>
                                 <span class="cart-item-price">{{ RS(item.value * item.quantity) }}</span>
                             </div>
+                            <textarea
+                              v-model="item.note"
+                              class="cart-item-note"
+                              rows="2"
+                              maxlength="180"
+                              placeholder="Observacao do item"
+                              @change="updateCartNote(item)"
+                            ></textarea>
                         </div>
                     </div>
                 </div>
@@ -708,6 +724,9 @@ export default {
             'Olá, gostaria de fazer o seguinte pedido: \n';
             for (let i = 0; i < this.queries.cart.length; i++) {
                 pedido += `${this.queries.cart[i].quantity}x ${this.queries.cart[i].name}  - [${this.RS(this.queries.cart[i].quantity*this.queries.cart[i].value)}]\n`;
+                if (this.queries.cart[i].note) {
+                    pedido += `Obs: ${this.queries.cart[i].note}\n`;
+                }
             }
             pedido += `\n*Total: ${this.RS(this.total)}* \n`;
             console.log(pedido);
@@ -749,6 +768,7 @@ export default {
                 value: item.subtitle.value,
                 name: item.title.name,
                 idProd: item.id,
+                note: quantityCount?.note || '',
                 quantity: quantity
             })
             const cartItems = await db.cart.where({ ad: this.idAd }).toArray()
@@ -786,6 +806,11 @@ export default {
             }
             item.quantity = qty;
             db.cart.where({ id: item.id }).modify(i => { i.quantity = qty; });
+        },
+        updateCartNote(item) {
+            const note = String(item.note || '').slice(0, 180)
+            item.note = note
+            db.cart.where({ id: item.id }).modify(i => { i.note = note; });
         },
 
         filterEatchType(arr) {
@@ -1909,6 +1934,26 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+.cart-item-note {
+  width: 100%;
+  margin-top: 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  resize: vertical;
+  min-height: 44px;
+  max-height: 96px;
+  outline: 0;
+}
+.cart-item-note:focus {
+  border-color: #86efac;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
 }
 .cart-qty {
   display: flex;

@@ -50,14 +50,13 @@
         </button>
       </div>
     </div>
-    <preview-ecommerce :ecommercePreview="adsComponent.files?.ecommercePreview" :admin="admin" />
-
     <!-- inputs ocultos para upload (mantidos para funcionalidade) -->
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
     <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
 
     <div class="ads-desktop-shell">
       <main class="ads-main-column">
+    <preview-ecommerce :ecommercePreview="adsComponent.files?.ecommercePreview" :admin="admin" />
 
     <!-- Feed de posts estilo Instagram -->
     <div class="ads-section" v-if="hasPosts">

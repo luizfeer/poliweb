@@ -178,7 +178,7 @@ const routes = [
         component: () => import('pages/Commerce.vue')
       },
       {
-        path: '/:id/:name?',
+        path: '/:id(\\d+)/:name?',
        component: () => import('pages/Ads.vue')
       },
       {

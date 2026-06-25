@@ -118,11 +118,20 @@ export default {
       return parent?.name ? `${parent.name} / ${category.name}` : category.name
     }
 
+    function normalizeSearchText(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+    }
+
     function matchesFilter(item, filter) {
       if (!filter || !filter.trim()) return true
-      const f = filter.trim().toLowerCase()
-      const name = (item.name || '').toLowerCase()
-      if (name.includes(f)) return true
+      const f = normalizeSearchText(filter)
+      const name = normalizeSearchText(item.name)
+      const id = normalizeSearchText(item.id)
+      if (name.includes(f) || id === f) return true
       const subs = item.subcategories || []
       return subs.some((s) => matchesFilter(s, filter))
     }

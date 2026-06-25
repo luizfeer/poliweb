@@ -219,9 +219,10 @@ export default {
             const adSlug = name
                 ? name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()
                 : String(ad.id || '')
+            const seoBaseUrl = (process.env.SEO_SITE_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
             const canonicalUrl = ad.id
-                ? `https://www.poliwebapp.com.br/${ad.id}/${adSlug}`
-                : 'https://www.poliwebapp.com.br'
+                ? `${seoBaseUrl}/comercio/${ad.id}/${encodeURIComponent(adSlug)}`
+                : seoBaseUrl
 
             // JSON-LD LocalBusiness para Google Rich Results
             const sameAs = [ad.website, ad.facebook, ad.instagram].filter(Boolean)

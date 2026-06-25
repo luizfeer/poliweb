@@ -428,7 +428,12 @@ export default {
 
     useMeta(() => {
       const ad = data.value || {}
-      const name = ad.name || ''
+      const routeId = (route.params.id || '').toString()
+      const rawSlug = (route.params.slug || '').toString()
+      const routeName = rawSlug
+        ? decodeURIComponent(rawSlug).replace(/[-_]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+        : ''
+      const name = ad.name || routeName
       const description = ad.description || ''
 
       const logoImg = ad.files?.logo?.filter(l => !l.deletedAt)?.[0]?.link || null
@@ -484,15 +489,15 @@ export default {
         ...categoryNames.value
       ].filter(Boolean)
 
-      const rawSlug = (route.params.slug || '').toString()
       const computedSlug = name
         ? name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()
-        : String(ad.id || '')
+        : routeId || String(ad.id || '')
       const slug = rawSlug || computedSlug
 
-      const seoBaseUrl = (process.env.SEO_SITE_URL || process.env.PUBLIC_SITE_URL || 'https://ssr.poliwebapp.com.br').replace(/\/$/, '')
-      const canonicalUrl = ad.id
-        ? `${seoBaseUrl}/comercio/${ad.id}/${encodeURIComponent(slug)}`
+      const seoBaseUrl = (process.env.SEO_SITE_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
+      const canonicalId = ad.id || routeId
+      const canonicalUrl = canonicalId
+        ? `${seoBaseUrl}/comercio/${canonicalId}/${encodeURIComponent(slug)}`
         : seoBaseUrl
       commerceCanonicalUrl.value = canonicalUrl
 

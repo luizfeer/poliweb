@@ -56,6 +56,8 @@
     <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
     <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
 
+    <div class="ads-desktop-shell">
+      <main class="ads-main-column">
 
     <!-- Feed de posts estilo Instagram -->
     <div class="ads-section" v-if="hasPosts">
@@ -329,6 +331,58 @@
       </div>
     </div>
 
+      </main>
+
+      <aside v-if="mediaItems.length" class="ads-media-column">
+        <!-- Grid de mídia estilo Stories (fotos + vídeos) -->
+        <div class="ads-section ads-media-section">
+          <div class="ads-media-panel">
+            <div class="ads-media-panel-head">
+              <div>
+                <p class="ads-media-eyebrow">Galeria</p>
+                <h2 class="ads-card-title">Fotos e vídeos</h2>
+              </div>
+              <span class="ads-media-count">{{ mediaItems.length }}</span>
+            </div>
+            <div class="ads-photo-grid-bleed">
+              <div class="ads-media-grid">
+                <div
+                  v-for="(item, i) in mediaItems"
+                  :key="'mgm-' + (item.id || i)"
+                  :class="item.type === 'video' ? 'ads-media-grid-video' : 'ads-media-grid-photo'"
+                  @click="openStoryAt(i)"
+                >
+                  <template v-if="item.type === 'video'">
+                    <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" :alt="adsComponent.name + ' - vídeo ' + (i + 1)" />
+                    <video
+                      v-else-if="item.link && !videoThumbFailed[String(item.id)]"
+                      :data-video-id="String(item.id)"
+                      :src="item.link"
+                      crossorigin="anonymous"
+                      preload="metadata"
+                      muted
+                      playsinline
+                      class="ads-video-thumb-video"
+                      @loadeddata="captureVideoThumb"
+                      @canplay="captureVideoThumb"
+                      @error="onVideoThumbError"
+                    />
+                    <div class="ads-media-grid-video-inner">
+                      <AppIcon name="play-circle-filled" :size="40" class="text-white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5))" />
+                      <span class="ads-media-grid-video-badge">vídeo</span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <img :src="item.thumbnail || item.src" loading="lazy" class="ads-media-grid-photo-img" :alt="adsComponent.name + ' - foto ' + (i + 1)" />
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
     <EditCategoriesModal
       v-model="expand.editCategories"
       :ad-id="adsComponent.id"
@@ -450,45 +504,6 @@
         </button>
       </template>
     </app-bottom-sheet>
-
-    <!-- Grid de mídia estilo Stories (fotos + vídeos) -->
-    <div class="ads-section" v-if="mediaItems.length">
-      <h2 class="ads-card-title mb-3">Fotos e vídeos</h2>
-      <div class="ads-photo-grid-bleed">
-        <div class="ads-media-grid">
-          <div
-            v-for="(item, i) in mediaItems"
-            :key="'mgm-' + (item.id || i)"
-            :class="item.type === 'video' ? 'ads-media-grid-video' : 'ads-media-grid-photo'"
-            @click="openStoryAt(i)"
-          >
-            <template v-if="item.type === 'video'">
-              <img v-if="videoThumbs[String(item.id)]" :src="videoThumbs[String(item.id)]" class="ads-video-thumb-img" :alt="adsComponent.name + ' - vídeo ' + (i + 1)" />
-              <video
-                v-else-if="item.link && !videoThumbFailed[String(item.id)]"
-                :data-video-id="String(item.id)"
-                :src="item.link"
-                crossorigin="anonymous"
-                preload="metadata"
-                muted
-                playsinline
-                class="ads-video-thumb-video"
-                @loadeddata="captureVideoThumb"
-                @canplay="captureVideoThumb"
-                @error="onVideoThumbError"
-              />
-              <div class="ads-media-grid-video-inner">
-                <AppIcon name="play-circle-filled" :size="40" class="text-white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5))" />
-                <span class="ads-media-grid-video-badge">vídeo</span>
-              </div>
-            </template>
-            <template v-else>
-              <img :src="item.thumbnail || item.src" loading="lazy" class="ads-media-grid-photo-img" :alt="adsComponent.name + ' - foto ' + (i + 1)" />
-            </template>
-          </div>
-        </div>
-      </div>
-    </div>
 
      <q-dialog v-model="confirm" persistent>
       <q-card>
@@ -1815,6 +1830,94 @@ export default {
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, #eef2f6 0%, #e5e7eb 100%);
   min-height: 100%;
+}
+.ads-desktop-shell,
+.ads-main-column,
+.ads-media-column {
+  min-width: 0;
+}
+.ads-media-eyebrow,
+.ads-media-count {
+  display: none;
+}
+.ads-media-panel-head {
+  margin-bottom: 0.75rem;
+}
+@media (min-width: 1024px) {
+  .ads-page {
+    padding: 1.25rem 1.5rem calc(88px + env(safe-area-inset-bottom));
+  }
+  .ads-header,
+  .ads-desktop-shell {
+    width: min(1180px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ads-header {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+  }
+  .ads-desktop-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    gap: 1rem;
+    align-items: start;
+  }
+  .ads-main-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .ads-media-column {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+  }
+  .ads-main-column .ads-section,
+  .ads-media-column .ads-section,
+  .admin-panel {
+    padding: 0;
+    margin-top: 0;
+  }
+  .ads-media-panel {
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  }
+  .ads-media-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #eef2f7;
+  }
+  .ads-media-eyebrow {
+    display: block;
+    margin: 0 0 0.2rem;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ads-media-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-weight: 800;
+    font-size: 0.82rem;
+  }
 }
 .ads-actions-bar-wrapper {
   position: fixed;

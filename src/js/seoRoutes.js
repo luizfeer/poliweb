@@ -12,6 +12,14 @@ export function normalizeSearch(value = '') {
   return slugify(value).replace(/-/g, ' ').trim()
 }
 
+export function titleFromSlug(value = '') {
+  return normalizeSearch(value)
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 export function findCityBySlug(cities = [], slug = '') {
   const target = slugify(slug)
   return cities.find((city) => slugify(city.city) === target) || null

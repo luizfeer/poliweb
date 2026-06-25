@@ -78,6 +78,7 @@ import {
   findCityBySlug,
   flattenCategories,
   slugify
+  , titleFromSlug
 } from 'src/js/seoRoutes'
 
 function addresses(ad) {
@@ -100,8 +101,8 @@ export default {
     const ads = ref([])
     const loading = ref(true)
 
-    const cityName = computed(() => city.value?.city || String(route.params.citySlug || '').replace(/-/g, ' '))
-    const categoryName = computed(() => category.value?.name || String(route.params.categorySlug || '').replace(/-/g, ' '))
+    const cityName = computed(() => city.value?.city || titleFromSlug(route.params.citySlug))
+    const categoryName = computed(() => category.value?.name || titleFromSlug(route.params.categorySlug))
     const pageTitle = computed(() => `${categoryName.value} em ${cityName.value}`)
     const pageDescription = computed(() => {
       const count = ads.value.length

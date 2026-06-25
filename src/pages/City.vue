@@ -54,7 +54,17 @@
             :to="categoryCityUrl(city, category)"
             class="city-category-item"
           >
-            <q-icon name="category" size="20px" />
+            <span class="city-category-icon">
+              <q-img
+                v-if="categoryIcon(category)"
+                :src="categoryIcon(category)"
+                :alt="category.name"
+                ratio="1"
+                fit="contain"
+                spinner-size="16px"
+              />
+              <q-icon v-else name="category" size="20px" />
+            </span>
             <span>{{ category.name }}</span>
           </router-link>
         </div>
@@ -272,6 +282,7 @@ export default {
       const address = addresses(ad).slice(-1)[0] || ad?.address
       return [address?.neighborhood, address?.city, address?.state].filter(Boolean).join(', ')
     }
+    const categoryIcon = (category) => category?.iconLink || category?.parent?.iconLink || ''
 
     return {
       city,
@@ -288,6 +299,7 @@ export default {
       adUrl,
       adImage,
       addressText,
+      categoryIcon,
       categoryCityUrl,
       slugify,
       cityUrl
@@ -410,7 +422,21 @@ export default {
   font-weight: 800;
   text-decoration: none;
 }
-.city-category-item .q-icon {
+.city-category-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 8px;
+  background: #eff6ff;
+  overflow: hidden;
+}
+.city-category-icon :deep(.q-img) {
+  width: 24px;
+  height: 24px;
+}
+.city-category-icon .q-icon {
   color: #2563eb;
 }
 .city-category-skeleton,

@@ -189,6 +189,10 @@ const routes = [
         component: () => import('pages/Commerce.vue')
       },
       {
+        path: '/:citySlug/:categorySlug',
+        component: () => import('pages/CityCategory.vue')
+      },
+      {
         path: '/:id(\\d+)/:name?',
        component: () => import('pages/Ads.vue')
       },

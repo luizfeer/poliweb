@@ -1,187 +1,498 @@
 <template>
-  <div class="city-page w-full p-4 pb-8">
-    <div class="city-header mb-6">
-      <h1 class="text-xl font-semibold text-gray-800 m-0">Escolha uma cidade</h1>
-      <p class="text-gray-500 text-sm mt-1">Selecione sua cidade para ver os comércios disponíveis</p>
-    </div>
+  <q-page class="city-page">
+    <section class="city-shell">
+      <nav class="city-breadcrumb" aria-label="breadcrumb">
+        <router-link to="/">Inicio</router-link>
+        <span>/</span>
+        <strong>{{ cityName }}</strong>
+      </nav>
 
-    <div class="city-list space-y-2">
-      <div
-        v-for="city in citys"
-        :key="city.id"
-        class="city-item flex items-center gap-3 min-h-[52px] px-4 py-3 rounded-xl bg-white shadow-sm active:bg-gray-50 touch-manipulation"
-        :class="{ 'opacity-60': switchingCity }"
-        @click="selectCity(city)"
-      >
-        <AppIcon name="location-on" :size="22" class="text-primary flex-shrink-0" />
-        <span class="font-medium text-gray-800 flex-1">{{ city.city }}</span>
-        <AppIcon v-if="!switchingCity" name="chevron-right" :size="20" class="text-gray-400" />
-        <q-spinner-dots v-else size="20px" color="primary" />
-      </div>
-    </div>
+      <header class="city-hero">
+        <div>
+          <p class="city-eyebrow">{{ city?.state || 'Cidade' }}</p>
+          <h1>Comercios em {{ cityName }}</h1>
+          <p>{{ seoText }}</p>
+        </div>
+        <q-btn
+          outline
+          color="primary"
+          icon="location_city"
+          label="Trocar cidade"
+          to="/cidades"
+          no-caps
+        />
+      </header>
 
-    <div class="gps-section mt-8 p-4 rounded-xl bg-primary/5">
-      <div
-        class="flex items-center gap-3 min-h-[48px] touch-manipulation"
-        :class="{ 'opacity-50': gettingLocation }"
-        @click="!gettingLocation && locateMe()"
-      >
-        <q-spinner-dots v-if="gettingLocation" size="24px" color="primary" />
-        <AppIcon v-else name="gps-fixed" :size="24" class="text-primary" />
-        <span class="font-medium text-primary">Usar GPS para localização</span>
-      </div>
-      <p class="text-gray-500 text-sm mt-2 mb-0">Encontre os serviços mais próximos de você!</p>
-    </div>
+      <section class="city-stats">
+        <q-card flat bordered class="city-stat">
+          <span>Categorias</span>
+          <strong>{{ flatCategories.length }}</strong>
+        </q-card>
+        <q-card flat bordered class="city-stat">
+          <span>Novos comercios</span>
+          <strong>{{ newAds.length }}</strong>
+        </q-card>
+        <q-card flat bordered class="city-stat">
+          <span>Em alta</span>
+          <strong>{{ topAds.length }}</strong>
+        </q-card>
+      </section>
 
-    <div v-if="localization && !switchingCity" class="mt-6 p-4 rounded-xl bg-gray-50">
-      <p class="text-primary font-medium text-sm">Sua última localização</p>
-      <p class="text-gray-700">{{ localization.city }}{{ localization.street ? ', ' + localization.street : '' }}{{ localization.zipCode ? ', ' + localization.zipCode : '' }}</p>
-    </div>
+      <section class="city-section">
+        <div class="city-section-head">
+          <h2>Categorias populares em {{ cityName }}</h2>
+          <router-link to="/cidades">Ver cidades</router-link>
+        </div>
 
-           <!--
+        <div v-if="loadingCategories" class="city-category-list">
+          <q-skeleton v-for="i in 8" :key="i" class="city-category-skeleton" />
+        </div>
+        <div v-else class="city-category-list">
+          <router-link
+            v-for="category in popularCategories"
+            :key="category.id"
+            :to="categoryCityUrl(city, category)"
+            class="city-category-item"
+          >
+            <q-icon name="category" size="20px" />
+            <span>{{ category.name }}</span>
+          </router-link>
+        </div>
+      </section>
 
-          <div v-if="location">
-            {{ dataApi }}
-            Your location data is, {{ location.coords.longitude}}
-          </div> -->
-        <!-- <q-card-section>
-          Preencha sua cidade ou CEP e encontre os serviçoes mais próximos de
-          você!
-        </q-card-section> -->
+      <section class="city-section city-split">
+        <div>
+          <div class="city-section-head">
+            <h2>Comercios novos</h2>
+          </div>
+          <div v-if="loadingAds" class="city-card-list">
+            <q-skeleton v-for="i in 4" :key="i" class="city-ad-skeleton" />
+          </div>
+          <div v-else class="city-card-list">
+            <router-link v-for="ad in newAds" :key="ad.id" :to="adUrl(ad)" class="city-ad-card">
+              <q-avatar size="46px" rounded>
+                <img v-if="adImage(ad)" :src="adImage(ad)" alt="" />
+                <q-icon v-else name="storefront" />
+              </q-avatar>
+              <span>
+                <strong>{{ ad.name }}</strong>
+                <small>{{ ad.description || addressText(ad) || 'Comercio local' }}</small>
+              </span>
+            </router-link>
+          </div>
+        </div>
 
+        <div>
+          <div class="city-section-head">
+            <h2>Mais acessados</h2>
+          </div>
+          <div v-if="loadingTop" class="city-card-list">
+            <q-skeleton v-for="i in 4" :key="i" class="city-ad-skeleton" />
+          </div>
+          <div v-else class="city-card-list">
+            <router-link v-for="(ad, index) in topAds" :key="ad.id" :to="adUrl(ad)" class="city-ad-card city-top-card">
+              <span class="city-rank">#{{ index + 1 }}</span>
+              <span>
+                <strong>{{ ad.name }}</strong>
+                <small>{{ ad.categoryName || addressText(ad) || 'Destaque da cidade' }}</small>
+              </span>
+            </router-link>
+          </div>
+        </div>
+      </section>
 
-  </div>
+      <section class="city-seo-text">
+        <h2>Guia local de {{ cityName }}</h2>
+        <p>
+          O Poliweb organiza empresas, prestadores de servico, lojas, restaurantes e outros comercios de {{ cityName }}
+          por categoria. Use esta pagina para encontrar negocios locais, comparar opcoes, abrir paginas de comercio
+          com fotos, endereco, telefone, WhatsApp e outras informacoes publicas.
+        </p>
+      </section>
+    </section>
+  </q-page>
 </template>
 
 <script>
-import { inject } from 'vue'
-import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, onServerPrefetch, ref, watch } from 'vue'
+import { useMeta } from 'quasar'
+import { useRoute } from 'vue-router'
+import { api } from 'boot/axios'
 import { citysData } from 'src/js/citys'
+import {
+  adUrl,
+  categoryCityUrl,
+  cityUrl,
+  findCityBySlug,
+  flattenCategories,
+  slugify
+} from 'src/js/seoRoutes'
+
+function addresses(ad) {
+  const value = ad?.addresses || ad?.address
+  return Array.isArray(value) ? value : [value].filter(Boolean)
+}
 
 export default {
+  name: 'CityPage',
   setup() {
-    return {
-      store: useStore(),
-      router: useRouter(),
-      loadCategoriesRef: inject('loadCategories')
-    }
-  },
-  data() {
-    return {
-      citys: [],
-      localization: {},
-      location: null,
-      gettingLocation: false,
-      switchingCity: false,
-      dataApi: []
-    }
-  },
-  methods: {
-    async selectCity(city) {
-      if (this.localization?.city === city.city) return
-      this.localization = city
-      this.switchingCity = true
-      this.store.dispatch('localization/setLocalization', city)
+    const route = useRoute()
+    const city = ref(null)
+    const categories = ref([])
+    const newAds = ref([])
+    const topAds = ref([])
+    const loadingCategories = ref(true)
+    const loadingAds = ref(true)
+    const loadingTop = ref(true)
+
+    const cityName = computed(() => city.value?.city || String(route.params.cidade || '').replace(/-/g, ' '))
+    const flatCategories = computed(() => flattenCategories(categories.value).filter((item) => !item.deletedAt))
+    const popularCategories = computed(() => flatCategories.value.slice(0, 18))
+    const seoText = computed(() => {
+      const count = newAds.value.length
+      const categoryCount = flatCategories.value.length
+      return `Encontre comercios, servicos e categorias em ${cityName.value}. ${categoryCount ? `${categoryCount} categorias locais` : 'Categorias locais'}${count ? ` e ${count} novos comercios cadastrados` : ''}.`
+    })
+
+    const loadCategories = async () => {
+      loadingCategories.value = true
       try {
-        const loadFn = this.loadCategoriesRef?.value || this.loadCategoriesRef
-        if (typeof loadFn === 'function') await loadFn(city)
-        await this.router.push('/')
+        const response = await api.get(`/cities/${city.value.id}/categories?nonDeleted=true`)
+        categories.value = response?.data?.categories || []
       } finally {
-        this.switchingCity = false
+        loadingCategories.value = false
       }
-    },
-    async getLocation() {
-
-      return new Promise((resolve, reject) => {
-
-        if(!("geolocation" in navigator)) {
-          reject(new Error('Erro com GPS.'));
-        }
-
-        navigator.geolocation.getCurrentPosition(pos => {
-          resolve(pos);
-        }, err => {
-          reject(err);
-        });
-
-      });
-    },
-    async locateMe() {
-
-      this.gettingLocation = true;
-      try {
-        this.location = await this.getLocation();
-        await this.getCity()
-      } catch(e) {
-        this.gettingLocation = false;
-        this.$q.notify({
-         color: 'negative',
-        position: 'top',
-        message: e.message,
-        icon: 'report_problem'
-        })
-      }
-    },
-    async getCity () {
-      const url = "/address/coordinates?"
-      const params = {'lat': this.location.coords.latitude, 'long': this.location.coords.longitude}
-      const self = this
-      return this.$api.get(url + new URLSearchParams(params))
-      .then(function(response) {
-        if(response.data) {
-              const address = {
-                city: response.data.city || "GPS",
-                    street: response.data.street || "",
-                    zipCode: response.data.zipCode || "",
-                    neighborhood: response.data.neighborhood || "",
-                    state: response.data.state || "",
-                    coordinates: {
-                      lat: response.data.coordinates.lat,
-                      long: response.data.coordinates.long
-                  },
-              }
-              self.dataApi = response.data
-              self.selectCity(address)
-
-        } else {
-          console.log('Network response was not ok.');
-        }
-      })
-      .catch(function(error) {
-        self.gettingLocation = false
-        self.$q.notify({
-          color: 'negative',
-          message: 'Erro ao buscar localização',
-          icon: 'report_problem'
-        })
-      })
-      .finally(() => {
-        self.gettingLocation = false
-      })
-    },
-    convertStringToUrl (str) {
-    return str.toLowerCase().replace(/ /g, '-')
     }
 
-  },
-  async mounted(){
-    //get city name in param url
-    const cityParam = this.$route.params.city
+    const loadAds = async () => {
+      loadingAds.value = true
+      try {
+        const response = await api.get(`/cities/${city.value.id}/ads`)
+        newAds.value = (response?.data?.ads || []).filter((ad) => ad && ad.id).slice(0, 8)
+      } finally {
+        loadingAds.value = false
+      }
+    }
 
-    this.citys = citysData.sort((a, b) => a.city.localeCompare(b.city))
+    const loadTopAds = async () => {
+      loadingTop.value = true
+      try {
+        const response = await api.get(`/cities/${city.value.id}/top-ranked-ads`)
+        topAds.value = (response?.data?.ads || []).filter((ad) => ad && ad.id).slice(0, 8)
+      } finally {
+        loadingTop.value = false
+      }
+    }
 
-     const localization = localStorage.getItem("localization")
-       if(localization){
-         this.localization =  JSON.parse(localization)
-        if(this.citys.findIndex(x=> x.city === this.localization.city)<0){
-          this.citys.push(this.localization)
-        }
-        // this.model = this.localization
-       }
-  },
+    const loadPage = async () => {
+      city.value = findCityBySlug(citysData, route.params.cidade)
+      categories.value = []
+      newAds.value = []
+      topAds.value = []
 
-};
+      if (!city.value) {
+        loadingCategories.value = false
+        loadingAds.value = false
+        loadingTop.value = false
+        return
+      }
+
+      await Promise.all([
+        loadCategories(),
+        loadAds(),
+        loadTopAds()
+      ])
+    }
+
+    onServerPrefetch(loadPage)
+    onMounted(() => {
+      if (!city.value) loadPage()
+    })
+    watch(() => route.params.cidade, loadPage)
+
+    useMeta(() => {
+      const seoBase = (process.env.SEO_SITE_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
+      const canonicalUrl = `${seoBase}${cityUrl(city.value || cityName.value)}`
+      const title = `Comercios em ${cityName.value}`
+      const description = seoText.value.slice(0, 160)
+
+      return {
+        title,
+        titleTemplate: (chunk) => `${chunk} - Poliweb`,
+        link: {
+          canonical: { rel: 'canonical', href: canonicalUrl }
+        },
+        meta: {
+          description: { name: 'description', content: description },
+          ogTitle: { property: 'og:title', content: title },
+          ogDesc: { property: 'og:description', content: description },
+          ogUrl: { property: 'og:url', content: canonicalUrl },
+          ogType: { property: 'og:type', content: 'website' },
+          twitterCard: { name: 'twitter:card', content: 'summary' }
+        },
+        script: [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'CollectionPage',
+              name: title,
+              description,
+              url: canonicalUrl,
+              about: {
+                '@type': 'City',
+                name: cityName.value,
+                addressRegion: city.value?.state,
+                addressCountry: 'BR'
+              }
+            })
+          },
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              name: `Categorias em ${cityName.value}`,
+              numberOfItems: flatCategories.value.length,
+              itemListElement: popularCategories.value.map((category, index) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: category.name,
+                url: `${seoBase}${categoryCityUrl(city.value || cityName.value, category)}`
+              }))
+            })
+          }
+        ]
+      }
+    })
+
+    const adImage = (ad) => ad?.logoLink || ad?.photoLinks?.[0] || ad?.files?.logo?.find((file) => !file.deletedAt && file.link)?.link || ''
+    const addressText = (ad) => {
+      const address = addresses(ad).slice(-1)[0] || ad?.address
+      return [address?.neighborhood, address?.city, address?.state].filter(Boolean).join(', ')
+    }
+
+    return {
+      city,
+      categories,
+      newAds,
+      topAds,
+      loadingCategories,
+      loadingAds,
+      loadingTop,
+      cityName,
+      flatCategories,
+      popularCategories,
+      seoText,
+      adUrl,
+      adImage,
+      addressText,
+      categoryCityUrl,
+      slugify,
+      cityUrl
+    }
+  }
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.city-page {
+  min-height: 100%;
+  background: #f8fafc;
+}
+.city-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 1rem 1rem 6rem;
+}
+.city-breadcrumb {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  color: #64748b;
+  font-size: 0.86rem;
+  margin: 0.25rem 0 1rem;
+}
+.city-breadcrumb a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 700;
+}
+.city-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.city-eyebrow {
+  margin: 0 0 0.3rem;
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.city-hero h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.02;
+}
+.city-hero p {
+  max-width: 48rem;
+  margin: 0.7rem 0 0;
+  color: #475569;
+  line-height: 1.55;
+}
+.city-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+.city-stat {
+  display: grid;
+  gap: 0.25rem;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+}
+.city-stat span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.city-stat strong {
+  color: #0f172a;
+  font-size: 1.6rem;
+}
+.city-section {
+  margin-top: 1.2rem;
+}
+.city-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.city-section-head h2,
+.city-seo-text h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+.city-section-head a {
+  color: #2563eb;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.city-category-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+.city-category-item {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: #fff;
+  color: #0f172a;
+  font-weight: 800;
+  text-decoration: none;
+}
+.city-category-item .q-icon {
+  color: #2563eb;
+}
+.city-category-skeleton,
+.city-ad-skeleton {
+  height: 58px;
+  border-radius: 8px;
+}
+.city-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.city-card-list {
+  display: grid;
+  gap: 0.65rem;
+}
+.city-ad-card {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+}
+.city-ad-card span:not(.city-rank) {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+.city-ad-card strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 0.96rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.city-ad-card small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.city-rank {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 900;
+}
+.city-seo-text {
+  margin-top: 1.4rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+.city-seo-text p {
+  max-width: 56rem;
+  margin: 0.5rem 0 0;
+  color: #475569;
+  line-height: 1.65;
+}
+@media (max-width: 820px) {
+  .city-hero {
+    display: block;
+  }
+  .city-hero .q-btn {
+    margin-top: 0.85rem;
+  }
+  .city-stats,
+  .city-category-list,
+  .city-split {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

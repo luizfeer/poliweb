@@ -3,7 +3,9 @@
     <q-header elevated class="desktop-web-header">
         <div class="desktop-web-nav">
             <router-link to="/" class="desktop-brand" aria-label="Poliweb">
-                <span class="desktop-brand-mark">P</span>
+                <span class="desktop-brand-mark">
+                    <img :src="logoUrl" alt="" />
+                </span>
                 <span class="desktop-brand-text">Poliweb</span>
             </router-link>
 
@@ -108,6 +110,7 @@ import Download from "components/Download.vue";
 import AppIcon from "components/AppIcon.vue";
 import SessionExpiredModal from "components/SessionExpiredModal.vue";
 import SelectCityModal from "components/SelectCityModal.vue";
+import logoUrl from "assets/logo.png";
 
 const linksList = [{
         title: "Home",
@@ -196,6 +199,7 @@ export default defineComponent({
             leftDrawerOpen,
             loadCategoriesRef,
             desktopSearch: ref(''),
+            logoUrl,
             toggleLeftDrawer() {
                 leftDrawerOpen.value = !leftDrawerOpen.value;
             },
@@ -633,10 +637,13 @@ slide-enter-active,
     place-items: center;
     border-radius: 10px;
     background: white;
-    color: #1d4ed8;
-    font-size: 1.25rem;
-    line-height: 1;
+    overflow: hidden;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+  }
+  .desktop-brand-mark img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
   }
   .desktop-brand-text {
     font-size: 1.18rem;

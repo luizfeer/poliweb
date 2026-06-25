@@ -52,12 +52,20 @@ function isHtmlRequest(request) {
   return accept.includes('text/html') || accept.includes('application/xhtml+xml')
 }
 
+function isSeoRoute(pathname) {
+  return (
+    pathname.startsWith('/comercio/') ||
+    pathname.startsWith('/cidade/') ||
+    /^\/[a-z0-9-]+\/[a-z0-9-]+\/?$/i.test(pathname)
+  )
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
 
-    // Segurança: este Worker deve ser roteado apenas para /comercio/*
-    if (!url.pathname.startsWith('/comercio/')) {
+    // Segurança: mesmo roteado em www/*, só páginas SEO em HTML vão para o SSR.
+    if (!isSeoRoute(url.pathname)) {
       return fetch(request)
     }
 
@@ -116,13 +124,7 @@ export default {
       res = await fetch(upstreamReq)
     } catch (e) {
       // Modo de falha: volta para o Pages (SPA) em vez de erro 522.
-      // Converte /comercio/:id/:slug -> /:id/:slug
-      const parts = url.pathname.split('/').filter(Boolean) // ["comercio", id, slug...]
-      const id = parts[1]
-      const slug = parts.slice(2).join('/') || ''
-      const fallback = new URL(request.url)
-      fallback.pathname = `/${id || ''}${slug ? '/' + slug : ''}`
-      return Response.redirect(fallback.toString(), 302)
+      return fetch(request)
     }
 
     // Não cacheia respostas ruins ou não-HTML
@@ -139,4 +141,3 @@ export default {
     return out
   }
 }
-

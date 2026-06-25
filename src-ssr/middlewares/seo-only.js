@@ -23,11 +23,13 @@ export default ssrMiddleware(({ app }) => {
     const acceptsHtml = (req.headers.accept || '').includes('text/html')
     const isAssetPath = ASSET_PATHS.some((prefix) => requestPath.startsWith(prefix)) || ASSET_EXTENSIONS.test(requestPath)
     const isCityCategoryPath = /^\/[a-z0-9-]+\/[a-z0-9-]+\/?$/i.test(requestPath)
+    const isCityPath = /^\/[a-z0-9-]+\/?$/i.test(requestPath)
 
     if (
       req.method !== 'GET' ||
       !acceptsHtml ||
       isAssetPath ||
+      isCityPath ||
       isCityCategoryPath ||
       routePrefixes.some((prefix) => requestPath.startsWith(prefix))
     ) {

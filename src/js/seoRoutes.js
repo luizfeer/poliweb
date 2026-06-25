@@ -59,5 +59,5 @@ export function categoryCityUrl(city = {}, category = {}) {
 
 export function cityUrl(city = {}) {
   const citySlug = slugify(city.city || city)
-  return citySlug ? `/cidade/${citySlug}` : '/cidades'
+  return citySlug ? `/${citySlug}` : '/cidades'
 }

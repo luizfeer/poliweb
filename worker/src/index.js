@@ -52,11 +52,39 @@ function isHtmlRequest(request) {
   return accept.includes('text/html') || accept.includes('application/xhtml+xml')
 }
 
+const CITY_SLUGS = new Set([
+  'alpinopolis',
+  'guaxupe',
+  'nova-resende',
+  'sao-pedro-da-uniao',
+  'bom-jesus-da-penha',
+  'conceicao-da-aparecida',
+  'jacui',
+  'alterosa',
+  'carmo-do-rio-claro',
+  'areado',
+  'passos',
+  'itau-de-minas',
+  'juruaia',
+  'sao-sebastiao-do-paraiso',
+  'itamogi',
+  'muzambinho',
+  'monte-belo',
+  'tapiratiba',
+  'caconde',
+  'arceburgo',
+  'sao-jose-do-rio-pardo',
+  'mococa'
+])
+
 function isSeoRoute(pathname) {
+  const parts = pathname.split('/').filter(Boolean)
+
   return (
     pathname.startsWith('/comercio/') ||
     pathname.startsWith('/cidade/') ||
-    /^\/[a-z0-9-]+\/[a-z0-9-]+\/?$/i.test(pathname)
+    (parts.length === 1 && CITY_SLUGS.has(parts[0])) ||
+    (parts.length === 2 && CITY_SLUGS.has(parts[0]) && /^[a-z0-9-]+$/i.test(parts[1]))
   )
 }
 

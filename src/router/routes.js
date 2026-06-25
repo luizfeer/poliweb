@@ -193,6 +193,10 @@ const routes = [
         component: () => import('pages/CityCategory.vue')
       },
       {
+        path: '/:cidade([A-Za-z][A-Za-z0-9-]*)',
+        component: () => import('pages/City.vue')
+      },
+      {
         path: '/:id(\\d+)/:name?',
        component: () => import('pages/Ads.vue')
       },

@@ -125,7 +125,8 @@ import {
   cityUrl,
   findCityBySlug,
   flattenCategories,
-  slugify
+  slugify,
+  titleFromSlug
 } from 'src/js/seoRoutes'
 
 function addresses(ad) {
@@ -145,7 +146,7 @@ export default {
     const loadingAds = ref(true)
     const loadingTop = ref(true)
 
-    const cityName = computed(() => city.value?.city || String(route.params.cidade || '').replace(/-/g, ' '))
+    const cityName = computed(() => city.value?.city || titleFromSlug(route.params.cidade))
     const flatCategories = computed(() => flattenCategories(categories.value).filter((item) => !item.deletedAt))
     const popularCategories = computed(() => flatCategories.value.slice(0, 18))
     const seoText = computed(() => {

@@ -81,17 +81,15 @@
     <!-- Navbar balão centralizado (estilo Apple) -->
     <div v-if="showGlassNavbar" class="glass-navbar-wrapper">
         <nav class="glass-navbar">
-            <router-link to="/" class="glass-nav-item" :class="{ active: $route.fullPath === '/' }">
-                <span class="glass-nav-icon"><AppIcon name="home" :size="22" /></span>
-                <span>Home</span>
-            </router-link>
-            <router-link to="/encontre" class="glass-nav-item" :class="{ active: $route.fullPath === '/encontre' }">
-                <span class="glass-nav-icon"><AppIcon name="storefront" :size="22" /></span>
-                <span>Categorias</span>
-            </router-link>
-            <router-link to="/buscar" class="glass-nav-item" :class="{ active: $route.fullPath.startsWith('/buscar') }">
-                <span class="glass-nav-icon"><AppIcon name="search" :size="22" /></span>
-                <span>Buscar</span>
+            <router-link
+              v-for="link in glassLinks"
+              :key="link.link"
+              :to="link.link"
+              class="glass-nav-item"
+              :class="{ active: isNavLinkActive(link) }"
+            >
+                <span class="glass-nav-icon"><AppIcon :name="link.icon" :size="22" /></span>
+                <span>{{ link.label }}</span>
             </router-link>
         </nav>
     </div>
@@ -166,6 +164,29 @@ const linksList = [{
     // },
 ];
 
+const glassLinks = [
+    {
+        label: "Home",
+        icon: "home",
+        link: "/",
+    },
+    {
+        label: "Categorias",
+        icon: "storefront",
+        link: "/encontre",
+    },
+    {
+        label: "Cidades",
+        icon: "location_city",
+        link: "/cidades",
+    },
+    {
+        label: "Buscar",
+        icon: "search",
+        link: "/buscar",
+    },
+];
+
 import {
     defineComponent,
     ref,
@@ -195,6 +216,7 @@ export default defineComponent({
         return {
             showCityModal,
             baseLinks: linksList,
+            glassLinks,
             essentialLinks: ref([]),
             leftDrawerOpen,
             loadCategoriesRef,
@@ -267,8 +289,12 @@ export default defineComponent({
             this.$router.push(`/buscar/${encodeURIComponent(term)}`)
         },
         isDesktopLinkActive(link) {
+            return this.isNavLinkActive(link)
+        },
+        isNavLinkActive(link) {
             const path = this.$route.path
             if (link.link === '/') return path === '/'
+            if (link.link === '/cidades') return path === '/cidades' || path.startsWith('/cidade/')
             return path === link.link || path.startsWith(`${link.link}/`)
         },
         async init() {
@@ -531,7 +557,7 @@ slide-enter-active,
   align-items: center;
   gap: 0.35rem;
   padding: 0.4rem 0.6rem;
-  max-width: 300px;
+  max-width: 380px;
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);

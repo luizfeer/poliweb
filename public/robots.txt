@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://sitemap.poliwebapp.com.br/sitemap.xml
+Sitemap: https://sitemap.poliwebapp.com.br/sitemap-comercios.xml
+Sitemap: https://sitemap.poliwebapp.com.br/sitemap-cidades-categorias.xml

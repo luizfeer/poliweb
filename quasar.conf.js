@@ -111,7 +111,7 @@ module.exports = configure(function (ctx) {
         API_URL_SERVER: process.env.API_URL_SERVER || process.env.API_URL_LOCAL || 'http://127.0.0.1:5001',
         PUBLIC_SITE_URL: process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br',
         SEO_SITE_URL: process.env.SEO_SITE_URL || 'https://www.poliwebapp.com.br',
-        SSR_ONLY_ROUTE_PREFIX: process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio',
+        SSR_ONLY_ROUTE_PREFIX: process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio,/adm',
         SSR_FALLBACK_URL: process.env.SSR_FALLBACK_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br'
       },
 

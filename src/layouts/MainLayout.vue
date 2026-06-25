@@ -258,7 +258,11 @@ export default defineComponent({
                 }
             }
             if (admin) {
-                this.essentialLinks.push({
+                const adminLinks = [{
+                    title: "Admin",
+                    icon: "admin_panel_settings",
+                    link: "/adm",
+                }, {
                     title: "Usuários",
                     icon: "group",
                     link: "/adm/users",
@@ -266,14 +270,15 @@ export default defineComponent({
                     title: "Icones",
                     icon: "insert_emoticon",
                     link: "/adm/icons",
-                })
+                }]
                 if (isSuperAdmin()) {
-                    this.essentialLinks.push({
+                    adminLinks.push({
                         title: "Mensagens",
                         icon: "mark_email_unread",
                         link: "/adm/contatos",
                     })
                 }
+                this.essentialLinks.push(...adminLinks)
             }
         },
         redirect(item) {

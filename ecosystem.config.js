@@ -19,7 +19,7 @@ module.exports = {
         API_URL_LOCAL: 'http://127.0.0.1:5000',
         PUBLIC_SITE_URL: 'https://www.poliwebapp.com.br',
         SEO_SITE_URL: 'https://www.poliwebapp.com.br',
-        SSR_ONLY_ROUTE_PREFIX: '/comercio',
+        SSR_ONLY_ROUTE_PREFIX: '/comercio,/adm',
         SSR_FALLBACK_URL: 'https://www.poliwebapp.com.br'
       }
     }

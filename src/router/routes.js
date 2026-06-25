@@ -52,6 +52,17 @@ const routes = [
         path: '/adm/login',
         component: () => import('pages/admin/Login.vue')
       },
+      {
+        path: '/adm',
+        component: () => import('pages/admin/Dashboard.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isSuperAdmin()) {
+            next('/adm/login')
+          } else {
+            next()
+          }
+        }
+      },
        {
         path: '/adm/icons',
         component: () => import('pages/admin/Icon.vue')

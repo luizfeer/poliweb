@@ -14,7 +14,10 @@ const ASSET_EXTENSIONS = /\.(?:css|js|mjs|map|json|txt|xml|png|jpe?g|gif|svg|web
 
 export default ssrMiddleware(({ app }) => {
   app.get('*', (req, res, next) => {
-    const routePrefix = process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio'
+    const routePrefixes = (process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio')
+      .split(',')
+      .map((prefix) => prefix.trim())
+      .filter(Boolean)
     const fallbackBaseUrl = (process.env.SSR_FALLBACK_URL || 'https://www.poliwebapp.com.br').replace(/\/$/, '')
     const requestPath = req.path || req.url || '/'
     const acceptsHtml = (req.headers.accept || '').includes('text/html')
@@ -24,7 +27,7 @@ export default ssrMiddleware(({ app }) => {
       req.method !== 'GET' ||
       !acceptsHtml ||
       isAssetPath ||
-      requestPath.startsWith(routePrefix)
+      routePrefixes.some((prefix) => requestPath.startsWith(prefix))
     ) {
       next()
       return

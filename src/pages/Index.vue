@@ -3,8 +3,6 @@
     <div class="index-shell px-4 py-4 pb-8">
       <Location class="mb-4" />
 
-      <div class="home-desktop-grid">
-        <main class="home-main-stack">
       <!-- Destaque: favorito que você segue -->
       <div v-if="favoriteFollow" class="section mt-2">
         <div
@@ -71,9 +69,7 @@
         <h2 class="section-title">Você segue</h2>
         <CardAds :ads="follow" :showAddress="true" :reverse="true" />
       </div>
-        </main>
 
-        <aside class="home-side-stack">
       <router-link to="/encontre" class="block mt-8">
         <div class="action-card flex items-center gap-4 p-4 rounded-2xl bg-primary/10 border border-primary/20 active:scale-[0.99] transition-transform touch-manipulation">
           <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
@@ -162,8 +158,6 @@
             </p>
           </router-link>
         </div>
-      </div>
-        </aside>
       </div>
     </div>
   </q-page>
@@ -293,11 +287,6 @@ export default defineComponent({
 }
 .index-shell {
   width: 100%;
-}
-.home-desktop-grid,
-.home-main-stack,
-.home-side-stack {
-  min-width: 0;
 }
 .section-title {
   font-size: 1.125rem;
@@ -499,35 +488,9 @@ export default defineComponent({
     background: #eef2f7;
   }
   .index-shell {
-    width: min(1220px, 100%);
+    width: min(960px, 100%);
     margin: 0 auto;
     padding: 1.25rem 1.25rem 2.5rem;
-  }
-  .index-shell > :deep(.location),
-  .index-shell > :first-child {
-    max-width: 1220px;
-  }
-  .home-desktop-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 1rem;
-    align-items: start;
-  }
-  .home-main-stack {
-    display: grid;
-    gap: 1rem;
-  }
-  .home-side-stack {
-    display: grid;
-    gap: 1rem;
-    position: sticky;
-    top: 5rem;
-  }
-  .home-main-stack > .section,
-  .home-side-stack > .section,
-  .home-side-stack > a,
-  .home-side-stack > .action-card {
-    margin-top: 0 !important;
   }
   .section-title {
     font-size: 1rem;
@@ -535,8 +498,7 @@ export default defineComponent({
     color: #111827;
   }
   .favorite-widget,
-  .action-card,
-  .home-side-stack .section {
+  .action-card {
     border-radius: 8px !important;
   }
   .favorite-gallery16 {
@@ -554,8 +516,8 @@ export default defineComponent({
   .search-button {
     border-radius: 8px;
   }
-  .home-side-stack .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  .grid.grid-cols-3 {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
     gap: 0.6rem;
   }
   .category-grid-card {
@@ -570,11 +532,6 @@ export default defineComponent({
   .category-grid-icon {
     width: 24px;
     height: 24px;
-  }
-}
-@media (min-width: 1280px) {
-  .home-desktop-grid {
-    grid-template-columns: minmax(0, 820px) 360px;
   }
 }
 </style>

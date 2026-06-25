@@ -1,5 +1,38 @@
 <template>
 <q-layout view="lHh Lpr lFf" :class="{ 'has-glass-navbar': showGlassNavbar }">
+    <q-header elevated class="desktop-web-header">
+        <div class="desktop-web-nav">
+            <router-link to="/" class="desktop-brand" aria-label="Poliweb">
+                <span class="desktop-brand-mark">P</span>
+                <span class="desktop-brand-text">Poliweb</span>
+            </router-link>
+
+            <form class="desktop-search" @submit.prevent="submitDesktopSearch">
+                <AppIcon name="search" :size="18" class="desktop-search-icon" />
+                <input
+                  v-model="desktopSearch"
+                  type="search"
+                  placeholder="Buscar comercios, serviços ou categorias"
+                  aria-label="Buscar no Poliweb"
+                />
+            </form>
+
+            <nav class="desktop-link-scroll" aria-label="Menu principal">
+                <router-link
+                  v-for="link in desktopLinks"
+                  :key="link.link"
+                  :to="link.link"
+                  class="desktop-nav-link"
+                  :class="{ active: isDesktopLinkActive(link) }"
+                >
+                    <AppIcon :name="link.icon" :size="17" />
+                    <span>{{ link.shortTitle || link.title }}</span>
+                    <small v-if="link.badge">{{ link.badge }}</small>
+                </router-link>
+            </nav>
+        </div>
+    </q-header>
+
     <q-header elevated reveal class="z-50 header-mobile">
         <q-toolbar class="flex-col px-0 min-h-[56px]">
             <div class="w-full flex items-center py-3 px-2">
@@ -33,7 +66,7 @@
         </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-1 drawer-mobile">
+    <q-drawer v-model="leftDrawerOpen" bordered class="bg-grey-1 drawer-mobile">
         <q-list class="py-4">
             <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" exact class="drawer-link" />
         </q-list>
@@ -162,6 +195,7 @@ export default defineComponent({
             essentialLinks: ref([]),
             leftDrawerOpen,
             loadCategoriesRef,
+            desktopSearch: ref(''),
             toggleLeftDrawer() {
                 leftDrawerOpen.value = !leftDrawerOpen.value;
             },
@@ -172,6 +206,15 @@ export default defineComponent({
         ...mapGetters('categories', ['loading']),
         categories() {
             return this.list || [];
+        },
+        desktopLinks() {
+            return this.essentialLinks
+                .filter((link) => ['/', '/encontre', '/cidades', '/buscar', '/perfil', '/contato', '/adm'].includes(link.link))
+                .map((link) => ({
+                    ...link,
+                    shortTitle: link.link === '/encontre' ? 'Categorias' : link.title.replace('Busque comércios', 'Buscar'),
+                    badge: link.link === '/adm' ? 'ADM' : ''
+                }))
         },
         showGlassNavbar() {
             const p = this.$route.fullPath;
@@ -211,6 +254,19 @@ export default defineComponent({
         }
     },
     methods: {
+        submitDesktopSearch() {
+            const term = String(this.desktopSearch || '').trim()
+            if (!term) {
+                this.$router.push('/buscar')
+                return
+            }
+            this.$router.push(`/buscar/${encodeURIComponent(term)}`)
+        },
+        isDesktopLinkActive(link) {
+            const path = this.$route.path
+            if (link.link === '/') return path === '/'
+            return path === link.link || path.startsWith(`${link.link}/`)
+        },
         async init() {
             this.essentialLinks = this.baseLinks.map((link) => ({ ...link }))
             const uuid = localStorage.getItem('uuid')
@@ -377,6 +433,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.desktop-web-header {
+  display: none;
+}
 .header-mobile {
   padding-top: env(safe-area-inset-top);
   background: rgba(37, 99, 235, 0.92) !important;
@@ -541,6 +600,132 @@ slide-enter-active,
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
 @media (min-width: 1024px) {
+  .desktop-web-header {
+    display: block;
+    background: #1d4ed8 !important;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 30px rgba(30, 64, 175, 0.22);
+  }
+  .desktop-web-nav {
+    width: min(1320px, 100%);
+    height: 64px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    display: grid;
+    grid-template-columns: auto minmax(280px, 420px) minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+  }
+  .desktop-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: max-content;
+    color: white;
+    text-decoration: none;
+    font-weight: 900;
+  }
+  .desktop-brand-mark {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 10px;
+    background: white;
+    color: #1d4ed8;
+    font-size: 1.25rem;
+    line-height: 1;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+  }
+  .desktop-brand-text {
+    font-size: 1.18rem;
+    letter-spacing: 0;
+  }
+  .desktop-search {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.98);
+    color: #1e3a8a;
+    box-shadow: inset 0 0 0 1px rgba(219, 234, 254, 0.9);
+  }
+  .desktop-search-icon {
+    color: #2563eb;
+    flex: 0 0 auto;
+  }
+  .desktop-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .desktop-search input::placeholder {
+    color: #64748b;
+    font-weight: 500;
+  }
+  .desktop-link-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .desktop-link-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .desktop-nav-link {
+    position: relative;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    flex: 0 0 auto;
+    padding: 0 0.75rem;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 800;
+    transition: background 0.16s ease, color 0.16s ease;
+  }
+  .desktop-nav-link:hover,
+  .desktop-nav-link.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+  }
+  .desktop-nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 22px;
+    height: 3px;
+    border-radius: 999px;
+    background: #ffffff;
+    transform: translateX(-50%);
+  }
+  .desktop-nav-link small {
+    min-width: 28px;
+    height: 18px;
+    padding: 0 0.38rem;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #1d4ed8;
+    font-size: 0.65rem;
+    line-height: 18px;
+    text-align: center;
+    font-weight: 900;
+  }
   .header-mobile {
     display: none;
   }
@@ -548,8 +733,7 @@ slide-enter-active,
     display: none;
   }
   .drawer-mobile {
-    border-right: 1px solid #e5e7eb;
-    background: #ffffff !important;
+    display: none;
   }
   .drawer-mobile :deep(.q-list) {
     position: sticky;
@@ -562,6 +746,18 @@ slide-enter-active,
   }
   .has-glass-navbar {
     padding-bottom: 0 !important;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .desktop-web-nav {
+    grid-template-columns: auto minmax(220px, 320px) minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+  .desktop-brand-text {
+    display: none;
+  }
+  .desktop-nav-link {
+    padding: 0 0.58rem;
   }
 }
 </style>

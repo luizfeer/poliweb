@@ -440,4 +440,63 @@ export default {
     flex-basis: calc((100% - 2.25rem) / 4);
   }
 }
+@media (min-width: 1024px) {
+  .preview-ecommerce {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.85rem 0;
+    margin: 1rem 0;
+  }
+  .preview-ecommerce-header {
+    padding: 0 0.85rem 0.65rem;
+  }
+  .preview-ecommerce-slider {
+    padding: 0 0.85rem 0.25rem;
+  }
+  .preview-ecommerce-scroll {
+    gap: 0.65rem;
+  }
+  .preview-ecommerce-card {
+    flex-basis: 146px;
+  }
+  .preview-ecommerce-card-inner {
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  }
+  .preview-ecommerce-img {
+    aspect-ratio: 4 / 3;
+  }
+  .preview-ecommerce-body {
+    padding: 0.58rem;
+    gap: 0.32rem;
+  }
+  .preview-ecommerce-name {
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+  .preview-ecommerce-desc {
+    font-size: 0.7rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+  }
+  .preview-ecommerce-price {
+    font-size: 0.86rem;
+  }
+  .preview-ecommerce-btn {
+    width: 31px;
+    height: 31px;
+    min-width: 31px;
+  }
+  .preview-ecommerce-nav {
+    top: 45%;
+    width: 30px;
+    height: 30px;
+  }
+}
+@media (min-width: 1280px) {
+  .preview-ecommerce-card {
+    flex-basis: 138px;
+  }
+}
 </style>

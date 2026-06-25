@@ -104,6 +104,7 @@
         </q-card>
     </q-dialog>
 
+    <div class="ecommerce-desktop-layout">
     <div class="ecommerce-content">
         <section v-if="selectedProduct" class="product-detail">
             <button type="button" class="product-detail-back" @click="backToStore">
@@ -223,6 +224,75 @@
             <AppIcon name="arrow-back" :size="20" class="mr-2" />
             Voltar
         </q-btn>
+    </div>
+    <aside class="ecommerce-desktop-sidebar">
+        <div class="desktop-social-panel">
+            <div class="desktop-store-mini">
+                <div class="desktop-store-logo">
+                    <q-img v-if="pathImg()" :src="pathImg()" :ratio="1" fit="cover" />
+                    <q-avatar v-else rounded class="h-full w-full" :color="colors[Math.floor(Math.random() * colors.length)]" text-color="white">{{ (adsComponent.name || '').split(" ").map((n)=>n[0]).join("").toUpperCase().slice(0, 2) }}</q-avatar>
+                </div>
+                <div>
+                    <h2>{{ adsComponent.name }}</h2>
+                    <p>{{ totalProducts }} produtos</p>
+                </div>
+            </div>
+            <div class="desktop-social-actions">
+                <button type="button" @click="copyLink" title="Copiar link">
+                    <AppIcon name="link" :size="19" />
+                    <span>Link</span>
+                </button>
+                <button type="button" @click="shareStore" title="Compartilhar">
+                    <AppIcon name="share" :size="19" />
+                    <span>Compartilhar</span>
+                </button>
+                <button type="button" :disabled="!phoneZap" @click="openWhatsappChooser" title="WhatsApp">
+                    <AppIcon name="whatsapp" :size="19" />
+                    <span>WhatsApp</span>
+                </button>
+            </div>
+        </div>
+        <div class="desktop-cart-panel">
+            <div class="cart-header">
+                <h2 class="cart-title">Carrinho</h2>
+                <span class="desktop-cart-count">{{ totalItems }} itens</span>
+            </div>
+            <div v-if="queries.cart.length" class="cart-body">
+                <div class="cart-list desktop-cart-list">
+                    <div class="cart-item" v-for="(item, id) in queries.cart" :key="'desktop-id-' + id">
+                        <q-img class="cart-item-img" :src="item.link" alt="" />
+                        <div class="cart-item-info">
+                            <h4 class="cart-item-name">{{ item.name }}</h4>
+                            <div class="cart-item-row">
+                                <div class="cart-qty">
+                                    <button type="button" class="cart-qty-btn" @click="sub(item)">
+                                        <AppIcon :name="item.quantity <= 1 ? 'close' : 'remove'" :size="14" />
+                                    </button>
+                                    <input type="number" min="0" v-model.number="item.quantity" class="cart-qty-input" @change="updateQuantity(item)">
+                                    <button type="button" class="cart-qty-btn" @click="add(item)">
+                                        <AppIcon name="add" :size="14" />
+                                    </button>
+                                </div>
+                                <span class="cart-item-price">{{ RS(item.value * item.quantity) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <span>Total</span>
+                        <span class="cart-total-value">{{ RS(total) }}</span>
+                    </div>
+                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap" @click="botaoPedido()" />
+                    <p v-if="!phoneZap" class="cart-checkout-warning">A loja nao possui WhatsApp ativo para receber pedidos.</p>
+                </div>
+            </div>
+            <div v-else class="cart-empty desktop-cart-empty">
+                <AppIcon name="shopping-cart" :size="34" class="text-gray-300 mb-2" />
+                <p>Adicione produtos para montar o pedido</p>
+            </div>
+        </div>
+    </aside>
     </div>
     <q-drawer v-model="rightDrawerOpen" side="right" bordered :width="360" :breakpoint="600" overlay behavior="mobile" class="cart-drawer">
         <div class="cart">
@@ -1040,6 +1110,12 @@ export default {
   padding: 1rem;
   padding-bottom: 6rem;
 }
+.ecommerce-desktop-layout {
+  width: 100%;
+}
+.ecommerce-desktop-sidebar {
+  display: none;
+}
 .ecommerce-category {
   margin-bottom: 1.5rem;
 }
@@ -1093,7 +1169,8 @@ export default {
 }
 @media (min-width: 1024px) {
   .ecommerce-grid.view-card {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 0.75rem;
   }
 }
 /* Lista: layout horizontal */
@@ -1162,6 +1239,204 @@ export default {
 @media (min-width: 640px) {
   .ecommerce-grid.view-compact {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .ecommerce-page {
+    background: #f3f4f6;
+  }
+  .ecommerce-header {
+    position: static;
+    padding: 1rem 1.25rem;
+  }
+  .ecommerce-header-glass {
+    background: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  }
+  .ecommerce-header-inner,
+  .ecommerce-actions-bar,
+  .ecommerce-shop-tools,
+  .ecommerce-actions {
+    max-width: 1220px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ecommerce-actions-bar {
+    justify-content: flex-start;
+  }
+  .ecommerce-action-btn {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0.35rem 0.7rem;
+  }
+  .ecommerce-shop-tools {
+    grid-template-columns: minmax(180px, auto) minmax(260px, 360px);
+    align-items: center;
+  }
+  .ecommerce-category-tabs {
+    grid-column: 1 / -1;
+  }
+  .ecommerce-cart-fab {
+    display: none !important;
+  }
+  .ecommerce-desktop-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 318px;
+    gap: 1rem;
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 1rem 1.25rem 2rem;
+    align-items: start;
+  }
+  .ecommerce-content {
+    padding: 0;
+    padding-bottom: 2rem;
+    min-width: 0;
+  }
+  .ecommerce-desktop-sidebar {
+    display: grid;
+    gap: 0.85rem;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+  .desktop-social-panel,
+  .desktop-cart-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+  .desktop-social-panel {
+    padding: 0.85rem;
+  }
+  .desktop-store-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .desktop-store-logo {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f3f4f6;
+  }
+  .desktop-store-mini h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .desktop-store-mini p {
+    margin: 0.2rem 0 0;
+    color: #6b7280;
+    font-size: 0.78rem;
+  }
+  .desktop-social-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+  }
+  .desktop-social-actions button {
+    min-height: 54px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #374151;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .desktop-social-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .desktop-social-actions button:hover:not(:disabled) {
+    color: #059669;
+    border-color: #bbf7d0;
+    background: #ecfdf5;
+  }
+  .desktop-cart-panel {
+    padding: 0.85rem;
+  }
+  .desktop-cart-count {
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .desktop-cart-list {
+    max-height: 42vh;
+  }
+  .desktop-cart-empty {
+    min-height: 170px;
+    padding: 1rem;
+  }
+  .ecommerce-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+  .ecommerce-card {
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  }
+  .ecommerce-card-img {
+    aspect-ratio: 4 / 3;
+  }
+  .ecommerce-card-body {
+    padding: 0.62rem;
+    gap: 0.35rem;
+  }
+  .ecommerce-card-title {
+    font-size: 0.86rem;
+    line-height: 1.25;
+  }
+  .ecommerce-card-desc {
+    font-size: 0.72rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+  }
+  .ecommerce-card-price {
+    font-size: 0.9rem;
+  }
+  .ecommerce-card-add {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+  .ecommerce-grid.view-list .ecommerce-card-img {
+    width: 78px;
+    min-width: 78px;
+  }
+  .ecommerce-grid.view-list .ecommerce-card {
+    min-height: 78px;
+  }
+  .ecommerce-grid.view-list .ecommerce-card-body {
+    padding: 0.55rem 0.75rem;
+  }
+  .ecommerce-grid.view-compact {
+    grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+    gap: 0.6rem;
+  }
+  .ecommerce-grid.view-compact .ecommerce-card-img {
+    aspect-ratio: 4 / 3;
   }
 }
 .ecommerce-card {
@@ -1708,6 +1983,51 @@ export default {
   padding: 2rem;
   text-align: center;
   color: #6b7280;
+}
+@media (min-width: 1024px) {
+  .ecommerce-card {
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  }
+  .ecommerce-card-img {
+    aspect-ratio: 4 / 3;
+  }
+  .ecommerce-card-body {
+    padding: 0.62rem;
+    gap: 0.35rem;
+  }
+  .ecommerce-card-title {
+    font-size: 0.86rem;
+    line-height: 1.25;
+  }
+  .ecommerce-card-desc {
+    font-size: 0.72rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+  }
+  .ecommerce-card-price {
+    font-size: 0.9rem;
+  }
+  .ecommerce-card-add {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+  .product-detail {
+    max-width: none;
+  }
+  .product-detail-main {
+    grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  }
+  .product-detail-title {
+    font-size: 1.35rem;
+  }
+  .product-detail-price {
+    font-size: 1.45rem;
+  }
+  .product-recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  }
 }
 </style>
 <style>

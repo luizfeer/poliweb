@@ -4,6 +4,18 @@ function isAdmin() {
   return !!localStorage.getItem('admin')
 }
 
+function isSuperAdmin() {
+  if (typeof localStorage === 'undefined') return true
+  try {
+    const raw = localStorage.getItem('context')
+    const context = raw ? JSON.parse(raw) : null
+    const email = context?.email || context?.user?.email
+    return email === 'pikazika0404@gmail.com'
+  } catch (_) {
+    return false
+  }
+}
+
 const routes = [
   {
     path: '/',
@@ -48,6 +60,17 @@ const routes = [
         path: '/adm/users',
        component: () => import('pages/admin/User.vue')
 
+      },
+      {
+        path: '/adm/contatos',
+        component: () => import('pages/admin/Contacts.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isSuperAdmin()) {
+            next('/')
+          } else {
+            next()
+          }
+        }
       },
       {
         path: '/adm/cidades',

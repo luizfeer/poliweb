@@ -136,6 +136,7 @@ import {
     provide
 } from "vue";
 import { mapState, mapGetters } from 'vuex'
+import { isSuperAdmin } from 'src/js/superadmin'
 
 export default defineComponent({
 
@@ -267,6 +268,13 @@ export default defineComponent({
                     icon: "insert_emoticon",
                     link: "/adm/icons",
                 })
+                if (isSuperAdmin()) {
+                    this.essentialLinks.push({
+                        title: "Mensagens",
+                        icon: "mark_email_unread",
+                        link: "/adm/contatos",
+                    })
+                }
             }
         },
         redirect(item) {

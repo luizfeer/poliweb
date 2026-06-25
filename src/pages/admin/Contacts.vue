@@ -68,7 +68,7 @@
           <template #body-cell-description="props">
             <q-td :props="props">
               <div class="admin-message-preview">
-                {{ preview(props.row.description) }}
+                {{ previewText(props.row.description) }}
               </div>
             </q-td>
           </template>
@@ -118,7 +118,7 @@
 
           <q-separator class="q-my-md" />
 
-          <pre class="admin-contact-message">{{ selectedContact?.description }}</pre>
+          <div class="admin-contact-message" v-html="renderHtml(selectedContact?.description)"></div>
         </q-card-section>
 
         <q-card-actions align="between">
@@ -229,9 +229,83 @@ export default {
     formatDate(value) {
       return value ? date.formatDate(value, 'DD/MM/YYYY HH:mm') : '-'
     },
-    preview(value = '') {
-      const clean = String(value).replace(/\s+/g, ' ').trim()
+    normalizeHtml(value = '') {
+      return String(value || '')
+    },
+    previewText(value = '') {
+      const clean = this.extractText(value).replace(/\s+/g, ' ').trim()
       return clean.length > 140 ? `${clean.slice(0, 140)}...` : clean
+    },
+    extractText(value = '') {
+      const source = this.normalizeHtml(value)
+      if (!source) return ''
+
+      if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {
+        return source
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+          .replace(/<[^>]*>/g, '')
+      }
+
+      const doc = new DOMParser().parseFromString(source, 'text/html')
+      return doc.body?.textContent || ''
+    },
+    renderHtml(value = '') {
+      const source = this.normalizeHtml(value)
+      if (!source) return ''
+
+      if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {
+        return source
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br>')
+      }
+
+      const doc = new DOMParser().parseFromString(source, 'text/html')
+      const allowedTags = new Set(['A', 'B', 'BR', 'BLOCKQUOTE', 'CODE', 'DIV', 'EM', 'I', 'LI', 'OL', 'P', 'PRE', 'SPAN', 'STRONG', 'UL', 'U'])
+
+      const walk = (node) => {
+        Array.from(node.children || []).forEach((child) => {
+          if (!allowedTags.has(child.tagName)) {
+            const text = doc.createTextNode(child.textContent || '')
+            child.replaceWith(text)
+            return
+          }
+
+          Array.from(child.attributes || []).forEach((attr) => {
+            const name = attr.name.toLowerCase()
+            const value = attr.value
+
+            if (name.startsWith('on')) {
+              child.removeAttribute(attr.name)
+              return
+            }
+
+            if (child.tagName === 'A') {
+              if (name === 'href') {
+                const href = String(value || '').trim()
+                if (!/^(https?:|mailto:|tel:|\/)/i.test(href)) {
+                  child.removeAttribute(attr.name)
+                  return
+                }
+                child.setAttribute('target', '_blank')
+                child.setAttribute('rel', 'noopener noreferrer')
+                return
+              }
+
+              if (name === 'title' || name === 'target' || name === 'rel') return
+            }
+
+            child.removeAttribute(attr.name)
+          })
+
+          walk(child)
+        })
+      }
+
+      walk(doc.body)
+      return doc.body.innerHTML
     },
     async fetchContacts() {
       this.loading = true

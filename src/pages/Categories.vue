@@ -471,6 +471,8 @@ export default {
 }
 
 .category-container {
+  width: min(1180px, 100%);
+  margin: 0 auto;
   padding: 12px 14px 20px;
 }
 
@@ -681,5 +683,33 @@ export default {
 
 .admin-btn-secondary:active {
   box-shadow: 0 2px 6px rgba(8, 145, 178, 0.2);
+}
+
+@media (min-width: 760px) {
+  .category-container {
+    padding: 20px 24px 40px;
+  }
+
+  .category-header {
+    margin-bottom: 16px;
+  }
+
+  .ads-grid {
+    gap: 14px;
+  }
+
+  .ads-grid-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ads-grid-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .ads-grid-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 </style>

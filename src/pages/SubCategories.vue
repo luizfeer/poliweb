@@ -21,66 +21,69 @@
               <q-btn no-caps rounded unelevated color="primary" icon="add_circle" label="Cadastrar nova categoria" class="admin-btn m-2"/>
             </router-link>
 
-            <div
-              v-for="item in categories"
-              :key="item.id"
-              @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}/${encodeURI(item.name)}`)"
-              class="cursor-pointer"
-            >
-              <article class="category-card">
-                <div class="category-card-main">
-                  <div class="category-thumb">
-                    <q-img
-                      :src="item.iconLink"
-                      :ratio="1"
-                      class="category-icon"
-                      spinner-color="white"
-                      spinner-size="30px"
-                    />
+            <div class="category-list">
+              <div
+                v-for="item in categories"
+                :key="item.id"
+                @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}/${encodeURI(item.name)}`)"
+                class="cursor-pointer"
+              >
+                <article class="category-card">
+                  <div class="category-card-main">
+                    <div class="category-thumb">
+                      <q-img
+                        v-if="item.iconLink"
+                        :src="item.iconLink"
+                        :ratio="1"
+                        class="category-icon"
+                        spinner-color="primary"
+                        spinner-size="24px"
+                      />
+                      <AppIcon v-else name="storefront" :size="28" class="category-icon-fallback" />
+                    </div>
+                    <div class="category-info">
+                      <h2 class="category-name">{{ item.name }}</h2>
+                      <div v-if="item.subcategories.length || item.haveAds || item.addressCity" class="category-meta">
+                        <span v-if="item.subcategories.length" class="category-meta-chip">
+                          {{ item.subcategories.length }} subcategorias
+                        </span>
+                        <span v-if="item.haveAds" class="category-meta-chip category-direct-ads">Comércios disponíveis</span>
+                        <span v-if="item.addressCity" class="category-meta-chip">{{ item.addressCity }}</span>
+                      </div>
+                    </div>
+                    <div v-if="admin" class="icon-chevron-wrap">
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="more_vert"
+                        class="actions-menu-btn"
+                        @click.stop
+                      >
+                        <q-menu auto-close @click.stop>
+                          <q-list dense style="min-width: 190px">
+                            <q-item v-if="isSuperAdmin" clickable v-ripple @click.stop="goToNewAd(item)">
+                              <q-item-section avatar><AppIcon name="storefront" :size="18" /></q-item-section>
+                              <q-item-section>Novo anúncio</q-item-section>
+                            </q-item>
+                            <q-item clickable v-ripple @click.stop="editCategory(item)">
+                              <q-item-section avatar><AppIcon name="edit" :size="18" /></q-item-section>
+                              <q-item-section>Editar</q-item-section>
+                            </q-item>
+                            <q-item clickable v-ripple v-if="isMaster" @click.stop="removeCategory(item)">
+                              <q-item-section avatar><AppIcon name="delete" :size="18" /></q-item-section>
+                              <q-item-section class="text-negative">Excluir</q-item-section>
+                            </q-item>
+                          </q-list>
+                        </q-menu>
+                      </q-btn>
+                    </div>
+                    <div v-else class="icon-chevron-wrap">
+                      <AppIcon name="chevron-right" :size="20" class="text-indigo-500" />
+                    </div>
                   </div>
-                  <div class="category-info">
-                    <h2 class="category-name">{{ item.name }}</h2>
-                    <p v-if="item.subcategories.length || item.haveAds" class="category-meta">
-                      <span v-if="item.subcategories.length">
-                        {{ item.subcategories.length }} subcategorias
-                      </span>
-                      <span v-if="item.subcategories.length && item.haveAds"> • </span>
-                      <span v-if="item.haveAds" class="category-direct-ads">Comércios disponíveis</span>
-                      <span v-if="item.addressCity"> • {{ item.addressCity }}</span>
-                    </p>
-                  </div>
-                  <div v-if="admin" class="icon-chevron-wrap">
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      icon="more_vert"
-                      class="actions-menu-btn"
-                      @click.stop
-                    >
-                      <q-menu auto-close @click.stop>
-                        <q-list dense style="min-width: 190px">
-                          <q-item v-if="isSuperAdmin" clickable v-ripple @click.stop="goToNewAd(item)">
-                            <q-item-section avatar><AppIcon name="storefront" :size="18" /></q-item-section>
-                            <q-item-section>Novo anúncio</q-item-section>
-                          </q-item>
-                          <q-item clickable v-ripple @click.stop="editCategory(item)">
-                            <q-item-section avatar><AppIcon name="edit" :size="18" /></q-item-section>
-                            <q-item-section>Editar</q-item-section>
-                          </q-item>
-                          <q-item clickable v-ripple v-if="isMaster" @click.stop="removeCategory(item)">
-                            <q-item-section avatar><AppIcon name="delete" :size="18" /></q-item-section>
-                            <q-item-section class="text-negative">Excluir</q-item-section>
-                          </q-item>
-                        </q-list>
-                      </q-menu>
-                    </q-btn>
-                  </div>
-                  <div v-else class="icon-chevron-wrap">
-                    <AppIcon name="chevron-right" :size="20" class="text-indigo-400" />
-                  </div>
-                </div>
-              </article>
+                </article>
+              </div>
             </div>
           </q-carousel-slide>
 
@@ -99,33 +102,35 @@
               <q-btn no-caps rounded unelevated color="primary" icon="category" label="Cadastrar sub-categoria" class="admin-btn m-2"/>
             </router-link>
 
-            <div
-              v-for="item in subCategories"
-              :key="item.id"
-              @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}`)"
-              class="cursor-pointer"
-            >
-              <article class="sub-card">
-                <div class="sub-card-main">
-                  <div class="sub-thumb">
-                    <q-img
-                      :src="item.iconLink"
-                      :ratio="1"
-                      class="sub-icon"
-                      spinner-color="white"
-                      spinner-size="30px"
-                    />
-                  </div>
-                  <div class="sub-info">
-                    <h3 class="sub-name">{{ item.name }}</h3>
-                    <p v-if="item.subcategories?.length || item.haveAds" class="sub-meta">
-                      <span v-if="item.subcategories?.length">
-                        {{ item.subcategories.length }} níveis abaixo
-                      </span>
-                      <span v-if="item.subcategories?.length && item.haveAds"> • </span>
-                      <span v-if="item.haveAds" class="category-direct-ads">Comércios disponíveis</span>
-                    </p>
-                  </div>
+            <div class="sub-list">
+              <div
+                v-for="item in subCategories"
+                :key="item.id"
+                @click="item.subcategories.length ? subcategories(item) : goTo(`/categorias/${item.id}`)"
+                class="cursor-pointer"
+              >
+                <article class="sub-card">
+                  <div class="sub-card-main">
+                    <div class="sub-thumb">
+                      <q-img
+                        v-if="item.iconLink"
+                        :src="item.iconLink"
+                        :ratio="1"
+                        class="sub-icon"
+                        spinner-color="primary"
+                        spinner-size="22px"
+                      />
+                      <AppIcon v-else name="storefront" :size="24" class="category-icon-fallback" />
+                    </div>
+                    <div class="sub-info">
+                      <h3 class="sub-name">{{ item.name }}</h3>
+                      <div v-if="item.subcategories?.length || item.haveAds" class="sub-meta">
+                        <span v-if="item.subcategories?.length" class="category-meta-chip">
+                          {{ item.subcategories.length }} níveis abaixo
+                        </span>
+                        <span v-if="item.haveAds" class="category-meta-chip category-direct-ads">Comércios disponíveis</span>
+                      </div>
+                    </div>
                   <div v-if="admin" class="icon-chevron-wrap">
                     <q-btn
                       flat
@@ -154,10 +159,11 @@
                     </q-btn>
                   </div>
                   <div v-else class="icon-chevron-wrap">
-                    <AppIcon name="chevron-right" :size="18" class="text-indigo-400" />
+                    <AppIcon name="chevron-right" :size="18" class="text-indigo-500" />
                   </div>
-                </div>
-              </article>
+                  </div>
+                </article>
+              </div>
             </div>
           </q-carousel-slide>
         </q-carousel>
@@ -337,7 +343,14 @@ export default defineComponent({
 }
 
 .sub-container {
-  padding: 8px 12px 16px;
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 8px 12px 24px;
+}
+
+.sub-container :deep(.q-carousel),
+.sub-container :deep(.q-carousel__slide) {
+  background: transparent;
 }
 
 .section-header {
@@ -346,8 +359,8 @@ export default defineComponent({
 
 .section-title {
   margin: 0;
-  font-size: 1.08rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
   color: #0f172a;
 }
 
@@ -357,55 +370,86 @@ export default defineComponent({
   color: #64748b;
 }
 
+.category-list,
+.sub-list {
+  display: grid;
+  gap: 10px;
+}
+
 .category-card,
 .sub-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 10px;
-  margin-top: 10px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #fff 0%, #f8faff 100%);
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.055);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.category-card::before,
+.sub-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, #6366f1, #3b82f6);
+  content: '';
+}
+
+.cursor-pointer:active .category-card,
+.cursor-pointer:active .sub-card {
+  transform: scale(0.985);
 }
 
 .category-card-main,
 .sub-card-main {
   display: flex;
   align-items: center;
-  gap: 10px;
+  min-height: 60px;
+  gap: 12px;
 }
 
 .category-thumb {
-  width: 52px;
-  min-width: 52px;
-  height: 52px;
+  width: 58px;
+  min-width: 58px;
+  height: 58px;
   border-radius: 999px;
-  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(145deg, #eef2ff, #e0f2fe);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .sub-thumb {
-  width: 48px;
-  min-width: 48px;
-  height: 48px;
+  width: 54px;
+  min-width: 54px;
+  height: 54px;
   border-radius: 999px;
-  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(145deg, #eef2ff, #e0f2fe);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .category-icon {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
 }
 
 .sub-icon {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
+}
+
+.category-icon-fallback {
+  color: #4f46e5;
 }
 
 .category-info,
@@ -416,21 +460,43 @@ export default defineComponent({
 
 .category-name,
 .sub-name {
+  display: -webkit-box;
+  overflow: hidden;
   margin: 0;
-  color: #334155;
-  font-weight: 700;
-  line-height: 1.25;
+  color: #1e293b;
+  font-size: 0.97rem;
+  font-weight: 800;
+  letter-spacing: -0.012em;
+  line-height: 1.12;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .category-meta,
 .sub-meta {
-  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 7px 0 0;
   color: #64748b;
-  font-size: 0.76rem;
+  font-size: 0.7rem;
+}
+
+.category-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: rgba(248, 250, 252, 0.9);
+  line-height: 1.1;
 }
 .category-direct-ads {
   color: #15803d;
   font-weight: 700;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
 }
 
 .admin-btn {
@@ -439,10 +505,11 @@ export default defineComponent({
 }
 
 .icon-chevron-wrap {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
   border-radius: 999px;
+  border: 1px solid #e0e7ff;
   background: #eef2ff;
   display: flex;
   align-items: center;
@@ -464,5 +531,25 @@ export default defineComponent({
   margin: 2px 0 8px;
   border-radius: 999px;
   padding: 6px 10px;
+}
+
+@media (hover: hover) {
+  .cursor-pointer:hover .category-card,
+  .cursor-pointer:hover .sub-card {
+    transform: translateY(-2px);
+    border-color: #c7d2fe;
+    box-shadow: 0 10px 24px rgba(30, 41, 59, 0.09);
+  }
+}
+
+@media (min-width: 760px) {
+  .category-list,
+  .sub-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-header {
+    margin-top: 14px;
+  }
 }
 </style>

@@ -229,6 +229,8 @@ export default defineComponent({
 }
 
 .list-container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
   padding: 10px 12px 16px;
 }
 
@@ -380,5 +382,21 @@ export default defineComponent({
   color: #475569;
   font-size: 0.84rem;
   margin: 8px 0 10px;
+}
+
+@media (min-width: 760px) {
+  .list-container {
+    padding: 18px 24px 40px;
+  }
+
+  .sub-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .sub-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 </style>

@@ -41,7 +41,6 @@
       <section class="city-section">
         <div class="city-section-head">
           <h2>Categorias populares em {{ cityName }}</h2>
-          <router-link to="/cidades">Ver cidades</router-link>
         </div>
 
         <div v-if="loadingCategories" class="city-category-list">
@@ -50,6 +49,35 @@
         <div v-else class="city-category-list">
           <router-link
             v-for="category in popularCategories"
+            :key="category.id"
+            :to="categoryCityUrl(city, category)"
+            class="city-category-item"
+          >
+            <span class="city-category-icon">
+              <q-img
+                v-if="categoryIcon(category)"
+                :src="categoryIcon(category)"
+                :alt="category.name"
+                ratio="1"
+                fit="contain"
+                spinner-size="16px"
+              />
+              <q-icon v-else name="category" size="20px" />
+            </span>
+            <span>{{ category.name }}</span>
+          </router-link>
+        </div>
+      </section>
+
+      <section class="city-section">
+        <div class="city-section-head">
+          <h2>Todas as categorias em {{ cityName }}</h2>
+          <router-link to="/encontre">Ver categorias</router-link>
+        </div>
+
+        <div class="city-category-list">
+          <router-link
+            v-for="category in allCategories"
             :key="category.id"
             :to="categoryCityUrl(city, category)"
             class="city-category-item"
@@ -80,7 +108,7 @@
           </div>
           <div v-else class="city-card-list">
             <router-link v-for="ad in newAds" :key="ad.id" :to="adUrl(ad)" class="city-ad-card">
-              <q-avatar size="46px" rounded>
+              <q-avatar size="46px">
                 <img v-if="adImage(ad)" :src="adImage(ad)" alt="" />
                 <q-icon v-else name="storefront" />
               </q-avatar>
@@ -160,7 +188,11 @@ export default {
 
     const cityName = computed(() => city.value?.city || titleFromSlug(route.params.cidade))
     const flatCategories = computed(() => flattenCategories(categories.value).filter((item) => !item.deletedAt))
-    const popularCategories = computed(() => flatCategories.value.slice(0, 18))
+    const topLevelCategories = computed(() => categories.value.filter((item) => !item.deletedAt))
+    const popularCategories = computed(() => topLevelCategories.value.slice(0, 10))
+    const allCategories = computed(() => [...topLevelCategories.value].sort((a, b) => (
+      String(a.name || '').trim().localeCompare(String(b.name || '').trim(), 'pt-BR')
+    )))
     const seoText = computed(() => {
       const count = newAds.value.length
       const categoryCount = flatCategories.value.length
@@ -302,6 +334,7 @@ export default {
       cityName,
       flatCategories,
       popularCategories,
+      allCategories,
       seoText,
       adUrl,
       adImage,

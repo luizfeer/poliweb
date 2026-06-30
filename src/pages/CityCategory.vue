@@ -306,13 +306,21 @@ export default {
   background: #fff;
 }
 .city-category-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
   overflow: hidden;
   border: 1px solid #e5e7eb;
+  padding: 0.85rem;
   color: inherit;
   text-decoration: none;
 }
 .city-category-media {
-  aspect-ratio: 1.25;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  overflow: hidden;
+  border-radius: 999px;
   background: #e2e8f0;
 }
 .city-category-img {
@@ -328,7 +336,8 @@ export default {
   background: linear-gradient(135deg, #e0f2fe, #f8fafc);
 }
 .city-category-body {
-  padding: 0.85rem;
+  min-width: 0;
+  padding: 0;
 }
 .city-category-body h2 {
   margin: 0;
@@ -353,7 +362,7 @@ export default {
   font-weight: 700;
 }
 .city-category-card-skeleton {
-  height: 250px;
+  height: 100px;
   border-radius: 8px;
 }
 .city-category-empty {

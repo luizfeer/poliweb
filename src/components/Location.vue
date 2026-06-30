@@ -31,12 +31,13 @@
             use-input
             input-debounce="0"
             label="Buscar cidade"
-            :options="citys"
+            :options="filteredCitys"
             option-label="city"
             outlined
             dense
             class="location-select"
             :disable="switchingCity"
+            @filter="filterCitys"
           >
             <template v-slot:prepend>
               <AppIcon name="place" :size="20" />
@@ -104,6 +105,14 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { citysData } from 'src/js/citys'
 
+function normalizeCitySearch(value = '') {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
 export default {
   setup() {
     const store = useStore()
@@ -146,6 +155,7 @@ export default {
       model: ref(null),
       dialog: ref(false),
       citys: ref([]),
+      filteredCitys: ref([]),
       localization: ref({}),
       location: ref(null),
       gettingLocation: ref(false),
@@ -180,6 +190,20 @@ export default {
     }
   },
   methods: {
+    filterCitys(val, update) {
+      update(() => {
+        const query = normalizeCitySearch(val)
+        if (!query) {
+          this.filteredCitys = [...this.citys]
+          return
+        }
+
+        this.filteredCitys = this.citys.filter((city) => {
+          const text = normalizeCitySearch(`${city.city} ${city.state || ''}`)
+          return text.includes(query)
+        })
+      })
+    },
     async getLocation() {
 
       return new Promise((resolve, reject) => {
@@ -246,13 +270,15 @@ export default {
   },
   async mounted(){
 
-     this.citys = citysData.sort((a, b) => a.city.localeCompare(b.city))
+     this.citys = [...citysData].sort((a, b) => a.city.localeCompare(b.city))
+     this.filteredCitys = [...this.citys]
 
      const localization = localStorage.getItem("localization")
        if(localization){
          this.localization =  JSON.parse(localization)
         if(this.citys.findIndex(x=> x.city === this.localization.city)<0){
           this.citys.push(this.localization)
+          this.filteredCitys = [...this.citys]
         }
         // this.model = this.localization
        }

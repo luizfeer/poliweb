@@ -127,6 +127,7 @@
 import { computed, onMounted, onServerPrefetch, ref, watch } from 'vue'
 import { useMeta } from 'quasar'
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import { api } from 'boot/axios'
 import { citysData } from 'src/js/citys'
 import {
@@ -148,6 +149,7 @@ export default {
   name: 'CityPage',
   setup() {
     const route = useRoute()
+    const store = useStore()
     const city = ref(null)
     const categories = ref([])
     const newAds = ref([])
@@ -207,6 +209,11 @@ export default {
         loadingTop.value = false
         return
       }
+
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('localization', JSON.stringify(city.value))
+      }
+      store.dispatch('localization/setLocalization', city.value)
 
       await Promise.all([
         loadCategories(),

@@ -135,9 +135,24 @@ export default {
 
         if (!category.value?.id) return
 
-        const adsResponse = await api.get(`/categories/${category.value.id}/ads?nonDeleted=true`)
-        const list = adsResponse?.data?.categoryAds || []
-        ads.value = list.filter((ad) => !ad.deletedAt && cityMatches(ad, city.value.city))
+        const categoryTree = flattenCategories([category.value])
+          .filter((item) => item.id && !item.deletedAt)
+        const adsResponses = await Promise.allSettled(
+          categoryTree.map((item) => (
+            api.get(`/categories/${item.id}/ads?nonDeleted=true`)
+          ))
+        )
+        const list = adsResponses.flatMap((result) => (
+          result.status === 'fulfilled'
+            ? result.value?.data?.categoryAds || []
+            : []
+        ))
+        const cityAds = list.filter((ad) => (
+          ad?.id &&
+          !ad.deletedAt &&
+          cityMatches(ad, city.value.city)
+        ))
+        ads.value = [...new Map(cityAds.map((ad) => [ad.id, ad])).values()]
       } finally {
         loading.value = false
       }

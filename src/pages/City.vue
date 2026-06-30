@@ -43,28 +43,31 @@
           <h2>Categorias populares em {{ cityName }}</h2>
         </div>
 
-        <div v-if="loadingCategories" class="city-category-list">
-          <q-skeleton v-for="i in 8" :key="i" class="city-category-skeleton" />
+        <div v-if="loadingCategories" class="city-popular-scroll">
+          <div v-for="i in 8" :key="i" class="city-popular-item">
+            <q-skeleton type="circle" class="city-popular-skeleton-icon" />
+            <q-skeleton type="text" class="city-popular-skeleton-text" />
+          </div>
         </div>
-        <div v-else class="city-category-list">
+        <div v-else class="city-popular-scroll">
           <router-link
             v-for="category in popularCategories"
             :key="category.id"
             :to="categoryCityUrl(city, category)"
-            class="city-category-item"
+            class="city-popular-item"
           >
-            <span class="city-category-icon">
+            <span class="city-popular-icon">
               <q-img
                 v-if="categoryIcon(category)"
                 :src="categoryIcon(category)"
                 :alt="category.name"
                 ratio="1"
                 fit="contain"
-                spinner-size="16px"
+                spinner-size="24px"
               />
-              <q-icon v-else name="category" size="20px" />
+              <q-icon v-else name="category" size="32px" />
             </span>
-            <span>{{ category.name }}</span>
+            <span class="city-popular-name">{{ category.name }}</span>
           </router-link>
         </div>
       </section>
@@ -443,6 +446,67 @@ export default {
   font-size: 0.88rem;
   font-weight: 800;
   text-decoration: none;
+}
+.city-popular-scroll {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0.1rem 0.65rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.city-popular-scroll::-webkit-scrollbar {
+  display: none;
+}
+.city-popular-item {
+  display: flex;
+  width: 92px;
+  flex: 0 0 92px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0f172a;
+  text-align: center;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+.city-popular-icon {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+.city-popular-icon :deep(.q-img) {
+  width: 56px;
+  height: 56px;
+}
+.city-popular-icon .q-icon {
+  color: #2563eb;
+}
+.city-popular-name {
+  display: -webkit-box;
+  overflow: hidden;
+  width: 100%;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.city-popular-skeleton-icon {
+  width: 76px;
+  height: 76px;
+}
+.city-popular-skeleton-text {
+  width: 78px;
 }
 .city-category-list {
   display: grid;

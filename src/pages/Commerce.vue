@@ -14,77 +14,81 @@
         </nav>
       </q-card>
 
-      <q-card class="seo-info-card">
-        <div class="seo-info-head">
-          <div>
-            <p class="seo-eyebrow">Categorias e buscas relacionadas</p>
-            <h2 class="seo-section-title">Veja {{ commerceName }} em outras buscas</h2>
+      <div class="seo-layout-grid">
+        <div class="seo-primary-column">
+          <q-card class="seo-info-card">
+            <div class="seo-info-head">
+              <div>
+                <p class="seo-eyebrow">Categorias e buscas relacionadas</p>
+                <h2 class="seo-section-title">Veja {{ commerceName }} em outras buscas</h2>
+                <p class="seo-section-text">
+                  {{ categoriesLeadText }}
+                </p>
+              </div>
+            </div>
+
+            <div v-if="adCategories.length" class="seo-category-grid">
+              <router-link
+                v-for="category in adCategories"
+                :key="category.id"
+                :to="categoryLink(category)"
+                class="seo-category-link"
+              >
+                <span class="seo-category-name">{{ categoryLabel(category) }}</span>
+                <span class="seo-category-sub">
+                  {{ categoryCityCta(category) }}
+                </span>
+              </router-link>
+            </div>
+
+            <div v-if="adCategories.length" class="seo-category-tags">
+              <router-link
+                v-for="category in adCategories"
+                :key="`tag-${category.id}`"
+                :to="categoryLink(category)"
+                class="seo-category-tag"
+              >
+                {{ categoryLabel(category) }}
+              </router-link>
+            </div>
+          </q-card>
+
+          <q-card class="seo-summary-card">
+            <p class="seo-eyebrow">Resumo local</p>
+            <h2 class="seo-section-title">{{ summaryTitle }}</h2>
+            <p class="seo-section-text">{{ localSummary }}</p>
+          </q-card>
+        </div>
+
+        <q-card class="seo-faq-card">
+          <div class="seo-faq-head">
+            <p class="seo-eyebrow">Perguntas frequentes</p>
+            <h2 class="seo-section-title">O que mais perguntam sobre {{ commerceName }}{{ citySuffix }}</h2>
             <p class="seo-section-text">
-              {{ categoriesLeadText }}
+              Reunimos as dúvidas mais comuns sobre contato, localização, categorias e presença digital deste comércio{{ citySuffix }}.
             </p>
           </div>
-        </div>
 
-        <div v-if="adCategories.length" class="seo-category-grid">
-          <router-link
-            v-for="category in adCategories"
-            :key="category.id"
-            :to="categoryLink(category)"
-            class="seo-category-link"
-          >
-            <span class="seo-category-name">{{ categoryLabel(category) }}</span>
-            <span class="seo-category-sub">
-              {{ categoryCityCta(category) }}
-            </span>
-          </router-link>
-        </div>
-
-        <div v-if="adCategories.length" class="seo-category-tags">
-          <router-link
-            v-for="category in adCategories"
-            :key="`tag-${category.id}`"
-            :to="categoryLink(category)"
-            class="seo-category-tag"
-          >
-            {{ categoryLabel(category) }}
-          </router-link>
-        </div>
-      </q-card>
-
-      <q-card class="seo-summary-card">
-        <p class="seo-eyebrow">Resumo local</p>
-        <h2 class="seo-section-title">{{ summaryTitle }}</h2>
-        <p class="seo-section-text">{{ localSummary }}</p>
-      </q-card>
-
-      <q-card class="seo-faq-card">
-        <div class="seo-faq-head">
-          <p class="seo-eyebrow">Perguntas frequentes</p>
-          <h2 class="seo-section-title">O que mais perguntam sobre {{ commerceName }}{{ citySuffix }}</h2>
-          <p class="seo-section-text">
-            Reunimos as dúvidas mais comuns sobre contato, localização, categorias e presença digital deste comércio{{ citySuffix }}.
-          </p>
-        </div>
-
-        <div class="seo-faq-list">
-          <q-expansion-item
-            v-for="(item, index) in faqItems"
-            :key="`${index}-${item.question}`"
-            group="commerce-faq"
-            dense
-            expand-separator
-            header-class="seo-faq-question"
-            class="seo-faq-item"
-          >
-            <template #header>
-              <q-item-section>
-                <div class="seo-faq-question-text">{{ item.question }}</div>
-              </q-item-section>
-            </template>
-            <div class="seo-faq-answer" v-html="item.answer" />
-          </q-expansion-item>
-        </div>
-      </q-card>
+          <div class="seo-faq-list">
+            <q-expansion-item
+              v-for="(item, index) in faqItems"
+              :key="`${index}-${item.question}`"
+              group="commerce-faq"
+              dense
+              expand-separator
+              header-class="seo-faq-question"
+              class="seo-faq-item"
+            >
+              <template #header>
+                <q-item-section>
+                  <div class="seo-faq-question-text">{{ item.question }}</div>
+                </q-item-section>
+              </template>
+              <div class="seo-faq-answer" v-html="item.answer" />
+            </q-expansion-item>
+          </div>
+        </q-card>
+      </div>
     </div>
     <div v-if="!loading && data" class="seo-cta-wrapper">
       <q-card class="seo-cta-card">
@@ -656,12 +660,23 @@ export default {
 
 <style scoped>
 .ads-page-wrapper {
+  min-height: 100vh;
   padding-top: 0.5rem;
   padding-bottom: env(safe-area-inset-bottom);
+  background: linear-gradient(180deg, #eef2f6 0%, #e5e7eb 100%);
 }
 .seo-content-wrapper,
 .seo-cta-wrapper {
   padding: 0 1rem 1rem;
+}
+.seo-content-wrapper {
+  padding-top: 1rem;
+}
+.seo-layout-grid {
+  min-width: 0;
+}
+.seo-primary-column {
+  min-width: 0;
 }
 @media (min-width: 1024px) {
   .seo-content-wrapper,
@@ -672,6 +687,21 @@ export default {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
+  .seo-layout-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.35fr);
+    gap: 1rem;
+    align-items: start;
+  }
+  .seo-primary-column {
+    display: grid;
+    gap: 1rem;
+  }
+  .seo-primary-column .seo-info-card,
+  .seo-primary-column .seo-summary-card,
+  .seo-layout-grid .seo-faq-card {
+    margin-bottom: 0;
+  }
 }
 .seo-breadcrumb-card,
 .seo-info-card,
@@ -680,6 +710,8 @@ export default {
 .seo-cta-card {
   border-radius: 14px;
   border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 .seo-breadcrumb-card,
 .seo-info-card,

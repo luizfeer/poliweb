@@ -51,8 +51,8 @@
       </div>
     </div>
     <!-- inputs ocultos para upload (mantidos para funcionalidade) -->
-    <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*,video/*" multiple class="hidden"/>
-    <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload()" accept="image/*" capture="environment" class="hidden"/>
+    <input type="file" id="gallery" ref="gallery" @change="galleryUpload($event)" accept="image/*,video/*" multiple class="hidden"/>
+    <input type="file" id="camera-gallery" ref="cameraGallery" @change="galleryUpload($event)" accept="image/*" capture="environment" class="hidden"/>
 
     <div class="ads-desktop-shell">
       <main class="ads-main-column">
@@ -818,6 +818,7 @@ import {
 } from 'src/js/openingHours'
 import { timeAgo as formatTimeAgo } from 'src/js/timeAgo'
 import { isSuperAdmin } from 'src/js/superadmin'
+import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
 import { mapState } from 'vuex'
 import { getAdCategories } from 'src/services/adsCategories'
 
@@ -1289,8 +1290,8 @@ export default {
         this.photoUpload = true
         this.adsComponent.files.logo[this.adsComponent.files.logo.length-1].link = URL.createObjectURL(file);
       },
-      galleryUpload() {
-        const input = this.$refs.gallery
+      galleryUpload(event) {
+        const input = event?.target || this.$refs.gallery
         const files = input?.files
         if (!files?.length) return
         const fileList = Array.from(files)
@@ -1698,10 +1699,11 @@ export default {
         const files = this.galleryItems.map((i) => i.file)
         if (!files?.length) return
         this.galleryUploading = true
-        const images = files.filter((f) => (f.type || '').startsWith('image/'))
+        const selectedImages = files.filter((f) => (f.type || '').startsWith('image/'))
         const videos = files.filter((f) => (f.type || '').startsWith('video/'))
         const results = []
         try {
+          const images = await Promise.all(selectedImages.map(normalizeUploadImage))
           if (images.length) {
             const formData = new FormData()
             formData.append('name', 'gallery')
@@ -1745,7 +1747,7 @@ export default {
             this.$q.notify({ color: 'negative', position: 'top', message: 'Falha ao enviar.', icon: 'report_problem' })
           }
         } catch (err) {
-          const msg = err?.response?.data?.message || 'Erro na conexão!'
+          const msg = err?.response?.data?.message || err?.message || 'Erro na conexão!'
           this.$q.notify({ color: 'negative', position: 'top', message: msg, icon: 'report_problem' })
           this.confirmGallery = false
           this.galleryItems = []
@@ -1754,11 +1756,17 @@ export default {
           this.galleryUploading = false
         }
       },
-      setAtt(){
+      async setAtt(){
         this.$q.loading.show()
-        let data = new FormData();
-        data.append('name', 'my-picture');
-        data.append('file', this.$refs.file.files[0]);
+        const data = new FormData()
+        data.append('name', 'my-picture')
+        try {
+          data.append('file', await normalizeUploadImage(this.$refs.file.files[0]))
+        } catch (err) {
+          this.$q.notify({ color: 'negative', position: 'top', message: err.message, icon: 'report_problem' })
+          this.$q.loading.hide()
+          return
+        }
         this.$api.post(`/categories/ads/${this.adsComponent.id}/files/logo`, data , { headers: { 'Content-Type': 'multipart/form-data' }})
         .then((response) => {
             //  console.log(response.data.addresses)

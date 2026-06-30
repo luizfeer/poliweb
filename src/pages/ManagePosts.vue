@@ -72,6 +72,7 @@
 
 <script>
 import { ref } from 'vue'
+import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
 
 export default {
   setup() {
@@ -123,8 +124,8 @@ export default {
       const item = this.queue[i]
       item.loading = true
       const form = new FormData()
-      form.append('file', item.file)
       try {
+        form.append('file', await normalizeUploadImage(item.file))
         // Upload the file with type=post
         const uploadRes = await this.$api.post(
           `/categories/ads/${this.adId}/files/post`,

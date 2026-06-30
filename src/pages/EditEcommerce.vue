@@ -238,6 +238,7 @@ import {
 import {
     categoryes
 } from 'src/js/CategoryesEcommerceNew'
+import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
 
 export default {
     components: {},
@@ -401,7 +402,7 @@ export default {
                     this.$q.loading.hide()
                 })
         },
-        sendGallery() {
+        async sendGallery() {
             this.$refs.name.validate()
             this.$refs.category.validate()
             this.$refs.value.validate()
@@ -415,8 +416,17 @@ export default {
                 return
             }
             this.$q.loading.show()
-            let data = new FormData();
-            data.append('file', this.$refs.gallery.files[0]);
+            const data = new FormData()
+            try {
+                data.append('file', await normalizeUploadImage(this.$refs.gallery.files[0]))
+            } catch (err) {
+                this.$q.loading.hide()
+                this.$q.notify({
+                    color: 'negative',
+                    message: err.message,
+                })
+                return
+            }
             // data.append('name', 'ecommerce');
             const url = new URLSearchParams()
             url.append('title', JSON.stringify(this.form.title));

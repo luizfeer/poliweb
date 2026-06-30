@@ -14,7 +14,7 @@
           <q-carousel-slide name="0" class="p-0">
             <div class="section-header">
               <h1 class="section-title">Categorias</h1>
-              <p class="section-subtitle">Escolha uma categoria para ver as subcategorias.</p>
+              <p class="section-subtitle">Escolha uma categoria para ver subcategorias ou comércios.</p>
             </div>
 
             <router-link v-if="admin" :to="`/painel/categorias/add`">
@@ -40,8 +40,12 @@
                   </div>
                   <div class="category-info">
                     <h2 class="category-name">{{ item.name }}</h2>
-                    <p class="category-meta">
-                      {{ item.subcategories.length }} subcategorias
+                    <p v-if="item.subcategories.length || item.haveAds" class="category-meta">
+                      <span v-if="item.subcategories.length">
+                        {{ item.subcategories.length }} subcategorias
+                      </span>
+                      <span v-if="item.subcategories.length && item.haveAds"> • </span>
+                      <span v-if="item.haveAds" class="category-direct-ads">Comércios disponíveis</span>
                       <span v-if="item.addressCity"> • {{ item.addressCity }}</span>
                     </p>
                   </div>
@@ -114,8 +118,12 @@
                   </div>
                   <div class="sub-info">
                     <h3 class="sub-name">{{ item.name }}</h3>
-                    <p class="sub-meta" v-if="item.subcategories?.length">
-                      {{ item.subcategories.length }} níveis abaixo
+                    <p v-if="item.subcategories?.length || item.haveAds" class="sub-meta">
+                      <span v-if="item.subcategories?.length">
+                        {{ item.subcategories.length }} níveis abaixo
+                      </span>
+                      <span v-if="item.subcategories?.length && item.haveAds"> • </span>
+                      <span v-if="item.haveAds" class="category-direct-ads">Comércios disponíveis</span>
                     </p>
                   </div>
                   <div v-if="admin" class="icon-chevron-wrap">
@@ -419,6 +427,10 @@ export default defineComponent({
   margin: 4px 0 0;
   color: #64748b;
   font-size: 0.76rem;
+}
+.category-direct-ads {
+  color: #15803d;
+  font-weight: 700;
 }
 
 .admin-btn {

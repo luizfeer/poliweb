@@ -47,10 +47,6 @@
               <strong>{{ city.city }}</strong>
               <span>{{ city.state || 'BR' }}</span>
             </div>
-            <div class="city-card-stats">
-              <strong>{{ cityStats(city).adsCount }}</strong>
-              <span>comercios</span>
-            </div>
             <AppIcon name="chevron-right" :size="20" class="text-gray-400" />
           </router-link>
         </div>
@@ -377,20 +373,9 @@ export default {
   line-height: 1.2;
 }
 .city-card-main span,
-.city-card-stats span,
 .latest-item span {
   color: #64748b;
   font-size: 0.78rem;
-}
-.city-card-stats {
-  min-width: 4.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-.city-card-stats strong {
-  color: #16a34a;
-  font-size: 1rem;
 }
 .latest-list {
   display: grid;
@@ -415,9 +400,6 @@ export default {
 @media (max-width: 640px) {
   .citys-shell {
     padding-inline: 0.75rem;
-  }
-  .city-card-stats {
-    min-width: 3.8rem;
   }
 }
 </style>

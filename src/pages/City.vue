@@ -523,10 +523,23 @@ export default {
   .city-hero .q-btn {
     margin-top: 0.85rem;
   }
-  .city-stats,
   .city-category-list,
   .city-split {
     grid-template-columns: 1fr;
+  }
+  .city-stats {
+    gap: 0.4rem;
+  }
+  .city-stat {
+    min-width: 0;
+    padding: 0.65rem 0.5rem;
+  }
+  .city-stat span {
+    font-size: 0.64rem;
+    line-height: 1.2;
+  }
+  .city-stat strong {
+    font-size: 1.25rem;
   }
 }
 </style>

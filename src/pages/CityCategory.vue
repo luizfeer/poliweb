@@ -21,22 +21,44 @@
 
       <div v-else-if="ads.length" class="city-category-grid">
         <router-link v-for="ad in ads" :key="ad.id" :to="adUrl(ad)" class="city-category-card">
-          <div class="city-category-media">
+          <div class="city-category-media" :class="{ 'city-category-media--fallback': !adCoverImage(ad) }">
             <q-img
-              v-if="adImage(ad)"
-              :src="adImage(ad)"
-              :ratio="1"
-              spinner-color="primary"
+              v-if="adCoverImage(ad)"
+              :src="adCoverImage(ad)"
+              :alt="`Foto de ${ad.name}`"
+              spinner-color="white"
+              loading="lazy"
               class="city-category-img"
             />
             <div v-else class="city-category-placeholder">
-              <q-icon name="storefront" size="28px" />
+              <q-icon name="storefront" size="38px" />
             </div>
-          </div>
-          <div class="city-category-body">
-            <h2>{{ ad.name }}</h2>
-            <p>{{ ad.description || addressText(ad) || 'Comercio local no Poliweb.' }}</p>
-            <span v-if="addressText(ad)">{{ addressText(ad) }}</span>
+
+            <div class="city-category-overlay"></div>
+
+            <div class="city-category-logo" aria-hidden="true">
+              <q-img
+                v-if="adLogoImage(ad)"
+                :src="adLogoImage(ad)"
+                :alt="`Logo de ${ad.name}`"
+                loading="lazy"
+                class="city-category-logo-img"
+              />
+              <span v-else>{{ initials(ad.name) }}</span>
+            </div>
+
+            <div class="city-category-arrow" aria-hidden="true">
+              <q-icon name="arrow_forward" size="18px" />
+            </div>
+
+            <div class="city-category-body">
+              <span v-if="addressText(ad)" class="city-category-address">
+                <q-icon name="place" size="14px" />
+                {{ addressText(ad) }}
+              </span>
+              <h2>{{ ad.name }}</h2>
+              <p>{{ ad.description || 'Conheça este comércio no Poliweb.' }}</p>
+            </div>
           </div>
         </router-link>
       </div>
@@ -232,10 +254,24 @@ export default {
       }
     })
 
-    const adImage = (ad) => {
-      const logo = ad?.files?.logo?.find((file) => !file.deletedAt && file.link)?.link
-      const gallery = ad?.files?.gallery?.find((file) => !file.deletedAt && file.link)?.link
-      return logo || gallery || ''
+    const firstActiveFile = (files) => {
+      return files?.find((file) => !file.deletedAt && file.link)?.link || ''
+    }
+    const adCoverImage = (ad) => {
+      return firstActiveFile(ad?.files?.gallery)
+    }
+    const adLogoImage = (ad) => {
+      return firstActiveFile(ad?.files?.logo)
+    }
+    const initials = (name = '') => {
+      return String(name)
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0))
+        .join('')
+        .toUpperCase() || 'P'
     }
     const addressText = (ad) => {
       const address = addresses(ad).slice(-1)[0]
@@ -254,7 +290,9 @@ export default {
       pageDescription,
       relatedCategories,
       adUrl,
-      adImage,
+      adCoverImage,
+      adLogoImage,
+      initials,
       addressText,
       categoryCityUrl,
       cityUrl
@@ -312,73 +350,158 @@ export default {
 }
 .city-category-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 .city-category-card,
 .city-category-empty {
-  border-radius: 8px;
+  border-radius: 18px;
   background: #fff;
 }
 .city-category-card {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
+  position: relative;
+  display: block;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
-  padding: 0.85rem;
+  min-width: 0;
+  border: 1px solid rgba(15, 23, 42, 0.08);
   color: inherit;
   text-decoration: none;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  isolation: isolate;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.city-category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
+}
+.city-category-card:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 3px;
 }
 .city-category-media {
-  width: 72px;
-  height: 72px;
-  flex: 0 0 72px;
+  position: relative;
+  min-height: 280px;
   overflow: hidden;
-  border-radius: 999px;
-  background: #e2e8f0;
+  background: #1e293b;
 }
 .city-category-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  transition: transform 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.city-category-card:hover .city-category-img {
+  transform: scale(1.045);
 }
 .city-category-placeholder {
+  position: absolute;
+  inset: 0;
   display: grid;
   width: 100%;
   height: 100%;
   place-items: center;
-  color: #64748b;
-  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+  color: rgba(255, 255, 255, 0.7);
+  background:
+    radial-gradient(circle at 80% 15%, rgba(96, 165, 250, 0.65), transparent 35%),
+    linear-gradient(145deg, #1e3a5f, #0f766e);
+}
+.city-category-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.08) 15%, rgba(15, 23, 42, 0.38) 50%, rgba(8, 15, 29, 0.96) 100%),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.18), transparent 60%);
+}
+.city-category-logo {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  background: #fff;
+  color: #1e3a8a;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
+}
+.city-category-logo-img {
+  width: 100%;
+  height: 100%;
+}
+.city-category-arrow {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.38);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  transition: background 180ms ease, transform 180ms ease;
+}
+.city-category-card:hover .city-category-arrow {
+  background: #2563eb;
+  transform: translateX(2px);
 }
 .city-category-body {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
   min-width: 0;
-  padding: 0;
+  padding: 4.5rem 1rem 1rem;
 }
 .city-category-body h2 {
   margin: 0;
-  color: #0f172a;
-  font-size: 1rem;
-  font-weight: 800;
+  color: #fff;
+  font-size: 1.12rem;
+  font-weight: 900;
+  line-height: 1.18;
+  text-wrap: balance;
 }
 .city-category-body p {
   display: -webkit-box;
-  min-height: 2.8em;
-  margin: 0.35rem 0;
+  min-height: 2.7em;
+  margin: 0.45rem 0 0;
   overflow: hidden;
-  color: #475569;
-  font-size: 0.88rem;
-  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
-.city-category-body span {
-  color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 700;
+.city-category-address {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.22rem;
+  margin: 0 0 0.45rem;
+  overflow: hidden;
+  color: #dbeafe;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .city-category-card-skeleton {
-  height: 100px;
-  border-radius: 8px;
+  height: 280px;
+  border-radius: 18px;
 }
 .city-category-empty {
   display: grid;
@@ -431,6 +554,20 @@ export default {
   }
   .city-category-grid {
     grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  .city-category-media {
+    min-height: 240px;
+  }
+  .city-category-card-skeleton {
+    height: 240px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .city-category-card,
+  .city-category-img,
+  .city-category-arrow {
+    transition: none;
   }
 }
 </style>

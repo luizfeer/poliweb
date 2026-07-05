@@ -484,7 +484,8 @@ export default {
             const data = {
                 title: JSON.stringify(this.form.title),
                 subtitle: JSON.stringify(this.form.subtitle),
-                label: JSON.stringify(this.form.label)
+                label: JSON.stringify(this.form.label),
+                meta: this.edit.meta ?? null
             }
             this.$api.post(`/categories/ads/files/${this.edit.id}`, {
                     ...data
@@ -495,7 +496,7 @@ export default {
                         this.$q.notify({
                             color: 'secondary',
                             position: 'top',
-                            message: 'Produto atualziado com sucesso!',
+                            message: 'Produto atualizado com sucesso!',
                         })
                         this.$router.go(0)
                     }

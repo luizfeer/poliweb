@@ -246,13 +246,15 @@ export default defineComponent({
       if (confirm(text) === false)  return
 
       this.$api.delete(`/categories/${item.id}`)
-      .then((response) => {
+      .then(async (response) => {
            this.$q.notify({
             color: 'positive',
             position: 'top',
             message: 'Deletado',
             icon: 'report_problem'
           })
+          await this.$store.dispatch('categories/invalidateCategories')
+          await this.getData()
 
         })
         .catch((err) => {

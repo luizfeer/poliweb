@@ -7,6 +7,7 @@ export const FOUR_MINUTES = 4 * 60 * 1000
 export const FIVE_HOURS = 5 * 60 * 60 * 1000
 
 export async function getCached(key, maxAgeMs = FOUR_MINUTES) {
+  if (typeof window === 'undefined') return { hit: false, data: null }
   try {
     const row = await db[STORE].get(String(key))
     if (!row) return { hit: false, data: null }
@@ -21,6 +22,7 @@ export async function getCached(key, maxAgeMs = FOUR_MINUTES) {
 }
 
 export async function setCached(key, data) {
+  if (typeof window === 'undefined') return
   try {
     await db[STORE].put({
       key: String(key),

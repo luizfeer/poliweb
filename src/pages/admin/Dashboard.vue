@@ -3,7 +3,7 @@
     <section class="admin-dashboard-shell">
       <header class="admin-dashboard-header">
         <div>
-          <p class="admin-dashboard-eyebrow">Super admin</p>
+          <p class="admin-dashboard-eyebrow">Admin</p>
           <h1>Painel administrativo</h1>
           <p>Atalhos rápidos para gerenciamento do Poliweb.</p>
         </div>
@@ -12,13 +12,13 @@
       <div v-if="!allowed" class="admin-dashboard-denied">
         <q-icon name="lock" size="30px" color="primary" />
         <h2>Acesso restrito</h2>
-        <p>Entre com a conta de super admin para abrir este painel.</p>
+        <p>Entre com uma conta admin para abrir este painel.</p>
         <q-btn color="primary" label="Fazer login" to="/adm/login" no-caps unelevated />
       </div>
 
       <div v-else class="admin-dashboard-grid">
         <router-link
-          v-for="item in shortcuts"
+          v-for="item in visibleShortcuts"
           :key="item.to"
           :to="item.to"
           class="admin-dashboard-card"
@@ -86,7 +86,10 @@ export default {
   },
   computed: {
     allowed() {
-      return typeof localStorage === 'undefined' || isSuperAdmin()
+      return typeof localStorage === 'undefined' || !!localStorage.getItem('admin')
+    },
+    visibleShortcuts() {
+      return this.shortcuts.filter((item) => item.to !== '/adm/contatos' || isSuperAdmin())
     }
   }
 }

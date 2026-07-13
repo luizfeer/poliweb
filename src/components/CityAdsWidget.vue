@@ -66,7 +66,7 @@
 <script>
 import AppIcon from 'components/AppIcon.vue'
 import { timeAgo } from 'src/js/timeAgo'
-import { getCached, setCached, FOUR_MINUTES } from 'src/services/homeCache'
+import { FIVE_HOURS, getCached, setCached } from 'src/services/homeCache'
 
 export default {
   name: 'CityAdsWidget',
@@ -145,7 +145,7 @@ export default {
     async loadFromCache(addressId) {
       try {
         const key = `cityAds_${addressId}`
-        const { hit, data } = await getCached(key, FOUR_MINUTES)
+        const { hit, data } = await getCached(key, FIVE_HOURS)
         if (hit && Array.isArray(data)) {
           this.ads = data
           return true

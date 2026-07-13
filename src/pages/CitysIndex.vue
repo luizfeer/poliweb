@@ -89,9 +89,9 @@
 <script>
 import { citysData } from 'src/js/citys'
 import { adUrl, cityUrl, normalizeSearch, slugify } from 'src/js/seoRoutes'
+import { FIVE_HOURS, getCached, setCached } from 'src/services/homeCache'
 
-const RANKING_CACHE_KEY = 'poliweb:city-ranking:v1'
-const RANKING_CACHE_TTL = 7 * 24 * 60 * 60 * 1000
+const RANKING_CACHE_KEY = 'cityRanking_v2'
 
 function dateValue(value) {
   const time = value ? new Date(value).getTime() : 0
@@ -148,7 +148,7 @@ export default {
       this.citys.push({ ...localization, link: slugify(localization.city) })
     }
 
-    this.loadCachedRanking()
+    await this.loadCachedRanking()
     await this.refreshRanking()
   },
   methods: {
@@ -178,76 +178,55 @@ export default {
       }
       this.$store?.dispatch?.('localization/setLocalization', city)
     },
-    loadCachedRanking() {
-      if (typeof localStorage === 'undefined') return
+    async loadCachedRanking() {
       try {
-        const cached = JSON.parse(localStorage.getItem(RANKING_CACHE_KEY) || 'null')
-        if (!cached?.createdAt || Date.now() - cached.createdAt > RANKING_CACHE_TTL) return
+        const { hit, data } = await getCached(RANKING_CACHE_KEY, FIVE_HOURS)
+        if (!hit || !data) return
+        const cached = data
         this.ranking = cached.ranking || {}
         this.latestInsertions = cached.latestInsertions || []
       } catch {
-        localStorage.removeItem(RANKING_CACHE_KEY)
+        this.ranking = {}
+        this.latestInsertions = []
       }
     },
     saveRanking() {
-      if (typeof localStorage === 'undefined') return
-      localStorage.setItem(
-        RANKING_CACHE_KEY,
-        JSON.stringify({
-          createdAt: Date.now(),
-          ranking: this.ranking,
-          latestInsertions: this.latestInsertions
-        })
-      )
+      setCached(RANKING_CACHE_KEY, {
+        ranking: this.ranking,
+        latestInsertions: this.latestInsertions
+      }).catch(() => {})
     },
     async refreshRanking() {
-      if (typeof localStorage !== 'undefined') {
-        try {
-          const cached = JSON.parse(localStorage.getItem(RANKING_CACHE_KEY) || 'null')
-          if (cached?.createdAt && Date.now() - cached.createdAt <= RANKING_CACHE_TTL) return
-        } catch {
-          localStorage.removeItem(RANKING_CACHE_KEY)
-        }
+      try {
+        const { hit } = await getCached(RANKING_CACHE_KEY, FIVE_HOURS)
+        if (hit) return
+      } catch {
+        // segue e recalcula
       }
 
       this.rankingLoading = true
       try {
-        const entries = await Promise.all(
-          this.citys.map(async (city) => {
-            try {
-              const response = await this.$api.get(`/cities/${city.id}/ads`)
-              const ads = (response?.data?.ads || [])
-                .filter((ad) => ad?.id && !ad.deletedAt)
-                .sort((a, b) => dateValue(b.createdAt || b.updatedAt) - dateValue(a.createdAt || a.updatedAt))
+        const response = await this.$api.get('/cities/ranking')
+        const apiRanking = Array.isArray(response?.data?.ranking) ? response.data.ranking : []
+        const byCity = new Map(apiRanking.map((item) => [Number(item.addressId), item]))
+        const entries = this.citys.map((city) => {
+          const stats = byCity.get(Number(city.id))
+          const latestAds = (stats?.latestAds || []).map((ad) => ({
+            ...ad,
+            cityId: city.id,
+            cityName: city.city,
+            createdLabel: formatDate(ad.createdAt || ad.updatedAt)
+          }))
 
-              const latestAds = ads.slice(0, 3).map((ad) => ({
-                ...ad,
-                cityId: city.id,
-                cityName: city.city,
-                createdLabel: formatDate(ad.createdAt || ad.updatedAt)
-              }))
-
-              return [
-                city.id,
-                {
-                  adsCount: ads.length,
-                  latestAt: dateValue(ads[0]?.createdAt || ads[0]?.updatedAt || city.createdAt),
-                  latestAds
-                }
-              ]
-            } catch (err) {
-              console.log(err)
-              return [
-                city.id,
-                {
-                  adsCount: 0,
-                  latestAt: dateValue(city.createdAt),
-                  latestAds: []
-                }
-              ]
+          return [
+            city.id,
+            {
+              adsCount: Number(stats?.adsCount || 0),
+              latestAt: dateValue(stats?.latestAt || latestAds[0]?.createdAt || city.createdAt),
+              latestAds
             }
-          })
-        )
+          ]
+        })
 
         this.ranking = Object.fromEntries(entries)
         this.latestInsertions = Object.values(this.ranking)

@@ -33,3 +33,35 @@ export function SET_CATEGORIES_CACHE(state, { cityId, list, fetchedAt = Date.now
     localStorage.setItem('categories', JSON.stringify(nextList))
   }
 }
+
+export function INVALIDATE_CATEGORIES_CACHE(state, { cityId } = {}) {
+  const key = cityId ? String(cityId) : null
+
+  if (key) {
+    const nextCache = { ...(state.cache || {}) }
+    delete nextCache[key]
+    state.cache = nextCache
+
+    if (state.currentCityId === key) {
+      state.list = []
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('categories')
+      }
+    }
+  } else {
+    state.cache = {}
+    state.list = []
+    state.currentCityId = null
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('categories')
+    }
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    if (Object.keys(state.cache || {}).length) {
+      localStorage.setItem('categoriesCache', JSON.stringify(state.cache))
+    } else {
+      localStorage.removeItem('categoriesCache')
+    }
+  }
+}

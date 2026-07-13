@@ -176,6 +176,18 @@ function addresses(ad) {
   return Array.isArray(value) ? value : [value].filter(Boolean)
 }
 
+async function getLocalCached(key) {
+  if (typeof window === 'undefined') return { hit: false, data: null }
+  const { FIVE_HOURS, getCached } = await import('src/services/homeCache')
+  return getCached(key, FIVE_HOURS)
+}
+
+async function setLocalCached(key, data) {
+  if (typeof window === 'undefined') return
+  const { setCached } = await import('src/services/homeCache')
+  await setCached(key, data)
+}
+
 export default {
   name: 'CityPage',
   setup() {
@@ -205,8 +217,15 @@ export default {
     const loadCategories = async () => {
       loadingCategories.value = true
       try {
+        const cacheKey = `cityPageCategories_${city.value.id}`
+        const cached = await getLocalCached(cacheKey)
+        if (cached.hit && Array.isArray(cached.data)) {
+          categories.value = cached.data
+          return
+        }
         const response = await api.get(`/cities/${city.value.id}/categories?nonDeleted=true`)
         categories.value = response?.data?.categories || []
+        setLocalCached(cacheKey, categories.value).catch(() => {})
       } finally {
         loadingCategories.value = false
       }
@@ -215,8 +234,15 @@ export default {
     const loadAds = async () => {
       loadingAds.value = true
       try {
+        const cacheKey = `cityPageAds_${city.value.id}`
+        const cached = await getLocalCached(cacheKey)
+        if (cached.hit && Array.isArray(cached.data)) {
+          newAds.value = cached.data
+          return
+        }
         const response = await api.get(`/cities/${city.value.id}/ads`)
         newAds.value = (response?.data?.ads || []).filter((ad) => ad && ad.id).slice(0, 8)
+        setLocalCached(cacheKey, newAds.value).catch(() => {})
       } finally {
         loadingAds.value = false
       }
@@ -225,8 +251,15 @@ export default {
     const loadTopAds = async () => {
       loadingTop.value = true
       try {
+        const cacheKey = `cityPageTopAds_${city.value.id}`
+        const cached = await getLocalCached(cacheKey)
+        if (cached.hit && Array.isArray(cached.data)) {
+          topAds.value = cached.data
+          return
+        }
         const response = await api.get(`/cities/${city.value.id}/top-ranked-ads`)
         topAds.value = (response?.data?.ads || []).filter((ad) => ad && ad.id).slice(0, 8)
+        setLocalCached(cacheKey, topAds.value).catch(() => {})
       } finally {
         loadingTop.value = false
       }

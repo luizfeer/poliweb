@@ -91,6 +91,22 @@ export default defineComponent({
     }
   },
   methods: {
+    getCurrentLocalization() {
+      const current = this.$store.state.localization?.current
+      if (current?.id) return current
+      try {
+        return JSON.parse(localStorage.getItem('localization') || 'null')
+      } catch {
+        return null
+      }
+    },
+    async refreshCategoriesAfterSave() {
+      const loc = this.getCurrentLocalization()
+      await this.$store.dispatch('categories/invalidateCategories')
+      if (loc?.id) {
+        await this.$store.dispatch('categories/fetchCategories', { loc, force: true })
+      }
+    },
     onSubmit(){
       this.$q.loading.show()
       this.$api.post(`/categories/${this.categoryId}`, {...this.form})
@@ -104,7 +120,7 @@ export default defineComponent({
 
         })
         }
-        this.$store.dispatch('categories/fetchCategories', { force: true }).finally(() => {
+        return this.refreshCategoriesAfterSave().finally(() => {
           this.$router.push({ path: '/' })
         })
 
@@ -129,9 +145,9 @@ export default defineComponent({
 
     },
      onReset () {
-        form.name = null
-        form.addressId = null
-        selectedCity = null
+        this.form.name = null
+        this.form.addressId = null
+        this.selectedCity = null
       },
     filterIcon(){
       try {

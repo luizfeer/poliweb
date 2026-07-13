@@ -50,14 +50,21 @@ const routes = [
       },
       {
         path: '/adm/login',
-        component: () => import('pages/admin/Login.vue')
+        component: () => import('pages/admin/Login.vue'),
+        beforeEnter: (to, from, next) => {
+          if (isAdmin()) {
+            next(to.query?.redirect || '/adm')
+          } else {
+            next()
+          }
+        }
       },
       {
         path: '/adm',
         component: () => import('pages/admin/Dashboard.vue'),
         beforeEnter: (to, from, next) => {
-          if (!isSuperAdmin()) {
-            next('/adm/login')
+          if (!isAdmin()) {
+            next({ path: '/adm/login', query: { redirect: to.fullPath } })
           } else {
             next()
           }
@@ -65,11 +72,25 @@ const routes = [
       },
        {
         path: '/adm/icons',
-        component: () => import('pages/admin/Icon.vue')
+        component: () => import('pages/admin/Icon.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isAdmin()) {
+            next({ path: '/adm/login', query: { redirect: to.fullPath } })
+          } else {
+            next()
+          }
+        }
       },
       {
         path: '/adm/users',
-       component: () => import('pages/admin/User.vue')
+       component: () => import('pages/admin/User.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isAdmin()) {
+            next({ path: '/adm/login', query: { redirect: to.fullPath } })
+          } else {
+            next()
+          }
+        }
 
       },
       {
@@ -85,7 +106,14 @@ const routes = [
       },
       {
         path: '/adm/cidades',
-       component: () => import('pages/admin/AddAddress.vue')
+       component: () => import('pages/admin/AddAddress.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isAdmin()) {
+            next({ path: '/adm/login', query: { redirect: to.fullPath } })
+          } else {
+            next()
+          }
+        }
 
       },
       {

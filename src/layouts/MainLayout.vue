@@ -74,7 +74,7 @@
         </q-list>
     </q-drawer>
     <transition name="slide" mode="out-in">
-        <q-page-container :class="{ 'has-glass-navbar': showGlassNavbar }">
+        <q-page-container class="main-page-container" :class="{ 'has-glass-navbar': showGlassNavbar }">
             <router-view />
         </q-page-container>
     </transition>
@@ -630,6 +630,9 @@ slide-enter-active,
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
 @media (min-width: 1024px) {
+  .main-page-container {
+    padding-top: 64px !important;
+  }
   .desktop-web-header {
     display: block;
     background: #1d4ed8 !important;

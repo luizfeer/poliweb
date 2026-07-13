@@ -53,7 +53,8 @@ export default {
          if (!ctx.email && this.form?.email) ctx.email = this.form.email
          localStorage.setItem("context", JSON.stringify(ctx))
 
-         this.$router.push({ path: '/' })
+         const redirect = this.$route.query?.redirect || '/adm'
+         this.$router.push(String(redirect))
         }
       })
       .catch((err) => {

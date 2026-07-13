@@ -10,6 +10,9 @@
 /service-worker.js
   Cache-Control: no-cache, no-store, must-revalidate
 
+/js/chunk-common.e6a3fe80.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
 /js/*
   Cache-Control: public, max-age=31536000, immutable
 

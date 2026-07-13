@@ -1190,9 +1190,6 @@ export default {
       }
     },
     async onAdCategoriesUpdated() {
-      try {
-        await this.$store.dispatch('categories/invalidateCategories')
-      } catch (_) {}
       await this.loadAdCategories()
       this.$emit('updated')
     },

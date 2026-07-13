@@ -386,7 +386,7 @@
       v-model="expand.editCategories"
       :ad-id="adsComponent.id"
       :categories="categories"
-      @updated="loadAdCategories(); $emit('updated')"
+      @updated="onAdCategoriesUpdated"
     />
 
     <PostarMediaModal
@@ -1188,6 +1188,13 @@ export default {
               : [],
         }
       }
+    },
+    async onAdCategoriesUpdated() {
+      try {
+        await this.$store.dispatch('categories/invalidateCategories')
+      } catch (_) {}
+      await this.loadAdCategories()
+      this.$emit('updated')
     },
     url(){
       let url = encodeURIComponent(this.adsComponent.name.replace(/[^a-z0-9_]+/gi, '-').replace(/^-|-$/g, '').toLowerCase())

@@ -33,3 +33,32 @@ export async function setCached(key, data) {
     // ignore storage errors
   }
 }
+
+export async function removeCached(key) {
+  if (typeof window === 'undefined') return
+  try {
+    await db[STORE].delete(String(key))
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export async function removeCachedByPrefix(prefixes = []) {
+  if (typeof window === 'undefined') return
+  const normalized = (Array.isArray(prefixes) ? prefixes : [prefixes])
+    .filter(Boolean)
+    .map(String)
+  if (!normalized.length) return
+
+  try {
+    const keys = await db[STORE].toCollection().primaryKeys()
+    const matching = keys.filter((key) =>
+      normalized.some((prefix) => String(key).startsWith(prefix))
+    )
+    if (matching.length) {
+      await db[STORE].bulkDelete(matching)
+    }
+  } catch {
+    // ignore storage errors
+  }
+}

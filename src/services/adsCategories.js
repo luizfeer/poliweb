@@ -1,4 +1,25 @@
 import { api } from 'src/boot/axios'
+import { queryClient } from 'src/boot/vue-query'
+
+const AD_CATEGORY_CACHE_PREFIXES = [
+  'cityAds_',
+  'cityTopRankedAds_',
+  'cityVideos_',
+  'cityPageAds_',
+  'cityPageTopAds_',
+  'cityPageCategories_',
+]
+
+export async function invalidateAdCategoryCaches() {
+  queryClient.removeQueries({ queryKey: ['category-ads'], exact: false })
+  queryClient.removeQueries({ queryKey: ['city-categories'], exact: false })
+  if (typeof window === 'undefined') return
+  const { removeCached, removeCachedByPrefix } = await import('src/services/homeCache')
+  await Promise.all([
+    removeCached('cityRanking_v2'),
+    removeCachedByPrefix(AD_CATEGORY_CACHE_PREFIXES),
+  ])
+}
 
 /**
  * Lista as categorias do anúncio.
@@ -19,6 +40,10 @@ export function getAdCategories(adId) {
  */
 export function addAdCategory(adId, categoryId) {
   return api.post(`/categories/ads/${adId}/categories`, { categoryId })
+    .then(async (response) => {
+      await invalidateAdCategoryCaches()
+      return response
+    })
 }
 
 /**
@@ -30,6 +55,10 @@ export function addAdCategory(adId, categoryId) {
  */
 export function removeAdCategory(adId, categoryId) {
   return api.delete(`/categories/ads/${adId}/categories/${categoryId}`)
+    .then(async (response) => {
+      await invalidateAdCategoryCaches()
+      return response
+    })
 }
 
 /**
@@ -41,4 +70,10 @@ export function removeAdCategory(adId, categoryId) {
  */
 export function updateAd(adId, payload) {
   return api.post(`/categories/ads/${adId}`, payload)
+    .then(async (response) => {
+      if (payload?.categoryIds || payload?.categoryId) {
+        await invalidateAdCategoryCaches()
+      }
+      return response
+    })
 }

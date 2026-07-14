@@ -119,7 +119,6 @@ export default defineComponent({
     async refreshCategoriesAfterSave() {
       const loc = this.selectedCity?.id ? this.selectedCity : this.getCurrentLocalization()
       if (loc?.id) {
-        this.form.addressId = this.form.addressId || loc.id
         await this.$store.dispatch('categories/invalidateCategories', { loc })
         await this.$store.dispatch('categories/fetchCategories', { loc, force: true })
         return
@@ -129,10 +128,13 @@ export default defineComponent({
     onSubmit(){
       this.$q.loading.show()
       const loc = this.selectedCity?.id ? this.selectedCity : this.getCurrentLocalization()
-      if (this.form.categoryId && loc?.id && !this.form.addressId) {
-        this.form.addressId = loc.id
+      const payload = { ...this.form }
+      if (payload.categoryId) {
+        delete payload.addressId
+      } else if (loc?.id && !payload.addressId) {
+        payload.addressId = loc.id
       }
-      this.$api.post('/categories', {...this.form})
+      this.$api.post('/categories', payload)
       .then((response) => {
         //  console.log(response.data.addresses)
         if(response.data){
@@ -190,8 +192,6 @@ export default defineComponent({
    if(this.$route.params.id){
     this.form.categoryId = this.$route.params.id
     this.nameCategorie = this.$route.params.name
-    const loc = this.getCurrentLocalization()
-    if (loc?.id) this.form.addressId = loc.id
    }
 
    await this.$api.get('/icons')

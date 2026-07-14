@@ -227,7 +227,7 @@ export default defineComponent({
      const localization = localStorage.getItem("localization")
      this.localization =  JSON.parse(localization)
      await this.getData()
-     if(idSub && !slide){
+     if(idSub){
       this.gotoSub(idSub)
      }
 
@@ -275,9 +275,10 @@ export default defineComponent({
         id: item.id,
         name: item.name
       }
-      item.subcategories.sort((a, b) => a.name.localeCompare(b.name));
+      const subcategories = Array.isArray(item.subcategories) ? [...item.subcategories] : []
+      subcategories.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-      this.subCategories = item.subcategories
+      this.subCategories = subcategories
       this.slide = '1'
       console.log(item)
     },
@@ -285,8 +286,16 @@ export default defineComponent({
       this.$router.push({ path })
     },
     gotoSub(idSub){
-       const item = this.categories.find(x => x.id === parseFloat(idSub))
+       const item = this.findCategoryById(idSub, this.categories)
        if(item) this.subcategories(item)
+    },
+    findCategoryById(id, list = []) {
+      for (const item of list || []) {
+        if (Number(item.id) === Number(id)) return item
+        const found = this.findCategoryById(id, item.subcategories || [])
+        if (found) return found
+      }
+      return null
     },
     async getData () {
       const addressId = this.localization?.id

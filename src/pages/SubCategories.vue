@@ -306,21 +306,12 @@ export default defineComponent({
       if(!this.categories){
         this.loading = true
       }
-      this.$api.get(`/cities/${addressId}/categories?nonDeleted=true`)
-      .then((response) => {
-          if(response.data){
-            try {
-              let categoriesData = response.data.categories ?? []
-              categoriesData.forEach(e => {
-                return e.name = e.name.trim()
-              })
-              categoriesData.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-              categoriesData = categoriesData.filter((item) => !item.deletedAt)
-
-              this.categories = categoriesData
-            } catch (error) {
-              console.log(error)
-            }
+      this.$store.dispatch('categories/fetchCategories', { loc: this.localization, force: true })
+      .then((categoriesData) => {
+          try {
+            this.categories = Array.isArray(categoriesData) ? categoriesData : []
+          } catch (error) {
+            console.log(error)
           }
           localStorage.setItem('categories', JSON.stringify(this.categories))
             // console.table(this.categories)

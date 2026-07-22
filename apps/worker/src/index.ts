@@ -16,7 +16,6 @@ import { runRoadRoutesUpdate } from './jobs/road-routes-update.js';
 import { runReindexTourism } from './jobs/reindex-tourism.js';
 import { runAnalyticsAggregate } from './jobs/analytics-aggregate.js';
 import { runOgPending } from './jobs/og-pending.js';
-import { runEmailDeliveries } from './jobs/email-deliveries.js';
 import { runPushDeliveries } from './jobs/push-deliveries.js';
 import { runBusinessTrialNudges } from './jobs/business-trial-nudges.js';
 import { runMediaSweepOrphans } from './jobs/media-sweep-orphans.js';
@@ -42,7 +41,6 @@ const JOBS: JobName[] = [
   'reindex:tourism',
   'analytics:aggregate',
   'og:pending',
-  'email:deliveries',
   'push:deliveries',
   'business:trial-nudges',
   'media:sweep-orphans',
@@ -157,11 +155,6 @@ async function runJob(job: JobName, env: ReturnType<typeof readEnv>): Promise<vo
 
   if (job === 'og:pending') {
     await runOgPending(env);
-    return;
-  }
-
-  if (job === 'email:deliveries') {
-    await runEmailDeliveries(env);
     return;
   }
 

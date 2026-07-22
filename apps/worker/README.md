@@ -8,7 +8,7 @@ Daemon Node.js que roda na VPS via PM2 e centraliza:
 - **Atualização de clima** (`weather:update`).
 - **Agregação de analytics** (`analytics:aggregate`).
 - **Reindex de turismo** (`reindex:tourism`).
-- **Envio de emails transacionais via Brevo** (`email:deliveries`, daemon).
+- **Push notifications** (`push:deliveries`, daemon).
 - **Lifecycle de leads de comércio** (`business:trial-nudges`, cron diário).
 
 Cada job é despachado pelo mesmo binário (`dist/index.js`) com um argumento — PM2
@@ -37,29 +37,16 @@ AI_MONTHLY_BUDGET_USD=5
 WORKER_HTTP_TIMEOUT_MS=15000
 WORKER_MAX_RETRIES=2
 
-# Email (Brevo) — obrigatórias se for rodar email:deliveries
-BREVO_API_KEY=xkeysib-...
-BREVO_FROM_EMAIL=contato@carmolocal.com.br
-BREVO_FROM_NAME=Portal Carmelitano
-BREVO_DEFAULT_SERVICE=hail_mary
-APP_URL=https://carmolocal.com.br
-EMAIL_POLL_INTERVAL_MS=15000
-EMAIL_BATCH_SIZE=25
-```
-
-Para usar o mesmo daemon com outros sistemas, configure contas extras em
-`BREVO_SERVICES_JSON`. As chaves ficam sempre no `.env`; a fila envia apenas
-`metadata.email_service`.
-
-```env
-BREVO_SERVICES_JSON={"ingresso_facil":{"apiKey":"xkeysib-...","fromEmail":"contato@ingressofacil.online","fromName":"Ingresso Facil","appUrl":"https://ingressofacil.online","defaultTags":["ingresso_facil"]}}
+# Email
+# O envio Brevo foi extraido para o projeto separado email-dispatcher.
+# Este repo apenas publica jobs em public.email_dispatch_jobs pela migration
+# 20260722203000_email_dispatcher_bridge.sql.
 ```
 
 ## Local
 
 ```bash
 pnpm --filter worker build
-pnpm --filter worker email:deliveries        # daemon de emails
 pnpm --filter worker business:trial-nudges   # tick único de nudges/overdue
 pnpm --filter worker scrape:all
 ```
@@ -106,22 +93,16 @@ pnpm --filter worker scrape:all
    pm2 reload apps/worker/deploy/pm2/ecosystem.config.cjs   # rolling reload
    ```
 
-## Como funciona o envio de email
+## Como funciona o disparo de email
 
 1. App web (`apps/web`) **nunca chama Brevo direto**. Quando precisa de email,
    chama `createNotification({ sendEmail: true, metadata: { email_to: ... } })`
    ou insere manualmente em `notifications` + `notification_deliveries`
    (`channel='email'`, `status='pending'`, `provider='brevo'`).
-2. O job `email:deliveries` roda em loop fazendo polling a cada
-   `EMAIL_POLL_INTERVAL_MS`:
-   - busca até `EMAIL_BATCH_SIZE` deliveries pendentes;
-   - resolve destinatário (`metadata.email_to` → `profiles.email`);
-   - escolhe a conta Brevo por `metadata.email_service` ou usa
-     `BREVO_DEFAULT_SERVICE`;
-   - renderiza HTML com o template em `src/jobs/email/template.ts`
-     usando `metadata.email_brand_name` quando informado;
-   - chama `POST /v3/smtp/email` da Brevo;
-   - marca `sent`/`failed` com timestamps e mensagem.
+2. A migration `20260722203000_email_dispatcher_bridge.sql` transforma esse
+   delivery em um job `email_dispatch_jobs`.
+3. O projeto separado `email-dispatcher` consome a fila, escolhe a credencial
+   Brevo por `service`, envia, grava `email_dispatch_logs` e aplica retries.
 
 Metadados aceitos por email:
 
@@ -134,8 +115,8 @@ Metadados aceitos por email:
 | `email_footnote` | Rodapé do email. |
 | `email_tags` | Tags extras enviadas para a Brevo. |
 
-O prompt pronto para integrar próximos projetos está em
-`EMAIL_DISPATCHER_INTEGRATION_PROMPT.md`.
+O prompt pronto para integrar próximos projetos fica no repo
+`email-dispatcher`, arquivo `INTEGRATION_PROMPT.md`.
 
 Se faltar destinatário, a linha fica como `pending` (o filtro de email
 em memória evita re-tentativa em loop — admin pode marcar `skipped`
@@ -155,7 +136,7 @@ Resumo de cada execução vai pro stdout (capturado pelos logs do PM2).
 
 ## O que pedir pro Brevo
 
-Pra `email:deliveries` funcionar:
+Pra `email-dispatcher` funcionar:
 
 1. **API key transacional** (Settings → SMTP & API → API keys). Permissão
    "Send transactional emails".
@@ -163,8 +144,8 @@ Pra `email:deliveries` funcionar:
 3. **Remetente padrão** com o domínio verificado.
 4. (Opcional) IP allowlist com o IP da VPS pra hardenizar a API key.
 
-Não precisa configurar listas, contatos ou campanhas — usamos só o
-endpoint transacional inline (sem templates do Brevo por enquanto).
+Não precisa configurar listas, contatos ou campanhas. O dispatcher usa envio
+transacional e os projetos clientes enviam HTML/texto pronto na fila.
 
 ## Migração / removendo o antigo
 

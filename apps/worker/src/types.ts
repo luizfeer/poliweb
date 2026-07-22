@@ -22,7 +22,6 @@ export type JobName =
   | 'reindex:tourism'
   | 'analytics:aggregate'
   | 'og:pending'
-  | 'email:deliveries'
   | 'push:deliveries'
   | 'business:trial-nudges'
   | 'media:sweep-orphans';

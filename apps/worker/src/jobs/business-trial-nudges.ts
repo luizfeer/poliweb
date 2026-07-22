@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { WorkerEnv } from '../runtime/env.js';
 import { logger } from '../runtime/logger.js';
-import { buildSupabase } from './email/supabase-client.js';
+import { buildSupabase } from './push/supabase-client.js';
 
 const OVERDUE_TOLERANCE_DAYS = 5;
 

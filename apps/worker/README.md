@@ -8,6 +8,7 @@ Daemon Node.js que roda na VPS via PM2 e centraliza:
 - **Atualização de clima** (`weather:update`).
 - **Agregação de analytics** (`analytics:aggregate`).
 - **Reindex de turismo** (`reindex:tourism`).
+- **Ponte de e-mails para o dispatcher local** (`email:dispatch-bridge`, daemon).
 - **Push notifications** (`push:deliveries`, daemon).
 - **Lifecycle de leads de comércio** (`business:trial-nudges`, cron diário).
 
@@ -38,15 +39,18 @@ WORKER_HTTP_TIMEOUT_MS=15000
 WORKER_MAX_RETRIES=2
 
 # Email
-# O envio Brevo foi extraido para o projeto separado email-dispatcher.
-# Este repo apenas publica jobs em public.email_dispatch_jobs pela migration
-# 20260722203000_email_dispatcher_bridge.sql.
+EMAIL_DISPATCHER_URL=http://127.0.0.1:3010
+EMAIL_DISPATCHER_TOKEN=Bearer ...
+EMAIL_DISPATCHER_SERVICE=hail_mary
+EMAIL_DISPATCH_POLL_INTERVAL_MS=15000
+EMAIL_DISPATCH_BATCH_SIZE=25
 ```
 
 ## Local
 
 ```bash
 pnpm --filter worker build
+pnpm --filter worker email:dispatch-bridge # daemon que publica no dispatcher
 pnpm --filter worker business:trial-nudges   # tick único de nudges/overdue
 pnpm --filter worker scrape:all
 ```
@@ -99,10 +103,11 @@ pnpm --filter worker scrape:all
    chama `createNotification({ sendEmail: true, metadata: { email_to: ... } })`
    ou insere manualmente em `notifications` + `notification_deliveries`
    (`channel='email'`, `status='pending'`, `provider='brevo'`).
-2. A migration `20260722203000_email_dispatcher_bridge.sql` transforma esse
-   delivery em um job `email_dispatch_jobs`.
-3. O projeto separado `email-dispatcher` consome a fila, escolhe a credencial
-   Brevo por `service`, envia, grava `email_dispatch_logs` e aplica retries.
+2. O job `email:dispatch-bridge` busca deliveries pendentes, resolve o e-mail
+   por `metadata.email_to` ou pelo Supabase Auth, e chama
+   `POST http://127.0.0.1:3010/emails`.
+3. O projeto separado `email-dispatcher` enfileira no Redis, escolhe a
+   credencial Brevo por `service`, envia, grava logs locais e aplica retries.
 
 Metadados aceitos por email:
 

@@ -22,6 +22,11 @@ export type WorkerEnv = {
   httpTimeoutMs: number
   maxRetries: number
   appUrl: string
+  emailDispatcherUrl: string | null
+  emailDispatcherToken: string | null
+  emailDispatcherService: string
+  emailDispatchPollIntervalMs: number
+  emailDispatchBatchSize: number
   mediaProcessorUrl: string | null
   mediaProcessorSecret: string | null
   expoAccessToken: string | null
@@ -55,6 +60,11 @@ export function readEnv(): WorkerEnv {
     httpTimeoutMs: readNumberEnv("WORKER_HTTP_TIMEOUT_MS", 15000),
     maxRetries: readNumberEnv("WORKER_MAX_RETRIES", 2),
     appUrl,
+    emailDispatcherUrl: process.env["EMAIL_DISPATCHER_URL"] ?? null,
+    emailDispatcherToken: process.env["EMAIL_DISPATCHER_TOKEN"] ?? null,
+    emailDispatcherService: process.env["EMAIL_DISPATCHER_SERVICE"] ?? "hail_mary",
+    emailDispatchPollIntervalMs: readNumberEnv("EMAIL_DISPATCH_POLL_INTERVAL_MS", 15000),
+    emailDispatchBatchSize: readNumberEnv("EMAIL_DISPATCH_BATCH_SIZE", 25),
     mediaProcessorUrl: process.env["MEDIA_PROCESSOR_URL"] ?? null,
     mediaProcessorSecret: process.env["MEDIA_PROCESSOR_SECRET"] ?? null,
     expoAccessToken: process.env["EXPO_ACCESS_TOKEN"] ?? null,

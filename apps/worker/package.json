@@ -26,6 +26,7 @@
     "weather:update": "node --env-file=.env dist/index.js weather:update",
     "road-routes:update": "node --env-file=.env dist/index.js road-routes:update",
     "og:pending": "node --env-file=.env dist/index.js og:pending",
+    "email:dispatch-bridge": "node --env-file=.env dist/index.js email:dispatch-bridge",
     "push:deliveries": "node --env-file=.env dist/index.js push:deliveries",
     "business:trial-nudges": "node --env-file=.env dist/index.js business:trial-nudges",
     "media:sweep-orphans": "node --env-file=.env dist/index.js media:sweep-orphans",

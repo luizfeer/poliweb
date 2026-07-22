@@ -26,6 +26,16 @@ const defaults = {
 
 module.exports = {
   apps: [
+    // --------- DAEMONS (rodam sempre) ---------
+    {
+      ...defaults,
+      name: 'worker-email-dispatch-bridge',
+      args: 'email:dispatch-bridge',
+      autorestart: true,
+      restart_delay: 5000,
+      max_restarts: 50,
+    },
+
     // --------- CRONS (PM2 mata e religa no horário) ---------
     // Nudges de trial + despublicação por inadimplência — 1x por dia às 11:00 UTC (08:00 BRT)
     {

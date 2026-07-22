@@ -1,0 +1,24 @@
+# Outros apps do monorepo (só apps/web vai pra este projeto Vercel)
+apps/mobile
+apps/cidadeviva
+apps/worker
+
+# Docs e tooling local
+.davia
+.claude
+.agents
+.cursor
+
+# Caches e builds locais (nunca subir)
+node_modules
+.next
+.next-agent
+out
+**/.next
+**/node_modules
+.expo-tmp-*
+**/.eas-inspect
+
+# Supabase local
+supabase/.branches
+supabase/.temp

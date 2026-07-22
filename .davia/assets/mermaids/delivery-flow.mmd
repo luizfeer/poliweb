@@ -1,0 +1,34 @@
+flowchart TD
+    subgraph Cliente["🛒 Cliente (web ou app)"]
+        A[Abre /cardapios] --> B[Ve lojas online]
+        B --> C[Monta carrinho iFood]
+        C --> D[Finaliza pedido]
+    end
+
+    subgraph Comerciante["🏪 Comerciante"]
+        OPEN["/abrir no WhatsApp<br/>ou Abrir loja no painel"] --> PRESENCE[(business_delivery_status<br/>is_online = true)]
+    end
+
+    PRESENCE -.filtra.-> B
+
+    D -->|RPC direto no Supabase| CO[create_order]
+    CO --> V{Loja online?<br/>Pedido minimo?}
+    V -->|nao| ERR[Erro amigavel pt-BR]
+    V -->|sim| SAVE[(orders + order_items<br/>recalcula preco no servidor)]
+
+    SAVE -->|AFTER INSERT| TRIG[trg_orders_notify]
+    TRIG --> WIN{Janela 24h aberta?}
+    WIN -->|sim| BTN[wa_outbound_queue<br/>interactive: Aceitar / Recusar]
+    WIN -->|nao| TPL[wa_outbound_queue<br/>template novo_pedido]
+
+    BTN --> WK[wa-outbound-worker<br/>cron 1/min, lote 25]
+    TPL --> WK
+    WK -->|Graph API| ZAP[📱 WhatsApp do operador]
+
+    ZAP -->|toca botao / digita comando| IN[wa_inbound_queue<br/>consumer = delivery_bot]
+    IN --> BOT[delivery-bot]
+    BOT -->|/aceitar /pronto /saiu| UPD[update_order_status]
+    UPD --> SAVE
+
+    SAVE -.Realtime.-> TRACK[📲 App do cliente<br/>rastreador de status ao vivo]
+    SAVE -.Realtime.-> FILA[🖥️ Fila no painel<br/>com som]

@@ -1,0 +1,122 @@
+[
+  {
+    "area": "Conta",
+    "tables": "auth.users, profiles",
+    "personal_data": "email, nome, telefone, data de nascimento, bio, avatar",
+    "purpose": "login, perfil, suporte e personalizacao",
+    "legal_basis": "execucao de contrato",
+    "visibility": "privado, exceto campos publicados pelo usuario",
+    "retention": "ate exclusao ou obrigacao legal",
+    "exportable": "sim",
+    "deletable": "anonimizar perfil e remover identificadores",
+    "apple_label": "Contact Info, User ID"
+  },
+  {
+    "area": "Papeis por cidade",
+    "tables": "profile_roles, entity_managers",
+    "personal_data": "profile_id, cidade, papel, entidade gerenciada",
+    "purpose": "autorizacao e ownership",
+    "legal_basis": "execucao de contrato",
+    "visibility": "privado para admin autorizado",
+    "retention": "enquanto existir relacao com a entidade",
+    "exportable": "sim",
+    "deletable": "remover vinculos nao obrigatorios",
+    "apple_label": "User ID"
+  },
+  {
+    "area": "Comercio e reivindicacoes",
+    "tables": "business_claims, business_leads, contact_submissions",
+    "personal_data": "nome, email, telefone, WhatsApp, mensagem",
+    "purpose": "validar dono, responder contato e vender plano",
+    "legal_basis": "execucao de contrato, consentimento",
+    "visibility": "admin da cidade e dono autorizado",
+    "retention": "180 a 365 dias se nao virar contrato",
+    "exportable": "sim",
+    "deletable": "apagar ou anonimizar quando encerrado",
+    "apple_label": "Contact Info, User Content"
+  },
+  {
+    "area": "Imobiliario",
+    "tables": "property_inquiries, property_favorites",
+    "personal_data": "nome, email, telefone, mensagem, favoritos",
+    "purpose": "gerar lead e salvar interesses",
+    "legal_basis": "consentimento, execucao de contrato",
+    "visibility": "corretor, imobiliaria e admin autorizado",
+    "retention": "180 a 365 dias para leads sem contrato",
+    "exportable": "sim",
+    "deletable": "apagar lead ou desassociar favorito",
+    "apple_label": "Contact Info, User Content, Usage Data"
+  },
+  {
+    "area": "UGC",
+    "tables": "business_reviews, attraction_reviews, attraction_photos, classifieds, lost_pets",
+    "personal_data": "texto, foto, avaliacao, profile_id, conteudo enviado",
+    "purpose": "publicar conteudo comunitario e moderar abuso",
+    "legal_basis": "consentimento, legitimo interesse",
+    "visibility": "publico quando aprovado",
+    "retention": "ate remocao, opt-out ou moderacao",
+    "exportable": "sim",
+    "deletable": "remover ou anonimizar autoria",
+    "apple_label": "User Content, Photos"
+  },
+  {
+    "area": "Newsletter",
+    "tables": "newsletter_subscribers, newsletter_consent_history",
+    "personal_data": "email, origem, versao de consentimento, hashes tecnicos",
+    "purpose": "enviar comunicados e provar consentimento",
+    "legal_basis": "consentimento",
+    "visibility": "admin da cidade",
+    "retention": "enquanto ativo e prova minima apos opt-out",
+    "exportable": "sim",
+    "deletable": "unsubscribe e pseudonimizacao",
+    "apple_label": "Contact Info"
+  },
+  {
+    "area": "Analytics",
+    "tables": "analytics_events, business_page_events, business_daily_stats",
+    "personal_data": "eventos, path, entidade, session hash, metadados sem PII",
+    "purpose": "audiencia, melhoria e relatorio agregado ao comerciante",
+    "legal_basis": "consentimento, legitimo interesse para agregado sem PII",
+    "visibility": "admin e comerciante em agregado",
+    "retention": "90 dias bruto, 24 meses agregado",
+    "exportable": "somente eventos vinculados ao usuario quando houver",
+    "deletable": "apagar bruto; manter agregado anonimo",
+    "apple_label": "Usage Data"
+  },
+  {
+    "area": "Notificacoes",
+    "tables": "notifications, notification_deliveries, notification_preferences, notification_devices",
+    "personal_data": "preferencias, status de entrega, device token futuro",
+    "purpose": "inbox, email e push opt-in",
+    "legal_basis": "consentimento, execucao de contrato",
+    "visibility": "usuario, admin autorizado",
+    "retention": "ate revogacao ou token invalido",
+    "exportable": "sim",
+    "deletable": "revogar token e apagar preferencias opcionais",
+    "apple_label": "Identifiers, Usage Data"
+  },
+  {
+    "area": "IA",
+    "tables": "ai_jobs, embeddings",
+    "personal_data": "query, fonte, output, tokens, custo, possivel PII em conteudo",
+    "purpose": "resumir, classificar, buscar e responder perguntas",
+    "legal_basis": "execucao de contrato, legitimo interesse, consentimento quando UGC",
+    "visibility": "admin tecnico",
+    "retention": "minima necessaria; redigir PII sensivel",
+    "exportable": "sim quando vinculado ao usuario",
+    "deletable": "redigir input/output com PII",
+    "apple_label": "User Content, Usage Data"
+  },
+  {
+    "area": "Pagamentos futuros",
+    "tables": "business_subscriptions, invoices, provider metadata",
+    "personal_data": "plano, cobranca, status, identificadores do provedor",
+    "purpose": "assinaturas, anuncios e comprovacao fiscal",
+    "legal_basis": "execucao de contrato, obrigacao legal",
+    "visibility": "dono, admin financeiro",
+    "retention": "prazo fiscal/legal",
+    "exportable": "sim",
+    "deletable": "nao apagar registros fiscais; limitar identificadores",
+    "apple_label": "Purchases, Financial Info"
+  }
+]

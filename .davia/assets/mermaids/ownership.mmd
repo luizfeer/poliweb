@@ -1,0 +1,18 @@
+flowchart TD
+    Profile[Profile<br/>cidadão / comerciante]
+
+    Profile --> Roles[profile_roles<br/>por cidade]
+    Roles --> R1[citizen<br/>cidade A]
+    Roles --> R2[merchant<br/>cidade A]
+    Roles --> R3[city_admin<br/>cidade B]
+
+    Profile --> EM[entity_managers<br/>genérico]
+    EM --> E1[business · ID-1<br/>role=owner]
+    EM --> E2[realtor · ID-2<br/>role=owner]
+    EM --> E3[business · ID-3<br/>role=editor]
+
+    Profile --> Direct[owner_profile_id<br/>FK direto em cada tabela]
+    Direct --> D1[accommodations<br/>businesses<br/>properties...]
+
+    style Direct fill:#e0f2fe
+    style EM fill:#fef3c7

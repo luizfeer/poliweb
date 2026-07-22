@@ -1,0 +1,60 @@
+export type BusinessLeadStatus = 'pending' | 'approved' | 'rejected' | 'converted';
+
+export type BusinessLead = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  city_id: string;
+  profile_id: string;
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  whatsapp: string | null;
+  category_hint: string | null;
+  address: string | null;
+  website: string | null;
+  instagram: string | null;
+  message: string | null;
+  consent: boolean;
+  status: BusinessLeadStatus;
+  approved_at: string | null;
+  approved_by: string | null;
+  rejected_reason: string | null;
+  trial_ends_at: string | null;
+  plan_slug: string | null;
+  document: string | null;
+  asaas_customer_id: string | null;
+  asaas_subscription_id: string | null;
+  asaas_subscription_status: string | null;
+  asaas_next_due_date: string | null;
+  asaas_payment_link: string | null;
+  free_forever: boolean;
+  free_reason: string | null;
+  notes: string | null;
+  business_id: string | null;
+  nudge_d7_sent_at: string | null;
+  nudge_d2_sent_at: string | null;
+  overdue_unpublished_at: string | null;
+};
+
+export type BusinessLeadInsert = {
+  city_id: string;
+  profile_id: string;
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  whatsapp?: string | null;
+  category_hint?: string | null;
+  address?: string | null;
+  website?: string | null;
+  instagram?: string | null;
+  message?: string | null;
+  consent: boolean;
+  status?: BusinessLeadStatus;
+  plan_slug?: string | null;
+  document?: string | null;
+};
+
+export type BusinessLeadUpdate = Partial<Omit<BusinessLead, 'id' | 'created_at' | 'updated_at' | 'city_id' | 'profile_id'>>;

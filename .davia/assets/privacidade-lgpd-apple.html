@@ -1,0 +1,22 @@
+<h1>Privacidade LGPD Apple</h1>
+<p>Frente de produto para deixar o portal auditavel, minimizado e pronto para App Store.</p>
+<excalidraw data-path="data/privacy-lgpd-apple.json"></excalidraw>
+<h2>Decisao tecnica</h2>
+<ul>
+  <li><strong>Consentimento granular:</strong> analytics, anuncios, marketing, push, IA e publicacao.</li>
+  <li><strong>Pedido LGPD unico:</strong> acesso, exportacao, correcao, oposicao e revisao.</li>
+  <li><strong>Exclusao continua separada:</strong> usa <code>account_deletion_requests</code> por seguranca.</li>
+  <li><strong>Apple:</strong> politica publica, exclusao no app e matriz para Privacy Labels.</li>
+</ul>
+<h2>Inventario de dados</h2>
+<database-view data-path="data/privacy-data-inventory.json"></database-view>
+<h2>Checklist da Sprint</h2>
+<ul data-type="taskList">
+  <li data-checked="true" data-type="taskItem"><input type="checkbox" checked><p>Criar inventario Davia por area, tabela, finalidade e Privacy Label.</p></li>
+  <li data-checked="true" data-type="taskItem"><input type="checkbox" checked><p>Criar migration de <code>privacy_consents</code>, eventos e <code>privacy_requests</code>.</p></li>
+  <li data-checked="true" data-type="taskItem"><input type="checkbox" checked><p>Bloquear Himetrica antes do opt-in de analytics.</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Gerar exportacao real em JSON/ZIP para <code>privacy_requests</code>.</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Criar painel admin de DPO para responder pedidos LGPD.</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Criar <code>PrivacyInfo.xcprivacy</code> quando o app iOS/Expo entrar no repo.</p></li>
+</ul>
+<blockquote>A politica publica em <code>/privacidade</code> deve refletir somente dados realmente coletados pelo codigo.</blockquote>

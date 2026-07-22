@@ -1,0 +1,40 @@
+<h1>Pipeline de IA &amp; automacao</h1>
+<p>O pipeline agora tem dois apps de backend na VPS.</p>
+<p><strong><code>apps/worker</code></strong> processa filas, scrapers e embeddings.</p>
+<p><strong><code>apps/agent</code></strong> responde perguntas conversacionais para web, n8n e WhatsApp.</p>
+<excalidraw data-path="data/ai-pipeline.json"></excalidraw>
+<h2>Agente conversacional</h2>
+<ul>
+  <li><code>apps/web/app/assistente/actions.ts</code> classifica a intencao.</li>
+  <li>Perguntas genericas continuam em <code>chatSearch()</code>.</li>
+  <li>Horario, detalhes e FAQ chamam <code>CITY_AGENT_URL</code>.</li>
+  <li>O agente usa tools sobre SQL estruturado.</li>
+  <li>O provider default e <code>gemini-2.5-flash-lite</code>.</li>
+</ul>
+<h2>Roteiros inteligentes</h2>
+<ul>
+  <li><code>apps/agent/src/city-agent.ts</code> detecta pedido de roteiro personalizado.</li>
+  <li>Se faltar contexto, pergunta dias e preferencias antes de sugerir.</li>
+  <li>Quando ha contexto, consulta <code>attractions</code> e <code>tour_packages</code>.</li>
+  <li>A resposta combina texto com cards reais do portal.</li>
+</ul>
+<h2>Dados estruturados</h2>
+<ul>
+  <li><code>entity_hours</code> responde aberto, fechado e proxima abertura.</li>
+  <li><code>entity_services</code> responde servicos e documentos.</li>
+  <li><code>entity_faqs</code> responde perguntas por entidade.</li>
+  <li><code>attributes</code> guarda Pix, delivery, SUS e outros booleanos.</li>
+</ul>
+<h2>Embeddings</h2>
+<ul>
+  <li>O worker concatena nome, descricao, servicos, atributos e FAQs.</li>
+  <li>Alteracoes em servicos e FAQs enfileiram a entidade mae.</li>
+  <li><code>text-embedding-3-small</code> segue como modelo de embedding.</li>
+</ul>
+<h2>Controle de custo</h2>
+<ul>
+  <li>Toda resposta do agente grava <code>ai_jobs</code>.</li>
+  <li>O input registra query, canal e intent.</li>
+  <li>O output registra resposta e tools usadas.</li>
+</ul>
+<blockquote>Regra de produto: resposta gerada por IA sempre aparece como <strong>Resumido por IA — sujeito a verificacao</strong>.</blockquote>

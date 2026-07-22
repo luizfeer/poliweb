@@ -1,0 +1,61 @@
+<h1>🎨 Design System — Carmo Local</h1>
+<p>Linguagem visual densa estilo Amazon mobile, com identidade do interior mineiro. <strong>Mobile-first</strong>, base 16px, frame de design 390-430px.</p>
+<excalidraw data-path="data/design-system.json"></excalidraw>
+<h2>Inspiração e diferenciação</h2>
+<ul>
+  <li><strong>Densidade Amazon:</strong> cards justapostos, banners coloridos, ícones de categoria, listagens curtas</li>
+  <li><strong>Identidade mineira:</strong> laranja-telha (não laranja-Amazon puro) referenciando solo da Canastra e entardecer em Furnas</li>
+  <li><strong>Tipografia com personalidade:</strong> Fraunces (serifa moderna) em displays + Inter no corpo</li>
+  <li><strong>Off-white quente</strong> (paper #FAF8F5) — não branco frio</li>
+</ul>
+<h2>Tokens e paleta</h2>
+<p>Definidos em <code>apps/web/app/globals.css</code> e expostos como utilidades Tailwind v4 via <code>@theme inline</code>:</p>
+<ul>
+  <li><strong>Clay (primária):</strong> <code>bg-clay-500</code> (#E0561B), <code>bg-clay-600</code> (hover), <code>bg-clay-50</code> (tint)</li>
+  <li><strong>Cerrado (verde):</strong> turismo, natureza, confirmações</li>
+  <li><strong>Sun (amarelo):</strong> ratings, "novo", destaques sutis</li>
+  <li><strong>Sky (azul cidadania):</strong> links, transparência, secundários</li>
+  <li><strong>Discount (magenta-vinho):</strong> APENAS em badges de oferta — <em>não</em> é destrutivo</li>
+  <li><strong>Ink:</strong> ink-900 (texto), ink-600 (secundário), ink-300 (bordas)</li>
+  <li><strong>Paper:</strong> paper (página), paper-card (cards), paper-deep (faixas de seção)</li>
+</ul>
+<h2>Tipografia</h2>
+<ul>
+  <li><strong>Display:</strong> Fraunces (Google Fonts) — pesos 500, 600, 800</li>
+  <li><strong>UI / corpo:</strong> Inter (Google Fonts) — pesos 400, 500, 600, 700</li>
+  <li><strong>Mono:</strong> JetBrains Mono — raros números técnicos</li>
+  <li><strong>Carregadas via</strong> <code>next/font</code> em <code>app/layout.tsx</code> com display swap</li>
+</ul>
+<h2>Componentes</h2>
+<p>Implementados em <code>apps/web/components/carmo/</code>. Todos Server Components por padrão (zero JS no cliente quando possível).</p>
+<database-view data-path="data/components.json"></database-view>
+<h2>Vozes e tom</h2>
+<ul>
+  <li><strong>PT-BR sempre</strong>, tratamento "você", sotaque interior mineiro sem caricatura</li>
+  <li><strong>Sentence case</strong> em títulos e labels ("Coleta de lixo", não "Coleta de Lixo")</li>
+  <li><strong>EXCEÇÕES title case:</strong> nomes próprios (Ilha do Chico, Serra da Canastra, Festa do Padroeiro)</li>
+  <li><strong>Sem emoji em UI estrutural</strong> — usar Lucide icons (stroke 1.75)</li>
+  <li><strong>Conteúdo IA</strong> sempre com badge "Resumido por IA — sujeito a verificação" + link pra fonte</li>
+</ul>
+<h2>Iconografia</h2>
+<p><strong>Lucide React</strong> instalado. Tamanhos padrão: 16 (inline), 20 (input/button), 24 (default), 30 (categoria).</p>
+<pre><code>import { Trash2, HeartPulse, Fish } from 'lucide-react';</code></pre>
+<h2>Como usar (página Server Component)</h2>
+<pre><code>import { AppFrame, AppHeader, HeroBanner, RoundCat, TabBar } from '@/components/carmo';
+import { Trash2 } from 'lucide-react';
+
+export default function Home() {
+  return (
+    &lt;AppFrame&gt;
+      &lt;AppHeader cep="37150-000" /&gt;
+      &lt;HeroBanner kicker="Domingo na represa" title="Ilha do Chico" /&gt;
+      &lt;RoundCat label="Lixo" icon={Trash2} bg="clay" /&gt;
+      &lt;TabBar active="home" /&gt;
+    &lt;/AppFrame&gt;
+  );
+}</code></pre>
+<h2>Showcase em dev</h2>
+<p>Página <code>/preview</code> renderiza todos os componentes lado a lado. Use pra validar mudanças no design system.</p>
+<h2>Skill local</h2>
+<p>Em <code>.claude/skills/carmo-local-design/</code> — quando você (Claude) for criar tela/banner/protótipo, ative essa skill pra ter os tokens, voz e referências em contexto. Contém <code>colors_and_type.css</code>, <code>README.md</code> com as fundamentações, e logos.</p>
+<blockquote><strong>Dica:</strong> Em telas densas, deixe a tipografia respirar com <code>letter-spacing: -0.01em</code> nos displays. O peso 800 do Fraunces é generoso — só usar quando for headline.</blockquote>

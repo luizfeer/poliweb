@@ -1,0 +1,139 @@
+<h1>🔔 Sistema de notificações</h1>
+<p>Inbox + Push + Email para <strong>cidadãos</strong>, <strong>comerciantes</strong> e <strong>admins</strong>, multi-cidade.</p>
+<p>Origem única (Postgres) com 3 canais de entrega: <strong>in-app</strong>, <strong>email</strong> (Brevo) e <strong>push</strong> (Expo + Web Push).</p>
+
+<h2>Modelo de dados</h2>
+<ul>
+  <li><code>notifications</code> — item visível no painel/inbox (1 linha por destinatário).</li>
+  <li><code>notification_deliveries</code> — 1 linha por canal (in_app, email, push) com status (pending/sent/failed/skipped).</li>
+  <li><code>notification_preferences</code> — opt-out por <code>type</code> + <code>profile_id</code> (+ city_id opcional). Default = ativado.</li>
+  <li><code>device_push_tokens</code> — tokens Expo do app mobile (iOS/Android). 1 por dispositivo.</li>
+  <li><code>web_push_subscriptions</code> — PushSubscription do navegador (Web Push API, VAPID).</li>
+</ul>
+
+<h2>Pipeline de envio</h2>
+<ol>
+  <li>Server Action ou trigger DB chama <code>public.create_notification(...)</code>.</li>
+  <li>Insere 1 row em <code>notifications</code> + 3 rows em <code>notification_deliveries</code>:
+    <ul>
+      <li><code>in_app</code> sempre <code>sent</code> (já está no banco)</li>
+      <li><code>email</code> <code>pending</code> se <code>p_send_email = true</code>, senão <code>skipped</code></li>
+      <li><code>push</code> <code>pending</code> se o user tem destino E preferência permite, senão <code>skipped</code></li>
+    </ul>
+  </li>
+  <li>Worker <code>email:deliveries</code> processa fila de emails (Brevo).</li>
+  <li>Worker <code>push:deliveries</code> processa fila de push:
+    <ul>
+      <li>Busca <code>device_push_tokens</code> e <code>web_push_subscriptions</code> do destinatário</li>
+      <li>Envia via <strong>Expo Push API</strong> (iOS+Android) e <strong>web-push</strong> (browser)</li>
+      <li>Marca <code>sent</code>/<code>failed</code>, deleta token se <code>DeviceNotRegistered</code></li>
+    </ul>
+  </li>
+</ol>
+
+<h2>Credenciais e providers</h2>
+<ul>
+  <li><strong>iOS</strong>: APNs Auth Key <code>.p8</code> uploadada no EAS (Key ID <code>QM785W2YCY</code>, Team <code>Y6FSFUALV7</code>, bundle <code>com.portalcarmelitano.app</code>). Push iOS sai pelo Expo Push Service.</li>
+  <li><strong>Android</strong>: Firebase project <code>cidade-viva-app</code>, FCM V1 Service Account Key uploadada no EAS. App ID Firebase <code>1:693128883516:android:022a99a12d9af27fe20239</code>.</li>
+  <li><strong>Web</strong>: VAPID keypair (gerado com <code>web-push generate-vapid-keys</code>). Public Key em <code>NEXT_PUBLIC_VAPID_PUBLIC_KEY</code>, Private Key só no worker.</li>
+  <li><strong>Expo Push</strong>: token de acesso em <code>EXPO_ACCESS_TOKEN</code> (rate-limit benefit).</li>
+</ul>
+
+<h2>Worker push:deliveries</h2>
+<ul>
+  <li>Arquivo: <code>apps/worker/src/jobs/push-deliveries.ts</code></li>
+  <li>Daemon permanente no PM2 (<code>worker-push-deliveries</code>), polling 5s.</li>
+  <li>Envs obrigatórias: <code>EXPO_ACCESS_TOKEN</code>, <code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code>, <code>VAPID_SUBJECT</code>.</li>
+  <li>Marca <code>skipped</code> quando o destinatário não tem nenhum token registrado.</li>
+</ul>
+
+<h2>UI</h2>
+<ul>
+  <li><strong>Web</strong> — <code>/painel/notificacoes</code> = inbox/histórico do usuário. Botão Web Push em <code>components/push/WebPushToggle.tsx</code>.</li>
+  <li><strong>Mobile — Mensagens → Avisos</strong> (<code>app/inbox/notifications.tsx</code>) = histórico paginado, pull-to-refresh, marca como lida ao abrir.</li>
+  <li><strong>Mobile — Perfil → Notificações</strong> (<code>app/(tabs)/perfil/notificacoes.tsx</code>) = preferências por categoria + lista de dispositivos + botão "ativar neste dispositivo".</li>
+  <li><strong>Roteamento inteligente</strong>: <code>lib/navigation/smart-route.ts</code> decide nativa vs webview. <code>/painel/notificacoes</code> roteia pra tela nativa de Avisos automaticamente.</li>
+</ul>
+
+<h2>Persistência: por que puxar do Supabase</h2>
+<ul>
+  <li><strong>Fonte de verdade única</strong> — notificação lida no mobile aparece lida no web.</li>
+  <li><strong>RLS já protege</strong> — usuário só vê as próprias.</li>
+  <li><strong>Cache local leve</strong> resolve perf (cachedJson TTL 60s; pull-to-refresh força reload).</li>
+  <li><strong>Realtime opcional</strong> via <code>supabase.channel('notifications').on('postgres_changes', ...)</code> quando quiser ao vivo.</li>
+  <li><strong>Não duplicar offline</strong> — risco de divergir entre devices.</li>
+</ul>
+
+<h2>Endpoints mobile (Next API)</h2>
+<ul>
+  <li><code>POST /api/mobile/push/register</code> — registra Expo token (chamado no boot do app)</li>
+  <li><code>GET /api/mobile/push/state</code> — devices + preferências</li>
+  <li><code>POST /api/mobile/push/preferences</code> — upsert preferência</li>
+  <li><code>DELETE /api/mobile/push/device/:id</code> — revoga device</li>
+</ul>
+<p><strong>Leitura/escrita de notifications no mobile vai DIRETO no Supabase</strong> (sem passar pelo Vercel) — RLS protege. Veja <code>apps/mobile/lib/inbox/notifications-feed.ts</code>.</p>
+
+<h2>Badge da tab Mensagens</h2>
+<ul>
+  <li><code>useUnreadNotifications()</code> em <code>apps/mobile/lib/inbox/use-unread.ts</code>.</li>
+  <li>Atualiza via: <strong>Supabase Realtime</strong> (instantâneo) + poll 60s (fallback) + foreground + emitter <code>notifyUnreadChanged()</code>.</li>
+  <li>Pra realtime funcionar, habilitar publication: <em>Supabase Dashboard → Database → Replication → tabela <code>notifications</code> → toggle on</em>. Sem isso, polling continua funcionando.</li>
+</ul>
+
+<h2>Por que mobile vai direto no Supabase (e não via /api/mobile)</h2>
+<ul>
+  <li><strong>1 hop a menos</strong> (mobile → Supabase, em vez de mobile → Vercel → Supabase)</li>
+  <li><strong>Sem deploy Vercel</strong> pra mudar query</li>
+  <li><strong>Realtime grátis</strong> via <code>supabase.channel(...)</code></li>
+  <li><strong>RLS já protege</strong> — usuário só vê as próprias linhas</li>
+  <li>Endpoints Next ficam só pra coisas que precisam de service_role ou lógica de servidor (ex: <code>push/register</code>, que valida token do user e faz upsert)</li>
+</ul>
+
+<h2>Endpoints web</h2>
+<ul>
+  <li><code>POST /api/push/web/subscribe</code> — registra PushSubscription do browser</li>
+  <li><code>DELETE /api/push/web/subscribe?endpoint=...</code> — desinscreve</li>
+</ul>
+
+<h2>Disparar notificação</h2>
+<p>Server Action / SQL autenticado:</p>
+<pre><code>select public.create_notification(
+  recipient_id, city_id, 'user', 'lead.received', 'high',
+  'Título', 'Corpo', '/painel', null, null, '{}'::jsonb,
+  false,
+  '{"route": "/inbox/notifications"}'::jsonb
+);</code></pre>
+<p>Quando rodar via service_role (sem <code>auth.uid()</code>), inserir direto nas tabelas (a função usa <code>auth.uid()</code> pra autorizar).</p>
+
+<h2>Tipos de notificação (convenção)</h2>
+<ul>
+  <li><code>lead.received</code> — lead em negócio/imóvel/CidadeViva</li>
+  <li><code>business.update</code> — aprovação, status de página</li>
+  <li><code>city.alert</code> — comunicados oficiais</li>
+  <li><code>events.new</code> — novos eventos</li>
+  <li><code>classifieds.reply</code> — interesse em classificado</li>
+</ul>
+<p>Categorias visíveis ao usuário ficam em <code>NOTIFICATION_CATEGORIES</code> (<code>apps/web/app/api/mobile/push/state/route.ts</code>) — adicione lá pra aparecer nos toggles de preferência.</p>
+
+<h2>Smoke test</h2>
+<pre><code>with me as (select id from auth.users where email = 'voce@exemplo.com')
+insert into notifications (city_id, recipient_profile_id, audience, type, priority, title, body, target_url, metadata)
+select null, me.id, 'user'::notification_audience, 'lead.received',
+  'high'::notification_priority, 'Teste', 'Funcionou?', '/painel', '{}'::jsonb
+from me
+returning id;
+
+insert into notification_deliveries (notification_id, channel, status, provider)
+values (
+  (select id from notifications order by created_at desc limit 1),
+  'push'::notification_channel, 'pending'::notification_delivery_status, 'expo'
+);</code></pre>
+
+<h2>Troubleshooting</h2>
+<ul>
+  <li><strong>Token não salva</strong>: cheque <code>env.webBaseUrl</code> no mobile e logs do app (botão "Ativar neste dispositivo" mostra erro real).</li>
+  <li><strong>Push fica <code>failed</code> com "DeviceNotRegistered"</strong>: token expirou; worker já apaga automaticamente.</li>
+  <li><strong>Web push nada chega</strong>: confere se <code>NEXT_PUBLIC_VAPID_PUBLIC_KEY</code> está no Vercel e se <code>sw.js</code> está carregando.</li>
+  <li><strong>iOS sem push</strong>: simulador não recebe; precisa dispositivo físico + dev build novo.</li>
+  <li><strong>"no_session" no mobile</strong>: bug do <code>secureStorage</code> em <code>lib/supabase.ts</code> — fix em vigor desde 2026-05-21.</li>
+</ul>

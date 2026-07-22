@@ -1,0 +1,63 @@
+<h1>Media Foundation</h1>
+<p>Imagens e videos passam pelo <strong>Media Processor na VPS</strong> antes do Bunny.</p>
+<p>O banco guarda <strong>metadados e vinculos</strong>, nao so URL solta.</p>
+<excalidraw data-path="data/media-foundation.json"></excalidraw>
+<h2>Decisao</h2>
+<ul>
+  <li><strong><code>media_assets</code></strong> guarda arquivo, CDN, checksum, tipo e autor.</li>
+  <li><strong><code>media_links</code></strong> liga midia a entidade, papel e ordem.</li>
+  <li><strong>Campos legados</strong> continuam sincronizados para o front publico.</li>
+  <li><strong>Paths</strong> seguem <code>{city_slug}/{entity_type}/{entity_id}/{role}/...</code>.</li>
+  <li><strong>VPS</strong> converte imagens para WebP e videos para MP4 comprimido.</li>
+</ul>
+<h2>Processor VPS</h2>
+<ul>
+  <li><strong>Projeto</strong>: <code>apps/media-processor</code>.</li>
+  <li><strong>Endpoint</strong>: <code>POST /v1/process</code>.</li>
+  <li><strong>Auth</strong>: header <code>Authorization: Bearer MEDIA_PROCESSOR_SECRET</code>.</li>
+  <li><strong>Imagem</strong>: JPG, PNG, WebP, AVIF, HEIC/HEIF para WebP.</li>
+  <li><strong>Video</strong>: formatos comuns para MP4 H.264/AAC via <code>ffmpeg</code>.</li>
+</ul>
+<h2>Onde usa</h2>
+<ul>
+  <li><strong>Comercio</strong>: capa, logo e galeria editavel na ficha.</li>
+  <li><strong>Igrejas</strong>: capa, logo e galeria editavel no painel da igreja.</li>
+  <li><strong>Atracoes</strong>: capa e galeria editavel no painel de turismo.</li>
+  <li><strong>Turismo futuro</strong>: hospedagem, restaurante e pacotes devem reutilizar <code>GalleryUploadField</code>.</li>
+  <li><strong>Classificados</strong>: capa no rascunho do cidadao.</li>
+  <li><strong>Comunidade</strong>: eventos, pets, achados e perdidos.</li>
+  <li><strong>Imoveis</strong>: capa no rascunho.</li>
+</ul>
+<h2>Galeria editavel</h2>
+<ul>
+  <li><strong>Preview</strong>: fotos usam <code>Image</code>; videos usam <code>video</code> com indicador visual.</li>
+  <li><strong>Acao principal</strong>: botao <code>Postar midia</code> abre o seletor de arquivo.</li>
+  <li><strong>Capa</strong>: imagens da galeria podem virar capa pelo botao <code>Definir capa</code>.</li>
+  <li><strong>Remocao</strong>: apagar no preview marca <code>media_assets.status = deleted</code> e remove o link.</li>
+  <li><strong>Legado</strong>: remocao tambem limpa arrays <code>photos</code> quando a pagina publica ainda depende deles.</li>
+</ul>
+<h2>Thumbs publicas</h2>
+<ul>
+  <li><strong>Worker</strong>: <code>apps/worker/src/jobs/og-pending.ts</code> processa <code>og_image_jobs</code>.</li>
+  <li><strong>Formatos</strong>: gera <code>og_image_url</code> em 1200x630 e <code>og_square_image_url</code> em 1080x1080.</li>
+  <li><strong>Cache</strong>: cada job usa path com <code>{job_id}</code> para a URL mudar quando a capa muda.</li>
+  <li><strong>Cobertura</strong>: negocios, turismo, imoveis, igrejas, balsas, classificados, eventos e comunidade publicada.</li>
+  <li><strong>WhatsApp</strong>: paginas de detalhe colocam a imagem quadrada primeiro em Open Graph.</li>
+</ul>
+<h2>Importacao do Google</h2>
+<ul>
+  <li><strong>Regra</strong>: fotos selecionadas do Google entram sempre como <code>role = gallery</code>.</li>
+  <li><strong>Modal</strong>: exibe 6 fotos por vez e permite <code>Carregar mais fotos</code>.</li>
+  <li><strong>Limite</strong>: a action aceita ate 20 fotos selecionadas por importacao.</li>
+  <li><strong>Capa</strong>: nao deve ser trocada automaticamente pela importacao.</li>
+  <li><strong>Fonte</strong>: creditos do Google ficam em <code>alt_text</code> e <code>import_source.google_places.imported_photos</code>.</li>
+</ul>
+<h2>Configuracao</h2>
+<pre><code>BUNNY_STORAGE_ZONE=
+BUNNY_STORAGE_ACCESS_KEY=
+BUNNY_STORAGE_ENDPOINT=https://storage.bunnycdn.com
+NEXT_PUBLIC_BUNNY_CDN_URL=https://seu-pull-zone.b-cdn.net
+BUNNY_IMAGE_MAX_BYTES=8388608
+MEDIA_PROCESSOR_URL=https://media.seudominio.com
+MEDIA_PROCESSOR_SECRET=troque-por-um-segredo-forte</code></pre>
+<blockquote>Use o <strong>Storage Zone Password</strong> da Bunny na Storage API. Nao use a API key global da conta.</blockquote>

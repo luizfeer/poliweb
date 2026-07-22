@@ -1,0 +1,11 @@
+[
+  { "secao": "Identificação", "campo": "slug, name, short_description, description, cnpj", "obs": "short_description: até ~140 chars (cards). description: ficha completa." },
+  { "secao": "Contatos", "campo": "phone, whatsapp, email, website, instagram, facebook, google_maps_url", "obs": "" },
+  { "secao": "Localização", "campo": "address, cep, district_id, lat, lng", "obs": "" },
+  { "secao": "Operação", "campo": "hours (jsonb)", "obs": "{ mon: [{open, close}], tue: [...] } — suporta múltiplos turnos por dia" },
+  { "secao": "Features", "campo": "amenities, payment_methods (jsonb)", "obs": "['estacionamento','wifi','pet_friendly','delivery'] | ['pix','dinheiro','credito','vale_refeicao']" },
+  { "secao": "Mídia", "campo": "cover_url, logo_url, photos (jsonb)", "obs": "" },
+  { "secao": "Categorização", "campo": "business_category_assignments (M:N)", "obs": "Múltiplas categorias possíveis, com is_primary única por negócio" },
+  { "secao": "Gestão", "campo": "owner_profile_id, plan, verified, claimed, ordering_enabled", "obs": "owner = quem gerencia. plan: free|featured|premium. verified: admin checou CNPJ. claimed: comerciante reivindicou ficha. ordering_enabled libera o CTA público de cardápio/delivery." },
+  { "secao": "Status", "campo": "status, featured, views_count, published_at", "obs": "status: draft|pending|published|rejected|archived" }
+]

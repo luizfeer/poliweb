@@ -1,0 +1,14 @@
+[
+  { "categoria": "Supermercados", "faixa": "L", "mensal": "R$ 1.000", "seis_meses": "R$ 6.000", "anual_15off": "R$ 10.200", "notas": "Maior ticket. Alta frequência de visita." },
+  { "categoria": "Farmácias", "faixa": "L", "mensal": "R$ 700", "seis_meses": "R$ 4.200", "anual_15off": "R$ 7.140", "notas": "Categoria sensível — exigir CRF visível." },
+  { "categoria": "Postos de combustível", "faixa": "L", "mensal": "R$ 600", "seis_meses": "R$ 3.600", "anual_15off": "R$ 6.120", "notas": "Poucos players por cidade — exclusividade vale ouro." },
+  { "categoria": "Material de construção", "faixa": "M", "mensal": "R$ 350", "seis_meses": "R$ 2.100", "anual_15off": "R$ 3.570", "notas": "Sazonalidade alta (reforma)." },
+  { "categoria": "Restaurantes / pizzarias", "faixa": "M", "mensal": "R$ 500", "seis_meses": "R$ 3.000", "anual_15off": "R$ 5.100", "notas": "Subcategorizar (pizzaria vs. comida regional) se houver demanda." },
+  { "categoria": "Pousadas", "faixa": "M", "mensal": "R$ 450", "seis_meses": "R$ 2.700", "anual_15off": "R$ 4.590", "notas": "Forte sazonalidade turística (Furnas/Canastra)." },
+  { "categoria": "Padarias", "faixa": "M", "mensal": "R$ 300", "seis_meses": "R$ 1.800", "anual_15off": "R$ 3.060", "notas": "Tráfego diário, ticket baixo." },
+  { "categoria": "Açougues / hortifrúti", "faixa": "M", "mensal": "R$ 280", "seis_meses": "R$ 1.680", "anual_15off": "R$ 2.856", "notas": "Boa combinação com encarte semanal." },
+  { "categoria": "Oficinas / borracharias", "faixa": "M", "mensal": "R$ 250", "seis_meses": "R$ 1.500", "anual_15off": "R$ 2.550", "notas": "Busca por urgência — destaque ajuda muito." },
+  { "categoria": "Escolas / cursos", "faixa": "S", "mensal": "R$ 220", "seis_meses": "R$ 1.320", "anual_15off": "R$ 2.244", "notas": "Vende em janelas (matrícula). Considerar pacote sazonal." },
+  { "categoria": "Pet shops", "faixa": "S", "mensal": "R$ 200", "seis_meses": "R$ 1.200", "anual_15off": "R$ 2.040", "notas": "Cresce conforme adoção do app." },
+  { "categoria": "Salões / barbearias", "faixa": "S", "mensal": "R$ 180", "seis_meses": "R$ 1.080", "anual_15off": "R$ 1.836", "notas": "Concorrência alta — fila de espera tende a se formar rápido." }
+]

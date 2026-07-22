@@ -1,0 +1,40 @@
+<h1>📦 Módulos da plataforma</h1>
+<p>9 módulos liga/desliga por cidade. Cada módulo agrupa um conjunto coeso de tabelas, telas e jobs IA.</p>
+<excalidraw data-path="data/product-map.json"></excalidraw>
+<h2>Catálogo</h2>
+<database-view data-path="data/modules.json"></database-view>
+<h2>Como ativar/desativar para uma cidade</h2>
+<pre><code>-- Desligar transparência em Capitólio até ter dados:
+update city_modules
+set enabled = false
+where city_id = (select id from cities where slug = 'capitolio')
+  and module_key = 'transparency';</code></pre>
+<p>O front consulta <code>city_modules</code> para decidir se mostra o item no menu, expõe rotas e roda jobs daquele módulo.</p>
+<h2>Mapa-guia público</h2>
+<p><code>/mapa</code> reúne pontos geolocalizados de turismo, comércios e eventos em uma experiência compartilhável.</p>
+<ul>
+  <li><strong>Camadas:</strong> atrações, igrejas, onde ficar, onde comer, pesca, guias, comércios e eventos.</li>
+  <li><strong>Controle por cidade:</strong> cada camada só aparece quando o módulo correspondente está ativo em <code>city_modules</code>.</li>
+  <li><strong>Estado na URL:</strong> <code>cats</code>, <code>q</code>, <code>z</code>, <code>c</code> e <code>id</code> permitem compartilhar o mesmo recorte do mapa.</li>
+  <li><strong>Mini widget:</strong> fichas públicas usam <code>MapEmbed</code> com atalhos para mapa local, Google, Waze e copiar endereço.</li>
+  <li><strong>Arquivos:</strong> <code>apps/web/app/mapa/page.tsx</code>, <code>apps/web/app/mapa/_components/map-explorer.tsx</code> e <code>apps/web/lib/maps/fetch-points.ts</code>.</li>
+</ul>
+<h2>Central Ao Vivo</h2>
+<p><code>/ao-vivo</code> agrega itens de <code>live_feed_items</code> em uma pagina publica mobile-first.</p>
+<ul>
+  <li><strong>Rotas:</strong> cards com tempo, atraso e distancia quando o payload tem <code>durationText</code>, <code>delayText</code> ou <code>distanceText</code>.</li>
+  <li><strong>Trechos:</strong> alertas sem metricas viram card de trecho em atencao, sem atraso estimado.</li>
+  <li><strong>Noticias futuras:</strong> a UI ja separa <code>news</code>, <code>event</code>, <code>service</code> e <code>portal</code> para fontes locais.</li>
+  <li><strong>Arquivos:</strong> <code>apps/web/app/ao-vivo/page.tsx</code>, <code>apps/web/lib/live-feed/queries.ts</code> e <code>apps/web/components/carmo/top-nav.tsx</code>.</li>
+</ul>
+<h2>Páginas detalhadas por módulo</h2>
+<ul>
+  <li><strong><a href="real-estate.html">real-estate.html</a></strong> — imobiliárias, corretores, imóveis</li>
+  <li><strong><a href="businesses.html">businesses.html</a></strong> — guia comercial com categorias hierárquicas</li>
+  <li><strong><a href="tourism.html">tourism.html</a></strong> — hospedagem, atrações, pesca e pacotes</li>
+  <li><strong><a href="tourism-attractions.html">tourism-attractions.html</a></strong> — atrações gerenciáveis, reviews, fotos UGC e roteiros</li>
+  <li><strong><a href="utilities.html">utilities.html</a></strong> — serviços públicos, plantão, saúde e alertas</li>
+  <li><strong><a href="ai-pipeline.html">ai-pipeline.html</a></strong> — scrapers, resumos IA e embeddings</li>
+  <li>community, transparency — em construção.</li>
+</ul>
+<blockquote>Adicionar um novo módulo: <code>insert into modules</code> + migration + RLS + Davia.</blockquote>

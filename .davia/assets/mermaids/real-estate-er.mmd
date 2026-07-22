@@ -1,0 +1,45 @@
+erDiagram
+    REALTORS ||--o{ REALTOR_AGENTS : has
+    REALTORS ||--o{ PROPERTIES : lists
+    REALTOR_AGENTS ||--o{ PROPERTIES : assigned_to
+    PROFILES ||--o{ PROPERTIES : owns_directly
+    PROFILES ||--o{ REALTORS : owns
+    PROPERTIES ||--o{ PROPERTY_INQUIRIES : receives
+    PROPERTIES ||--o{ PROPERTY_FAVORITES : favorited_by
+    CITIES ||--o{ REALTORS : in
+    CITIES ||--o{ PROPERTIES : in
+    DISTRICTS ||--o{ PROPERTIES : located_in
+
+    REALTORS {
+        uuid id PK
+        uuid city_id FK
+        text slug
+        text name
+        text creci
+        uuid owner_profile_id FK
+        entity_status status
+    }
+    REALTOR_AGENTS {
+        uuid id PK
+        uuid realtor_id FK
+        uuid profile_id FK
+        text creci
+        text role
+    }
+    PROPERTIES {
+        uuid id PK
+        uuid city_id FK
+        uuid realtor_id FK
+        uuid owner_profile_id FK
+        listing_kind listing_type
+        property_kind property_type
+        numeric price
+        smallint bedrooms
+        bool exclusive
+    }
+    PROPERTY_INQUIRIES {
+        uuid id PK
+        uuid property_id FK
+        text requester_name
+        text status
+    }

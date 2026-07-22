@@ -1,0 +1,13 @@
+[
+  { "secao": "Identificação", "campo": "slug, reference_code, listing_type, property_type, title", "obs": "listing_type: sale|rent|temporary | property_type: 14 tipos (apartment, house, chacara, terreno_*, comercial_*, etc)" },
+  { "secao": "Ownership",     "campo": "realtor_id ou owner_profile_id", "obs": "Imóvel pode pertencer a uma imobiliária OU a um particular (cidadão postando direto). CHECK garante ao menos um." },
+  { "secao": "Ownership",     "campo": "agent_id, exclusive", "obs": "Agente da imobiliária responsável; flag de exclusividade" },
+  { "secao": "Valores",       "campo": "price, rent_price, condo_fee, iptu_yearly", "obs": "price para venda, rent_price para aluguel; pode ter ambos para venda+permuta" },
+  { "secao": "Valores",       "campo": "accepts_financing, accepts_exchange", "obs": "Aceita financiamento bancário / permuta" },
+  { "secao": "Métricas",      "campo": "area_total_m2, area_useful_m2, bedrooms, suites, bathrooms, parking_spaces, floor, built_year", "obs": "Padrão imobiliário brasileiro" },
+  { "secao": "Localização",   "campo": "address_street, number, complement, cep, district_id, lat, lng, show_exact_location", "obs": "show_exact_location=false esconde número/lat-lng exato e mostra só o bairro" },
+  { "secao": "Features",      "campo": "amenities (jsonb)", "obs": "Array livre: ['piscina','churrasqueira','varanda','elevador',...]" },
+  { "secao": "Features",      "campo": "furnished, pets_allowed, has_pool, has_grill, has_garden, has_garage, near_lake", "obs": "Booleans para filtros rápidos. near_lake é killer-feature em CRC/Furnas" },
+  { "secao": "Mídia",         "campo": "cover_url, photos (jsonb), video_url, tour_360_url, floor_plan_url", "obs": "photos = [{url, caption, order}]" },
+  { "secao": "Status",        "campo": "status, featured, views_count, published_at, expires_at", "obs": "status: draft|pending|published|rejected|archived. expires_at automatiza arquivamento de anúncios velhos" }
+]

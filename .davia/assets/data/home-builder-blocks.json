@@ -1,0 +1,32 @@
+[
+  {
+    "type": "banner_carousel",
+    "media": "varios banners",
+    "config": "aspectRatio, intervalMs",
+    "admin_surface": "upload de imagem/video + reordenacao"
+  },
+  {
+    "type": "wide_banner",
+    "media": "imagem unica",
+    "config": "aspectRatio, fullBleed",
+    "admin_surface": "upload de imagem/video unico"
+  },
+  {
+    "type": "custom_hero_banner",
+    "media": "imagem unica",
+    "config": "layout, texto, cores, fonte, overlay, posicao da imagem, animacao",
+    "admin_surface": "galeria de modelos + controles visuais"
+  },
+  {
+    "type": "business_promo_hero",
+    "media": "sem upload",
+    "config": "href",
+    "admin_surface": "config simples"
+  },
+  {
+    "type": "entity_list",
+    "media": "dados do modulo",
+    "config": "source, limit, layout, categorySlug, CTA",
+    "admin_surface": "fonte e limite"
+  }
+]

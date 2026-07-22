@@ -1,0 +1,71 @@
+<h1>Delivery e Pedidos</h1>
+<p>Modulo de cardapio, pedidos nativos e operacao por WhatsApp. Permite o cidadao montar um carrinho estilo iFood na web ou no app, finalizar o pedido direto no Supabase, e o comerciante operar tudo pelo zap (online/offline, aceitar, avancar status) ou pelo painel em tempo real.</p>
+<p>Plano completo em <code>.claude/plans/06-delivery-pedidos-nativos-bot-whatsapp.md</code>.</p>
+
+<h2>Decisoes de arquitetura</h2>
+<ul>
+  <li><strong>Sem backend novo.</strong> Estende a stack atual: Postgres (RPC + RLS + trigger), edge functions Deno e o worker Node ja existentes. Reusa o hub de WhatsApp (fila, worker, janela de 24h).</li>
+  <li><strong>Caminho do pedido fora do Vercel.</strong> O pedido e gravado pela RPC <code>create_order</code> chamada direto no Supabase pelo browser/app. Excecao consciente a regra de mutations via Server Action, restrita ao modulo delivery.</li>
+  <li><strong>Notificacao por trigger.</strong> Um trigger AFTER INSERT em <code>orders</code> enfileira a mensagem ao operador, independente do canal de entrada (web, app, futuras integracoes).</li>
+  <li><strong>Anti-fraude.</strong> A RPC recalcula precos e frete a partir do catalogo no servidor; o cliente nunca define o valor.</li>
+</ul>
+
+<h2>Fluxo do pedido</h2>
+<excalidraw data-path="data/delivery-flow.json" />
+<ul>
+  <li>Comerciante manda <code>/abrir</code> no WhatsApp ou clica em Abrir loja no painel. A loja fica online em <code>business_delivery_status</code>.</li>
+  <li>Cliente abre <code>/cardapios</code>, ve so as lojas online, monta o carrinho e finaliza.</li>
+  <li><code>create_order</code> valida loja online + pedido minimo, recalcula precos, grava <code>orders</code> e <code>order_items</code>, retorna o numero curto do dia.</li>
+  <li>Trigger <code>trg_orders_notify</code> enfileira em <code>wa_outbound_queue</code>: botoes interativos se a janela de 24h estiver aberta, senao o template <code>novo_pedido</code>.</li>
+  <li><code>wa-outbound-worker</code> (cron por minuto) drena a fila e envia via Graph API.</li>
+  <li>Operador toca os botoes ou digita comandos. <code>delivery-bot</code> consome <code>wa_inbound_queue</code> e chama <code>update_order_status</code>.</li>
+  <li>Cliente acompanha o status em tempo real no app (Supabase Realtime).</li>
+</ul>
+
+<h2>Comandos do bot</h2>
+<database-view data-path="data/delivery-bot-commands.json" />
+
+<h2>Tabelas</h2>
+<database-view data-path="data/delivery-tables.json" />
+
+<h2>Componentes</h2>
+<ul>
+  <li><code>supabase/migrations/20260530180000_delivery_catalog_orders_bot.sql</code> cria catalogo, pedidos, presenca, operadores, RPCs e RLS.</li>
+  <li><code>supabase/migrations/20260530190000_delivery_order_notifications_trigger.sql</code> cria o trigger de notificacao.</li>
+  <li><code>supabase/functions/delivery-bot</code> interpreta comandos e botoes do operador.</li>
+  <li><code>apps/web/lib/delivery/create-order.ts</code> grava o pedido direto no Supabase (browser client).</li>
+  <li><code>apps/web/lib/delivery/catalog.ts</code> monta a arvore do cardapio para a pagina publica.</li>
+  <li><code>apps/web/app/painel/comercio/[id]/cardapio</code> editor de cardapio com upload de foto via R2.</li>
+  <li><code>apps/web/app/painel/comercio/[id]/delivery</code> config de entrega, online/offline e operadores.</li>
+  <li><code>apps/web/app/painel/comercio/[id]/fila</code> fila de pedidos em tempo real com som.</li>
+  <li><code>apps/web/app/cardapios</code> lista publica Faca Pedidos.</li>
+  <li><code>apps/mobile/app/pedidos</code> lista e detalhe de pedidos do cliente com status ao vivo.</li>
+</ul>
+
+<h2>Estados do pedido</h2>
+<p>Maquina de estados validada em <code>update_order_status</code>: <code>pending</code> ao <code>confirmed</code> ao <code>preparing</code> ao <code>ready</code> ao <code>dispatched</code> ao <code>delivered</code>. Os estados <code>cancelled</code> e <code>rejected</code> encerram o fluxo. Cada transicao grava trilha em <code>order_status_history</code>.</p>
+
+<h2>Presenca online</h2>
+<ul>
+  <li><code>business_delivery_status</code> e a fonte de verdade do que aparece em Faca Pedidos.</li>
+  <li><code>auto_offline_at</code> desliga a loja sozinha apos o periodo (evita loja fantasma online).</li>
+  <li>Fontes de mudanca: <code>whatsapp</code>, <code>panel</code>, <code>app</code>, <code>auto</code>.</li>
+</ul>
+
+<h2>Monetizacao: Free e Pro</h2>
+<p>A cidade nao esta acostumada com cobranca por porcentagem, e o portal NAO processa o pagamento do pedido (segue PIX direto ou maquininha do motoboy na entrega). Por isso a cobranca e assinatura fixa mensal, em dois planos. A diferenca de valor fica visivel porque so o Pro registra os pedidos e gera relatorios.</p>
+<ul>
+  <li><strong>Free</strong>: cardapio digital e item mais pedido. O cliente finaliza e o pedido vai pelo WhatsApp (<code>wa.me</code>). Nada e gravado no banco: sem fila, sem bot, sem relatorios.</li>
+  <li><strong>Pro</strong>: pedidos nativos (<code>create_order</code>), bot no WhatsApp com botoes, acompanhamento no app e relatorios completos. Inclui 1 mes de teste gratis.</li>
+</ul>
+<p>Gate no banco: <code>delivery_is_pro()</code> e checagem <code>plan_required</code> dentro de <code>create_order</code>. Trial via <code>start_delivery_trial()</code> (uma vez por negocio, 30 dias). Colunas <code>delivery_plan</code>, <code>delivery_trial_started_at</code>, <code>delivery_trial_ends_at</code> em <code>businesses</code>. Migration <code>20260530200000_delivery_plans.sql</code>.</p>
+<p>Relatorios em <code>apps/web/lib/delivery/reports.ts</code> e na aba <code>/painel/comercio/[id]/relatorios</code>: faturamento, ticket medio, pedidos por dia, itens mais pedidos, horario de pico, tempo de preparo e taxa de aceite/cancelamento. No Free a aba mostra um convite para ativar o teste.</p>
+<p>Cobranca da assinatura Pro: usar <code>business_plans</code> + Asaas (recorrencia PIX/boleto) — follow-up. Faixa de preco sugerida para validar: R$ 29 a 49 por mes.</p>
+
+<h2>Pendencias</h2>
+<ul>
+  <li>Aplicar as migrations no banco (incluindo <code>20260530200000_delivery_plans.sql</code>) e rodar <code>pnpm supabase gen types</code> (remove a camada-ponte <code>deliveryClient</code>).</li>
+  <li>Criar o template Meta <code>novo_pedido</code> (3 variaveis: nome da loja, numero do pedido, total).</li>
+  <li>Push ao comerciante com o app fechado: funcao SECURITY DEFINER dedicada para o fanout sem depender de auth.uid().</li>
+  <li>Cobranca recorrente da assinatura Pro via Asaas (<code>business_plans</code>); hoje o trial e o gate ja funcionam, falta o pagamento da mensalidade.</li>
+</ul>

@@ -1,0 +1,26 @@
+[
+  {
+    "stage": "Fonte",
+    "owner": "Server Actions / triggers",
+    "example": "lead.received, approval.pending, review.pending",
+    "output": "Chama create_notification ou notify_city_admins"
+  },
+  {
+    "stage": "Persistencia",
+    "owner": "Postgres + RLS",
+    "example": "notifications, notification_deliveries",
+    "output": "Inbox por usuario, cidade e entidade"
+  },
+  {
+    "stage": "Entrega",
+    "owner": "In-app primeiro",
+    "example": "email apenas quando marcado",
+    "output": "delivery in_app sent, email pending/skipped"
+  },
+  {
+    "stage": "Futuro push",
+    "owner": "Firebase",
+    "example": "notification_devices",
+    "output": "channel push preparado, mas skipped no v1"
+  }
+]

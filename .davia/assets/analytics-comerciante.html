@@ -1,0 +1,45 @@
+<h1>📊 Analytics de comerciante</h1>
+<p>Mini Google Analytics para o comerciante local. Sem cookies de terceiros, sem PII.</p>
+<hr />
+<h2>Fluxo de dados</h2>
+<p>Eventos brutos → agregados diários → dashboard. Rotação em 90 dias.</p>
+<excalidraw data-path="data/analytics-flow.json"></excalidraw>
+<p></p>
+<h2>Tabelas</h2>
+<ul>
+  <li><code>business_page_events</code> — eventos brutos (view, cliques)</li>
+  <li><code>business_daily_stats</code> — agregados por dia</li>
+  <li><code>business_weekly_rank</code> — ranking por categoria/bairro</li>
+</ul>
+<h2>Tracking</h2>
+<ul>
+  <li><strong>Views:</strong> <code>after()</code> do Next 16 na ficha pública</li>
+  <li><strong>Cliques:</strong> hook <code>useBusinessTracker</code> nos CTAs</li>
+  <li><strong>Session hash:</strong> SHA-256 de IP+UA+data (sem PII)</li>
+</ul>
+<h2>Dashboard</h2>
+<ul>
+  <li><strong>Merchant:</strong> <code>/painel/comercio/[id]/analytics</code></li>
+  <li><strong>Admin:</strong> <code>/painel/cidade/comercio/analytics</code></li>
+  <li><strong>Export:</strong> CSV com range de 7/30/90 dias</li>
+</ul>
+<h2>Checklist</h2>
+<database-view data-path="data/analytics-checklist.json"></database-view>
+<p></p>
+<h2>Cron jobs</h2>
+<ul>
+  <li><strong>Agregação diária:</strong> <code>cron.schedule('0 4 * * *')</code> → chama <code>aggregate_business_daily_stats</code></li>
+  <li><strong>Limpeza semanal:</strong> <code>cron.schedule('0 5 * * 0')</code> → chama <code>purge_old_business_events</code></li>
+  <li>Requer <code>pg_cron</code> habilitado no Supabase</li>
+</ul>
+<h2>Arquivos principais</h2>
+<ul>
+  <li><code>supabase/migrations/20260506100000_business_analytics.sql</code></li>
+  <li><code>supabase/functions/aggregate-business-stats/index.ts</code> (edge function opcional)</li>
+  <li><code>apps/web/lib/analytics/track.ts</code></li>
+  <li><code>apps/web/lib/analytics/queries.ts</code></li>
+  <li><code>apps/web/lib/analytics/use-tracker.ts</code></li>
+  <li><code>apps/web/app/api/track/business-event/route.ts</code></li>
+  <li><code>apps/web/app/painel/comercio/[id]/analytics/page.tsx</code></li>
+  <li><code>apps/web/app/painel/cidade/comercio/analytics/page.tsx</code></li>
+</ul>

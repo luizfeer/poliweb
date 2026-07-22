@@ -1,0 +1,161 @@
+/* ============================================================
+   Carmo Local — Design Tokens
+   Colors, typography, radii, shadows, spacing, animation.
+   Mobile-first. Base 16px / 390px design width.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ---------- COLORS ---------- */
+
+  /* Primary — Clay (terracotta orange, calibrated from Amazon orange) */
+  --carmo-clay-50:  #FFF1E8;
+  --carmo-clay-100: #FFD9BF;
+  --carmo-clay-300: #F08A4E;
+  --carmo-clay-500: #E0561B;   /* primary */
+  --carmo-clay-600: #C84810;   /* hover/pressed */
+  --carmo-clay-700: #9C3608;
+
+  /* Secondary — Cerrado green */
+  --carmo-cerrado-50:  #F1F7EE;
+  --carmo-cerrado-100: #E1EEDE;
+  --carmo-cerrado-300: #6E9C5E;
+  --carmo-cerrado-500: #3C6B36;
+  --carmo-cerrado-700: #1F4A2C;
+
+  /* Accent — Sun yellow */
+  --carmo-sun-100: #FFF1CC;
+  --carmo-sun-300: #FAD46A;
+  --carmo-sun-500: #F4B73A;
+
+  /* Civic blue — links, transparency layer */
+  --carmo-sky-100: #DCEAF7;
+  --carmo-sky-500: #2E78C2;
+  --carmo-sky-700: #0F4C81;
+
+  /* Discount magenta-vinho (NOT destructive) */
+  --carmo-discount: #C81E4A;
+  --carmo-discount-deep: #9C1238;
+
+  /* Destructive */
+  --carmo-destructive: #B23A3A;
+  --carmo-destructive-tint: #FBEBEB;
+
+  /* Ink (text) */
+  --carmo-ink-900: #191919;
+  --carmo-ink-700: #2F2F2F;
+  --carmo-ink-600: #5A5A5A;
+  --carmo-ink-400: #9A9A9A;
+  --carmo-ink-300: #C9C9C9;
+  --carmo-ink-200: #E4E4E4;
+
+  /* Paper (backgrounds) */
+  --carmo-paper:        #FAF8F5;  /* page bg, warm off-white */
+  --carmo-paper-card:   #FFFFFF;  /* card bg */
+  --carmo-paper-deep:   #F2EEE7;  /* section bands, footer */
+  --carmo-paper-tint:   #F7F2EA;  /* hover on paper-card */
+
+  /* ---------- SEMANTIC ---------- */
+  --color-bg:            var(--carmo-paper);
+  --color-bg-card:       var(--carmo-paper-card);
+  --color-bg-section:    var(--carmo-paper-deep);
+  --color-fg:            var(--carmo-ink-900);
+  --color-fg-muted:      var(--carmo-ink-600);
+  --color-fg-subtle:     var(--carmo-ink-400);
+  --color-border:        var(--carmo-ink-200);
+  --color-border-strong: var(--carmo-ink-300);
+  --color-primary:       var(--carmo-clay-500);
+  --color-primary-fg:    #FFFFFF;
+  --color-primary-hover: var(--carmo-clay-600);
+  --color-primary-tint:  var(--carmo-clay-50);
+  --color-link:          var(--carmo-sky-700);
+  --color-success:       var(--carmo-cerrado-500);
+  --color-warning:       var(--carmo-sun-500);
+  --color-danger:        var(--carmo-destructive);
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  /* Scale */
+  --text-display: 32px;  --lh-display: 1.05;
+  --text-h1:      24px;  --lh-h1:      1.15;
+  --text-h2:      20px;  --lh-h2:      1.20;
+  --text-h3:      17px;  --lh-h3:      1.30;
+  --text-body:    15px;  --lh-body:    1.45;
+  --text-sm:      13px;  --lh-sm:      1.40;
+  --text-xs:      11px;  --lh-xs:      1.30;
+
+  /* ---------- SPACING (4px scale) ---------- */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 56px;
+  --sp-10: 80px;
+
+  /* ---------- RADII ---------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ---------- SHADOWS ---------- */
+  --shadow-card:    0 1px 2px rgba(25,25,25,0.04), 0 0 0 1px rgba(25,25,25,0.06);
+  --shadow-pop:     0 8px 24px rgba(25,25,25,0.10), 0 0 0 1px rgba(25,25,25,0.04);
+  --shadow-banner:  0 2px 6px rgba(192,72,16,0.18);
+  --shadow-tabbar:  0 -1px 0 var(--carmo-ink-200);
+
+  /* ---------- ANIMATION ---------- */
+  --ease-out:  cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in:   cubic-bezier(0.6, 0, 0.8, 0.4);
+  --dur-micro:  120ms;
+  --dur-base:   200ms;
+  --dur-modal:  320ms;
+
+  /* ---------- LAYOUT ---------- */
+  --app-max-w:  430px;
+  --app-pad-x:  16px;
+  --tabbar-h:   60px;
+  --header-h:   110px;
+}
+
+/* ============================================================
+   Element defaults
+   ============================================================ */
+
+html {
+  font-family: var(--font-sans);
+  color: var(--color-fg);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body { font-size: var(--text-body); line-height: var(--lh-body); }
+
+h1, .h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--text-h1); line-height: var(--lh-h1); letter-spacing: -0.01em; }
+h2, .h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-h2); line-height: var(--lh-h2); letter-spacing: -0.005em; }
+h3, .h3 { font-family: var(--font-sans); font-weight: 600; font-size: var(--text-h3); line-height: var(--lh-h3); }
+
+.display { font-family: var(--font-display); font-weight: 800; font-size: var(--text-display); line-height: var(--lh-display); letter-spacing: -0.015em; }
+
+p, .body { font-size: var(--text-body); line-height: var(--lh-body); }
+.text-sm { font-size: var(--text-sm); line-height: var(--lh-sm); }
+.text-xs { font-size: var(--text-xs); line-height: var(--lh-xs); letter-spacing: 0.02em; }
+
+.muted { color: var(--color-fg-muted); }
+.subtle { color: var(--color-fg-subtle); }
+
+a { color: var(--color-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code, pre { font-family: var(--font-mono); font-size: 13px; }

@@ -1,0 +1,66 @@
+<h1>🗄️ Modelo de dados</h1>
+<p>Schema modular, multi-cidade, com <strong>RLS habilitada em todas as tabelas</strong>. Migrations em <code>supabase/migrations/</code>. Convenção universal: <code>id uuid</code>, <code>created_at</code>, <code>updated_at</code>, <code>city_id</code> (em quase tudo).</p>
+<database-view data-path="data/schema.json"></database-view>
+<h2>Padrão multi-cidade</h2>
+<p>Toda entidade do domínio tem <code>city_id</code> FK para <code>cities</code>. RLS sempre filtra por <code>city_id</code> + papel. Ver detalhes em <strong>multi-city.html</strong>.</p>
+<h2>Padrão de ownership</h2>
+<p>Combinação de <strong>owner direto</strong> (<code>owner_profile_id</code> em cada tabela editável) + <strong><code>entity_managers</code></strong> (M:N genérico para multi-pessoa). Ver detalhes em <strong>ownership.html</strong>.</p>
+<h2>Padrões importantes</h2>
+<ul>
+  <li><strong>Soft modular</strong> — módulos são liga/desliga via <code>city_modules</code>. Tabelas existem mesmo se módulo desligado, queries é que filtram</li>
+  <li><strong>Slugs humanos</strong> em tudo público (<code>recanto-da-furnas</code>) — UNIQUE por cidade</li>
+  <li><strong>Status uniforme</strong> via enum <code>entity_status</code>: draft, pending, published, rejected, archived</li>
+  <li><strong>Storage paths</strong> previsíveis: <code>{city_slug}/{entity_type}/{id}/cover.webp</code></li>
+  <li><strong>Mídia</strong> centralizada em <code>media_assets</code> + <code>media_links</code>, com Bunny CDN e sincronização dos campos <code>cover_url</code>/<code>photos</code></li>
+  <li><strong>jsonb</strong> para campos flexíveis (<code>hours</code>, <code>amenities</code>, <code>photos</code>) — evita explosão de tabelas</li>
+  <li><strong>pgvector</strong> em <code>embeddings</code> com índice ivfflat (busca semântica de DO/atos/imóveis/negócios)</li>
+  <li><strong>Triggers</strong>: <code>set_updated_at()</code> universal; <code>handle_new_user()</code> cria profile no signup</li>
+  <li><strong>Claims de negócio</strong>: admin da cidade pode ler perfis vinculados a <code>business_claims</code> da sua cidade para contato manual</li>
+  <li><strong>Pedidos públicos</strong>: <code>businesses.ordering_enabled</code> libera o CTA de cardápio/delivery sem apagar dados existentes</li>
+  <li><strong>Relatos de erro</strong>: <code>business_reports</code> guarda correções sugeridas por usuários e fila de revisão do admin</li>
+  <li><strong>Contato público</strong>: <code>contact_submissions</code> guarda mensagens do formulário público e um trigger notifica admin/moderator da cidade</li>
+  <li><strong>Ledger financeiro</strong>: <code>portal_payments</code> e <code>portal_payment_events</code> guardam cobranças Asaas, status, datas e logs por perfil/cidade</li>
+  <li><strong>Páginas indexáveis</strong>: <code>site_pages</code> guarda páginas públicas como <code>/servicos/saude</code> e entra no pipeline de embeddings como <code>site_page</code></li>
+  <li><strong>Notificações</strong>: <code>notifications</code>, <code>notification_deliveries</code>, <code>notification_preferences</code> e <code>notification_devices</code> formam a inbox in-app e a ponte futura para Firebase</li>
+  <li><strong>Ao vivo da navbar</strong>: <code>live_feed_items</code> guarda avisos por cidade com prioridade, origem, link, cache curto e validade por <code>starts_at</code>/<code>expires_at</code></li>
+  <li><strong>Rotas rodoviárias</strong>: <code>road_route_snapshots</code> cacheia DER-MG e, opcionalmente, Google Routes para destinos regionais saindo de Carmo</li>
+  <li><strong>Logs de worker</strong>: <code>worker_run_logs</code> registra execução, sucesso, erro e duração dos jobs para o super admin</li>
+  <li><strong>Atrações robustas</strong>: <code>attraction_reviews</code>, <code>attraction_photos.media_type</code> e <code>attraction_services</code> seguem ownership via <code>manages_attraction()</code></li>
+  <li><strong>OG persistido</strong>: <code>og_image_jobs</code> gera imagens WebP em Bunny CDN para entidades compartilháveis, incluindo grupos da comunidade</li>
+</ul>
+<h2>Funções RLS-helpers</h2>
+<ul>
+  <li><code>public.is_super_admin()</code> — global</li>
+  <li><code>public.is_city_admin(city_id)</code> — admin/moderator de uma cidade (super_admin sempre passa)</li>
+  <li><code>public.is_merchant(city_id)</code> — comerciante de uma cidade</li>
+  <li><code>public.manages_entity(type, id)</code> — checa <code>entity_managers</code></li>
+  <li><code>public.manages_realtor(id)</code> — wrapper para realtor (owner OU entity_manager OU city_admin)</li>
+  <li><code>public.manages_business(id)</code> — wrapper para business</li>
+</ul>
+<h2>Migrations (ordem)</h2>
+<ol>
+  <li><code>20260429120000_core.sql</code> — extensions, types, cities, profiles, roles, ownership, audit, helpers</li>
+  <li><code>20260429120100_real_estate.sql</code> — realtors, agents, properties, inquiries, favoritos</li>
+  <li><code>20260429120200_businesses.sql</code> — categorias hierárquicas, businesses, reviews, claims, promoções</li>
+  <li><code>20260429120300_tourism.sql</code> — accommodations, restaurants, attractions, pesca</li>
+  <li><code>20260429120400_community.sql</code> — events, classifieds, lost_pets, obituários</li>
+  <li><code>20260429120500_utilities.sql</code> — coleta, telefones, farmácias, saúde, alertas</li>
+  <li><code>20260429120600_transparency_ads_ai.sql</code> — DO, atas, licitações, obras + ads + IA + embeddings</li>
+  <li><code>20260504103000_business_review_photos.sql</code> - foto opcional em <code>business_reviews.photo_url</code> e policies de storage para reviews</li>
+  <li><code>20260505153000_tourism_attractions_tripadvisor.sql</code> - ownership, reviews, fotos UGC, serviços e campos de roteiro para atrações</li>
+  <li><code>20260518025736_attraction_media_type.sql</code> - tipo de mídia em <code>attraction_photos</code> para separar imagem e vídeo no UGC de atrações</li>
+  <li><code>20260508190000_notifications_center.sql</code> - central de notificações, deliveries, preferências e devices Firebase futuros</li>
+  <li><code>20260511203000_community_groups_og_jobs.sql</code> - <code>og_image_url</code>, trigger e backfill de OG para grupos da comunidade</li>
+  <li><code>20260513161034_contato_publico_notifica_admin.sql</code> - <code>contact_submissions</code>, RLS de envio público e trigger de notificação para admin</li>
+  <li><code>20260513162508_paginas_servicos_embeddings.sql</code> - <code>site_pages</code>, seed das páginas de serviços e indexação semântica via worker</li>
+  <li><code>20260523175000_payment_ledger_history.sql</code> - ledger local de pagamentos, eventos de cobrança e vínculo com webhooks Asaas</li>
+  <li><code>20260525163207_live_feed_items.sql</code> - cache editorial do ticker ao vivo por cidade, com expiração e seeds genéricos de lançamento</li>
+  <li><code>20260525164528_road_route_snapshots.sql</code> - cache de condições DER-MG/Google por destino rodoviário</li>
+  <li><code>20260525172242_worker_run_logs.sql</code> - logs operacionais dos workers visíveis no painel super admin</li>
+  <li><code>20260607120000_studio_art_pieces.sql</code> - <code>art_pieces</code> (documento JSON da arte) + <code>home_banner_requests</code> (fila de banner)</li>
+  <li><code>20260608120000_business_menu.sql</code> - cardápio editável: <code>business_menu_sections</code> + <code>business_menu_items</code> (leitura pública quando <code>published</code>)</li>
+  <li><code>20260616120000_business_monthly_reports.sql</code> - boletim mensal + RPCs <code>security definer</code> (métricas, favoritos, rank na categoria)</li>
+  <li><code>20260617120000_studio_renders.sql</code> - <code>studio_renders</code> (estado/histórico dos Reels MP4)</li>
+</ol>
+<p>Seed em <code>supabase/seed.sql</code>: Carmo + Capitólio (preview), 10 bairros, módulos habilitados, 11 categorias raiz + dezenas de subcategorias de comércio, categorias de eventos, slots de anúncio.</p>
+<blockquote><strong>Aviso LGPD:</strong> nunca expor CPF, endereço residencial completo, dados de saúde individuais, nomes em contextos administrativos sensíveis. UGC sempre tem opt-out direto pelo painel do cidadão. Ato do DO com dados pessoais pode ser <code>flagged = true</code> para esconder do público.</blockquote>

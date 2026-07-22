@@ -1,0 +1,66 @@
+<h1>🧱 Home Builder</h1>
+<p>Sistema de blocos reordenáveis pra montar a home pública de cada cidade. Inspirado na home do app Amazon (carrosséis com vídeo, atalhos circulares, listagens segmentadas, faixas de oferta).</p>
+
+<database-view data-path="data/home-builder-blocks.json"></database-view>
+<p></p>
+
+<h2>Quem mexe</h2>
+<ul>
+  <li><strong>city_admin</strong> (e super_admin) edita a home da sua cidade em <code>/painel/cidade/home</code>.</li>
+  <li>RLS faz a checagem via <code>public.is_city_admin(city_id)</code>. Leitura é pública.</li>
+</ul>
+
+<h2>Modelo de dados</h2>
+<p><code>custom_hero_banner</code> usa <code>home_block_banners</code> para a imagem unica e guarda layout, textos, cores, fonte, overlay, posicao e animacao em <code>home_blocks.config</code>.</p>
+<ul>
+  <li><code>home_layouts</code> — 1 linha por cidade. Criado on-demand pela função <code>ensure_home_layout(city_id)</code>.</li>
+  <li><code>home_blocks</code> — blocos do layout. Campos: <code>type</code> (enum), <code>position</code>, <code>enabled</code>, <code>title</code>, <code>config jsonb</code>.</li>
+  <li><code>home_block_banners</code> — filhos de blocos do tipo <code>banner_carousel</code>. FK pra <code>media_assets</code> (imagem obrigatória, vídeo opcional). Link interno/externo + janela <code>start_at</code>/<code>end_at</code>.</li>
+</ul>
+
+<h2>Tipos de bloco (MVP)</h2>
+<ul>
+  <li><strong>banner_carousel</strong> — slides com vídeo que toca uma vez e dá fade pra imagem. Imagem é obrigatória, vídeo opcional. Suporta link interno (router), externo (new tab), ou nenhum. Janela de exibição opcional.</li>
+  <li><strong>category_grid</strong> — atalhos circulares (RoundCat) configuráveis: label, ícone lucide, href, tom de cor.</li>
+  <li><strong>entity_list</strong> — listagem dinâmica de uma fonte: <code>businesses_featured</code>, <code>businesses_recent</code>, <code>tourism_attractions</code>, <code>tourism_lodgings</code>, <code>city_promotions</code>. Limite e CTA configuráveis.</li>
+  <li><strong>promo_strip</strong> — faixa horizontal de cupons ativos.</li>
+</ul>
+
+<h2>Hero personalizavel</h2>
+<ul>
+  <li><strong>custom_hero_banner</strong> tem modelos de comercio, evento, turismo e oferta.</li>
+  <li>O editor controla imagem, posicao X/Y, texto, CTA, cores, fonte, altura, full-bleed, overlay e animacao.</li>
+  <li>A action de banners aceita o tipo como bloco de midia unica.</li>
+</ul>
+
+<h2>Renderer</h2>
+<p><code>app/page.tsx</code> consulta <code>getHomeLayoutForRender(cityId)</code>. Se a cidade tem layout do builder, renderiza <code>&lt;HomeRenderer /&gt;</code> mesmo quando todos os blocos estao ocultos ou removidos. O layout hardcoded antigo fica apenas como fallback para cidades sem layout configurado.</p>
+
+<h2>Banner com vídeo → imagem</h2>
+<ul>
+  <li>Imagem sempre presente como base.</li>
+  <li>Vídeo (se houver) sobreposto com <code>autoplay muted playsInline preload="metadata"</code>.</li>
+  <li>IntersectionObserver pausa quando o slide sai da viewport.</li>
+  <li>Ao terminar (<code>onEnded</code>) ou falhar (<code>onError</code>), faz fade-out e revela a imagem.</li>
+</ul>
+
+<h2>Port para React Native</h2>
+<p>O contrato é o schema do <code>config</code>, não o JSX. Cada bloco tem schema documentado em <a href="https://github.com/luizalmeida/hail-mary/blob/main/apps/web/components/public/home/blocks/README.md">components/public/home/blocks/README.md</a> com dicas específicas pra reimplementação nativa (expo-av, FlatList horizontal, viewabilityConfig, etc).</p>
+
+<h2>Extensibilidade</h2>
+<ol>
+  <li>Adicionar valor no enum <code>home_block_type</code>.</li>
+  <li>Tipar config em <code>lib/home/types.ts</code>.</li>
+  <li>Registrar em <code>lib/home/block-catalog.ts</code> (label, descrição, defaultConfig).</li>
+  <li>Criar componente em <code>components/public/home/blocks/</code>.</li>
+  <li>Adicionar case em <code>HomeRenderer.tsx</code>.</li>
+  <li>Documentar no README dos blocos.</li>
+</ol>
+
+<h2>Arquivos relevantes</h2>
+<ul>
+  <li><code>supabase/migrations/20260516120000_home_builder.sql</code></li>
+  <li><code>apps/web/lib/home/{types,block-catalog,queries,actions}.ts</code></li>
+  <li><code>apps/web/components/public/home/{HomeRenderer,blocks/*}.tsx</code></li>
+  <li><code>apps/web/app/painel/cidade/home/{page,[blockId]/page,[blockId]/banner-form}.tsx</code></li>
+</ul>

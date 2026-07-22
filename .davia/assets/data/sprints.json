@@ -1,0 +1,58 @@
+[
+  {
+    "sprint": "0",
+    "duracao": "3-5 dias",
+    "tema": "Setup multi-cidade",
+    "entregas": "Migrations base, storage por city_slug, seeds, getCurrentCity, tipos Supabase e Davia",
+    "status": "aplicado"
+  },
+  {
+    "sprint": "1-4",
+    "duracao": "8 sem",
+    "tema": "Fundacao MVP",
+    "entregas": "Auth, comercio, servicos, turismo e comunidade",
+    "status": "aplicado"
+  },
+  {
+    "sprint": "5",
+    "duracao": "verificacao",
+    "tema": "Fechamento Sprints 0-4",
+    "entregas": "Auditoria, smoke e correcao de lacunas",
+    "status": "aplicado parcial"
+  },
+  {
+    "sprint": "6",
+    "duracao": "2 sem",
+    "tema": "Transparencia + IA",
+    "entregas": "Worker, scrapers, resumos, moderacao e busca semantica",
+    "status": "backlog"
+  },
+  {
+    "sprint": "7",
+    "duracao": "2 sem",
+    "tema": "Imoveis",
+    "entregas": "Front, painel, aprovacao admin e paywall futuro",
+    "status": "aplicado parcial"
+  },
+  {
+    "sprint": "8",
+    "duracao": "2 sem",
+    "tema": "Classificados pesados",
+    "entregas": "Veiculos, vagas, servicos, itens, aprovacao, reports e paywall futuro",
+    "status": "aplicado parcial"
+  },
+  {
+    "sprint": "9",
+    "duracao": "polish",
+    "tema": "SEO, a11y, analytics e newsletter",
+    "entregas": "Sitemap, robots, JSON-LD base, newsletter double opt-in, analytics proprio e LGPD",
+    "status": "aplicado parcial"
+  },
+  {
+    "sprint": "10",
+    "duracao": "soft launch",
+    "tema": "Operacao + ads",
+    "entregas": "Betatesters, parcerias locais, ads e monetizacao",
+    "status": "proximo"
+  }
+]

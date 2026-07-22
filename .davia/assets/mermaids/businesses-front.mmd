@@ -1,0 +1,33 @@
+flowchart TD
+    User[Visitante] --> Home[Home /]
+    Home --> Hub[/comercio<br/>Hub guia comercial]
+    Home --> Search[Busca]
+
+    Hub --> CatGrid[Grid 12 macro categorias<br/>+ contagem por categoria]
+    Hub --> Featured[Destaques<br/>BusinessCard horizontal]
+    Hub --> Top[Mais bem avaliados<br/>BusinessListItem]
+    Hub --> CTA[CTA cadastrar negocio]
+
+    Search --> SearchPage[/comercio/buscar<br/>?q=&sort=&whatsapp=]
+    CatGrid --> CatPage[/comercio/categoria<br/>lista + filtros]
+
+    CatPage --> SubCats[Subcategorias chips]
+    CatPage --> Districts[Filtro bairro]
+    CatPage --> List1[BusinessListItem...]
+
+    Featured --> Detail[/comercio/negocio/slug]
+    Top --> Detail
+    List1 --> Detail
+    SearchPage --> Detail
+
+    Detail --> Header[BusinessHeader<br/>cover + nome + cat + rating]
+    Header --> Save[Salvar favorito<br/>business_favorites]
+    Save --> Favorites[/painel/favoritos<br/>pousadas salvas]
+    Detail --> ContactCTAs[ContactBar<br/>WhatsApp / Ligar / Mapa / Compartilhar]
+    Detail --> Sobre[Descricao]
+    Detail --> Contato[Endereco + email + site + insta]
+    Detail --> Hours[HoursTable]
+    Detail --> Amenities[AmenitiesList chips]
+    Detail --> Pay[PaymentMethodsList chips]
+    Detail --> Claim[Claim CTA<br/>se nao reivindicado]
+    Detail --> Related[Outros na categoria]

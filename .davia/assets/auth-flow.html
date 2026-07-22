@@ -1,0 +1,43 @@
+<h1>🔐 Fluxo de autenticação</h1>
+<p>Supabase Auth como provedor único. Papéis ficam em <code>profile_roles</code>, sempre por cidade.</p>
+<excalidraw data-path="data/auth-flow.json"></excalidraw>
+<h2>Métodos de login no MVP</h2>
+<ul>
+  <li><strong>Email + senha</strong> — padrão</li>
+  <li><strong>Magic link</strong> — pós-MVP</li>
+  <li><strong>OAuth Google</strong> — pós-MVP</li>
+</ul>
+<h2>Contas de teste</h2>
+<p>Use estas contas para smoke test manual do painel. Elas vêm de <code>supabase/seeds/auth.sql</code>.</p>
+<database-view data-path="data/auth-test-accounts.json"></database-view>
+<p></p>
+<h2>Como o painel decide o destino</h2>
+<ul>
+  <li><strong>super_admin</strong> entra na visão global de cidades.</li>
+  <li><strong>city_admin</strong> e <strong>moderator</strong> entram na área da cidade atual.</li>
+  <li><strong>merchant</strong> entra na área de comércio.</li>
+  <li><strong>citizen</strong> entra no resumo do painel e perfil.</li>
+</ul>
+<h2>Como o middleware funciona</h2>
+<p>Toda requisição passa pelo <code>middleware.ts</code>:</p>
+<ol>
+  <li>Resolve <code>city_slug</code> por subdomínio, path <code>/c/[slug]</code> ou cookie</li>
+  <li>Chama <code>supabase.auth.getUser()</code> — refresca token se preciso</li>
+  <li>Se o usuário está logado, chama <code>grant_citizen_role(city_id)</code></li>
+  <li>Reescreve cookies e envia <code>x-city-slug</code> para RSC e Server Actions</li>
+</ol>
+<h2>Trigger de criação de profile</h2>
+<p>Ao inserir em <code>auth.users</code>, um trigger SQL cria o registro em <code>public.profiles</code>. O papel <code>citizen</code> é concedido na primeira visita logada à cidade ativa.</p>
+<pre><code>-- Papéis não ficam em profiles.
+-- Fluxo:
+auth.users -&gt; public.profiles
+request logada -&gt; grant_citizen_role(city_id)
+admin -&gt; profile_roles(city_admin|moderator|merchant)</code></pre>
+<h2>Páginas e rotas</h2>
+<ul>
+  <li><code>/entrar</code> — login por email e senha</li>
+  <li><code>/cadastro</code> — registro sem papel global</li>
+  <li><code>/recuperar-senha</code> — reset de senha</li>
+  <li><code>/painel</code> — dashboard conforme <code>profile_roles</code></li>
+</ul>
+<blockquote><strong>Importante:</strong> o middleware não autoriza acesso por papel. Ele só atualiza sessão, contexto de cidade e papel <code>citizen</code>. A autorização fica na RLS e nas Server Components do <code>/painel</code>.</blockquote>

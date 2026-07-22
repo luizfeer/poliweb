@@ -1,0 +1,10 @@
+flowchart LR
+  User["Painel / UGC"] --> Upload["ImageUploadField ou cover_file"]
+  Upload --> Action["Server Action Zod"]
+  Action --> Bunny["Bunny Storage API"]
+  Bunny --> CDN["Bunny CDN URL"]
+  Action --> Assets["media_assets"]
+  Action --> Links["media_links"]
+  Action --> Legacy["cover_url / logo_url / photos"]
+  CDN --> Public["Cards e fichas publicas"]
+  Assets --> Admin["CRUD e auditoria"]

@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1200" />
+<title>Oficial da categoria — Carmo Local</title>
+<link rel="stylesheet" href="../.claude/skills/carmo-local-design/colors_and_type.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--carmo-paper-deep);
+    font-family: var(--font-sans);
+    color: var(--color-fg);
+    padding: 48px 24px 80px;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+
+  .hero {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 32px; margin-bottom: 32px;
+  }
+  .hero-text { max-width: 640px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--carmo-clay-50); color: var(--carmo-clay-600);
+    padding: 6px 12px; border-radius: var(--radius-full);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-size: 40px; line-height: 1.05; margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  .hero p { color: var(--color-fg-muted); font-size: 16px; line-height: 1.55; margin: 0; }
+  .hero-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    background: white; border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); padding: 16px 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .hero-meta div { display: flex; flex-direction: column; gap: 2px; }
+  .hero-meta b { font-family: var(--font-display); font-size: 22px; }
+  .hero-meta span { font-size: 12px; color: var(--color-fg-muted); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  /* Phone frame */
+  .phone {
+    background: var(--carmo-paper);
+    border: 1px solid var(--color-border);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: var(--shadow-pop);
+    height: 760px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .phone-label {
+    position: absolute; top: -28px; left: 0; right: 0; text-align: center;
+    font-size: 12px; font-weight: 600;
+    color: var(--color-fg-muted); letter-spacing: 0.02em;
+  }
+  .status-bar {
+    background: white;
+    height: 36px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px; font-size: 12px; font-weight: 600;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .status-bar .icons { display: flex; gap: 4px; align-items: center; }
+  .status-bar [data-lucide] { width: 14px; height: 14px; }
+
+  .topbar {
+    background: white; padding: 12px 14px;
+    display: flex; gap: 8px; align-items: center;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .topbar .search {
+    flex: 1; background: var(--carmo-paper-deep);
+    border-radius: var(--radius-full);
+    padding: 9px 14px; display: flex; gap: 8px; align-items: center;
+    font-size: 13px; color: var(--color-fg-muted);
+  }
+  .topbar [data-lucide] { width: 18px; height: 18px; color: var(--color-fg-muted); }
+  .topbar .pin {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--carmo-clay-600); font-weight: 600;
+  }
+
+  .scroll { flex: 1; overflow-y: auto; }
+
+  /* ========== PHONE 1: HOME with oficial spot ========== */
+
+  .home-banner {
+    margin: 12px 14px; border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--carmo-clay-500), var(--carmo-clay-600));
+    color: white; padding: 14px 16px;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-banner);
+  }
+  .home-banner .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(4px);
+    padding: 4px 10px; border-radius: var(--radius-full);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .home-banner [data-lucide="badge-check"] { width: 12px; height: 12px; }
+  .home-banner h3 {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: 22px; line-height: 1.1; margin: 0 0 4px; color: white;
+  }
+  .home-banner .sub { font-size: 12px; opacity: 0.92; margin-bottom: 12px; }
+  .home-banner .promo-row {
+    display: flex; gap: 8px; overflow-x: auto;
+    margin: 0 -16px; padding: 0 16px;
+    scrollbar-width: none;
+  }
+  .home-banner .promo-row::-webkit-scrollbar { display: none; }
+  .promo-card {
+    flex-shrink: 0; width: 92px; background: white;
+    border-radius: var(--radius-md); padding: 8px; color: var(--color-fg);
+  }
+  .promo-card .img {
+    height: 64px; background: var(--carmo-paper-deep);
+    border-radius: 6px; margin-bottom: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--carmo-ink-300);
+  }
+  .promo-card .img [data-lucide] { width: 28px; height: 28px; }
+  .promo-card .name { font-size: 11px; line-height: 1.25; font-weight: 500; margin-bottom: 2px; }
+  .promo-card .price-from { font-size: 9px; color: var(--color-fg-muted); text-decoration: line-through; }
+  .promo-card .price { font-size: 12px; font-weight: 700; color: var(--carmo-discount); }
+  .home-banner .cta-row {
+    margin-top: 12px; display: flex; gap: 8px;
+  }
+  .home-banner .cta {
+    background: white; color: var(--carmo-clay-600);
+    border-radius: var(--radius-full); padding: 8px 14px;
+    font-size: 12px; font-weight: 700; flex: 1; text-align: center;
+  }
+  .home-banner .cta.ghost {
+    background: transparent; color: white; border: 1px solid rgba(255,255,255,0.5);
+  }
+
+  .section-title {
+    padding: 18px 16px 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .section-title h4 {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 17px; margin: 0; letter-spacing: -0.005em;
+  }
+  .section-title a { font-size: 12px; color: var(--color-link); font-weight: 600; }
+
+  .cats {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+    padding: 0 14px 12px;
+  }
+  .cat {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px;
+  }
+  .cat .icon {
+    width: 48px; height: 48px; border-radius: var(--radius-full);
+    background: var(--carmo-clay-50);
+    color: var(--carmo-clay-600);
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(224,86,27,0.15);
+  }
+  .cat .icon [data-lucide] { width: 22px; height: 22px; }
+  .cat span { font-size: 10px; text-align: center; line-height: 1.2; }
+
+  .feed-card {
+    margin: 8px 14px; background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .feed-card .img {
+    height: 110px; background: linear-gradient(135deg, #6E9C5E, #1F4A2C);
+    display: flex; align-items: center; justify-content: center; color: white;
+  }
+  .feed-card .img [data-lucide] { width: 32px; height: 32px; opacity: 0.6; }
+  .feed-card .body { padding: 10px 12px; }
+  .feed-card .body h5 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+  .feed-card .body .meta { font-size: 11px; color: var(--color-fg-muted); }
+
+  /* ========== PHONE 2: Category page ========== */
+
+  .cat-header {
+    background: white; padding: 14px 16px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .cat-header .crumb { font-size: 11px; color: var(--color-fg-muted); margin-bottom: 4px; }
+  .cat-header h2 { margin: 0 0 12px; font-size: 22px; }
+  .filters { display: flex; gap: 6px; padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; padding: 6px 12px;
+    border-radius: var(--radius-full); background: var(--carmo-paper-deep);
+    font-size: 12px; font-weight: 500;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .chip.active { background: var(--carmo-clay-50); color: var(--carmo-clay-600); border: 1px solid var(--carmo-clay-500); }
+
+  /* Master card — the BIG oficial slot at top of category */
+  .master {
+    margin: 14px;
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(192,72,16,0.18), 0 0 0 2px var(--carmo-clay-500);
+    position: relative;
+  }
+  .master .ribbon {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    background: var(--carmo-clay-500); color: white;
+    padding: 4px 10px; border-radius: var(--radius-full);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; display: flex; align-items: center; gap: 4px;
+  }
+  .master .ribbon [data-lucide] { width: 12px; height: 12px; }
+  .master .cover {
+    height: 130px;
+    background: linear-gradient(120deg, #E0561B 0%, #C84810 50%, #9C3608 100%);
+    position: relative; color: white; padding: 18px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .master .cover h3 {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: 24px; line-height: 1.05; margin: 0; color: white;
+  }
+  .master .cover .tagline { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+  .master .cover .logo {
+    position: absolute; top: 14px; right: 14px;
+    width: 48px; height: 48px; border-radius: var(--radius-full);
+    background: white; display: flex; align-items: center; justify-content: center;
+    color: var(--carmo-clay-600); font-family: var(--font-display); font-weight: 800;
+    box-shadow: var(--shadow-card);
+  }
+  .master .info { padding: 12px 16px; }
+  .master .info .stars { display: flex; gap: 4px; align-items: center; font-size: 12px; margin-bottom: 8px; }
+  .master .info .stars [data-lucide] { width: 12px; height: 12px; color: var(--carmo-sun-500); fill: var(--carmo-sun-500); }
+  .master .info .stars b { font-weight: 700; }
+  .master .info .stars .muted { color: var(--color-fg-muted); margin-left: 4px; }
+  .master .actions { display: flex; gap: 6px; padding: 0 12px 12px; }
+  .master .actions button {
+    flex: 1; border: none; padding: 9px 0;
+    background: var(--carmo-cerrado-700); color: white;
+    border-radius: var(--radius-sm); font-weight: 600; font-size: 12px;
+    display: inline-flex; gap: 4px; justify-content: center; align-items: center;
+  }
+  .master .actions button.ghost {
+    background: white; color: var(--carmo-ink-900);
+    border: 1px solid var(--color-border);
+  }
+  .master .actions [data-lucide] { width: 14px; height: 14px; }
+
+  .promo-strip {
+    padding: 0 12px 14px;
+  }
+  .promo-strip .h {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    color: var(--carmo-discount); letter-spacing: 0.06em; margin-bottom: 6px;
+  }
+  .promo-strip .h .deal {
+    background: var(--carmo-discount); color: white;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .promo-strip .scroll-row {
+    display: flex; gap: 8px; overflow-x: auto;
+    margin: 0 -12px; padding: 0 12px;
+    scrollbar-width: none;
+  }
+  .promo-strip .scroll-row::-webkit-scrollbar { display: none; }
+
+  .normal-card {
+    margin: 8px 14px; background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    display: flex; gap: 10px; padding: 10px;
+  }
+  .normal-card .thumb {
+    width: 72px; height: 72px; border-radius: var(--radius-sm);
+    background: var(--carmo-paper-deep); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--color-fg-subtle);
+  }
+  .normal-card .thumb [data-lucide] { width: 24px; height: 24px; }
+  .normal-card .body { flex: 1; min-width: 0; }
+  .normal-card .body h5 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+  .normal-card .body .meta { font-size: 11px; color: var(--color-fg-muted); margin-bottom: 4px; }
+  .normal-card .body .stars { display: flex; gap: 4px; align-items: center; font-size: 11px; }
+  .normal-card .body .stars [data-lucide] { width: 11px; height: 11px; color: var(--carmo-sun-500); fill: var(--carmo-sun-500); }
+
+  /* ========== PHONE 3: merchant config ========== */
+
+  .cfg-header {
+    background: white; padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .cfg-header [data-lucide="arrow-left"] { width: 22px; height: 22px; }
+  .cfg-header h2 { font-size: 18px; margin: 0; }
+  .cfg-header .crumb { font-size: 11px; color: var(--color-fg-muted); }
+
+  .cfg-hero {
+    margin: 14px; padding: 14px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--carmo-cerrado-700), var(--carmo-cerrado-500));
+    color: white;
+  }
+  .cfg-hero .badge {
+    display: inline-flex; gap: 4px; align-items: center;
+    background: rgba(255,255,255,0.15); padding: 4px 10px;
+    border-radius: var(--radius-full); font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  .cfg-hero .badge [data-lucide] { width: 12px; height: 12px; }
+  .cfg-hero h3 { font-family: var(--font-display); font-weight: 800; font-size: 20px; margin: 0 0 4px; color: white; }
+  .cfg-hero p { font-size: 12px; opacity: 0.92; margin: 0 0 10px; }
+  .cfg-hero .status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+  }
+  .cfg-hero .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--carmo-sun-500); box-shadow: 0 0 0 4px rgba(244,183,58,0.3);
+  }
+
+  .cfg-section {
+    margin: 14px; background: white; border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card); overflow: hidden;
+  }
+  .cfg-section h4 {
+    margin: 0; padding: 12px 14px 6px;
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--color-fg-muted);
+  }
+  .toggle-row {
+    padding: 12px 14px; display: flex; gap: 10px;
+    align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--color-border);
+  }
+  .toggle-row:first-of-type { border-top: none; }
+  .toggle-row .left { flex: 1; min-width: 0; }
+  .toggle-row .left .label { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+  .toggle-row .left .help { font-size: 11px; color: var(--color-fg-muted); }
+  .toggle-row [data-lucide] { width: 18px; height: 18px; color: var(--color-fg-muted); flex-shrink: 0; }
+
+  .switch {
+    width: 38px; height: 22px; background: var(--carmo-clay-500);
+    border-radius: 22px; position: relative; flex-shrink: 0;
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 2px; right: 2px;
+    width: 18px; height: 18px; background: white; border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .switch.off { background: var(--carmo-ink-300); }
+  .switch.off::after { right: auto; left: 2px; }
+
+  .upload-row {
+    padding: 12px 14px; border-top: 1px solid var(--color-border);
+  }
+  .upload-row .label { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+  .thumbs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .thumbs .t {
+    width: 56px; height: 56px; border-radius: var(--radius-sm);
+    background: var(--carmo-paper-deep);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--color-fg-subtle); position: relative;
+  }
+  .thumbs .t.filled {
+    background: linear-gradient(135deg, var(--carmo-sun-300), var(--carmo-clay-500));
+  }
+  .thumbs .t.add {
+    border: 1.5px dashed var(--color-border-strong);
+    background: transparent; color: var(--carmo-clay-500);
+  }
+  .thumbs .t [data-lucide] { width: 16px; height: 16px; }
+
+  .cta-pick {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 6px; padding: 8px 14px 14px;
+  }
+  .cta-pick .opt {
+    border: 1px solid var(--color-border-strong);
+    padding: 8px; border-radius: var(--radius-sm);
+    font-size: 12px; display: flex; gap: 6px; align-items: center;
+  }
+  .cta-pick .opt.active {
+    border-color: var(--carmo-clay-500);
+    background: var(--carmo-clay-50); color: var(--carmo-clay-600);
+    font-weight: 600;
+  }
+  .cta-pick [data-lucide] { width: 14px; height: 14px; }
+
+  .save-bar {
+    background: white; padding: 12px 14px;
+    border-top: 1px solid var(--color-border);
+    display: flex; gap: 8px;
+  }
+  .save-bar button {
+    flex: 1; padding: 12px;
+    border-radius: var(--radius-sm); font-weight: 700;
+    font-size: 14px; border: none;
+  }
+  .save-bar .primary { background: var(--carmo-clay-500); color: white; }
+  .save-bar .ghost { background: white; color: var(--color-fg-muted); border: 1px solid var(--color-border-strong); }
+
+  /* ========== Pricing table ========== */
+
+  .pricing {
+    background: white; border-radius: var(--radius-xl);
+    padding: 32px; box-shadow: var(--shadow-card);
+  }
+  .pricing h2 { font-size: 28px; margin: 0 0 4px; }
+  .pricing p.lead { color: var(--color-fg-muted); margin: 0 0 24px; font-size: 14px; }
+  .pricing table { width: 100%; border-collapse: collapse; }
+  .pricing th {
+    text-align: left; padding: 12px 14px;
+    font-family: var(--font-sans); font-weight: 700; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--color-fg-muted); border-bottom: 2px solid var(--color-border);
+  }
+  .pricing th:nth-child(n+2) { text-align: right; }
+  .pricing td {
+    padding: 14px; border-bottom: 1px solid var(--color-border);
+    font-size: 14px; vertical-align: middle;
+  }
+  .pricing td:nth-child(n+2) { text-align: right; font-variant-numeric: tabular-nums; }
+  .pricing tr:hover { background: var(--carmo-paper-tint); }
+  .pricing .cat-name { display: flex; gap: 10px; align-items: center; }
+  .pricing .cat-name .ic {
+    width: 32px; height: 32px; border-radius: var(--radius-full);
+    background: var(--carmo-clay-50); color: var(--carmo-clay-600);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pricing .cat-name [data-lucide] { width: 16px; height: 16px; }
+  .pricing .price-monthly { font-weight: 700; }
+  .pricing .price-yearly { color: var(--carmo-cerrado-700); }
+  .pricing .price-yearly small { color: var(--color-fg-muted); font-weight: 400; }
+  .pricing tier {
+    font-size: 11px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: var(--radius-full); font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .tier-S { background: var(--carmo-clay-50); color: var(--carmo-clay-700); }
+  .tier-M { background: var(--carmo-cerrado-100); color: var(--carmo-cerrado-700); }
+  .tier-L { background: var(--carmo-sun-100); color: #6b4a0a; }
+
+  .principles {
+    margin-top: 32px; display: grid;
+    grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .principle {
+    background: var(--carmo-paper-tint);
+    padding: 16px; border-radius: var(--radius-md);
+  }
+  .principle [data-lucide] {
+    width: 20px; height: 20px;
+    color: var(--carmo-clay-600); margin-bottom: 8px;
+  }
+  .principle h5 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+  .principle p { margin: 0; font-size: 12px; color: var(--color-fg-muted); line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-text">
+      <span class="eyebrow"><i data-lucide="badge-check"></i> Patrocínio exclusivo por categoria</span>
+      <h1>Oficial da categoria</h1>
+      <p>Um só comerciante por categoria, por cidade. Ganha selo, vitrine no topo, banner com promoções e aparições rotativas na home. Concorrentes ficam de fora pelo período contratado.</p>
+    </div>
+    <div class="hero-meta">
+      <div><b>1</b><span>oficial por categoria</span></div>
+      <div><b>6 meses</b><span>contrato padrão</span></div>
+      <div><b>−15%</b><span>no plano anual</span></div>
+    </div>
+  </header>
+
+  <section class="grid">
+
+    <!-- ====================== PHONE 1: HOME ====================== -->
+    <article class="phone">
+      <div class="phone-label">Home — banner do oficial</div>
+      <div class="status-bar"><span>9:41</span><div class="icons"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></div></div>
+
+      <div class="topbar">
+        <i data-lucide="menu"></i>
+        <div class="search"><i data-lucide="search"></i>Buscar em Carmo…</div>
+        <div class="pin"><i data-lucide="map-pin"></i>Carmo</div>
+      </div>
+
+      <div class="scroll">
+        <div class="home-banner">
+          <span class="tag"><i data-lucide="badge-check"></i>Oficial · Supermercados</span>
+          <h3>Supermercado Boa Vista</h3>
+          <div class="sub">Ofertas da semana, válidas até domingo</div>
+
+          <div class="promo-row">
+            <div class="promo-card">
+              <div class="img"><i data-lucide="beef"></i></div>
+              <div class="name">Picanha kg</div>
+              <div class="price-from">R$ 89,90</div>
+              <div class="price">R$ 64,90</div>
+            </div>
+            <div class="promo-card">
+              <div class="img"><i data-lucide="milk"></i></div>
+              <div class="name">Leite Itambé 1L</div>
+              <div class="price-from">R$ 6,49</div>
+              <div class="price">R$ 4,99</div>
+            </div>
+            <div class="promo-card">
+              <div class="img"><i data-lucide="wheat"></i></div>
+              <div class="name">Arroz 5kg</div>
+              <div class="price-from">R$ 32,90</div>
+              <div class="price">R$ 24,90</div>
+            </div>
+            <div class="promo-card">
+              <div class="img"><i data-lucide="coffee"></i></div>
+              <div class="name">Café 500g</div>
+              <div class="price-from">R$ 24,90</div>
+              <div class="price">R$ 17,90</div>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <div class="cta">Ver encarte</div>
+            <div class="cta ghost">Como chegar</div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h4>Categorias</h4>
+          <a>Ver todas</a>
+        </div>
+        <div class="cats">
+          <div class="cat"><div class="icon"><i data-lucide="shopping-cart"></i></div><span>Mercados</span></div>
+          <div class="cat"><div class="icon"><i data-lucide="pill"></i></div><span>Farmácias</span></div>
+          <div class="cat"><div class="icon"><i data-lucide="utensils-crossed"></i></div><span>Comer</span></div>
+          <div class="cat"><div class="icon"><i data-lucide="croissant"></i></div><span>Padaria</span></div>
+          <div class="cat"><div class="icon"><i data-lucide="fuel"></i></div><span>Postos</span></div>
+        </div>
+
+        <div class="section-title"><h4>Hoje em Carmo</h4><a>Ver</a></div>
+        <div class="feed-card">
+          <div class="img"><i data-lucide="calendar-days"></i></div>
+          <div class="body">
+            <h5>Feira na Praça Getúlio</h5>
+            <div class="meta">sáb, 17 mai · 7h às 13h</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ====================== PHONE 2: CATEGORY ====================== -->
+    <article class="phone">
+      <div class="phone-label">Categoria — vitrine do oficial</div>
+      <div class="status-bar"><span>9:41</span><div class="icons"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></div></div>
+
+      <div class="cat-header">
+        <div class="crumb">Comércio › Alimentação</div>
+        <h2>Padarias</h2>
+        <div class="filters">
+          <div class="chip active"><i data-lucide="map-pin"></i>Perto</div>
+          <div class="chip">Abertas agora</div>
+          <div class="chip">Café da manhã</div>
+          <div class="chip">Aceita Pix</div>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <div class="master">
+          <span class="ribbon"><i data-lucide="badge-check"></i>Oficial</span>
+          <div class="cover">
+            <div class="logo">PD</div>
+            <h3>Padaria do Centro</h3>
+            <div class="tagline">Pão quente das 5h às 21h · 32 anos em Carmo</div>
+          </div>
+          <div class="info">
+            <div class="stars">
+              <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
+              <b>4,9</b><span class="muted">· 218 avaliações · Aberta agora</span>
+            </div>
+          </div>
+
+          <div class="promo-strip">
+            <div class="h"><span>Promoções da semana</span><span class="deal">−20%</span></div>
+            <div class="scroll-row">
+              <div class="promo-card">
+                <div class="img"><i data-lucide="croissant"></i></div>
+                <div class="name">Pão de queijo (6un)</div>
+                <div class="price-from">R$ 12,00</div>
+                <div class="price">R$ 9,90</div>
+              </div>
+              <div class="promo-card">
+                <div class="img"><i data-lucide="cake"></i></div>
+                <div class="name">Bolo de fubá</div>
+                <div class="price-from">R$ 18,00</div>
+                <div class="price">R$ 14,90</div>
+              </div>
+              <div class="promo-card">
+                <div class="img"><i data-lucide="cookie"></i></div>
+                <div class="name">Biscoito polvilho</div>
+                <div class="price-from">R$ 16,00</div>
+                <div class="price">R$ 12,90</div>
+              </div>
+              <div class="promo-card">
+                <div class="img"><i data-lucide="coffee"></i></div>
+                <div class="name">Café + pão na chapa</div>
+                <div class="price-from">R$ 12,00</div>
+                <div class="price">R$ 8,90</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button><i data-lucide="phone"></i>Ligar</button>
+            <button><i data-lucide="message-circle"></i>WhatsApp</button>
+            <button class="ghost"><i data-lucide="map-pin"></i>Ir até</button>
+          </div>
+        </div>
+
+        <div style="padding: 4px 14px 8px; font-size: 11px; color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Outras padarias</div>
+
+        <div class="normal-card">
+          <div class="thumb"><i data-lucide="croissant"></i></div>
+          <div class="body">
+            <h5>Pão Dourado</h5>
+            <div class="meta">R. das Acácias, 220 · 1,2 km</div>
+            <div class="stars"><i data-lucide="star"></i>4,6 · 87 av.</div>
+          </div>
+        </div>
+        <div class="normal-card">
+          <div class="thumb"><i data-lucide="croissant"></i></div>
+          <div class="body">
+            <h5>Padaria Recanto</h5>
+            <div class="meta">Av. Brasil, 1.040 · 2,1 km</div>
+            <div class="stars"><i data-lucide="star"></i>4,4 · 41 av.</div>
+          </div>
+        </div>
+        <div class="normal-card">
+          <div class="thumb"><i data-lucide="croissant"></i></div>
+          <div class="body">
+            <h5>Forno da Vovó</h5>
+            <div class="meta">Pç. Getúlio, 8 · 0,4 km</div>
+            <div class="stars"><i data-lucide="star"></i>4,7 · 132 av.</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ====================== PHONE 3: MERCHANT CONFIG ====================== -->
+    <article class="phone">
+      <div class="phone-label">Painel do comerciante — configuração</div>
+      <div class="status-bar"><span>9:41</span><div class="icons"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></div></div>
+
+      <div class="cfg-header">
+        <i data-lucide="arrow-left"></i>
+        <div>
+          <div class="crumb">Painel › Plano Oficial</div>
+          <h2>Sua vitrine Oficial</h2>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <div class="cfg-hero">
+          <span class="badge"><i data-lucide="badge-check"></i>Plano Oficial · Padarias</span>
+          <h3>Você é o Oficial até 14/11/2026</h3>
+          <p>R$ 300/mês · contrato 6 meses · pagamento via Pix</p>
+          <div class="status"><div class="dot"></div>Vitrine ativa · 1.842 visualizações nos últimos 7 dias</div>
+        </div>
+
+        <div class="cfg-section">
+          <h4>O que aparece na sua vitrine</h4>
+          <div class="toggle-row">
+            <div class="left"><div class="label">Banner principal</div><div class="help">Foto de capa no topo da ficha</div></div>
+            <div class="switch"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="left"><div class="label">Produtos em promoção</div><div class="help">Carrossel com até 6 itens (preço de/por)</div></div>
+            <div class="switch"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="left"><div class="label">Aparecer na home</div><div class="help">Rotaciona com outros oficiais a cada visita</div></div>
+            <div class="switch"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="left"><div class="label">Galeria de fotos</div><div class="help">Até 8 fotos do estabelecimento</div></div>
+            <div class="switch off"></div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <h4>Fotos do banner</h4>
+          <div class="upload-row">
+            <div class="thumbs">
+              <div class="t filled"></div>
+              <div class="t filled" style="background: linear-gradient(135deg, var(--carmo-clay-300), var(--carmo-clay-600));"></div>
+              <div class="t filled" style="background: linear-gradient(135deg, var(--carmo-cerrado-300), var(--carmo-cerrado-700));"></div>
+              <div class="t add"><i data-lucide="plus"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <h4>Botão principal (CTA)</h4>
+          <div class="cta-pick">
+            <div class="opt active"><i data-lucide="phone"></i>Ligar agora</div>
+            <div class="opt"><i data-lucide="message-circle"></i>WhatsApp</div>
+            <div class="opt"><i data-lucide="map-pin"></i>Como chegar</div>
+            <div class="opt"><i data-lucide="tag"></i>Ver encarte</div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <h4>Produtos em destaque</h4>
+          <div class="toggle-row">
+            <div class="left"><div class="label">Pão de queijo (6un)</div><div class="help">De R$ 12,00 por R$ 9,90</div></div>
+            <i data-lucide="grip-vertical"></i>
+          </div>
+          <div class="toggle-row">
+            <div class="left"><div class="label">Bolo de fubá</div><div class="help">De R$ 18,00 por R$ 14,90</div></div>
+            <i data-lucide="grip-vertical"></i>
+          </div>
+          <div class="toggle-row">
+            <div class="left"><div class="label" style="color: var(--carmo-clay-600);"><i data-lucide="plus" style="display:inline-block;vertical-align:-3px;"></i> Adicionar produto</div></div>
+          </div>
+        </div>
+
+        <div style="height: 80px"></div>
+      </div>
+
+      <div class="save-bar">
+        <button class="ghost">Pré-visualizar</button>
+        <button class="primary">Salvar e publicar</button>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section class="pricing">
+    <h2>Tabela de preços — Oficial da categoria</h2>
+    <p class="lead">Valores mensais sugeridos para Carmo do Rio Claro (~21 mil habitantes). Contrato padrão 6 meses, anual com 15% de desconto. Pix à vista ou cartão recorrente.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Categoria</th>
+          <th>Faixa</th>
+          <th>Mensal</th>
+          <th>6 meses</th>
+          <th>Anual (−15%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="shopping-cart"></i></div>Supermercados</div></td><td><tier class="tier-L">L</tier></td><td class="price-monthly">R$ 1.000</td><td>R$ 6.000</td><td class="price-yearly">R$ 10.200 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="pill"></i></div>Farmácias</div></td><td><tier class="tier-L">L</tier></td><td class="price-monthly">R$ 700</td><td>R$ 4.200</td><td class="price-yearly">R$ 7.140 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="fuel"></i></div>Postos de combustível</div></td><td><tier class="tier-L">L</tier></td><td class="price-monthly">R$ 600</td><td>R$ 3.600</td><td class="price-yearly">R$ 6.120 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="utensils-crossed"></i></div>Restaurantes / pizzarias</div></td><td><tier class="tier-M">M</tier></td><td class="price-monthly">R$ 500</td><td>R$ 3.000</td><td class="price-yearly">R$ 5.100 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="bed"></i></div>Pousadas</div></td><td><tier class="tier-M">M</tier></td><td class="price-monthly">R$ 450</td><td>R$ 2.700</td><td class="price-yearly">R$ 4.590 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="croissant"></i></div>Padarias</div></td><td><tier class="tier-M">M</tier></td><td class="price-monthly">R$ 300</td><td>R$ 1.800</td><td class="price-yearly">R$ 3.060 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="beef"></i></div>Açougues / hortifrúti</div></td><td><tier class="tier-M">M</tier></td><td class="price-monthly">R$ 280</td><td>R$ 1.680</td><td class="price-yearly">R$ 2.856 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="wrench"></i></div>Oficinas / borracharias</div></td><td><tier class="tier-M">M</tier></td><td class="price-monthly">R$ 250</td><td>R$ 1.500</td><td class="price-yearly">R$ 2.550 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="paw-print"></i></div>Pet shops</div></td><td><tier class="tier-S">S</tier></td><td class="price-monthly">R$ 200</td><td>R$ 1.200</td><td class="price-yearly">R$ 2.040 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="scissors"></i></div>Salões / barbearias</div></td><td><tier class="tier-S">S</tier></td><td class="price-monthly">R$ 180</td><td>R$ 1.080</td><td class="price-yearly">R$ 1.836 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="hammer"></i></div>Material de construção</div></td><td><tier class="tier-M">M</tier></td><td class="price-monthly">R$ 350</td><td>R$ 2.100</td><td class="price-yearly">R$ 3.570 <small>/ano</small></td></tr>
+        <tr><td><div class="cat-name"><div class="ic"><i data-lucide="graduation-cap"></i></div>Escolas / cursos</div></td><td><tier class="tier-S">S</tier></td><td class="price-monthly">R$ 220</td><td>R$ 1.320</td><td class="price-yearly">R$ 2.244 <small>/ano</small></td></tr>
+      </tbody>
+    </table>
+
+    <div class="principles">
+      <div class="principle">
+        <i data-lucide="lock"></i>
+        <h5>Exclusividade real</h5>
+        <p>Enquanto o contrato estiver ativo, nenhum outro comerciante da mesma categoria pode comprar o slot.</p>
+      </div>
+      <div class="principle">
+        <i data-lucide="hourglass"></i>
+        <h5>Fila de espera</h5>
+        <p>Quando a categoria está ocupada, concorrentes entram em lista — gera urgência e protege a renovação.</p>
+      </div>
+      <div class="principle">
+        <i data-lucide="bar-chart-3"></i>
+        <h5>Relatório mensal</h5>
+        <p>Visualizações da vitrine, cliques em CTA, mapa, telefone e WhatsApp. Enviado por email todo dia 1º.</p>
+      </div>
+      <div class="principle">
+        <i data-lucide="circle-slash"></i>
+        <h5>Sem ar de propaganda</h5>
+        <p>Selo "Oficial" + visual editorial. Não se confunde com banner pago de rotação curta.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

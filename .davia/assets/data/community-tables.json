@@ -1,0 +1,87 @@
+[
+  {
+    "table": "events",
+    "module": "events",
+    "public_filter": "city_id + status=published",
+    "ugc": true,
+    "moderation": "status"
+  },
+  {
+    "table": "classifieds",
+    "module": "classifieds",
+    "public_filter": "city_id + status=published + expires_at>now",
+    "ugc": true,
+    "moderation": "status + flagged_count"
+  },
+  {
+    "table": "lost_pets",
+    "module": "community",
+    "public_filter": "city_id + moderation_status=published",
+    "ugc": true,
+    "moderation": "moderation_status + flagged_count"
+  },
+  {
+    "table": "lost_and_found",
+    "module": "community",
+    "public_filter": "city_id + moderation_status=published",
+    "ugc": true,
+    "moderation": "moderation_status + flagged_count"
+  },
+  {
+    "table": "obituaries",
+    "module": "community",
+    "public_filter": "city_id + status=published",
+    "ugc": false,
+    "moderation": "city_admin only"
+  },
+  {
+    "table": "content_reports",
+    "module": "community",
+    "public_filter": "self insert, admin read/update",
+    "ugc": true,
+    "moderation": "reports queue"
+  },
+  {
+    "table": "churches",
+    "module": "community",
+    "public_filter": "city_id + status=published",
+    "ugc": false,
+    "moderation": "claim + city_admin"
+  },
+  {
+    "table": "church_schedule_items",
+    "module": "community",
+    "public_filter": "city_id + active + church published",
+    "ugc": false,
+    "moderation": "manager update"
+  },
+  {
+    "table": "church_claims",
+    "module": "community",
+    "public_filter": "self read, admin update",
+    "ugc": true,
+    "moderation": "city_admin approval"
+  },
+  {
+    "table": "community_groups",
+    "module": "community",
+    "public_filter": "city_id + status=published",
+    "ugc": true,
+    "moderation": "status + flagged_count + owner_profile_id",
+    "media": "cover_url + thumbnail_url + og_image_url via og_image_jobs"
+  },
+  {
+    "table": "community_group_posts",
+    "module": "community",
+    "public_filter": "city_id + group_id + status=published",
+    "ugc": true,
+    "moderation": "status + flagged_count + manager update"
+  },
+  {
+    "table": "community_group_followers",
+    "module": "community",
+    "public_filter": "server-side public projection: full_name + avatar_url",
+    "ugc": true,
+    "moderation": "self follow/unfollow"
+  }
+]

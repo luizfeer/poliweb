@@ -1,0 +1,96 @@
+<h1>💎 Oficial da categoria — patrocínio exclusivo</h1>
+<p>Produto comercial premium do portal. <strong>Um único comerciante por categoria, por cidade</strong>, com vitrine destacada, banner com produtos em promoção, aparições na home e selo "Oficial" visível em toda a categoria. Concorrentes da mesma categoria não podem comprar o mesmo slot enquanto o contrato estiver ativo.</p>
+
+<h2>Por que esse formato</h2>
+<ul>
+  <li><strong>Exclusividade vende mais que rotação.</strong> Anunciante prefere pagar 5x mais e ser único do que dividir um slot rotativo com 3 concorrentes.</li>
+  <li><strong>Receita previsível.</strong> Contratos de 6 meses (padrão) ou 12 meses (anual). Não depende de leilão nem de tráfego.</li>
+  <li><strong>FOMO no concorrente.</strong> Quando a categoria está ocupada, demais comerciantes entram em fila de espera — pressão natural de renovação.</li>
+  <li><strong>Não polui a UI.</strong> Selo editorial "Oficial" + visual tipo ficha rica. Não vira banner de propaganda.</li>
+</ul>
+
+<h2>O que o Oficial ganha</h2>
+<ul>
+  <li><strong>Selo "Oficial · &lt;Categoria&gt;"</strong> visível em todas as listagens, busca e ficha.</li>
+  <li><strong>Vitrine master no topo da categoria</strong> com banner de capa, logo, tagline, avaliação, fotos e 3 CTAs grandes (ligar, WhatsApp, ir até).</li>
+  <li><strong>Carrossel de até 6 produtos em promoção</strong> com preço de/por, atualizável pelo painel.</li>
+  <li><strong>Aparições rotativas na home</strong> (banner laranja-telha) entre os oficiais ativos — cada visita pode mostrar 1 oficial diferente.</li>
+  <li><strong>Galeria de até 8 fotos</strong> do estabelecimento.</li>
+  <li><strong>CTA primário configurável</strong> (Ligar agora, WhatsApp, Como chegar, Ver encarte).</li>
+  <li><strong>Relatório mensal por email</strong> com visualizações, cliques, ligações, mensagens WhatsApp e direções pedidas.</li>
+  <li><strong>Suporte direto da equipe</strong> para subir banner e produtos.</li>
+</ul>
+
+<h2>O que o comerciante pode escolher exibir</h2>
+<p>No painel <code>/painel/comercio/[id]/oficial</code>:</p>
+<ul>
+  <li>Liga/desliga banner principal, produtos em promoção, galeria, aparição na home</li>
+  <li>Sobe até 3 fotos de banner (rotação automática), 8 fotos de galeria</li>
+  <li>Cadastra produtos em promoção: nome, preço de, preço por, foto, validade</li>
+  <li>Escolhe o CTA primário</li>
+  <li>Tagline curta (até 60 caracteres)</li>
+  <li>Vê pré-visualização antes de publicar</li>
+</ul>
+
+<h2>Tabela de preços (Carmo do Rio Claro, MVP)</h2>
+<p>Valores sugeridos para cidade de ~21 mil habitantes. Contrato mensal mínimo 6 meses. Anual tem <strong>15% de desconto</strong>. Pix à vista ou cartão recorrente (Asaas/Mercado Pago).</p>
+
+<database-view data-path="data/oficial-pricing.json"></database-view>
+
+<h2>Lógica do pricing</h2>
+<ul>
+  <li><strong>Teto de referência:</strong> 1–2 inserções/mês em rádio local de Carmo (~R$ 600 a R$ 1.500). Oficial precisa ficar abaixo disso no 1º ano pra fechar fácil, mas com valor percebido alto.</li>
+  <li><strong>Faixas (S/M/L)</strong> seguem o ticket médio do comerciante e o tamanho do público que aquela categoria atrai. Supermercado e farmácia são L (alto fluxo, ticket alto). Padaria e pet são S/M.</li>
+  <li><strong>Reajuste anual</strong> indexado ao IPCA na renovação. Travado durante o contrato.</li>
+  <li><strong>Multi-cidade:</strong> cada cidade tem sua tabela. Capitólio (~8 mil hab) entra ~40% mais barato; Guapé idem. Cidades maiores futuras escalam pra cima.</li>
+</ul>
+
+<h2>Regras operacionais</h2>
+<ul>
+  <li><strong>Uma só vaga ativa por categoria por cidade.</strong> Constraint no banco em <code>category_sponsorships(category_id, city_id, active=true)</code>.</li>
+  <li><strong>Contrato mínimo 6 meses.</strong> Quebra antecipada cobra 50% do restante.</li>
+  <li><strong>Renovação automática</strong> 30 dias antes do fim, com aviso por email + WhatsApp.</li>
+  <li><strong>Fila de espera</strong> aberta pela landing <code>/oficial/&lt;categoria&gt;</code>. Notifica candidatos quando vagar.</li>
+  <li><strong>Conteúdo moderado pelo admin da cidade</strong> antes de publicar — protege a marca do portal.</li>
+  <li><strong>Direito de recusa.</strong> Admin da cidade pode recusar comerciante (ex: histórico de denúncias, baixa qualidade) e oferecer próximo da fila.</li>
+</ul>
+
+<h2>Modelagem (esboço)</h2>
+<ul>
+  <li><code>category_sponsorships</code> — <code>id</code>, <code>city_id</code>, <code>category_id</code>, <code>business_id</code>, <code>starts_at</code>, <code>ends_at</code>, <code>monthly_amount_cents</code>, <code>billing_cycle</code> (monthly|semiannual|annual), <code>status</code> (active|paused|expired|cancelled), <code>auto_renew</code></li>
+  <li><code>category_sponsorship_assets</code> — banners, fotos, configurações de exibição (jsonb)</li>
+  <li><code>category_sponsorship_products</code> — produtos em promoção: nome, foto, preço de/por, validade, ordem</li>
+  <li><code>category_sponsorship_waitlist</code> — fila por categoria/cidade</li>
+  <li><code>category_sponsorship_events</code> — log de impressões/cliques pra relatório</li>
+</ul>
+<p>RLS: SELECT público de <code>category_sponsorships</code> ativos; INSERT/UPDATE só <code>is_city_admin(city_id)</code>; o próprio merchant escreve em <code>category_sponsorship_assets</code> e <code>_products</code> via <code>manages_business(id)</code>.</p>
+
+<h2>Onde aparece no app</h2>
+<ul>
+  <li><strong>Home</strong> — banner do Oficial rotativo (1 de N oficiais ativos)</li>
+  <li><strong>Categoria</strong> — vitrine master fixa no topo, antes da lista normal</li>
+  <li><strong>Busca</strong> — primeiro resultado da categoria correspondente com selo "Oficial"</li>
+  <li><strong>Ficha do negócio</strong> — banner premium + galeria + carrossel de promoções</li>
+  <li><strong>Landing comercial</strong> — <code>/oficial</code> explica o produto + form de interesse</li>
+</ul>
+
+<h2>Métricas a acompanhar</h2>
+<ul>
+  <li>Categorias vendidas / categorias disponíveis por cidade</li>
+  <li>Ticket médio mensal (MRR do Oficial)</li>
+  <li>Taxa de renovação ao fim do contrato</li>
+  <li>Fila de espera por categoria (sinal de pricing power)</li>
+  <li>CTR no banner do oficial vs. ficha normal</li>
+  <li>Cliques em CTA (ligar/whats/mapa) por R$ pago — custo por contato pro merchant</li>
+</ul>
+
+<h2>Risco e mitigação</h2>
+<ul>
+  <li><strong>"Tô pagando e não vejo resultado"</strong> — relatório mensal granular + reunião trimestral com o gerente comercial.</li>
+  <li><strong>Categoria sem demanda</strong> (não tem comerciante grande o suficiente) — manter slot vazio com CTA <em>"Seja o Oficial em &lt;categoria&gt;"</em> em vez de vender barato demais e desvalorizar.</li>
+  <li><strong>Concorrente alegando favorecimento</strong> — termo público em <code>/oficial</code> deixa claro que é um produto comprado, não recomendação editorial.</li>
+  <li><strong>Confusão com publi convencional</strong> — selo "Oficial" com explicação ao toque ("Patrocinador oficial desta categoria em Carmo. Saiba mais.").</li>
+</ul>
+
+<h2>Mock visual</h2>
+<p>Ver <code>mocks/oficial-da-categoria.html</code> — três telas: home com banner, categoria com vitrine master, painel do comerciante com config.</p>

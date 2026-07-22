@@ -1,0 +1,15 @@
+flowchart LR
+  V["Visitante / cidadao"] --> B["Banner granular"]
+  B --> C["privacy_consents"]
+  C --> E["privacy_consent_events"]
+  V --> P["Painel: Perfil e privacidade"]
+  P --> R["privacy_requests"]
+  P --> D["account_deletion_requests"]
+  R --> A["Admin / DPO"]
+  D --> A
+  A --> X["Exportar, corrigir, anonimizar ou reter"]
+  X --> L["audit_log"]
+  C --> S["App Store Privacy Labels"]
+  I["Inventario de dados"] --> S
+  I --> PP["/privacidade"]
+  S --> IOS["App iOS / Expo futuro"]

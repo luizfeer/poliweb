@@ -1,0 +1,15 @@
+[
+  { "ordem": 1, "task": "Migration: profiles + cities + districts + audit_log", "tipo": "DB", "bloqueio": "—" },
+  { "ordem": 2, "task": "Seed: cidade Carmo + bairros (~15)", "tipo": "Conteúdo", "bloqueio": "Lista oficial de bairros (prefeitura)" },
+  { "ordem": 3, "task": "Configurar Supabase Auth (email + Google + magic link)", "tipo": "Auth", "bloqueio": "Criar projeto Supabase remoto" },
+  { "ordem": 4, "task": "Server Actions: signup / signin / signout", "tipo": "Auth", "bloqueio": "—" },
+  { "ordem": 5, "task": "Trigger SQL: criar profile ao inserir auth.users", "tipo": "DB", "bloqueio": "—" },
+  { "ordem": 6, "task": "RLS policies: profiles, audit_log", "tipo": "DB", "bloqueio": "—" },
+  { "ordem": 7, "task": "Layout público (header/nav/footer) responsivo", "tipo": "UI", "bloqueio": "Logo + paleta de cores" },
+  { "ordem": 8, "task": "Layout do painel (sidebar por role)", "tipo": "UI", "bloqueio": "—" },
+  { "ordem": 9, "task": "Página /entrar e /cadastro", "tipo": "UI", "bloqueio": "—" },
+  { "ordem": 10, "task": "Middleware: redirect por role no /painel", "tipo": "Auth", "bloqueio": "—" },
+  { "ordem": 11, "task": "Componente <AdSlot/> renderiza placeholder", "tipo": "UI", "bloqueio": "—" },
+  { "ordem": 12, "task": "Davia: atualizar database.html + auth-flow", "tipo": "Doc", "bloqueio": "—" },
+  { "ordem": 13, "task": "Política de privacidade + termos (rascunho)", "tipo": "Legal", "bloqueio": "Revisar com advogado antes do launch" }
+]

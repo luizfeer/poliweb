@@ -1,0 +1,51 @@
+<h1>Utilities</h1>
+<p><strong>Serviços públicos</strong> é o módulo de retenção diária.</p>
+<p>Todo dado é curado pelo <code>city_admin</code> e filtrado por <code>city_id</code>.</p>
+<excalidraw data-path="data/utilities-alert-flow.json"></excalidraw>
+<h2>Superfícies</h2>
+<database-view data-path="data/utilities-tables.json"></database-view>
+<h2>Telefones úteis</h2>
+<p><code>/servicos/telefones</code> lê <code>emergency_contacts</code>. O painel <code>/painel/cidade/servicos/contatos</code> edita telefones, fonte, tags, endereço, e-mail e status de verificação.</p>
+<p>Contatos ativos entram na busca como <code>emergency_contact</code> e são enfileirados em <code>indexing_queue</code> para embeddings consultados pelo assistente.</p>
+<h2>Postos de saúde</h2>
+<p><code>/servicos/saude</code> lê <code>health_facilities</code> para ESFs, UBS, CAPS, Farmácia Municipal, Sala de Vacinas e Vigilâncias. O painel <code>/painel/cidade/servicos/saude</code> mantém unidades, telefones, WhatsApp, serviços, requisitos e fonte.</p>
+<p>Unidades ativas entram na busca como <code>health_facility</code> e também são enfileiradas em <code>indexing_queue</code> para respostas do assistente.</p>
+<h2>Páginas de serviço na IA</h2>
+<p><code>site_pages</code> guarda textos-base de páginas como <code>/servicos/saude</code>, <code>/servicos/telefones</code>, <code>/servicos/agua</code>, <code>/servicos/energia</code>, <code>/servicos/coleta</code>, <code>/servicos/farmacias</code>, <code>/servicos/alertas</code>, <code>/servicos/clima</code> e <code>/balsas</code>.</p>
+<p>Essas páginas entram no embedding como <code>site_page</code>, aparecem na busca semântica e podem ser usadas pelo assistente quando a pergunta é sobre o serviço em geral.</p>
+<h2>Regras</h2>
+<ul>
+  <li><strong>Leitura pública:</strong> somente registros ativos.</li>
+  <li><strong>Escrita:</strong> RLS com <code>is_city_admin(city_id)</code>.</li>
+  <li><strong>Coleta:</strong> o schema ainda usa <code>district_id</code>, mas a página pública mostra primeiro o cronograma municipal resumido.</li>
+  <li><strong>Carmo:</strong> lixo úmido/orgânico segunda, quarta e sexta antes do almoço; reciclável terça e quinta à noite.</li>
+  <li><strong>Plantão:</strong> usa RPC <code>current_pharmacy_on_duty</code>.</li>
+  <li><strong>Alertas:</strong> críticos aparecem no topo de <code>/servicos</code>.</li>
+  <li><strong>Energia:</strong> <code>/servicos/energia</code> concentra Cemig, 116, WhatsApp, Telegram, segunda via, religação e segurança.</li>
+  <li><strong>Água e esgoto:</strong> <code>/servicos/agua</code> concentra Copasa, 115, WhatsApp, segunda via, falta de água, vazamentos e tarifa social.</li>
+  <li><strong>Previsão do tempo:</strong> usa Open-Meteo, salva cache em <code>weather_snapshots</code> e renderiza widget na home.</li>
+  <li><strong>Tela de clima:</strong> <code>/servicos/clima</code> reaproveita o widget e calcula contexto histórico via Open-Meteo Archive.</li>
+  <li><strong>Worker de clima:</strong> <code>weather:update</code> busca 7 dias, tenta novamente em erro 5xx e mantém cache por 30h.</li>
+  <li><strong>Rotas ao vivo:</strong> <code>road-routes:update</code> salva tráfego, duração, distância, atraso, link do Maps e alertas DER-MG em <code>live_feed_items.payload</code>.</li>
+  <li><strong>Topo ao vivo:</strong> a barra do topo expande um painel com resumo do clima e cards de rotas úteis.</li>
+</ul>
+<h2>Arquivos-chave</h2>
+<ul>
+  <li><code>apps/web/lib/utilities/queries.ts</code></li>
+  <li><code>apps/web/lib/utilities/cemig-info.ts</code></li>
+  <li><code>apps/web/lib/utilities/copasa-info.ts</code></li>
+  <li><code>apps/web/lib/weather/*</code></li>
+  <li><code>apps/web/components/public/weather/weather-widget.tsx</code></li>
+  <li><code>apps/web/components/carmo/top-nav.tsx</code></li>
+  <li><code>apps/web/lib/live-feed/queries.ts</code></li>
+  <li><code>apps/worker/src/jobs/weather-update.ts</code></li>
+  <li><code>apps/worker/src/jobs/road-routes-update.ts</code></li>
+  <li><code>apps/web/app/servicos/clima/page.tsx</code></li>
+  <li><code>apps/web/app/servicos/energia/page.tsx</code></li>
+  <li><code>apps/web/app/servicos/agua/page.tsx</code></li>
+  <li><code>apps/web/app/api/cron/weather/route.ts</code></li>
+  <li><code>apps/web/app/servicos/*</code></li>
+  <li><code>apps/web/app/painel/cidade/servicos/*</code></li>
+  <li><code>supabase/migrations/20260430223000_utilities_admin_plan02.sql</code></li>
+  <li><code>supabase/migrations/20260501090000_weather_snapshots.sql</code></li>
+</ul>

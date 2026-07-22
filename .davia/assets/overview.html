@@ -1,0 +1,42 @@
+<h1>🌄 Portal Hiperlocal — Carmo do Rio Claro</h1>
+<p>Plataforma de <strong>utilidade pública</strong>, <strong>turismo</strong>, <strong>comunidade</strong>, <strong>transparência</strong> e <strong>comércio local</strong> para Carmo do Rio Claro/MG (~21 mil hab.), região da represa de Furnas e Serra da Canastra.</p>
+<p>Mapa do produto:</p>
+<excalidraw data-path="data/product-map.json"></excalidraw>
+<h2>Por que existe</h2>
+<ul>
+  <li><strong>Cidadão</strong> não tem um lugar único pra saber dia da coleta, plantão de farmácia, eventos.</li>
+  <li><strong>Turista</strong> não tem guia consolidado de pousadas, atrações e pesca esportiva da região.</li>
+  <li><strong>Comerciante</strong> não tem vitrine digital local fora do Instagram.</li>
+  <li><strong>Cidade</strong> não tem canal de transparência com Diário Oficial e atas resumidos.</li>
+</ul>
+<h2>5 camadas de valor</h2>
+<ol>
+  <li><strong>Utilidade pública</strong> — coleta, telefones, farmácia, saúde, alertas <em>(retenção diária)</em></li>
+  <li><strong>Agenda &amp; comunidade</strong> — eventos, achados, pets, obituários <em>(viralização local)</em></li>
+  <li><strong>Turismo</strong> — pousadas, atrações, pesca esportiva <em>(receita futura via afiliados/anúncios)</em></li>
+  <li><strong>Transparência</strong> — DO, atas, licitações, obras resumidos por IA <em>(diferencial editorial)</em></li>
+  <li><strong>Comércio</strong> — guia, classificados, promoções <em>(receita recorrente)</em></li>
+</ol>
+<h2>Decisões estratégicas do MVP</h2>
+<ul>
+  <li><strong>Foco MVP:</strong> utilidade pública + 1 vertical turismo (pesca esportiva — perfil regional Furnas)</li>
+  <li><strong>Multi-cidade desde o dia 1:</strong> arquitetura por <code>city_id</code> + módulos liga/desliga por cidade (ver <strong>multi-city.html</strong>)</li>
+  <li><strong>Auth e papéis:</strong> super_admin, city_admin, moderator, merchant, citizen — papéis <em>por cidade</em></li>
+  <li><strong>Cliente como admin da própria página:</strong> imobiliária edita seus imóveis, comerciante edita sua ficha, pousada edita seus quartos (ver <strong>ownership.html</strong>)</li>
+  <li><strong>Conteúdo:</strong> automação/IA forte desde o dia 1 (scrapers DO, atas, moderação UGC)</li>
+  <li><strong>Monetização:</strong> slots prontos no front mas <em>inativos</em> até ter tração local</li>
+</ul>
+<h2>Módulos disponíveis</h2>
+<p>Cada cidade ativa só os módulos que faz sentido. Para Carmo, todos:</p>
+<ul>
+  <li><strong>utilities</strong> — coleta de lixo, telefones úteis, farmácia plantão, saúde, alertas</li>
+  <li><strong>events</strong> — agenda cultural, religiosa, esportiva, gastronômica</li>
+  <li><strong>tourism</strong> — pousadas, atrações, restaurantes, pesca esportiva, pacotes</li>
+  <li><strong>real_estate</strong> — imobiliárias, corretores, imóveis (venda/aluguel/temporada), leads</li>
+  <li><strong>businesses</strong> — guia comercial com categorias hierárquicas, reviews, promoções</li>
+  <li><strong>classifieds</strong> — veículos, vagas, serviços, itens (imóveis ficam em real_estate)</li>
+  <li><strong>community</strong> — pets perdidos, achados, obituários</li>
+  <li><strong>transparency</strong> — DO, atas, licitações, obras (resumidos por IA)</li>
+  <li><strong>ads</strong> — slots prontos, ativam pós-tração</li>
+</ul>
+<blockquote>Cidade-foco: Carmo do Rio Claro. Capitólio já está como <code>coming_soon</code> no banco. Expansão prevista pós-MVP: Guapé, São Roque de Minas, Alpinópolis, Furnas.</blockquote>

@@ -1,0 +1,29 @@
+<h1>Classifieds Front</h1>
+<p><strong>Classificados</strong> agora tem quatro verticais públicas.</p>
+<p>As rotas usam <code>city_id</code>, módulo <code>classifieds</code> e aprovação antes de publicar.</p>
+<ul>
+  <li><code>/classificados</code> mostra o hub e contagens.</li>
+  <li><code>/classificados/veiculos</code> lista veiculos.</li>
+  <li><code>/classificados/vagas</code> lista vagas gratis.</li>
+  <li><code>/classificados/servicos</code> lista prestadores.</li>
+  <li><code>/classificados/itens</code> lista itens e doacoes.</li>
+</ul>
+<excalidraw data-path="data/classifieds-approval.json"></excalidraw>
+<p></p>
+<h2>Fluxo de postagem</h2>
+<ul>
+  <li><code>/painel/cidadao/classificados/novo</code> cria rascunho com capa e galeria.</li>
+  <li>O form aceita imagem de capa e múltiplos arquivos em <code>gallery_files</code>.</li>
+  <li>Publicação exige aceite do termo de responsabilidade e segurança.</li>
+  <li><code>createClassifiedDraftAction</code> grava <code>cover_url</code> e sincroniza <code>photos</code> via <code>media_assets</code> + <code>media_links</code>.</li>
+  <li>Se a pessoa envia galeria sem capa, a primeira imagem também vira capa.</li>
+</ul>
+<h2>Consumo público</h2>
+<ul>
+  <li>Detalhe público usa <code>StoryPhotoGallery</code> para fotos e vídeos.</li>
+  <li>WhatsApp e telefone só aparecem depois de login e clique em solicitar contato.</li>
+  <li>A solicitação grava <code>classified.contact_reveal</code> em <code>audit_log</code>.</li>
+  <li>A interface mostra aviso anti-golpe antes de liberar o contato.</li>
+  <li>Dados continuam filtrados por <code>city_id</code>, status publicado e revisão aprovada.</li>
+</ul>
+<p>Código principal: <code>apps/web/lib/classifieds/queries.ts</code> e <code>apps/web/components/public/classifieds/cards.tsx</code>.</p>

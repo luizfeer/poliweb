@@ -1,0 +1,14 @@
+[
+  { "camada": "Framework", "tecnologia": "Next.js 16 (App Router)", "versao": "16.2.4", "papel": "SSR/ISR + Server Actions + serverless API" },
+  { "camada": "UI", "tecnologia": "Tailwind CSS + shadcn/ui", "versao": "4.x", "papel": "Design system" },
+  { "camada": "Banco", "tecnologia": "Supabase Postgres", "versao": "—", "papel": "Dados + RLS por papel" },
+  { "camada": "Auth", "tecnologia": "Supabase Auth", "versao": "@supabase/ssr 0.10", "papel": "Email + OAuth Google + magic link" },
+  { "camada": "Storage", "tecnologia": "Supabase Storage", "versao": "—", "papel": "Fotos pousadas/eventos, PDFs do DO" },
+  { "camada": "Busca", "tecnologia": "Postgres FTS + pgvector", "versao": "—", "papel": "Busca textual + semântica" },
+  { "camada": "Mapas", "tecnologia": "Maplibre + OSM tiles", "versao": "—", "papel": "Pins de pousadas, atrações, obras" },
+  { "camada": "IA", "tecnologia": "Anthropic Claude API", "versao": "Sonnet 4.6 / Haiku 4.5", "papel": "Resumir DO, atas, moderar UGC" },
+  { "camada": "Email", "tecnologia": "Resend", "versao": "—", "papel": "Newsletter + transacional" },
+  { "camada": "Cron", "tecnologia": "Vercel Cron + Supabase Edge", "versao": "—", "papel": "Scrapers e jobs IA agendados" },
+  { "camada": "Deploy", "tecnologia": "Vercel", "versao": "—", "papel": "CDN + serverless front" },
+  { "camada": "Doc interna", "tecnologia": "Davia", "versao": "0.1.14", "papel": "Documentação interativa" }
+]

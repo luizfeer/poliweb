@@ -1,0 +1,16 @@
+export const HI_METRICA_EVENTS = {
+  business_profile_viewed: 'business_profile_viewed',
+  tourism_listing_viewed: 'tourism_listing_viewed',
+  contact_whatsapp_click: 'contact_whatsapp_click',
+  contact_phone_click: 'contact_phone_click',
+  contact_website_click: 'contact_website_click',
+  directions_click: 'directions_click',
+  address_copied: 'address_copied',
+  map_cta_click: 'map_cta_click',
+  search_submitted: 'search_submitted',
+  search_result_clicked: 'search_result_clicked',
+  newsletter_subscribe_completed: 'newsletter_subscribe_completed',
+  consent_updated: 'consent_updated',
+  signup_completed: 'signup_completed',
+  login_completed: 'login_completed',
+} as const;

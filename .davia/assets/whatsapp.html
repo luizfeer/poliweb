@@ -1,0 +1,65 @@
+<h1>WhatsApp Hub</h1>
+<p>Integracao oficial com a Meta WhatsApp Cloud API. Dois canais por cidade.</p>
+<p><strong>Canal transacional</strong> envia confirmacoes, lembretes e alertas via templates aprovados.</p>
+<p><strong>Canal assistente</strong> recebe perguntas livres e responde usando o agente de cidade ja existente.</p>
+
+<h2>Componentes</h2>
+<ul>
+  <li><code>apps/web/lib/whatsapp/meta-client.ts</code> faz wrapper da Graph API.</li>
+  <li><code>apps/web/lib/whatsapp/templates/</code> guarda templates como codigo TS versionado.</li>
+  <li><code>apps/web/lib/whatsapp/sync-templates.ts</code> faz diff entre local e Meta.</li>
+  <li><code>apps/web/lib/whatsapp/outbound.ts</code> expoe <code>enqueueTemplate()</code> para Server Actions.</li>
+  <li><code>supabase/functions/wa-webhook</code> recebe mensagens da Meta com HMAC.</li>
+  <li><code>supabase/functions/wa-outbound-worker</code> processa fila a cada minuto via cron.</li>
+</ul>
+
+<h2>Fluxo outbound</h2>
+<ul>
+  <li>Server Action chama <code>enqueueTemplate()</code> apos um evento de negocio.</li>
+  <li>Linha entra em <code>wa_outbound_queue</code> com status pending.</li>
+  <li>Cron dispara <code>wa-outbound-worker</code> a cada minuto.</li>
+  <li>Worker pega lote de 25, envia via Graph API e cria linha em <code>wa_messages</code>.</li>
+  <li>Status updates posteriores chegam via webhook e atualizam <code>sent_at</code>, <code>delivered_at</code>, <code>read_at</code>.</li>
+  <li>Suporta <code>kind = interactive</code> para mensagens com botoes de resposta (usado pelo delivery: Aceitar / Recusar / Ver pedidos).</li>
+</ul>
+
+<h2>Fluxo inbound</h2>
+<ul>
+  <li>Meta entrega payload em <code>POST /functions/v1/wa-webhook</code>.</li>
+  <li>Webhook valida HMAC com <code>META_WA_APP_SECRET</code> e responde 200 em menos de 5 segundos.</li>
+  <li>Mensagem entra em <code>wa_messages</code> com direction <code>in</code>.</li>
+  <li><code>wa_touch_session()</code> renova a janela de 24 horas do contato.</li>
+  <li>O webhook enfileira em <code>wa_inbound_queue</code> com a coluna <code>consumer</code>: canal assistente vai para o worker IA; canal transacional vai para o <code>delivery-bot</code>.</li>
+  <li>Worker IA consome <code>consumer = assistant</code>, chama <code>city-agent-client</code> e responde.</li>
+  <li><code>delivery-bot</code> consome <code>consumer = delivery_bot</code>, interpreta comandos e botoes do operador e atualiza o status do pedido. Ver <code>delivery-orders.html</code>.</li>
+</ul>
+
+<h2>Templates como codigo</h2>
+<ul>
+  <li>Cada template eh um modulo TS tipado em <code>lib/whatsapp/templates/</code>.</li>
+  <li>Script <code>pnpm tsx scripts/wa-sync-templates.ts</code> envia novos templates para Meta.</li>
+  <li>Meta nao permite editar body de template aprovado. Mudancas de texto criam template novo com sufixo de versao.</li>
+  <li>Status remoto vira espelhado em <code>wa_templates</code>.</li>
+</ul>
+
+<h2>Multi-cidade</h2>
+<ul>
+  <li>Cada cidade tem ate dois canais via <code>wa_channels</code> com constraint unique em <code>(city_id, kind)</code>.</li>
+  <li>Webhook resolve cidade pelo <code>phone_number_id</code> recebido.</li>
+  <li>RLS filtra <code>wa_messages</code> por canal e cidade.</li>
+</ul>
+
+<h2>LGPD</h2>
+<ul>
+  <li><code>wa_opt_ins</code> guarda consentimento granular por tipo: transacional, marketing, assistente.</li>
+  <li>Marketing exige opt-in explicito. Transacional segue base legitima de execucao de contrato.</li>
+  <li>Revogacao gera <code>revoked_at</code> e bloqueia envios futuros via verificacao no worker.</li>
+</ul>
+
+<h2>Estimativa de custo</h2>
+<ul>
+  <li>Service conversations sao gratis desde julho de 2025.</li>
+  <li>Utility conversa custa cerca de 4 centavos por janela de 24 horas.</li>
+  <li>Marketing conversa custa cerca de 32 centavos.</li>
+  <li>Cenario MVP em Carmo gira em torno de 700 reais por mes total.</li>
+</ul>

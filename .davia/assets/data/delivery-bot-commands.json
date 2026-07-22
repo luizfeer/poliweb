@@ -1,0 +1,15 @@
+[
+  { "comando": "/abrir", "acao": "Loja fica online e passa a aceitar pedidos. Fecha sozinha em 6h ou com /fechar." },
+  { "comando": "/fechar", "acao": "Loja fica offline. Nao recebe novos pedidos." },
+  { "comando": "/pausar [min]", "acao": "Modo ocupado: aceita pedidos com tempo maior por N minutos." },
+  { "comando": "/lista", "acao": "Lista pedidos abertos: numero, status, ha quantos minutos e total." },
+  { "comando": "/aceitar <n>", "acao": "Aceita o pedido (status confirmed)." },
+  { "comando": "/recusar <n>", "acao": "Recusa o pedido (status rejected)." },
+  { "comando": "/pronto <n>", "acao": "Marca como pronto (status ready)." },
+  { "comando": "/saiu <n>", "acao": "Saiu para entrega (status dispatched)." },
+  { "comando": "/entregue <n>", "acao": "Finaliza o pedido (status delivered)." },
+  { "comando": "/ajuda", "acao": "Lista todos os comandos." },
+  { "comando": "Botao Aceitar", "acao": "Botao interativo no card do pedido: confirma sem digitar." },
+  { "comando": "Botao Recusar", "acao": "Botao interativo: recusa o pedido." },
+  { "comando": "Botao Ver pedidos", "acao": "Botao interativo: roda /lista." }
+]

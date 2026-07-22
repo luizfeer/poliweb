@@ -1,0 +1,32 @@
+[
+  {
+    "area": "ownership",
+    "table_name": "attractions",
+    "key_fields": "owner_profile_id, entity_managers(entity_type=attraction)",
+    "public_behavior": "owner, manager ou city_admin edita; published aparece no público"
+  },
+  {
+    "area": "reviews",
+    "table_name": "attraction_reviews",
+    "key_fields": "rating, title, comment, status, reply_owner",
+    "public_behavior": "usuário cria pending; admin/owner modera e responde"
+  },
+  {
+    "area": "media",
+    "table_name": "attraction_photos",
+    "key_fields": "storage_path, media_type, caption, status, moderated_by",
+    "public_behavior": "fotos e vídeos UGC entram pending; fotos publicadas alimentam a galeria pública"
+  },
+  {
+    "area": "services",
+    "table_name": "attraction_services",
+    "key_fields": "kind, label, details, price, contact_business_id",
+    "public_behavior": "serviços da atração podem linkar negócios locais"
+  },
+  {
+    "area": "itineraries",
+    "table_name": "tour_packages",
+    "key_fields": "itinerary, difficulty, total_duration_hours, total_distance_km, featured",
+    "public_behavior": "continua tour_packages no banco; UI chama de roteiros"
+  }
+]

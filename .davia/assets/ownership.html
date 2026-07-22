@@ -1,0 +1,46 @@
+<h1>🔑 Cliente como admin da própria página</h1>
+<p>Comerciantes, pousadas, imobiliárias, guias e organizadores precisam <strong>gerenciar sua própria página</strong> sem depender do admin do portal. O esquema usa duas pernas combinadas:</p>
+<excalidraw data-path="data/ownership.json"></excalidraw>
+<h2>1. Owner direto (caso comum, simples)</h2>
+<p>Toda entidade gerenciável (negócio, pousada, imóvel, etc.) tem <code>owner_profile_id</code> apontando pro perfil do dono. RLS verifica esse campo.</p>
+<pre><code>create policy "biz_update" on businesses for update
+  using (public.manages_business(id))
+  with check (public.manages_business(id));</code></pre>
+<h2>2. <code>entity_managers</code> (multi-pessoa, M:N)</h2>
+<p>Tabela genérica <code>(profile_id, entity_type, entity_id, role)</code>. Permite:</p>
+<ul>
+  <li>Sócios coadministrando o mesmo negócio</li>
+  <li>Imobiliária com vários corretores tendo acesso a editar</li>
+  <li>Convidar editor sem dar ownership total</li>
+  <li>Transferir ownership sem perder histórico</li>
+</ul>
+<p>A função <code>public.manages_entity('business', id)</code> resolve em uma checagem transparente para qualquer tabela.</p>
+<h2>Papéis (<code>profile_roles</code>)</h2>
+<ul>
+  <li><strong>super_admin</strong> — eu/equipe (acesso global)</li>
+  <li><strong>city_admin</strong> — admin de cidade específica (pode futuramente delegar Carmo a alguém local)</li>
+  <li><strong>moderator</strong> — modera UGC mas não cria conteúdo institucional</li>
+  <li><strong>merchant</strong> — pode criar negócios, pousadas, imobiliárias na cidade</li>
+  <li><strong>citizen</strong> — pode postar UGC (classificados, pets, reviews)</li>
+</ul>
+<p><strong>Papéis são por cidade.</strong> Um usuário pode ser <code>city_admin</code> em Carmo e <code>citizen</code> em Capitólio. O <code>super_admin</code> tem <code>city_id = null</code>.</p>
+<h2>Fluxo de "reivindicar uma página"</h2>
+<ol>
+  <li>Admin cadastra um negócio que descobriu na cidade (status <code>published</code>, <code>claimed = false</code>)</li>
+  <li>Comerciante encontra a ficha, faz cadastro, clica <em>"Sou eu o dono"</em></li>
+  <li>Cria registro em <code>business_claims</code> vinculado ao login atual e grava WhatsApp de contato</li>
+  <li>Admin entra em contato, valida e aprova — action atualiza <code>businesses.owner_profile_id</code> e <code>claimed = true</code></li>
+  <li>Cria entrada em <code>entity_managers</code> tipo <code>(profile, 'business', id, 'owner')</code></li>
+</ol>
+<h2>Como o painel sabe o que mostrar pro usuário</h2>
+<p>No <code>/painel</code>, o servidor consulta:</p>
+<pre><code>-- "Quais negócios eu gerencio?"
+select b.* from businesses b
+where b.owner_profile_id = auth.uid()
+   or exists (
+     select 1 from entity_managers em
+     where em.profile_id = auth.uid()
+       and em.entity_type = 'business'
+       and em.entity_id = b.id
+   );</code></pre>
+<blockquote>Esse pattern vale para <strong>todas</strong> as entidades editáveis: businesses, accommodations, restaurants, realtors, fishing_guides, properties (via realtor) e events.</blockquote>

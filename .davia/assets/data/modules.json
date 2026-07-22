@@ -1,0 +1,11 @@
+[
+  { "modulo": "utilities",    "nome": "Utilidade pública",  "tabelas_principais": "garbage_schedules, emergency_contacts, pharmacies, health_facilities, service_alerts", "ligado_em_crc": "✅" },
+  { "modulo": "events",       "nome": "Agenda",             "tabelas_principais": "events, event_categories", "ligado_em_crc": "✅" },
+  { "modulo": "tourism",      "nome": "Turismo",            "tabelas_principais": "accommodations, restaurants, attractions, fishing_spots, fishing_guides, tour_packages", "ligado_em_crc": "✅" },
+  { "modulo": "real_estate",  "nome": "Imobiliária",        "tabelas_principais": "realtors, realtor_agents, properties, property_inquiries, property_favorites", "ligado_em_crc": "✅" },
+  { "modulo": "businesses",   "nome": "Comércio",           "tabelas_principais": "businesses, business_categories, business_promotions, business_reviews, business_claims", "ligado_em_crc": "✅" },
+  { "modulo": "classifieds",  "nome": "Classificados",      "tabelas_principais": "classifieds (veículos, vagas, serviços; imóveis ficam em properties)", "ligado_em_crc": "✅" },
+  { "modulo": "community",    "nome": "Comunidade",         "tabelas_principais": "lost_pets, lost_and_found, obituaries", "ligado_em_crc": "✅" },
+  { "modulo": "transparency", "nome": "Transparência",      "tabelas_principais": "official_diaries, diary_acts, council_meetings, council_topics, public_tenders, public_works", "ligado_em_crc": "✅" },
+  { "modulo": "ads",          "nome": "Anúncios",           "tabelas_principais": "ad_slots, advertisements (slots prontos, vazios no MVP)", "ligado_em_crc": "✅" }
+]

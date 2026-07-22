@@ -1,0 +1,26 @@
+<h1>Tourism</h1>
+<p><strong>Turismo</strong> cobre hospedagem, restaurantes, atrações, pesca e pacotes.</p>
+<p>A vertical estrela do MVP é <strong>pesca esportiva em Furnas</strong>.</p>
+<excalidraw data-path="data/tourism-flow.json"></excalidraw>
+<h2>Superfícies</h2>
+<database-view data-path="data/tourism-surfaces.json"></database-view>
+<h2>Pesca</h2>
+<p>A página pública <code>/turismo/pesca</code> segue o padrão editorial de Cemig/Copasa: o guia base fica em <code>apps/web/lib/tourism/fishing-info.ts</code> e a página renderiza esse seed tipado.</p>
+<p>Os pontos verificados e guias de pesca continuam vindo das tabelas <code>fishing_spots</code> e <code>fishing_guides</code>, com edição pelo painel de turismo/cidade.</p>
+<h2>Regras</h2>
+<ul>
+  <li><strong>Multi-cidade:</strong> toda query filtra por <code>city_id</code>.</li>
+  <li><strong>Publicação:</strong> público lê apenas <code>published</code>.</li>
+  <li><strong>Merchant:</strong> edita entidades próprias.</li>
+  <li><strong>City admin:</strong> aprova pendências e mantém catálogo curado.</li>
+  <li><strong>Mídia:</strong> bucket <code>tourism</code> com paths <code>{city_slug}/...</code>.</li>
+  <li><strong>IA:</strong> sugestão SEO registra <code>ai_jobs</code>.</li>
+</ul>
+<h2>Arquivos-chave</h2>
+<ul>
+  <li><code>apps/web/lib/tourism/queries.ts</code></li>
+  <li><code>apps/web/app/turismo/*</code></li>
+  <li><code>apps/web/app/painel/turismo/*</code></li>
+  <li><code>apps/web/app/painel/cidade/turismo/*</code></li>
+  <li><code>supabase/migrations/20260430230000_turismo_admin_plan03.sql</code></li>
+</ul>

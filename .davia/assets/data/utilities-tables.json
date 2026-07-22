@@ -1,0 +1,44 @@
+[
+  {
+    "area": "Coleta",
+    "table": "garbage_schedules",
+    "public_route": "/servicos/coleta",
+    "admin_route": "/painel/cidade/servicos/coleta",
+    "city_scope": "city_id + district_id"
+  },
+  {
+    "area": "Telefones",
+    "table": "emergency_contacts",
+    "public_route": "/servicos/telefones",
+    "admin_route": "/painel/cidade/servicos/contatos",
+    "city_scope": "city_id"
+  },
+  {
+    "area": "Farmácias",
+    "table": "pharmacies / pharmacy_shifts",
+    "public_route": "/servicos/farmacias",
+    "admin_route": "/painel/cidade/servicos/farmacias",
+    "city_scope": "pharmacies.city_id"
+  },
+  {
+    "area": "Saúde",
+    "table": "health_facilities / health_campaigns",
+    "public_route": "/servicos/saude",
+    "admin_route": "/painel/cidade/servicos/saude",
+    "city_scope": "city_id + district_id opcional"
+  },
+  {
+    "area": "Alertas",
+    "table": "service_alerts",
+    "public_route": "/servicos/alertas",
+    "admin_route": "/painel/cidade/servicos/alertas",
+    "city_scope": "city_id + affected_district_ids"
+  },
+  {
+    "area": "Clima",
+    "table": "weather_snapshots + Open-Meteo Archive",
+    "public_route": "/servicos/clima",
+    "admin_route": "/painel/cidade/jobs",
+    "city_scope": "city_id + lat/lng"
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "pm2_name": "worker-google-photos",
+    "job_command": "import:google-business-photos",
+    "cron": "*/20 * * * *",
+    "frequencia": "A cada 20 min",
+    "descricao": "Baixa fotos da fila pending_photos do Google Places e sobe no Bunny",
+    "env_criticas": "GOOGLE_PLACES_API_KEY, BUNNY_*",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-embed",
+    "job_command": "embed:pending",
+    "cron": "30 8 * * *",
+    "frequencia": "Diário 08h30",
+    "descricao": "Gera embeddings OpenAI para entidades pendentes de indexação semântica",
+    "env_criticas": "OPENAI_API_KEY, OPENAI_EMBEDDING_MODEL",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-summarize",
+    "job_command": "summarize:pending",
+    "cron": "0 8 * * 1,4",
+    "frequencia": "Seg e Qui 08h",
+    "descricao": "Sumariza conteúdo pendente com GPT (transparência, notícias)",
+    "env_criticas": "OPENAI_API_KEY, OPENAI_SUMMARY_MODEL",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-indexing",
+    "job_command": "indexing:semantic",
+    "cron": "0 4 * * *",
+    "frequencia": "Diário 04h",
+    "descricao": "Reindexação semântica de entidades no Supabase pgvector",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-moderate",
+    "job_command": "moderate:backlog",
+    "cron": "0 9 * * *",
+    "frequencia": "Diário 09h",
+    "descricao": "Moderação automática de conteúdo UGC pendente",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-weather",
+    "job_command": "weather:update",
+    "cron": "0 0 * * *",
+    "frequencia": "Diário 00h",
+    "descricao": "Atualiza previsão do tempo via Open-Meteo (gratuito, sem chave)",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-scrape-diario",
+    "job_command": "scrape:diario",
+    "cron": "0 6 * * 1,4",
+    "frequencia": "Seg e Qui 06h",
+    "descricao": "Scrape do Diário Oficial do município",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-scrape-licitacoes",
+    "job_command": "scrape:licitacoes",
+    "cron": "30 6 * * 1,4",
+    "frequencia": "Seg e Qui 06h30",
+    "descricao": "Scrape de licitações públicas",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-scrape-atas",
+    "job_command": "scrape:atas",
+    "cron": "0 7 * * 1",
+    "frequencia": "Segunda 07h",
+    "descricao": "Scrape de atas de sessões da Câmara Municipal",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-scrape-noticias-camara",
+    "job_command": "scrape:noticias-camara",
+    "cron": "0 7 * * 2",
+    "frequencia": "Terça 07h",
+    "descricao": "Scrape de notícias da Câmara Municipal",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-scrape-noticias-prefeitura",
+    "job_command": "scrape:noticias-prefeitura",
+    "cron": "15 7 * * 2",
+    "frequencia": "Terça 07h15",
+    "descricao": "Scrape de notícias da Prefeitura",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "worker-scrape-proposicoes",
+    "job_command": "scrape:proposicoes",
+    "cron": "30 7 * * 2",
+    "frequencia": "Terça 07h30",
+    "descricao": "Scrape de proposições legislativas da Câmara",
+    "env_criticas": "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    "cwd": "apps/worker"
+  },
+  {
+    "pm2_name": "hail-mary-media",
+    "job_command": "daemon (autorestart)",
+    "cron": "—",
+    "frequencia": "Contínuo",
+    "descricao": "Media processor: resize, WebP, upload Bunny. Daemon permanente em apps/media-processor",
+    "env_criticas": "BUNNY_*, SUPABASE_URL",
+    "cwd": "apps/media-processor"
+  },
+  {
+    "pm2_name": "city-agent",
+    "job_command": "daemon (autorestart)",
+    "cron": "—",
+    "frequencia": "Contínuo",
+    "descricao": "Agente conversacional da cidade — HTTP server na porta 8787",
+    "env_criticas": "PORT, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, AGENT_API_TOKEN",
+    "cwd": "apps/agent"
+  }
+]

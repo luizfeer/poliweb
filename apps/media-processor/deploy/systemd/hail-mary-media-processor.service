@@ -1,0 +1,16 @@
+[Unit]
+Description=Hail Mary Media Processor
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hail-mary/apps/media-processor
+EnvironmentFile=/etc/hail-mary/media-processor.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=5
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target

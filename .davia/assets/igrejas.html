@@ -1,0 +1,45 @@
+<h1>Igrejas</h1>
+<p><strong>Igrejas</strong> e uma superficie dentro de <code>community</code>.</p>
+<p>O foco e calendario religioso semanal por cidade.</p>
+<excalidraw data-path="data/igrejas-calendario.json"></excalidraw>
+<h2>Modelo</h2>
+<ul>
+  <li><code>churches</code>: perfil publico, contato e reivindicacao.</li>
+  <li><code>church_schedule_items</code>: horarios recorrentes por dia da semana.</li>
+  <li><code>church_claims</code>: solicitacao para administrar a pagina.</li>
+  <li><code>church_reviews</code>: avaliacoes moderadas, nota publica e resposta da igreja.</li>
+  <li><code>media_assets</code> + <code>media_links</code>: capa, logo/imagem de perfil e galeria via Bunny.</li>
+  <li><code>entity_managers</code>: vinculo aprovado para multiplos responsaveis.</li>
+</ul>
+<h2>Admin</h2>
+<ul>
+  <li>O perfil publico mostra <strong>Editar no admin</strong> para moderador e admin da cidade.</li>
+  <li><code>/painel/cidade/comunidade/igrejas/[slug]</code> edita dados, status, capa, logo, galeria e calendario.</li>
+  <li><code>/painel/cidade/comunidade/igrejas/[slug]/avaliacoes</code> modera avaliacoes e respostas.</li>
+  <li>A edicao tem importacao Google Places em <code>google-church-import.tsx</code>.</li>
+  <li>Campos aprovados atualizam contato, mapa e coordenadas; dados ricos ficam em <code>churches.import_source.google_places</code>.</li>
+  <li>Fotos aprovadas ou enviadas pelo painel alimentam a galeria publica; importacao Google salva no Bunny e mantem fallback via <code>/api/church-google-photo</code>.</li>
+  <li>O diretorio publico usa Supabase por cidade, com fallback mock em dev.</li>
+</ul>
+<h2>Rotas</h2>
+<ul>
+  <li><code>/comunidade/igrejas</code>: calendario semanal e diretorio.</li>
+  <li><code>/comunidade/igrejas/[slug]</code>: pagina dedicada da igreja.</li>
+  <li><code>/painel/cidade/comunidade</code>: lista administrativa de igrejas.</li>
+  <li><code>/painel/cidade/comunidade/igrejas/[slug]</code>: edicao do perfil e horarios.</li>
+  <li><code>/painel/cidade/comunidade/igrejas/[slug]/avaliacoes</code>: moderacao de avaliacoes.</li>
+  <li><code>/entrar</code>: ponto inicial para reivindicacao.</li>
+</ul>
+<h2>Arquivos-chave</h2>
+<ul>
+  <li><code>apps/web/lib/churches/*</code></li>
+  <li><code>apps/web/components/public/churches/*</code></li>
+  <li><code>apps/web/app/comunidade/igrejas/*</code></li>
+  <li><code>apps/web/app/api/church-google-photo/route.ts</code></li>
+  <li><code>apps/web/app/painel/cidade/comunidade/igrejas/[slug]/*</code></li>
+  <li><code>supabase/migrations/20260504160000_churches_weekly_calendar.sql</code></li>
+  <li><code>supabase/migrations/20260505112000_churches_google_import.sql</code></li>
+  <li><code>supabase/migrations/20260505124500_church_reviews.sql</code></li>
+  <li><code>supabase/migrations/20260505125500_church_reviews_city_id.sql</code></li>
+  <li><code>supabase/migrations/20260505130000_church_reviews_rls_city.sql</code></li>
+</ul>

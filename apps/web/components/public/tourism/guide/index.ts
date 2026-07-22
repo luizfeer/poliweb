@@ -1,0 +1,11 @@
+export { GuideHighlights } from './guide-highlights';
+export { GuideActivities } from './guide-activities';
+export { GuideFerry } from './guide-ferry';
+export { GuideFestival } from './guide-festival';
+export { GuideSeasons } from './guide-seasons';
+export { GuidePlaces } from './guide-places';
+export { GuideExperiences } from './guide-experiences';
+export { GuidePracticalInfo } from './guide-practical-info';
+export { GuideFaq } from './guide-faq';
+export { GuideContentBlocks } from './guide-content-blocks';
+export { GuideReviews } from './guide-reviews';

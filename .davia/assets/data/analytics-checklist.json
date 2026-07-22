@@ -1,0 +1,12 @@
+[
+  { "item": "Migration aplicada", "status": "Done" },
+  { "item": "RLS em todas as tabelas", "status": "Done" },
+  { "item": "Track view via after()", "status": "Done" },
+  { "item": "Track cliques client-side", "status": "Done" },
+  { "item": "API route /api/track/business-event", "status": "Done" },
+  { "item": "Dashboard merchant com Recharts", "status": "Done" },
+  { "item": "Visão admin (top negócios)", "status": "Done" },
+  { "item": "Export CSV", "status": "Done" },
+  { "item": "Cron de agregação (RPC)", "status": "Done" },
+  { "item": "Documentação Davia", "status": "Done" }
+]

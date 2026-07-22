@@ -1,0 +1,116 @@
+[
+  {
+    "area": "SEO",
+    "item": "sitemap.xml",
+    "status": "implemented",
+    "path": "apps/web/app/sitemap.ts"
+  },
+  {
+    "area": "SEO",
+    "item": "robots.txt",
+    "status": "implemented",
+    "path": "apps/web/app/robots.ts"
+  },
+  {
+    "area": "SEO",
+    "item": "JSON-LD base",
+    "status": "implemented",
+    "path": "apps/web/lib/seo/structured-data.ts"
+  },
+  {
+    "area": "SEO",
+    "item": "Meta tags e canonical base",
+    "status": "implemented",
+    "path": "apps/web/app/layout.tsx"
+  },
+  {
+    "area": "SEO",
+    "item": "ISR em listagens publicas",
+    "status": "implemented",
+    "path": "comercio, turismo, imoveis, comunidade, classificados"
+  },
+  {
+    "area": "Newsletter",
+    "item": "Double opt-in",
+    "status": "implemented",
+    "path": "apps/web/lib/newsletter/subscribe.ts"
+  },
+  {
+    "area": "Newsletter",
+    "item": "Unsubscribe 1-click",
+    "status": "implemented",
+    "path": "apps/web/lib/newsletter/confirm.ts"
+  },
+  {
+    "area": "Newsletter",
+    "item": "Auditoria LGPD em subscribe/confirm/unsubscribe",
+    "status": "implemented",
+    "path": "apps/web/lib/newsletter/subscribe.ts"
+  },
+  {
+    "area": "Newsletter",
+    "item": "Painel de admin de newsletter",
+    "status": "implemented",
+    "path": "apps/web/app/painel/cidade/newsletter/"
+  },
+  {
+    "area": "Analytics",
+    "item": "Tabela analytics_events",
+    "status": "implemented",
+    "path": "supabase/migrations/20260501143000_newsletter_audit_analytics.sql"
+  },
+  {
+    "area": "Analytics",
+    "item": "Dashboard admin inicial",
+    "status": "implemented",
+    "path": "apps/web/app/painel/cidade/analytics/"
+  },
+  {
+    "area": "Analytics",
+    "item": "Sem cookies de terceiros por padrao",
+    "status": "implemented",
+    "path": "apps/web/components/marketing/consent-banner.tsx"
+  },
+  {
+    "area": "Acessibilidade",
+    "item": "Skip-to-content",
+    "status": "implemented",
+    "path": "apps/web/components/a11y/skip-to-content.tsx"
+  },
+  {
+    "area": "Acessibilidade",
+    "item": "Botoes de icone com aria-label",
+    "status": "implemented",
+    "path": "apps/web/components/public/businesses/catalog/"
+  },
+  {
+    "area": "Acessibilidade",
+    "item": "Formularios com labels",
+    "status": "implemented",
+    "path": "apps/web/components/marketing/newsletter-cta.tsx"
+  },
+  {
+    "area": "LGPD",
+    "item": "Pagina de privacidade no perfil",
+    "status": "implemented",
+    "path": "apps/web/app/painel/perfil/privacidade/"
+  },
+  {
+    "area": "LGPD",
+    "item": "RPC delete_user_data",
+    "status": "implemented",
+    "path": "supabase/migrations/20260501143000_newsletter_audit_analytics.sql"
+  },
+  {
+    "area": "Performance",
+    "item": "ISR em listagens publicas criticas",
+    "status": "implemented",
+    "path": "revalidate = 60"
+  },
+  {
+    "area": "Performance",
+    "item": "next/image em imagens reais",
+    "status": "implemented",
+    "path": "apps/web/components/"
+  }
+]

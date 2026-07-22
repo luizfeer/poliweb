@@ -1,0 +1,22 @@
+flowchart LR
+  U[Usuario busca intencao] --> B[/buscar]
+  B --> AICTA[CTA Usar IA]
+  AICTA --> A[/assistente?q=...]
+  B --> P[Paginas estaticas curadas]
+  B --> E[OpenAI embedding da query]
+  E --> RPC[RPC match_embeddings]
+  RPC --> H[Hidratacao por tipo]
+  H --> G{Publicado?}
+  G -->|sim| UI[Resultados unificados]
+  G -->|nao| X[Descarta resultado]
+  P --> UI
+  UI --> C[Tracking de clique]
+
+  D[Tabelas publicas] --> T[Triggers enqueue_indexing]
+  T --> Q[indexing_queue]
+  J[Admin Refazer indice] --> Q
+  Q --> W[Worker indexing:semantic]
+  W --> O[OpenAI text-embedding-3-small]
+  O --> V[embeddings com pgvector]
+  W --> DEL[Remove embeddings obsoletos]
+  V --> RPC

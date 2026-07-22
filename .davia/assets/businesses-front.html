@@ -1,0 +1,48 @@
+<h1>🛍️ Front do guia comercial</h1>
+<p>Páginas públicas do módulo <strong>businesses</strong>. Agora leem Supabase por <code>city_id</code> e mantêm mock só com flag de dev.</p>
+<excalidraw data-path="data/businesses-front.json"></excalidraw>
+<h2>Rotas implementadas</h2>
+<ul>
+  <li><code>/comercio</code> — hub: busca, 12 macro categorias com contagem, destaques, mais bem avaliados, CTA pra cadastrar negócio</li>
+  <li><code>/comercio/[categoria]</code> — lista por categoria (macro ou folha) com filtro por bairro, breadcrumb, subcategorias e busca dentro da categoria</li>
+  <li><code>/comercio/negocio/[slug]</code> — ficha completa: CTAs, mapa OSM, promoções, reviews, form de review e claim</li>
+  <li><code>/comercio/buscar?q=&sort=&whatsapp=1</code> — busca livre com ordenação</li>
+</ul>
+<h2>12 macro categorias</h2>
+<database-view data-path="data/business-categories.json"></database-view>
+<h2>Componentes Carmo de business</h2>
+<p>Em <code>apps/web/components/carmo/business/</code>:</p>
+<ul>
+  <li><strong>BusinessListItem</strong> — linha compacta com ícone categoria + nome + descrição curta + bairro + rating + CTAs inline (WhatsApp/Ligar)</li>
+  <li><strong>BusinessCard</strong> — card pra carrosséis de destaque (cover, badge "Destaque", rating)</li>
+  <li><strong>BusinessHeader</strong> — header da ficha com cover gradient fallback, nome, BadgeCheck verificado, categoria, rating, descrição curta</li>
+  <li><strong>ContactBar</strong> — variantes: <em>full</em> (4 CTAs grandes) e <em>compact</em> (2 ícones inline na lista)</li>
+  <li><strong>SearchBar</strong> — form GET server-side, sem JS no cliente</li>
+  <li><strong>CategoryGrid</strong> — grid 2-col com ícone Lucide + blurb + contagem de negócios</li>
+  <li><strong>HoursTable</strong> — tabela de horários por dia da semana</li>
+  <li><strong>AmenitiesList / PaymentMethodsList</strong> — chips de comodidades e formas de pagamento</li>
+  <li><strong>ContactDetailsBlock</strong> — endereço, email, site, instagram (links nativos: tel, mailto, https)</li>
+  <li><strong>ClaimCTA</strong> — bloco "É o dono? Reivindique" quando <code>claimed = false</code></li>
+</ul>
+<h2>Pipeline de dados</h2>
+<p><strong>Atual:</strong> <code>apps/web/lib/businesses/queries.ts</code> usa <code>createClient()</code>, <code>getCurrentCity()</code> e filtro obrigatório por <code>city_id</code>.</p>
+<p><strong>Fallback:</strong> <code>NEXT_PUBLIC_USE_MOCK_BUSINESSES=true</code> volta para <code>mock.ts</code> em desenvolvimento.</p>
+<h2>Como popular o DB</h2>
+<ol>
+  <li>Rodar migration <code>20260430204330_comercio_admin_plan01.sql</code></li>
+  <li>Abrir <code>/painel/cidade/comercio/import</code></li>
+  <li>Executar dry run do Cliqueiachei</li>
+  <li>Executar import real para criar fichas <code>draft</code></li>
+  <li>Aprovar fichas em <code>/painel/cidade/comercio</code></li>
+</ol>
+<h2>Decisões de UX</h2>
+<ul>
+  <li><strong>CTA de WhatsApp em primeiro lugar</strong> em mobile — é onde o usuário interior vai realmente ligar. Cor cerrado-500 (verde-WhatsApp).</li>
+  <li><strong>Telefone como link <code>tel:</code></strong> — abre discador direto.</li>
+  <li><strong>WhatsApp pré-preenche mensagem</strong>: "Olá! Vi seu contato no Carmo Local..." — atribuição ajuda comerciante a entender de onde veio o lead.</li>
+  <li><strong>BadgeCheck</strong> azul-cidadania só em negócios <code>verified = true</code> (admin checou CNPJ).</li>
+  <li><strong>"Destaque"</strong> badge só em negócios com plano <em>featured</em> ou <em>premium</em> + flag <code>featured = true</code>.</li>
+  <li><strong>Busca normaliza acentos</strong> (NFD) para comparar — usuário digita "acougue" e acha "Açougue".</li>
+  <li><strong>Filtro por categoria expande hierarquia</strong> — clicar em "Alimentação" mostra todas as folhas (restaurantes, padarias, etc).</li>
+</ul>
+<blockquote>Pré-renderização: <strong>90 páginas estáticas</strong> geradas no build (12 macros + ~60 folhas + ~50 fichas + buscar + hub). ISR no futuro pra revalidar quando admin aprovar nova ficha.</blockquote>

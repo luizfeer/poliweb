@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph Web["🌐 Web / PWA"]
+        A[Usuário no Next.js] -->|clica habilitar| B[Pede permissão Notification API]
+        B --> C[Registra /sw.js]
+        C -->|pushManager.subscribe<br/>com VAPID public| D[Subscription endpoint+keys]
+    end
+
+    subgraph Mobile["📱 RN Shell"]
+        E[App abre WebView] --> F[FCM messaging.getToken]
+        F -->|postMessage bridge| G[JS injetado no site]
+    end
+
+    D -->|Server Action Zod| H[(push_subscriptions<br/>profile_id, city_id, platform)]
+    G -->|Server Action Zod| H
+
+    subgraph Trigger["⚡ Gatilhos"]
+        T1[Evento novo na cidade]
+        T2[Resposta em comentário]
+        T3[Alerta balsa/clima]
+        T4[Mensagem comerciante]
+    end
+
+    Trigger --> I[Edge Function send-push]
+    I -->|filtra audiência| H
+    I -->|respeita| J[(notification_preferences)]
+    I -->|web-push + VAPID| K[Browser Push Service]
+    I -->|FCM Admin SDK| L[Firebase Cloud Messaging]
+
+    K --> M[🔔 Notificação no browser/PWA]
+    L --> N[🤖 Android device]
+    L --> O[ APNs → iOS device]
+
+    M -->|click| P[clients.openWindow URL]
+    N -->|click| Q[Deep link carmolocal://...]
+    O -->|click| Q
+
+    I -->|log| R[(push_deliveries)]
+    I -->|410 / UNREGISTERED| S[Remove subscription]

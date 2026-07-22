@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "studio-artes",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8732", "--directory", "C:/Users/luizg/Downloads/studio-artes-v2"],
+      "port": 8732
+    }
+  ]
+}

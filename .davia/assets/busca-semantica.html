@@ -1,0 +1,22 @@
+<h1>Busca Semântica</h1>
+<p><strong>Busca unificada por intenção</strong> para páginas do site, comércio, turismo, eventos, classificados e imóveis.</p>
+<p>O usuário procura do jeito natural. O sistema resolve a cidade atual, gera embedding da query e busca no índice vetorial do Supabase.</p>
+<excalidraw data-path="data/busca-semantica.json"></excalidraw>
+<h2>Peças principais</h2>
+<ul>
+  <li><code>supabase/migrations/20260504130000_busca_semantica.sql</code>: fila, analytics, RPC e triggers.</li>
+  <li><code>supabase/migrations/20260511015109_search_reindex_cleanup.sql</code>: limpeza de embeddings antigos e refileiramento.</li>
+  <li><code>apps/worker/src/indexing/</code>: worker incremental por <code>content_hash</code>.</li>
+  <li><code>apps/web/lib/search/</code>: busca semântica, fallback textual, páginas estáticas e hidratação.</li>
+  <li><code>apps/web/app/buscar/page.tsx</code>: experiência pública de busca com CTA para IA.</li>
+  <li><code>apps/web/app/painel/cidade/jobs/page.tsx</code>: botão admin para refazer o índice.</li>
+</ul>
+<h2>Regras</h2>
+<ul>
+  <li>Toda busca filtra por <code>city_id</code>.</li>
+  <li>Hidratação só renderiza entidades públicas: <code>published</code>, <code>active</code> ou <code>approved</code>.</li>
+  <li>Classificados precisam estar <code>published</code>, <code>approved</code> e não expirados.</li>
+  <li>Rascunhos e pendentes entram na fila como <code>delete</code>.</li>
+  <li>Páginas como clima, balsas, passagens e privacidade entram pelo índice textual curado.</li>
+  <li>Cliques alimentam <code>search_queries</code> para melhoria de relevância.</li>
+</ul>

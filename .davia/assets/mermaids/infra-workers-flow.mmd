@@ -1,0 +1,50 @@
+flowchart TD
+    PM2["⚙️ PM2 6\necosystem.config.cjs\ninterpreter_args: --env-file=.env"]
+
+    subgraph ENV["📁 apps/worker/.env"]
+        E1["SUPABASE_URL / KEY"]
+        E2["GOOGLE_PLACES_API_KEY"]
+        E3["BUNNY_STORAGE_ZONE / KEY / ENDPOINT"]
+        E4["NEXT_PUBLIC_BUNNY_CDN_URL"]
+        E5["OPENAI_API_KEY / MODELS"]
+    end
+
+    PM2 -->|"cron */20 * * * *"| W_PHOTOS["worker-google-photos\nimport:google-business-photos"]
+    PM2 -->|"cron 30 8 * * *"| W_EMBED["worker-embed\nembed:pending"]
+    PM2 -->|"cron 0 8 * * 1,4"| W_SUM["worker-summarize\nsummarize:pending"]
+    PM2 -->|"cron 0 9 * * *"| W_MOD["worker-moderate\nmoderate:backlog"]
+    PM2 -->|"cron 0 4 * * *"| W_IDX["worker-indexing\nindexing:semantic"]
+    PM2 -->|"cron 0 0 * * *"| W_WTH["worker-weather\nweather:update"]
+    PM2 -->|"cron 0 6 * * 1,4"| W_DIA["worker-scrape-diario"]
+    PM2 -->|"cron 30 6 * * 1,4"| W_LIC["worker-scrape-licitacoes"]
+    PM2 -->|"cron 0 7 * * 1"| W_ATAS["worker-scrape-atas"]
+    PM2 -->|"cron 0 7 * * 2"| W_CAM["worker-scrape-noticias-camara"]
+    PM2 -->|"cron 15 7 * * 2"| W_PRE["worker-scrape-noticias-prefeitura"]
+    PM2 -->|"cron 30 7 * * 2"| W_PROP["worker-scrape-proposicoes"]
+    PM2 -->|"daemon autorestart"| W_MEDIA["hail-mary-media\napps/media-processor"]
+
+    ENV -.->|"node --env-file=.env\ndist/index.js"| PM2
+
+    W_PHOTOS --> GPLACES["Google Places API\nv1/places"]
+    W_PHOTOS --> BUNNY["Bunny Storage\nbr.storage.bunnycdn.com\nzone: hail-mary"]
+    W_PHOTOS --> SB["Supabase\nPostgres + RLS"]
+
+    W_EMBED --> OPENAI["OpenAI\ntext-embedding-3-small"]
+    W_SUM --> OPENAI
+    W_EMBED --> SB
+    W_SUM --> SB
+    W_MOD --> SB
+    W_IDX --> SB
+    W_WTH --> METEO["Open-Meteo API\ngratuito"]
+    W_WTH --> SB
+
+    W_DIA --> GOV["Portais gov\nDiário / Câmara\nPrefeitura"]
+    W_LIC --> GOV
+    W_ATAS --> GOV
+    W_CAM --> GOV
+    W_PRE --> GOV
+    W_PROP --> GOV
+    GOV --> SB
+
+    W_MEDIA --> BUNNY
+    W_MEDIA --> SB

@@ -1,0 +1,27 @@
+{
+  "name": "media-processor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1048.0",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/multipart": "^9.3.0",
+    "@remotion/bundler": "4.0.474",
+    "@remotion/renderer": "4.0.474",
+    "dotenv": "^16.6.1",
+    "fastify": "^5.6.2",
+    "sharp": "^0.34.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

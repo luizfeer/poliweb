@@ -1,0 +1,39 @@
+<h1>🏗️ Arquitetura técnica</h1>
+<p>Stack híbrida: web serverless, dados no Supabase e worker de coleta em VPS.</p>
+<excalidraw data-path="data/architecture.json"></excalidraw>
+<h2>Princípios</h2>
+<ul>
+  <li><strong>RSC por padrão</strong> — fetch direto no servidor, hidratação só onde precisa</li>
+  <li><strong>Server Actions</strong> para mutations (sem rotas REST extras)</li>
+  <li><strong>RLS no Supabase</strong> é a fonte de verdade da autorização — middleware é apenas refresh de token</li>
+  <li><strong>Worker VPS</strong> para jobs longos de scraping, IA e embeddings</li>
+  <li><strong>Edge Functions</strong> só para callbacks leves, triggers e fallback</li>
+  <li><strong>ISR</strong> nas listagens públicas (pousadas, eventos, telefones) — revalidate 60s</li>
+</ul>
+<h2>Camadas e papéis</h2>
+<database-view data-path="data/stack.json"></database-view>
+<h2>Estrutura de pastas</h2>
+<pre><code>hail-mary/
+├── apps/web/          Next.js 16 App Router
+│   ├── app/           rotas (public, painel, api)
+│   ├── components/    UI (shadcn + custom)
+│   ├── lib/
+│   │   ├── supabase/  client / server / middleware
+│   │   ├── ai/        prompts e wrappers de IA
+│   │   └── scrapers/  parsers locais
+│   └── middleware.ts  refresh de sessão
+├── apps/worker/       scrapers, IA, embeddings, jobs VPS
+├── supabase/
+│   ├── migrations/    SQL versionado
+│   └── functions/     callbacks leves quando necessário
+├── packages/shared/   types e schemas zod
+└── .davia/            esta documentação</code></pre>
+<h2>Custo estimado de operação</h2>
+<ul>
+  <li><strong>Vercel Hobby</strong>: free (até hit de tráfego significativo)</li>
+  <li><strong>Supabase Free</strong>: free (500MB DB + 1GB storage)</li>
+  <li><strong>OpenAI API</strong>: ~US$ 1–5/mês no MVP com <code>gpt-5.4-nano</code></li>
+  <li><strong>Resend</strong>: free até 3k emails/mês</li>
+  <li><strong>Domínio</strong>: ~R$ 40/ano</li>
+</ul>
+<blockquote>Total esperado nos primeiros 6 meses: <strong>menos de R$ 200/mês</strong>.</blockquote>

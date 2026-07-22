@@ -1,0 +1,47 @@
+[
+  {
+    "sprint": "A",
+    "titulo": "Backend & infra",
+    "duracao": "1 sprint",
+    "entrega": "Migrations + Edge Function + VAPID + Firebase project",
+    "tarefas": "Tabelas push_subscriptions e notification_preferences, RLS por profile_id/city_id, gerar par VAPID, criar projeto Firebase + APNs Auth Key, Edge Function send-push (esqueleto), tela admin para broadcast de teste",
+    "depende_de": "—",
+    "status": "pendente"
+  },
+  {
+    "sprint": "B",
+    "titulo": "Web Push / PWA",
+    "duracao": "1 sprint",
+    "entrega": "Push funcionando no Chrome Android e iOS 16.4+ instalado",
+    "tarefas": "manifest.webmanifest, sw.js (push + notificationclick), botão enable-push (client), Server Action saveSubscription com Zod, tela preferências por módulo, banner Add to Home Screen no iOS",
+    "depende_de": "Sprint A",
+    "status": "pendente"
+  },
+  {
+    "sprint": "C",
+    "titulo": "RN shell",
+    "duracao": "1-2 sprints",
+    "entrega": "APK e IPA internos com push nativo",
+    "tarefas": "Bootstrap Expo bare, react-native-webview apontando produção, @react-native-firebase/messaging, @notifee/react-native, bridge JS-native para registrar token, deep linking expo-linking, splash + onboarding nativo",
+    "depende_de": "Sprint A",
+    "status": "pendente"
+  },
+  {
+    "sprint": "D",
+    "titulo": "Distribuição lojas",
+    "duracao": "1 sprint + review",
+    "entrega": "App publicado em Play Internal e TestFlight",
+    "tarefas": "Conta Google Play (USD 25), Apple Developer (USD 99/ano), EAS Build, PrivacyInfo.xcprivacy, textos PT-BR de permissão, screenshots, política privacidade, submissão",
+    "depende_de": "Sprint C",
+    "status": "pendente"
+  },
+  {
+    "sprint": "E",
+    "titulo": "Operação contínua",
+    "duracao": "ongoing",
+    "entrega": "Push como canal estável do produto",
+    "tarefas": "Gatilhos por módulo (events, classifieds, community, agent clima/balsa), métricas de delivery e CTR, limpeza automática de tokens mortos, A/B de mensagens",
+    "depende_de": "Sprint B + D",
+    "status": "pendente"
+  }
+]

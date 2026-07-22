@@ -1,0 +1,43 @@
+<h1>🚀 Ferramentas de crescimento do comerciante</h1>
+<p>Três ferramentas <strong>self-service</strong> no painel do negócio (<code>painel/comercio/[id]</code>) que compartilham o mesmo backbone do Studio: <em>gerar asset → R2 → publicar/baixar</em>.</p>
+<excalidraw data-path="data/ferramentas-comerciante.json"></excalidraw>
+<h2>🍕 Cardápio + QR + link de bio</h2>
+<p>O comerciante monta o cardápio sozinho; vira página pública, QR pra mesa e link pra bio do Instagram.</p>
+<ul>
+  <li>Editor com <strong>drag-reorder</strong> de seções e itens, foto via R2, preço em <code>price_cents</code> — <code>painel/comercio/[id]/cardapio</code></li>
+  <li>Tabelas <code>business_menu_sections</code> + <code>business_menu_items</code> (RLS: escrita por <code>manages_business</code>, leitura pública quando o negócio é <code>published</code>)</li>
+  <li>Render público via <code>getBusinessMenu()</code> monta o tipo <code>Catalog</code>; cai no mock quando ainda não há itens</li>
+  <li><strong>Paridade nativa</strong> no app: <code>lib/api/business-menu.ts</code> + <code>CatalogScreen.tsx</code> (checkout via WhatsApp)</li>
+  <li>QR e link gerados com a lib <code>qrcode</code> (PNG pra mesa + copiar link)</li>
+</ul>
+<h2>📈 Boletim mensal</h2>
+<p><em>"Seu mês: 320 visitas, 41 cliques no WhatsApp, 2º em Pizzarias."</em> Justifica a assinatura e dá orgulho de compartilhar.</p>
+<ul>
+  <li>Soma <code>business_daily_stats</code> do mês via RPC <code>security definer</code> (só colunas reais: views, phone/whatsapp/map/website clicks)</li>
+  <li>Favoritos vêm de <code>business_favorites</code> e o rank de <code>business_category_assignments</code> — ambos por RPC, pois a RLS não deixa o merchant ler dados de terceiros</li>
+  <li>Resumo amigável escrito pelo <strong>Haiku</strong> (<code>lib/ai/anthropic.ts</code>), logado em <code>ai_jobs</code>, com badge <em>"Resumido por IA"</em></li>
+  <li>Cache em <code>business_monthly_reports</code> (1 linha por negócio × mês) — geração on-demand, sem cron</li>
+  <li>Imagem compartilhável 1080×1350 via <code>html-to-image</code></li>
+</ul>
+<h2>🎨 Studio de Artes inteligente (briefing + IA)</h2>
+<p>O Studio (<code>painel/comercio/[id]/studio</code>) deixou de gerar arte genérica: ele parte dos <strong>dados reais do comércio</strong> e tem um fluxo de perguntas antes de criar.</p>
+<ul>
+  <li><strong>Contexto vivo</strong> carregado no servidor por <code>gatherBusinessContext()</code> (<code>lib/studio/business-context.ts</code>): nome, @, categoria, descrição, endereço público, horários (agrupados tipo <em>Seg a sex · 08h às 18h</em>), pagamentos, diferenciais, capa, logo, galeria, <strong>produtos do cardápio</strong> e <strong>avaliações publicadas</strong></li>
+  <li><strong>Briefing</strong> antes de gerar: pergunta se tem Instagram (e o @; sem @ assina com o nome do negócio, nunca um exemplo fixo), a intenção do post (promo, novidade, cardápio, horário, depoimento, institucional + campo livre) e quais itens incluir (capa, logo, fotos da galeria, produtos, avaliação selecionada, chave Pix)</li>
+  <li><strong>Geração com IA</strong> em <code>generateArtCarouselAction()</code> (<code>lib/studio/ai-actions.ts</code>): usa o <strong>Sonnet</strong> via <code>lib/ai/anthropic.ts</code>, manda contexto rico + pré-template de copy por tipo de card, proíbe inventar fatos/preços/chaves, loga em <code>ai_jobs</code> (<code>job_type: 'studio_carousel'</code>) e tem <strong>fallback determinístico</strong> com os dados reais quando a IA está indisponível</li>
+  <li><strong>Conteúdo por card</strong>: cada slide carrega <code>content</code> (<code>SlideContent</code>) que sobrescreve o copy do ramo — o documento fica autossuficiente, então reels e capturas renderizam fielmente. <code>buildBusinessCopy()</code> e <code>resolveCopy()</code> em <code>lib/studio/copy.ts</code></li>
+  <li><strong>Novos cards</strong>: Horário de funcionamento, Plaquinha Pix (pergunta a chave) e Depoimento (avaliação real). Corrigido o card <em>"Um dia por aqui"</em> (título não encosta mais na marca) e adicionadas guardas de overflow pra texto longo não estourar</li>
+  <li><strong>Editor</strong>: cards reordenáveis (setas e opções <em>mover</em> no menu), menu de 3 pontinhos por card com <em>Duplicar</em> e <em>Apagar</em>, e seletor de fotos da galeria/capa/logo do próprio negócio</li>
+</ul>
+
+<h2>🎬 Studio → Reels</h2>
+<p>Os mesmos slides do Studio viram um vídeo vertical animado. O upgrade mais desejado e que o comerciante não sabe fazer.</p>
+<ul>
+  <li>Fonte de verdade = o <strong>documento JSON</strong> do Studio (<code>lib/studio/types.ts</code>); o renderer reusa o <code>SlideCanvas</code></li>
+  <li><strong>Fase 1:</strong> preview no navegador com <code>@remotion/player</code> (Ken Burns + transições), zero infra</li>
+  <li><strong>Fase 2:</strong> render MP4 no <code>apps/media-processor</code> com <code>@remotion/renderer</code> (bundle do Remotion via alias <code>@</code>→apps/web) → vídeo no R2</li>
+  <li>Estado/histórico em <code>studio_renders</code> (status, <code>video_url</code>, <code>art_piece_id</code>)</li>
+</ul>
+<hr />
+<blockquote><strong>Backbone comum:</strong> os três terminam em <em>gerar asset → R2 → publicar ou baixar</em>. O fluxo de mídia (<code>requestMediaUploadToken → uploadDirectToProcessor → finalize</code>) e a captura <code>html-to-image</code> são reusados entre cardápio, boletim e Reels.</blockquote>
+<p>Migrations: <code>20260608120000_business_menu.sql</code>, <code>20260616120000_business_monthly_reports.sql</code>, <code>20260617120000_studio_renders.sql</code>. Planos em <code>.claude/plans/15-boletim-mensal.md</code> e <code>16-studio-reels-remotion.md</code>.</p>

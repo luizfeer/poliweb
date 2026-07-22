@@ -1,0 +1,799 @@
+﻿@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   Portal Carmelitano - Design Tokens
+   Mobile-first. Base 16px / 390px design width.
+   Paleta: Clay (terracotta), Cerrado (verde), Sun (amarelo),
+   Sky (azul cidadania), Discount (magenta-vinho), Ink (texto),
+   Paper (off-white quente).
+   ============================================================ */
+
+:root {
+  /* ---------- COLORS ---------- */
+
+  /* Primary — Clay (terracotta calibrado a partir do laranja Amazon) */
+  --carmo-clay-50: #fff1e8;
+  --carmo-clay-100: #ffd9bf;
+  --carmo-clay-300: #f08a4e;
+  --carmo-clay-500: #e0561b;
+  --carmo-clay-600: #c84810;
+  --carmo-clay-700: #9c3608;
+
+  /* Secondary — Cerrado green */
+  --carmo-cerrado-50: #f1f7ee;
+  --carmo-cerrado-100: #e1eede;
+  --carmo-cerrado-300: #6e9c5e;
+  --carmo-cerrado-500: #3c6b36;
+  --carmo-cerrado-700: #1f4a2c;
+
+  /* Accent — Sun yellow */
+  --carmo-sun-100: #fff1cc;
+  --carmo-sun-300: #fad46a;
+  --carmo-sun-500: #f4b73a;
+
+  /* Civic blue — links, transparency */
+  --carmo-sky-100: #dceaf7;
+  --carmo-sky-500: #2e78c2;
+  --carmo-sky-700: #0f4c81;
+
+  /* Discount magenta-vinho (NOT destructive) */
+  --carmo-discount: #c81e4a;
+  --carmo-discount-deep: #9c1238;
+
+  /* Destructive */
+  --carmo-destructive: #b23a3a;
+  --carmo-destructive-tint: #fbebeb;
+
+  /* Ink (text) */
+  --carmo-ink-900: #191919;
+  --carmo-ink-700: #2f2f2f;
+  --carmo-ink-600: #5a5a5a;
+  --carmo-ink-400: #9a9a9a;
+  --carmo-ink-300: #c9c9c9;
+  --carmo-ink-200: #e4e4e4;
+  --carmo-ink-100: #f0f0f0;
+
+  /* Paper (warm off-white) */
+  --carmo-paper: #faf8f5;
+  --carmo-paper-card: #ffffff;
+  --carmo-paper-deep: #f2eee7;
+  --carmo-paper-tint: #f7f2ea;
+
+  /* ---------- shadcn semantic mapping ---------- */
+  --background: var(--carmo-paper);
+  --foreground: var(--carmo-ink-900);
+  --card: var(--carmo-paper-card);
+  --card-foreground: var(--carmo-ink-900);
+  --popover: var(--carmo-paper-card);
+  --popover-foreground: var(--carmo-ink-900);
+  --primary: var(--carmo-clay-500);
+  --primary-foreground: #ffffff;
+  --secondary: var(--carmo-cerrado-100);
+  --secondary-foreground: var(--carmo-cerrado-700);
+  --muted: var(--carmo-paper-deep);
+  --muted-foreground: var(--carmo-ink-600);
+  --accent: var(--carmo-clay-50);
+  --accent-foreground: var(--carmo-clay-700);
+  --destructive: var(--carmo-destructive);
+  --border: var(--carmo-ink-200);
+  --input: var(--carmo-ink-200);
+  --ring: var(--carmo-clay-500);
+  --radius: 12px;
+
+  /* ---------- TYPOGRAPHY (mobile-first scale) ---------- */
+  --text-display: 32px;
+  --lh-display: 1.05;
+  --text-h1: 24px;
+  --lh-h1: 1.15;
+  --text-h2: 20px;
+  --lh-h2: 1.2;
+  --text-h3: 17px;
+  --lh-h3: 1.3;
+  --text-body: 15px;
+  --lh-body: 1.45;
+  --text-sm: 13px;
+  --lh-sm: 1.4;
+  --text-xs: 11px;
+  --lh-xs: 1.3;
+
+  /* ---------- SPACING (4px scale) ---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 56px;
+  --sp-10: 80px;
+
+  /* ---------- RADII ---------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ---------- SHADOWS ---------- */
+  --shadow-card: 0 1px 2px rgba(25, 25, 25, 0.04), 0 0 0 1px rgba(25, 25, 25, 0.06);
+  --shadow-pop: 0 8px 24px rgba(25, 25, 25, 0.1), 0 0 0 1px rgba(25, 25, 25, 0.04);
+  --shadow-banner: 0 2px 6px rgba(192, 72, 16, 0.18);
+  --shadow-tabbar: 0 -1px 0 var(--carmo-ink-200);
+
+  /* ---------- ANIMATION ---------- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in: cubic-bezier(0.6, 0, 0.8, 0.4);
+  --dur-micro: 120ms;
+  --dur-base: 200ms;
+  --dur-modal: 320ms;
+
+  /* ---------- LAYOUT ---------- */
+  --app-max-w: 1180px;
+  --app-pad-x: 16px;
+  --tabbar-h: 60px;
+  --header-h: 110px;
+}
+
+/* ============================================================
+   Tailwind v4 token mapping — gera utilidades como bg-clay-500,
+   text-ink-900, font-display, rounded-pill, shadow-pop etc.
+   ============================================================ */
+
+@theme inline {
+  /* shadcn aliases */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Carmo brand utilities */
+  --color-clay-50: var(--carmo-clay-50);
+  --color-clay-100: var(--carmo-clay-100);
+  --color-clay-300: var(--carmo-clay-300);
+  --color-clay-500: var(--carmo-clay-500);
+  --color-clay-600: var(--carmo-clay-600);
+  --color-clay-700: var(--carmo-clay-700);
+
+  --color-cerrado-50: var(--carmo-cerrado-50);
+  --color-cerrado-100: var(--carmo-cerrado-100);
+  --color-cerrado-300: var(--carmo-cerrado-300);
+  --color-cerrado-500: var(--carmo-cerrado-500);
+  --color-cerrado-700: var(--carmo-cerrado-700);
+
+  --color-sun-100: var(--carmo-sun-100);
+  --color-sun-300: var(--carmo-sun-300);
+  --color-sun-500: var(--carmo-sun-500);
+
+  --color-sky-100: var(--carmo-sky-100);
+  --color-sky-500: var(--carmo-sky-500);
+  --color-sky-700: var(--carmo-sky-700);
+
+  --color-discount: var(--carmo-discount);
+  --color-discount-deep: var(--carmo-discount-deep);
+
+  --color-ink-900: var(--carmo-ink-900);
+  --color-ink-700: var(--carmo-ink-700);
+  --color-ink-600: var(--carmo-ink-600);
+  --color-ink-400: var(--carmo-ink-400);
+  --color-ink-300: var(--carmo-ink-300);
+  --color-ink-200: var(--carmo-ink-200);
+  --color-ink-100: var(--carmo-ink-100);
+
+  --color-paper: var(--carmo-paper);
+  --color-paper-card: var(--carmo-paper-card);
+  --color-paper-deep: var(--carmo-paper-deep);
+  --color-paper-tint: var(--carmo-paper-tint);
+
+  /* Fonts (definidas via next/font no layout.tsx) */
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font-sora), 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+  --font-heading: var(--font-sora), 'Segoe UI', Roboto, sans-serif;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(25, 25, 25, 0.04), 0 0 0 1px rgba(25, 25, 25, 0.06);
+  --shadow-pop: 0 8px 24px rgba(25, 25, 25, 0.1), 0 0 0 1px rgba(25, 25, 25, 0.04);
+  --shadow-banner: 0 2px 6px rgba(192, 72, 16, 0.18);
+
+  /* Layout */
+  --container-app: 1180px;
+}
+
+/* ============================================================
+   Element defaults
+   ============================================================ */
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    color: var(--foreground);
+    background: var(--background);
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-size: var(--text-body);
+    line-height: var(--lh-body);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--text-h1);
+    line-height: var(--lh-h1);
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: -0.005em;
+  }
+
+  h3 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-h3);
+    line-height: var(--lh-h3);
+  }
+
+  p {
+    font-size: var(--text-body);
+    line-height: var(--lh-body);
+  }
+
+  a {
+    color: var(--carmo-sky-700);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  code,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+}
+
+/* ============================================================
+   Utility classes não-Tailwind úteis
+   ============================================================ */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.carmo-map-popup .maplibregl-popup-content {
+  overflow: hidden;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: var(--shadow-pop);
+}
+.carmo-map-popup .maplibregl-popup-tip {
+  filter: drop-shadow(0 2px 2px rgb(25 25 25 / 0.12));
+}
+
+@keyframes carmo-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.skeleton {
+  background: var(--carmo-paper-deep);
+  animation: carmo-pulse 1.4s var(--ease-out) infinite;
+}
+
+.carmo-live-ticker-list {
+  animation: carmo-live-ticker-rotate 14s steps(1) infinite;
+}
+
+.carmo-live-marquee {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes carmo-live-ticker-rotate {
+  0%, 24% {
+    transform: translateY(0);
+  }
+  25%, 49% {
+    transform: translateY(-22px);
+  }
+  50%, 74% {
+    transform: translateY(-44px);
+  }
+  75%, 99% {
+    transform: translateY(-66px);
+  }
+  100% {
+    transform: translateY(-88px);
+  }
+}
+
+@media (max-width: 767px) {
+  .carmo-live-ticker-list {
+    animation-duration: 40s;
+  }
+
+  .carmo-live-marquee {
+    min-width: max-content;
+    padding-right: 2rem;
+    animation: carmo-live-marquee 4.8s ease-in-out infinite;
+  }
+
+  .carmo-live-ticker-list i {
+    animation: carmo-live-dot-pulse 1.25s ease-in-out infinite;
+  }
+}
+
+@keyframes carmo-live-marquee {
+  0%,
+  18% {
+    transform: translateX(0);
+  }
+  82%,
+  100% {
+    transform: translateX(min(0px, calc(100vw - 100% - 8.5rem)));
+  }
+}
+
+@keyframes carmo-live-dot-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.86);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes promo-gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes promo-float-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+@keyframes promo-float-fast {
+  0%, 100% {
+    transform: translateY(0) rotate(4deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(8deg);
+  }
+}
+
+@keyframes promo-shine {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  60%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes promo-tag-pop {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes promo-sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.6) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes custom-hero-kenburns {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes custom-hero-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.01);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) scale(1.035);
+  }
+}
+
+@keyframes custom-hero-sparkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.75) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08) rotate(16deg);
+  }
+}
+
+.promo-bg-anim {
+  background-size: 200% 200%;
+  animation: promo-gradient-shift 9s ease-in-out infinite;
+}
+
+.promo-float-slow {
+  animation: promo-float-slow 6s ease-in-out infinite;
+}
+.promo-float-fast {
+  animation: promo-float-fast 4.5s ease-in-out infinite;
+}
+.promo-tag-pop {
+  animation: promo-tag-pop 2.4s ease-in-out infinite;
+}
+.promo-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.promo-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  animation: promo-shine 4.5s ease-in-out infinite;
+}
+.promo-sparkle {
+  animation: promo-sparkle 3.2s ease-in-out infinite;
+}
+
+.custom-hero-kenburns {
+  animation: custom-hero-kenburns 13s ease-in-out infinite;
+}
+.custom-hero-float {
+  animation: custom-hero-float 7s ease-in-out infinite;
+}
+.custom-hero-sparkle {
+  animation: custom-hero-sparkle 3.6s ease-in-out infinite;
+}
+.custom-hero-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.custom-hero-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -45%;
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  animation: promo-shine 5.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-bg-anim,
+  .promo-float-slow,
+  .promo-float-fast,
+  .promo-tag-pop,
+  .promo-sparkle,
+  .carmo-live-ticker-list,
+  .carmo-live-marquee,
+  .carmo-live-ticker-list i,
+  .custom-hero-kenburns,
+  .custom-hero-float,
+  .custom-hero-sparkle,
+  .custom-hero-shine::after,
+  .promo-shine::after {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   Page transitions + entrada com stagger
+   Usado por <PageTransition> e <Stagger> (components/navigation)
+   ============================================================ */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes page-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-enter {
+  animation: page-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* transform em ancestor quebra position:fixed + toques no iOS Safari */
+@media (max-width: 767px) {
+  .page-enter,
+  .page-enter-stagger > *,
+  .stagger-rise > * {
+    animation-name: page-enter-fade;
+  }
+}
+
+.page-enter-stagger > * {
+  animation: page-enter 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  opacity: 0;
+}
+.page-enter-stagger > *:nth-child(1) { animation-delay: 40ms; }
+.page-enter-stagger > *:nth-child(2) { animation-delay: 90ms; }
+.page-enter-stagger > *:nth-child(3) { animation-delay: 140ms; }
+.page-enter-stagger > *:nth-child(4) { animation-delay: 190ms; }
+.page-enter-stagger > *:nth-child(5) { animation-delay: 230ms; }
+.page-enter-stagger > *:nth-child(6) { animation-delay: 265ms; }
+.page-enter-stagger > *:nth-child(7) { animation-delay: 295ms; }
+.page-enter-stagger > *:nth-child(n+8) { animation-delay: 320ms; }
+
+/* grid de cards / listas — usar classe utilitária separada */
+.stagger-rise > * {
+  animation: page-enter 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  opacity: 0;
+}
+.stagger-rise > *:nth-child(1) { animation-delay: 30ms; }
+.stagger-rise > *:nth-child(2) { animation-delay: 70ms; }
+.stagger-rise > *:nth-child(3) { animation-delay: 110ms; }
+.stagger-rise > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-rise > *:nth-child(5) { animation-delay: 185ms; }
+.stagger-rise > *:nth-child(6) { animation-delay: 215ms; }
+.stagger-rise > *:nth-child(7) { animation-delay: 240ms; }
+.stagger-rise > *:nth-child(8) { animation-delay: 260ms; }
+.stagger-rise > *:nth-child(9) { animation-delay: 275ms; }
+.stagger-rise > *:nth-child(n+10) { animation-delay: 285ms; }
+
+/* skeleton shimmer mais bonito que o pulse atual */
+@keyframes carmo-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--carmo-paper-deep) 0%,
+    color-mix(in oklab, var(--carmo-paper-deep) 60%, white) 50%,
+    var(--carmo-paper-deep) 100%
+  );
+  background-size: 200% 100%;
+  animation: carmo-shimmer 1.6s linear infinite;
+  border-radius: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .page-enter-stagger > *,
+  .stagger-rise > *,
+  .skeleton-shimmer {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* App mobile (WebView): sem tab bar web nem respiro da nav fixa.
+   Elementos com [data-hide-in-embedded-app] somem; com [data-show-in-embedded-app]
+   só aparecem no app. */
+html[data-embedded-app='true'] [data-hide-in-embedded-app] {
+  display: none !important;
+}
+
+html:not([data-embedded-app='true']) [data-show-in-embedded-app] {
+  display: none !important;
+}
+
+html[data-embedded-app='true'] {
+  --carmo-fab-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+}
+
+html:not([data-embedded-app='true']) {
+  --carmo-fab-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+html[data-embedded-app='true'] [data-quick-actions-fab] {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  isolation: isolate;
+}
+
+@media (max-width: 767px) {
+  [data-quick-actions-fab] {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    isolation: isolate;
+  }
+}
+
+html[data-embedded-app='true'] .carmo-embedded-chat-fab {
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: var(--carmo-fab-bottom);
+}
+
+html[data-embedded-app='true'] .pb-mobile-tab-bar {
+  padding-bottom: 0 !important;
+}
+
+/* Zera o respiro do body reservado pra TabBar fixa quando o flag entrou só
+   client-side (fallback do <script> no head). */
+html[data-embedded-app='true'] body {
+  padding-bottom: 0 !important;
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+}
+
+html[data-embedded-app='true'] button,
+html[data-embedded-app='true'] a,
+html[data-embedded-app='true'] [role='button'] {
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+html[data-embedded-app='true'] [data-quick-actions-fab],
+html[data-embedded-app='true'] .carmo-embedded-chat-fab,
+html[data-embedded-app='true'] [data-floating-action] {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  isolation: isolate;
+}
+
+#carmo-floating-root {
+  position: relative;
+  z-index: 100;
+}
+
+/* Bloco raw_html da home — estilo base pra conteudo editado pelo admin. */
+.home-raw-html {
+  color: var(--carmo-ink-900, #1c1917);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.home-raw-html > * + * {
+  margin-top: 0.75rem;
+}
+.home-raw-html h1,
+.home-raw-html h2,
+.home-raw-html h3,
+.home-raw-html h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 1.25rem;
+}
+.home-raw-html h1 { font-size: 28px; }
+.home-raw-html h2 { font-size: 22px; }
+.home-raw-html h3 { font-size: 18px; }
+.home-raw-html h4 { font-size: 16px; }
+.home-raw-html a {
+  color: var(--carmo-clay-600, #b94a1f);
+  text-decoration: underline;
+}
+.home-raw-html img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  display: block;
+}
+.home-raw-html figure {
+  margin: 1rem 0;
+}
+.home-raw-html figcaption {
+  font-size: 12px;
+  color: var(--carmo-ink-500, #78716c);
+  margin-top: 0.25rem;
+}
+.home-raw-html ul,
+.home-raw-html ol {
+  padding-left: 1.25rem;
+}
+.home-raw-html ul { list-style: disc; }
+.home-raw-html ol { list-style: decimal; }
+.home-raw-html li + li { margin-top: 0.25rem; }
+.home-raw-html blockquote {
+  border-left: 3px solid var(--carmo-clay-300, #f4c79c);
+  padding-left: 0.75rem;
+  color: var(--carmo-ink-600, #57534e);
+  font-style: italic;
+}
+.home-raw-html hr {
+  border: 0;
+  border-top: 1px solid var(--carmo-ink-100, #e7e5e4);
+  margin: 1rem 0;
+}
+.home-raw-html code {
+  background: var(--carmo-paper, #f5f5f4);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+}

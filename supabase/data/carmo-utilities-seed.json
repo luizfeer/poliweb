@@ -1,0 +1,44 @@
+[
+  {
+    "section": "coleta",
+    "city_slug": "carmo-do-rio-claro",
+    "district": "Centro",
+    "type": "common",
+    "days": "segunda, quarta, sexta",
+    "time": "07:00-10:00",
+    "notes": "Coleta domiciliar no periodo da manha."
+  },
+  {
+    "section": "coleta",
+    "city_slug": "carmo-do-rio-claro",
+    "district": "Centro",
+    "type": "recyclable",
+    "days": "quinta",
+    "time": "08:00-12:00",
+    "notes": "Separar reciclaveis limpos."
+  },
+  {
+    "section": "contato",
+    "city_slug": "carmo-do-rio-claro",
+    "category": "emergencia",
+    "name": "Policia Militar",
+    "phone": "190",
+    "short_dial": "190",
+    "hours": "24h"
+  },
+  {
+    "section": "farmacia",
+    "city_slug": "carmo-do-rio-claro",
+    "name": "Farmacia Central",
+    "address": "Rua Camilo Aschar, Centro",
+    "phone": "(35) 3561-1000",
+    "shift": "plantao_24h"
+  },
+  {
+    "section": "saude",
+    "city_slug": "carmo-do-rio-claro",
+    "name": "UBS Centro",
+    "type": "ubs",
+    "services": "clinica-geral, vacinacao, enfermagem"
+  }
+]

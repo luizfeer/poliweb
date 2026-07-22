@@ -1,0 +1,54 @@
+# EAS Build — exclusões além do .gitignore da raiz.
+# Este arquivo fica na raiz do git; padrões são relativos ao repositório.
+# Referência: https://expo.fyi/eas-build-archive
+
+# Outros apps do monorepo (build mobile não depende deles)
+apps/web
+apps/cidadeviva
+apps/worker
+apps/agent
+apps/media-processor
+
+# Docs, planos e tooling
+.davia
+.claude
+.Codex
+.agents
+.cursor
+
+# Backend/scripts locais
+supabase
+scripts
+packages
+/mocks
+
+# Screenshots de debug na raiz
+.mapa-*
+.onde-ficar-*
+
+# Caches que às vezes escapam do empacotamento EAS
+**/.next
+**/.next-agent
+**/.open-next
+**/.wrangler
+**/.expo-tmp-*
+**/.eas-inspect
+
+# Git metadata (EAS já omite por padrão; reforço explícito)
+.git
+
+# Dependências — instaladas no worker EAS
+node_modules
+
+# Env local
+.env
+.env.*
+!.env.example
+
+# Deploy/logs locais
+.vercel
+*.log
+.codex-*
+.next-*-dev.log
+.next-*-start.log
+.pm2-logs/

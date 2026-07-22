@@ -1,0 +1,25 @@
+<h1>SEO, Newsletter e Acessibilidade</h1>
+<p><strong>Plano 09</strong> prepara o soft launch tecnico.</p>
+<p>Foco em indexacao, acessibilidade, consentimento e mensuracao sem cookies de terceiros.</p>
+<hr />
+<p><strong>Pilares cobertos:</strong></p>
+<ul>
+  <li><strong>SEO tecnico:</strong> sitemap, robots, JSON-LD, meta tags, ISR</li>
+  <li><strong>Newsletter:</strong> double opt-in via Resend, unsubscribe 1-click, auditoria LGPD</li>
+  <li><strong>Analytics:</strong> eventos proprios em <code>analytics_events</code>, dashboard por cidade</li>
+  <li><strong>Acessibilidade:</strong> skip-to-content, aria-labels, form labels</li>
+  <li><strong>LGPD:</strong> banner de consentimento, exclusao de conta, exportacao de dados</li>
+</ul>
+<excalidraw data-path="data/newsletter-flow.json"></excalidraw>
+<p></p>
+<database-view data-path="data/seo-checklist.json"></database-view>
+<p></p>
+<p>Arquivos principais:</p>
+<ul>
+  <li><code>apps/web/app/sitemap.ts</code></li>
+  <li><code>apps/web/app/robots.ts</code></li>
+  <li><code>apps/web/lib/seo/structured-data.ts</code></li>
+  <li><code>apps/web/lib/newsletter/subscribe.ts</code></li>
+  <li><code>apps/web/components/a11y/skip-to-content.tsx</code></li>
+  <li><code>apps/web/components/marketing/consent-banner.tsx</code></li>
+</ul>

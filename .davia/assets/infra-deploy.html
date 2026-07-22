@@ -1,0 +1,102 @@
+<h1>Infra & Deploy</h1>
+<p>VPS Ubuntu 22 · Node 22 · PM2 6 · projeto em <code>/home/ubuntu/projects/hail-mary</code></p>
+<hr />
+<h2>🔑 Variáveis de ambiente</h2>
+<p>
+  Cada app tem seu próprio <code>.env</code> — <strong>nunca versionado</strong>. O PM2 injeta via
+  <code>interpreter_args: '--env-file=.env'</code> (Node 22 nativo, sem dotenv).
+</p>
+<ul>
+  <li><code>apps/worker/.env</code> — todos os workers de background</li>
+  <li><code>apps/media-processor/.env</code> — daemon de mídia</li>
+  <li><code>apps/web/.env.local</code> — Next.js (nunca usar no worker)</li>
+</ul>
+<p>
+  <strong>Variáveis obrigatórias do worker</strong> (copiar de
+  <code>apps/worker/.env.example</code>):
+</p>
+<pre><code>SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+WORKER_CITY_SLUG=carmo-do-rio-claro
+GOOGLE_PLACES_API_KEY=          # Google Cloud Console → Places API (New)
+BUNNY_STORAGE_ZONE=hail-mary
+BUNNY_STORAGE_ACCESS_KEY=       # Bunny Dashboard → Storage → FTP & API Access
+BUNNY_STORAGE_ENDPOINT=https://br.storage.bunnycdn.com
+NEXT_PUBLIC_BUNNY_CDN_URL=https://hail-mary-crc.b-cdn.net
+OPENAI_API_KEY=
+OPENAI_SUMMARY_MODEL=gpt-4o-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small</code></pre>
+<hr />
+<h2>⚙️ PM2 — padrão de todos os workers</h2>
+<p>Config central em <code>ecosystem.config.cjs</code> na raiz. <strong>Regras:</strong></p>
+<ul>
+  <li><code>autorestart: false</code> — jobs one-shot, não reiniciam sozinhos ao sair</li>
+  <li><code>cron_restart</code> — disparo agendado pelo PM2</li>
+  <li>
+    <code>interpreter_args: '--env-file=.env'</code> — carrega o <code>.env</code> relativo ao
+    <code>cwd</code>
+  </li>
+  <li>Logs em <code>.pm2-logs/worker-[nome]-{out,error}.log</code></li>
+</ul>
+<h2>🔄 Recriar do zero</h2>
+<ol>
+  <li>Clonar repo e rodar <code>pnpm install --frozen-lockfile</code></li>
+  <li>Criar <code>apps/worker/.env</code> a partir do <code>.env.example</code></li>
+  <li><code>pnpm --filter worker build</code></li>
+  <li><code>pm2 start ecosystem.config.cjs</code></li>
+  <li><code>pm2 save</code> (persiste entre reboots)</li>
+  <li>Opcional: <code>pm2 startup</code> para inicializar no boot da VPS</li>
+</ol>
+<h2>🧪 Testar um job manualmente</h2>
+<pre><code># dry-run (não grava nada)
+pnpm --filter worker import:google-business-photos -- --dry-run
+
+# rodar de verdade
+pnpm --filter worker import:google-business-photos
+
+# forçar via PM2 agora
+pm2 restart worker-google-photos --update-env</code></pre>
+<hr />
+<h2>🌐 Expor city-agent na web (Nginx)</h2>
+<p>
+  O <code>city-agent</code> é um daemon HTTP permanente na porta <strong>8787</strong>. Para expô-lo
+  no subdomínio <code>agent.luizalmeida.dev</code>, use proxy reverso no Nginx.
+</p>
+<p>Exemplo de configuração:</p>
+<pre><code>server {
+    listen 80;
+    server_name agent.luizalmeida.dev;
+
+    location / {
+        proxy_pass http://127.0.0.1:8787;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 60s;
+    }
+}</code></pre>
+<p><strong>Passos no servidor:</strong></p>
+<ol>
+  <li>Copiar o exemplo para <code>/etc/nginx/sites-available/agent.luizalmeida.dev</code></li>
+  <li>
+    Criar symlink:
+    <code
+      >sudo ln -s /etc/nginx/sites-available/agent.luizalmeida.dev /etc/nginx/sites-enabled/</code
+    >
+  </li>
+  <li>Testar: <code>sudo nginx -t</code> e <code>sudo systemctl reload nginx</code></li>
+  <li>SSL: <code>sudo certbot --nginx -d agent.luizalmeida.dev</code></li>
+</ol>
+<p>Arquivo de exemplo versionado em <code>scripts/nginx/city-agent.conf</code>.</p>
+<hr />
+<h2>📋 Workers registrados</h2>
+<database-view data-path="data/infra-workers.json"></database-view>
+<p></p>
+<h2>🗺️ Diagrama de fluxo</h2>
+<excalidraw data-path="data/infra-workers-flow.json"></excalidraw>

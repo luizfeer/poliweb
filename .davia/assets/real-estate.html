@@ -1,0 +1,68 @@
+<h1>🏠 Módulo: Imobiliária</h1>
+<p>Módulo completo para anúncios de <strong>venda, aluguel e temporada</strong>. Suporta tanto imobiliárias com múltiplos corretores quanto particulares postando direto.</p>
+<excalidraw data-path="data/real-estate-er.json"></excalidraw>
+<h2>Entidades principais</h2>
+<ul>
+  <li><strong><code>realtors</code></strong> — imobiliária (CNPJ, CRECI, contatos, marca)</li>
+  <li><strong><code>realtor_agents</code></strong> — corretores vinculados (com ou sem conta no portal)</li>
+  <li><strong><code>properties</code></strong> — imóvel anunciado</li>
+  <li><strong><code>property_inquiries</code></strong> — leads/contatos recebidos no anúncio</li>
+  <li><strong><code>property_favorites</code></strong> — cidadão salva imóveis pra rever</li>
+</ul>
+<h2>Quem pode postar um imóvel</h2>
+<ol>
+  <li><strong>Imobiliária (merchant)</strong> — cria <code>realtor</code>, depois corretores e imóveis vinculados (<code>realtor_id</code> + <code>agent_id</code>)</li>
+  <li><strong>Particular (citizen)</strong> — posta direto com <code>owner_profile_id</code> sem precisar criar imobiliária. Útil para "alugo minha chácara na temporada"</li>
+  <li>O CHECK constraint <code>properties_has_owner</code> garante que sempre exista um responsável</li>
+</ol>
+<h2>Tipos de imóvel suportados</h2>
+<p>14 tipos no enum <code>property_kind</code>: apartment, house, cobertura, kitnet, studio, chacara, sitio, fazenda, terreno_urbano, terreno_rural, comercial_loja, comercial_sala, galpao, hotel.</p>
+<p>Tipos de listagem: <code>sale</code> (venda), <code>rent</code> (aluguel), <code>temporary</code> (temporada — relevante em CRC pela região de Furnas).</p>
+<h2>Precos e pagamento</h2>
+<p>Preços de publicação ficam no <code>city_modules.config</code> do módulo <code>real_estate</code>.</p>
+<ul>
+  <li>Admin ajusta em <code>/painel/cidade/imoveis/precos</code>.</li>
+  <li>A matriz usa chave <code>{listing_type}:{property_type}</code>.</li>
+  <li><code>real_estate_payment_active=false</code> mantem o MVP sem cobranca real.</li>
+  <li><code>lib/payments/</code> isola o gateway para Stripe, Pagar.me ou outro provedor futuro.</li>
+</ul>
+<h2>Aprovação</h2>
+<p>Todo imóvel passa por fila antes de publicar.</p>
+<excalidraw data-path="data/real-estate-approval.json"></excalidraw>
+<h2>Campos da ficha</h2>
+<database-view data-path="data/real-estate-fields.json"></database-view>
+<h2>Privacidade do endereço</h2>
+<p>Flag <code>show_exact_location</code> controla se o número/lat-lng exato aparece publicamente. Por padrão (<code>false</code>): ficha mostra só bairro e quadra aproximada. Anunciantes "premium" podem optar por mostrar tudo.</p>
+<h2>Lead management para imobiliária</h2>
+<p>Quando um visitante clica em <em>"Tenho interesse"</em>, o portal:</p>
+<ol>
+  <li>Cria <code>property_inquiries</code> com nome/telefone/email/mensagem</li>
+  <li>Gera notificação <code>lead.received</code> para o dono ou imobiliária</li>
+  <li>Notifica corretor responsável (email/whatsapp)</li>
+  <li>Aparece no painel da imobiliária com status <code>new</code> → corretor atualiza para <code>contacted</code> → <code>qualified</code> → <code>closed</code></li>
+  <li>Notas internas privadas (<code>internal_notes</code>) só a imobiliária vê</li>
+</ol>
+<h2>Cidadão favoritar</h2>
+<p>Cidadão logado clica ❤ → <code>property_favorites(profile_id, property_id)</code>. Acessa em <code>/painel/cidadao/favoritos</code>. Receberá email se o preço cair.</p>
+<h2>Indexação</h2>
+<ul>
+  <li><code>idx_properties_city_status</code> — listagem pública (filtra por status=published)</li>
+  <li><code>idx_properties_listing(listing_type, property_type)</code> — filtros principais (Aluguel ▸ Apartamento)</li>
+  <li><code>idx_properties_district</code> — filtro por bairro</li>
+  <li><code>idx_properties_price</code> — sort/filter por preço (parcial: só publicados)</li>
+</ul>
+<h2>Mídia na postagem</h2>
+<ul>
+  <li><code>/painel/imobiliaria/imoveis/novo</code> aceita capa e galeria no rascunho inicial.</li>
+  <li>Publicação exige aceite do termo de responsabilidade e segurança.</li>
+  <li>Fotos e vídeos passam por <code>media_assets</code> + <code>media_links</code>.</li>
+  <li><code>properties.cover_url</code> e <code>properties.photos</code> ficam sincronizados para listagem e SEO.</li>
+  <li>Detalhe público usa a capa real e <code>StoryPhotoGallery</code> quando existe mais de uma mídia.</li>
+</ul>
+<h2>Contato protegido</h2>
+<ul>
+  <li>WhatsApp e telefone da ficha pública só aparecem depois de login e clique em solicitar contato.</li>
+  <li>A solicitação grava <code>property.contact_reveal</code> em <code>audit_log</code>.</li>
+  <li>O aviso anti-golpe orienta conferir valores, documentos, estado do imóvel e comprovantes.</li>
+  <li>Quando não há telefone público vinculado ao imóvel, o usuário deve usar o formulário de interesse.</li>
+</ul>

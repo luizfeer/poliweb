@@ -1,0 +1,19 @@
+[
+  { "componente": "AppFrame", "tipo": "layout", "papel": "Container 430px com posição relativa pra tab bar" },
+  { "componente": "AppHeader", "tipo": "layout", "papel": "Header laranja com busca e chips de localização" },
+  { "componente": "TabBar", "tipo": "layout", "papel": "Tab bar fixa rodapé (Início, Turismo, Serviços, Conta)" },
+  { "componente": "Band", "tipo": "layout", "papel": "Faixa de seção (paper / paper-deep / paper-card)" },
+  { "componente": "HScroll", "tipo": "layout", "papel": "Carrossel horizontal com scroll-snap" },
+  { "componente": "Divider", "tipo": "layout", "papel": "Divisor 8px entre blocos" },
+  { "componente": "Logo", "tipo": "branding", "papel": "Variants: mark / lockup / mono" },
+  { "componente": "Pill", "tipo": "input", "papel": "Chip arredondado (header chapado OU filter com borda)" },
+  { "componente": "SectionHeader", "tipo": "estrutural", "papel": "Cabeçalho de seção com kicker, título e action" },
+  { "componente": "HeroBanner", "tipo": "destaque", "papel": "Banner full-bleed com diagonal de acento ou foto" },
+  { "componente": "CupomCard", "tipo": "comércio", "papel": "Cupom quadrado clay chapado (ofertas da semana)" },
+  { "componente": "TileCard", "tipo": "produto", "papel": "Tile com título bold em cima e illo/foto no centro" },
+  { "componente": "ProductCard", "tipo": "produto", "papel": "Card de produto com preço estilo Amazon" },
+  { "componente": "PousadaCard", "tipo": "turismo", "papel": "Card de pousada com rating, tags, diária" },
+  { "componente": "RoundCat", "tipo": "navegação", "papel": "Categoria circular 76px (5 colunas no mobile)" },
+  { "componente": "ListItem", "tipo": "lista", "papel": "Linha compacta com ícone + título + sub + chevron" },
+  { "componente": "AICallout", "tipo": "transparência", "papel": "Bloco de resumo IA com badge e link pra fonte" }
+]

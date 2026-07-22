@@ -1,0 +1,76 @@
+<h1>🏪 Módulo: Comércio (guia + categorias)</h1>
+<p>Guia comercial completo da cidade. Empresas têm ficha pública, painel do dono e moderação por admin.</p>
+<excalidraw data-path="data/business-categories.json"></excalidraw>
+<h2>Admin do comércio</h2>
+<ul>
+  <li><strong>Merchant</strong> edita fichas em <code>apps/web/app/painel/comercio</code>.</li>
+  <li><strong>City admin</strong> aprova, rejeita e importa em <code>apps/web/app/painel/cidade/comercio</code>.</li>
+  <li><strong>RLS</strong> segue <code>manages_business(id)</code> e <code>is_city_admin(city_id)</code>.</li>
+  <li><strong>Import</strong> grava <code>businesses.import_source</code> com origem Cliqueiachei.</li>
+</ul>
+<h2>Importação Google aprovada pelo painel</h2>
+<ul>
+  <li><strong>Painel</strong> busca candidatos no Google Places em <code>apps/web/app/painel/comercio/[id]/google-business-import.tsx</code>.</li>
+  <li><strong>Aprovação manual</strong> grava campos e <code>pending_photos</code> em <code>businesses.import_source.google_places</code>.</li>
+  <li><strong>Dados ricos</strong> guarda reviews aprovadas, link 360, rating, resumos, faixa de preço, pagamentos, comodidades, atributos e horários secundários.</li>
+  <li><strong>Ficha pública</strong> lê <code>google_places</code> em <code>lib/businesses/queries.ts</code> e mostra rating, link 360, resumos e comentários aprovados em <code>/comercio/negocio/[slug]</code>.</li>
+  <li><strong>Vitrine</strong> em <code>toBusiness</code>: <code>rating</code> e <code>reviewsCount</code> agregam média do portal com nota e volume do import Google (média ponderada quando os dois existem). <code>portalReviewsCount</code> é só o que está publicado no portal (link para <code>#avaliacoes</code>).</li>
+  <li><strong>Horários</strong> usa <code>regularOpeningHours.periods</code> para montar o JSON de funcionamento da ficha, evitando cair como fechado.</li>
+  <li><strong>VPS</strong> roda <code>pnpm --filter worker import:google-business-photos</code> no <code>apps/worker</code>.</li>
+  <li><strong>Worker</strong> baixa as fotos do Google, envia ao Bunny, cria <code>media_assets</code>/<code>media_links</code> e sincroniza <code>cover_url</code>/<code>photos</code>.</li>
+</ul>
+<h2>Categorias hierárquicas</h2>
+<p>Tabela <code>business_categories</code> com auto-relacionamento via <code>parent_id</code>. Suporta até 3 níveis:</p>
+<ul>
+  <li><strong>Raiz</strong> — Alimentação, Saúde, Beleza, Casa & Construção, Veículos, Moda, Serviços, Educação, Turismo, Agropecuária, Pets</li>
+  <li><strong>Filhas</strong> — Restaurantes, Pizzarias, Padarias, Bares (sob Alimentação)</li>
+  <li><strong>Netas</strong> — opcional, para refinamento extra</li>
+</ul>
+<p>Categorias podem ser <strong>globais</strong> (<code>city_id = null</code>, valem para todas as cidades) ou <strong>locais</strong> (categoria que só faz sentido em determinada cidade — ex: "café especial" em Carmo, "vinícola" em Andradas).</p>
+<h2>M:N negócio ↔ categoria</h2>
+<p>Tabela de junção <code>business_category_assignments(business_id, category_id, is_primary)</code>. Um negócio pode estar em <strong>Restaurantes + Pizzarias + Delivery</strong> simultaneamente. Constraint garante <strong>uma única <code>is_primary</code></strong> por negócio (categoria que aparece como destaque).</p>
+<h2>Campos da ficha</h2>
+<database-view data-path="data/business-fields.json"></database-view>
+<p><code>ordering_enabled</code> controla se a ficha pública mostra o CTA de cardápio/delivery. O admin pode ativar depois sem remover <code>delivery</code> de <code>amenities</code> nem perder dados do cardápio. O catálogo, os pedidos nativos e a operação por WhatsApp estão documentados em <code>delivery-orders.html</code>.</p>
+<h2>Favoritos de comercio (<code>business_favorites</code>)</h2>
+<p>Cidadaos logados podem salvar fichas publicas de comercio.</p>
+<ul>
+  <li><strong>Persistencia</strong> fica em <code>business_favorites(profile_id, business_id, created_at)</code>.</li>
+  <li><strong>RLS</strong> permite leitura e escrita apenas do proprio <code>profile_id = auth.uid()</code>.</li>
+  <li><strong>Pousadas</strong> sao negocios com categoria <code>pousadas</code> ou <code>pousada</code>.</li>
+  <li><strong>Painel</strong> lista pousadas salvas em <code>/painel/favoritos</code>.</li>
+</ul>
+<h2>Reivindicação de página (<code>business_claims</code>)</h2>
+<p>Cenário comum: o admin importa o negócio antes do dono entrar. O claim conecta a ficha ao comerciante real.</p>
+<excalidraw data-path="data/business-claim-flow.json"></excalidraw>
+<ol>
+  <li>Encontra a ficha do seu negócio</li>
+  <li>Clica <em>"Sou o dono"</em> → <code>submitClaimAction</code></li>
+  <li>Informa WhatsApp e dados para a equipe validar por contato direto</li>
+  <li>Admin aprova → cria <code>entity_managers</code> e seta <code>claimed = true</code></li>
+  <li>Dono passa a editar a página completa</li>
+</ol>
+<h2>Relatos de erro (<code>business_reports</code>)</h2>
+<p>Usuários logados podem marcar anúncio como inexistente, desatualizado, contato errado, endereço errado, duplicado, inadequado ou outro. O admin revisa em <code>/painel/cidade/comercio/reports</code>.</p>
+<p>Claims, relatos e reviews pendentes também geram notificações para admins em <code>/painel/cidade/notificacoes</code>.</p>
+<h2>Promoções e cupons</h2>
+<p><code>business_promotions</code> permite o dono criar ofertas com período de validade e código de cupom. Aparecem na ficha pública e podem ser destacadas em listagens. Filtros públicos só mostram promoções ativas e dentro da validade.</p>
+<h2>Reviews</h2>
+<p><code>business_reviews</code> — 1 review por usuário por negócio (constraint UNIQUE). A entrada pública começa simples: 5 estrelas. Depois abre modal com texto e foto opcional.</p>
+<ol>
+  <li>Cidadão escolhe de 1 a 5 estrelas em <code>ReviewPrompt</code></li>
+  <li>Modal coleta título, comentário e <code>photo_url</code> opcional</li>
+  <li>Foto sobe no bucket <code>businesses</code> em <code>{city_slug}/reviews/{review_id}.ext</code></li>
+  <li>Review entra com status <code>pending</code></li>
+  <li><code>moderate-ugc</code> classifica com Haiku → <code>published</code> ou <code>rejected</code></li>
+  <li>Reviews aprovadas aparecem; rating médio do negócio é calculado</li>
+  <li>Dono pode <strong>responder</strong> (campo <code>reply_owner</code>) — agrega confiança</li>
+  <li>Dono <strong>não pode deletar</strong> reviews ruins, só responder ou denunciar</li>
+</ol>
+<h2>Planos comerciais (<code>plan</code>)</h2>
+<ul>
+  <li><strong>free</strong> — ficha básica, sem destaque</li>
+  <li><strong>featured</strong> — aparece no topo da categoria, badge "Destaque"</li>
+  <li><strong>premium</strong> — banner próprio, prioridade na busca, analytics no painel</li>
+</ul>
+<p>Slots prontos no schema mas <strong>monetização desligada</strong> no MVP — vende quando tiver tráfego.</p>

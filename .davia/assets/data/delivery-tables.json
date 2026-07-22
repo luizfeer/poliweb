@@ -1,0 +1,13 @@
+[
+  { "tabela": "business_catalogs", "papel": "Catalogo (cardapio) de um negocio. Normalmente 1 por negocio.", "rls": "Publico le ativos; dono escreve via manages_business." },
+  { "tabela": "catalog_sections", "papel": "Secoes do cardapio (Pizzas, Bebidas, etc).", "rls": "Publico le ativas; dono escreve." },
+  { "tabela": "catalog_items", "papel": "Itens com preco, foto, etiquetas e disponibilidade. Tem business_id denormalizado para RLS.", "rls": "Publico le disponiveis; dono escreve." },
+  { "tabela": "catalog_item_option_groups", "papel": "Grupos de opcao do item (Tamanho, Borda, Adicionais) com min/max escolhas.", "rls": "Publico le; dono escreve." },
+  { "tabela": "catalog_item_option_values", "papel": "Valores de opcao com acrescimo de preco.", "rls": "Publico le disponiveis; dono escreve." },
+  { "tabela": "business_delivery_status", "papel": "Presenca online da loja. Fonte de verdade da lista Faca Pedidos. Tem auto_offline_at.", "rls": "Leitura publica; dono escreve." },
+  { "tabela": "business_wa_operators", "papel": "Numeros de WhatsApp autorizados a operar a loja pelo bot. So obedece operador verificado.", "rls": "Dono e city_admin gerenciam." },
+  { "tabela": "orders", "papel": "Pedido com totais, snapshot de endereco/cliente, timestamps por estagio e numero curto diario.", "rls": "Cliente ve os seus; comerciante ve os do negocio. Insert so via create_order." },
+  { "tabela": "order_items", "papel": "Itens do pedido com snapshot imutavel de nome, preco e opcoes.", "rls": "Le via vinculo com orders." },
+  { "tabela": "order_status_history", "papel": "Trilha de auditoria de cada transicao de status.", "rls": "Le via vinculo com orders." },
+  { "tabela": "order_daily_counters", "papel": "Gera o numero curto por negocio e dia.", "rls": "Sem acesso direto; so via funcoes definer." }
+]

@@ -1,34 +1,79 @@
+# dependencies
+node_modules/
+.pnpm-store/
+apps/web/pnpm-lock.yaml
+
+# next.js
+.next/
+.next-agent/
+out/
+build/
+
+# production
+*.tsbuildinfo
+next-env.d.ts
+apps/worker/dist/
+
+# misc
 .DS_Store
-.thumbs.db
-node_modules
+*.pem
+*.jks
+*.keystore
+*.p12
+Thumbs.db
 
-# Quasar core related directories
-.quasar
-/dist
-.env
-
-# Cordova related directories and files
-/src-cordova/node_modules
-/src-cordova/platforms
-/src-cordova/plugins
-/src-cordova/www
-
-# Capacitor related directories and files
-/src-capacitor/www
-/src-capacitor/node_modules
-
-# BEX related directories and files
-/src-bex/www
-/src-bex/js/core
-
-# Log files
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# Editor directories and files
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+# env files (DO NOT commit secrets)
+.env
+.env.*
+!.env.example
+!*.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# vercel
+.vercel
+
+# supabase
+supabase/.branches
+supabase/.temp
+supabase/.env
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# logs
+logs/
+*.log
+.Codex/scheduled/*.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Davia
+.davia/.cache
+.cursor/rules/davia-documentation.mdc
+.davia/build
+
+# Expo / EAS (caches locais; gitignore aninhado nem sempre entra no tarball do EAS)
+.expo-tmp-*/
+**/.eas-inspect/
+# Note: project-local skills under .claude/skills/ ARE committed (carmo-local-design,
+# davia-documentation). Do not ignore them.
+
+.vercel
+.pm2-logs/

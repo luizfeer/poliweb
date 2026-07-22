@@ -1,0 +1,26 @@
+flowchart TD
+  M["Comerciante - painel/comercio/[id]"]
+
+  M --> CARD["Cardapio"]
+  M --> BOL["Boletim mensal"]
+  M --> REE["Studio - Reels"]
+
+  CARD --> C1["Editor: secoes e itens - drag, foto, preco"]
+  C1 --> C2[("business_menu_sections + business_menu_items")]
+  C2 --> C3["Pagina publica + app nativo - getBusinessMenu"]
+  C3 --> C4["QR pra mesa + link de bio - lib qrcode"]
+
+  BOL --> B1["Soma business_daily_stats do mes - RPC"]
+  B1 --> B2["Rank na categoria + favoritos - RPC security definer"]
+  B2 --> B3["Resumo Haiku - logado em ai_jobs"]
+  B3 --> B4[("business_monthly_reports - cache")]
+  B4 --> B5["Imagem compartilhavel - html-to-image"]
+
+  REE --> R1["Documento JSON do Studio - lib/studio/types.ts"]
+  R1 --> R2["Preview @remotion/player - Ken Burns + transicoes"]
+  R1 --> R3["Render MP4 - media-processor + @remotion/renderer"]
+  R3 --> R4[("studio_renders - video no R2")]
+
+  R3 -.->|"gerar asset -> R2 -> publicar/baixar"| BACKBONE["Backbone comum do Studio"]
+  B5 -.-> BACKBONE
+  C4 -.-> BACKBONE

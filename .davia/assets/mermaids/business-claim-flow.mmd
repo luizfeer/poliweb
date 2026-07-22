@@ -1,0 +1,11 @@
+flowchart TD
+    Public[Visitante logado\n/comercio/negocio/slug] --> Claim[Form Sou o dono]
+    Claim --> Action[submitClaimAction\napp/comercio/negocio/[slug]/actions.ts]
+    Action --> RLS[business_claims\nclaims_self_create]
+    RLS --> Queue[/painel/cidade/comercio/claims]
+    Queue --> Review[reviewClaimAction]
+    Review -->|Aprovar| Managers[entity_managers\nrole owner]
+    Review -->|Aprovar| Owner[businesses.owner_profile_id\nclaimed true]
+    Review -->|Aprovar| Role[profile_roles\nmerchant na cidade]
+    Review -->|Rejeitar| Reject[business_claims\nstatus rejected + motivo]
+    Managers --> Panel[/painel/comercio\nmerchant edita ficha]

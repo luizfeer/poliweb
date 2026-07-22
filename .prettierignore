@@ -1,0 +1,6 @@
+node_modules
+.next
+.davia/.cache
+.davia/build
+pnpm-lock.yaml
+*.md

@@ -1,0 +1,25 @@
+<h1>🌎 Arquitetura multi-cidade</h1>
+<p>O portal foi projetado <strong>desde o dia 1</strong> para suportar várias cidades. Carmo do Rio Claro é a cidade-foco do MVP, mas adicionar Capitólio, Guapé ou outra cidade da região é só uma linha em <code>cities</code> + ativar módulos.</p>
+<excalidraw data-path="data/multi-city.json"></excalidraw>
+<h2>Como funciona</h2>
+<ul>
+  <li><strong>Tabela <code>cities</code></strong> — registro mestre. Toda entidade do domínio tem <code>city_id</code> FK.</li>
+  <li><strong>Tabela <code>modules</code></strong> — registro global de funcionalidades disponíveis (utilities, tourism, real_estate, businesses, classifieds, community, transparency, ads, events).</li>
+  <li><strong>Tabela <code>city_modules</code></strong> — liga/desliga módulos por cidade, com <code>config jsonb</code> para overrides.</li>
+  <li><strong>RLS</strong> sempre filtra por <code>city_id</code> + papel do usuário. Admin de Carmo não toca em Capitólio.</li>
+</ul>
+<h2>URLs e roteamento</h2>
+<p>Decisão recomendada: <strong>subdomínio por cidade</strong> em produção (<code>crc.portal.com.br</code>, <code>capitolio.portal.com.br</code>) com fallback path-based em dev (<code>/crc</code>, <code>/capitolio</code>). Subdomínio melhora SEO local e identidade.</p>
+<p>O middleware Next resolve <code>request.headers.host</code> → <code>cities.slug</code> e injeta <code>currentCity</code> no contexto. Fallback: cookie <code>preferred_city</code>.</p>
+<h2>Adicionar nova cidade — passos</h2>
+<ol>
+  <li><code>insert into cities (slug, name, state, status) values ('alpinopolis', 'Alpinópolis', 'MG', 'coming_soon');</code></li>
+  <li>Inserir bairros em <code>districts</code></li>
+  <li>Habilitar módulos em <code>city_modules</code> (qual liga primeiro? geralmente <em>utilities + events + tourism</em>)</li>
+  <li>Promover um <code>city_admin</code> local em <code>profile_roles</code></li>
+  <li>Configurar subdomínio no DNS + Vercel</li>
+  <li>Mudar <code>cities.status</code> para <code>active</code> quando estiver pronto</li>
+</ol>
+<h2>Módulos por cidade</h2>
+<database-view data-path="data/modules.json"></database-view>
+<blockquote><strong>Trade-off escolhido:</strong> mesma instância Postgres para todas as cidades (não multi-tenant DB-por-cidade). Custo baixo, queries simples, RLS protege isolamento. Quando uma cidade ficar grande demais, dá pra promover pra DB separado depois.</blockquote>

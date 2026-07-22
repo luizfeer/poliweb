@@ -1,0 +1,23 @@
+<h1>Payment flow</h1>
+<p>O fluxo financeiro usa <strong>ledger local</strong> + <strong>Asaas</strong>.</p>
+<p>O objetivo é ter histórico confiável no perfil do usuário e visão global para super admin.</p>
+<excalidraw data-path="data/real-estate-approval.json"></excalidraw>
+<h2>Contrato</h2>
+<ul>
+  <li><code>portal_payments</code> guarda a cobrança local: dono, cidade, valor, status, vencimento e referência Asaas.</li>
+  <li><code>portal_payment_events</code> guarda cada evento/log associado ao pagamento.</li>
+  <li><code>asaas_webhook_events</code> mantém o payload bruto recebido do Asaas.</li>
+  <li><code>/api/asaas/webhook</code> sincroniza ledger, assinatura comercial, destaque pago e publicação paga.</li>
+  <li><code>lib/payments/ledger.ts</code> centraliza gravação de cobrança e eventos.</li>
+</ul>
+<h2>Entradas</h2>
+<ul>
+  <li><strong>Publicação paga</strong>: imóveis e classificados usam <code>AsaasPaymentGateway</code>.</li>
+  <li><strong>Destaque pago</strong>: <code>feature_orders</code> cria cobrança avulsa no Asaas.</li>
+  <li><strong>Assinatura comercial</strong>: webhooks de pagamentos de assinatura viram registros no ledger.</li>
+</ul>
+<h2>Interfaces</h2>
+<ul>
+  <li><code>/painel/perfil/pagamentos</code> mostra histórico e logs para o dono do pagamento.</li>
+  <li><code>/painel/super/pagamentos</code> mostra entrada paga, pendentes, atrasos e eventos recentes.</li>
+</ul>

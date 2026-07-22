@@ -1,0 +1,43 @@
+<h1>Turismo Atrações</h1>
+<p>Atrações viraram entidades gerenciáveis.</p>
+<p>O padrão segue negócios e igrejas: <strong>owner direto</strong>, <strong>entity_managers</strong>, experiências moderadas e mídias UGC aprovadas.</p>
+<database-view data-path="data/tourism-attractions-schema.json"></database-view>
+<h2>Decisões</h2>
+<ul>
+  <li><strong>Sem rename agora:</strong> <code>tour_packages</code> continua no banco; UI usa Roteiros.</li>
+  <li><strong>UGC seguro:</strong> experiências, fotos e vídeos entram como <code>pending</code>.</li>
+  <li><strong>Envio unificado:</strong> <code>ContributionPrompts</code> abre o modal Compartilhe sua experiência com nota, relato, dica e até 5 mídias.</li>
+  <li><strong>Owner flexível:</strong> <code>owner_profile_id</code> cobre dono principal; <code>entity_managers</code> cobre equipe.</li>
+  <li><strong>Google pronto:</strong> <code>google_place_id</code>, rating, URL, fotos e sync ficam em <code>attractions</code>.</li>
+</ul>
+<h2>Conteúdo inicial de Carmo</h2>
+<p>A migration <code>20260505170000_carmo_tourism_real_content.sql</code> remove seeds demonstrativos e publica atrações reais do planejamento turístico de Carmo do Rio Claro.</p>
+<p>A migration <code>20260505183000_carmo_tourism_real_sources.sql</code> reforça a limpeza dos demos e adiciona dados reais conferidos em fontes públicas da Prefeitura, Minas Gerais Turismo e planejamento turístico local.</p>
+<ul>
+  <li><strong>Natureza e aventura:</strong> Serra da Tormenta, Cachoeira Pedra Molhada e Cachoeira do Silvestre.</li>
+  <li><strong>Mar de Minas:</strong> Lago de Furnas, Aterro Santa Quitéria e cachoeiras acessíveis por barco.</li>
+  <li><strong>Cultura:</strong> MUARI, Praça Maria Goulart e Igreja Matriz de Nossa Senhora do Carmo.</li>
+  <li><strong>Hospedagem e gastronomia:</strong> Pousada Pontal do Lago, Pousada Salto da Cachoeira, Hotel Varandas da Montanha, Pousada Santa Inês, Restaurante Pontal do Lago, Recanto das Águas, Prainha e Bom Prato.</li>
+  <li><strong>Roteiros:</strong> Mar de Minas, cânions e Aterro; Serra da Tormenta, fé e aventura; Centro histórico, MUARI e Matriz.</li>
+</ul>
+<p>As imagens ficam vazias por padrão para cadastro posterior pelo painel.</p>
+<h2>Distribuição no app</h2>
+<p>O componente <code>TourismGatewayWidget</code> conecta a home, a comunidade e o módulo de turismo com atalhos para atrações, roteiros, experiências, início e comunidade.</p>
+<h2>Arquivos principais</h2>
+<ul>
+  <li><code>supabase/migrations/20260505153000_tourism_attractions_tripadvisor.sql</code></li>
+  <li><code>supabase/migrations/20260505170000_carmo_tourism_real_content.sql</code></li>
+  <li><code>supabase/migrations/20260505183000_carmo_tourism_real_sources.sql</code></li>
+  <li><code>supabase/migrations/20260518025736_attraction_media_type.sql</code></li>
+  <li><code>apps/web/lib/tourism/queries.ts</code></li>
+  <li><code>apps/web/app/painel/turismo/actions.ts</code></li>
+  <li><code>apps/web/app/turismo/page.tsx</code></li>
+  <li><code>apps/web/app/page.tsx</code></li>
+  <li><code>apps/web/app/comunidade/page.tsx</code></li>
+  <li><code>apps/web/components/public/tourism/tourism-gateway-widget.tsx</code></li>
+  <li><code>apps/web/app/turismo/experiencias/page.tsx</code></li>
+  <li><code>apps/web/app/turismo/o-que-fazer/[slug]/contribution-prompts.tsx</code></li>
+  <li><code>apps/web/app/turismo/o-que-fazer/[slug]/page.tsx</code></li>
+  <li><code>apps/web/app/painel/cidade/turismo/atracoes/[id]/google-attraction-import.tsx</code></li>
+  <li><code>apps/worker/src/jobs/import-google-attraction-photos.ts</code></li>
+</ul>

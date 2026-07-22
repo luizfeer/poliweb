@@ -1,6 +1,0 @@
-[{
-        "relation": ["delegate_permission/common.handle_all_urls"],
-        "target" : { "namespace": "android_app", "package_name": "br.com.poliwebapp.www.twa",
-                     "sha256_cert_fingerprints": ["68:0B:87:95:73:46:DB:DA:44:23:1C:60:5C:D3:44:FD:9D:E6:18:42:DF:29:33:38:4F:61:D7:B0:1A:A7:CC:4C"] }
-      }
-]

@@ -1,0 +1,88 @@
+<h1>Plano Push</h1>
+<p>Plano completo pra <strong>push web</strong> + <strong>push nativo</strong> (Android e iOS) sem reescrever o produto.</p>
+<p>Estratégia: <em>PWA primeiro</em> pra validar UX, <em>RN shell com WebView</em> pra entrar nas lojas com push nativo, migração progressiva pra RN puro depois.</p>
+<hr />
+<h2>🏗️ Arquitetura</h2>
+<excalidraw data-path="data/push-architecture.json"></excalidraw>
+<hr />
+<h2>🗺️ Roadmap por sprint</h2>
+<database-view data-path="data/push-roadmap.json"></database-view>
+<hr />
+<h2>🔑 Decisões prévias</h2>
+<ul>
+  <li><strong>VAPID keys</strong> — par gerado uma vez. Pública em <code>NEXT_PUBLIC_VAPID_PUBLIC_KEY</code>, privada em secret do Supabase.</li>
+  <li><strong>Firebase project</strong> — FCM cobre Android nativo e despacha pra APNs via <em>Auth Key .p8</em> da Apple.</li>
+  <li><strong>Apple Developer</strong> (USD 99/ano) — sem isso não há push no iOS, nem via FCM.</li>
+  <li><strong>Google Play Console</strong> (USD 25 one-time).</li>
+</ul>
+<h2>🗄️ Modelagem Supabase</h2>
+<p>Uma tabela única cobre web e nativo. RLS sempre por <code>profile_id</code> e <code>city_id</code>.</p>
+<pre><code>create table push_subscriptions (
+  id uuid default gen_random_uuid() primary key,
+  profile_id uuid references profiles(id) on delete cascade,
+  city_id uuid references cities(id),
+  platform text check (platform in ('web','android','ios')) not null,
+  endpoint text, p256dh text, auth text,
+  fcm_token text,
+  user_agent text,
+  last_seen_at timestamptz default now(),
+  created_at timestamptz default now(),
+  unique (profile_id, platform, coalesce(endpoint, fcm_token))
+);
+
+create table notification_preferences (
+  profile_id uuid, city_id uuid, module text,
+  channel text check (channel in ('push','email')),
+  enabled boolean default true,
+  primary key (profile_id, city_id, module, channel)
+);</code></pre>
+<h2>🌐 Web Push (Sprint B)</h2>
+<ul>
+  <li><code>apps/web/public/manifest.webmanifest</code> com ícones 192/512 e <code>display: standalone</code>.</li>
+  <li><code>apps/web/public/sw.js</code> com listeners <code>push</code> e <code>notificationclick</code>.</li>
+  <li><code>components/push/enable-push-button.tsx</code> (client) → <code>pushManager.subscribe</code> → Server Action com Zod.</li>
+  <li>Tela <code>/painel/notificacoes/preferencias</code> ligando módulos liga/desliga por canal.</li>
+</ul>
+<blockquote>No iOS, web push <strong>só funciona</strong> a partir do iOS 16.4 <em>e</em> se o usuário fizer "Adicionar à Tela de Início". Mostrar banner condicional ensinando o gesto.</blockquote>
+<h2>📱 RN shell (Sprint C)</h2>
+<p>Repo novo <code>apps/mobile/</code> usando <strong>Expo bare + dev client</strong> pra builds via EAS sem dor de Xcode.</p>
+<ul>
+  <li><code>react-native-webview</code> carregando o site Next.</li>
+  <li><code>@react-native-firebase/messaging</code> pra token FCM.</li>
+  <li><code>@notifee/react-native</code> pra exibir notificação em foreground.</li>
+  <li><code>expo-linking</code> pra deep links <code>carmolocal://turismo/...</code>.</li>
+  <li>Bridge: WebView <code>onMessage</code> recebe token do JS no site → fetch autenticado pra Server Action <code>registerDevice</code>.</li>
+</ul>
+<blockquote>App Review da Apple rejeita "site embrulhado". Push + splash + deep link já cobrem o mínimo, mas vale ter <strong>1-2 telas nativas</strong> (login ou perfil) como seguro.</blockquote>
+<h2>📤 Envio unificado</h2>
+<p>Edge Function <code>send-push</code> recebe <code>{ audience, title, body, url, module }</code> e:</p>
+<ol>
+  <li>Resolve audiência (ex: cidadãos de Carmo inscritos em <code>events</code>).</li>
+  <li>Filtra por <code>notification_preferences</code>.</li>
+  <li>Particiona por plataforma: <code>web-push</code> com VAPID, <code>FCM Admin SDK</code> pra mobile.</li>
+  <li>Loga em <code>push_deliveries</code>.</li>
+  <li>Remove subscriptions com <code>410 Gone</code> (web) ou <code>UNREGISTERED</code> (FCM).</li>
+</ol>
+<h2>🎯 Gatilhos iniciais</h2>
+<ul>
+  <li>Evento novo na cidade favorita do usuário.</li>
+  <li>Novo classificado em categoria seguida.</li>
+  <li>Alerta de balsa ou clima (reaproveita o agent já existente).</li>
+  <li>Resposta em comentário ou pedido respondido pelo comerciante.</li>
+  <li>Aprovação de papel <code>merchant</code>.</li>
+</ul>
+<h2>✅ Checklist antes de subir pra produção</h2>
+<ul data-type="taskList">
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Migrations <code>push_subscriptions</code> e <code>notification_preferences</code> aplicadas</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>RLS testada por <code>profile_id</code> e <code>city_id</code></p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>VAPID keys geradas e em secrets</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Firebase project + APNs Auth Key configurados</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Service worker registrado e cacheado corretamente</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Edge Function <code>send-push</code> com retry e limpeza de tokens mortos</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Página <code>/privacidade</code> atualizada mencionando push e device tokens</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Tela de preferências por módulo (LGPD: opt-out granular)</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>EAS Build configurado pra Android e iOS</p></li>
+  <li data-checked="false" data-type="taskItem"><input type="checkbox"><p>Política privacidade + screenshots + textos PT-BR de permissão prontos</p></li>
+</ul>
+<hr />
+<p>Ver também: <code>notifications.html</code> (inbox in-app), <code>auth-flow.html</code> (perfis e cidades), <code>multi-city.html</code> (filtro por <code>city_id</code>).</p>

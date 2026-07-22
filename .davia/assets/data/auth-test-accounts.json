@@ -1,0 +1,38 @@
+[
+  {
+    "email": "super@carmolocal.test",
+    "senha": "CarmoLocal123!",
+    "papel": "super_admin",
+    "cidade": "global",
+    "entrada": "/entrar",
+    "destino_esperado": "/painel/super/cidades",
+    "pode_testar": "criar cidades e acessar visão global"
+  },
+  {
+    "email": "admin@carmolocal.test",
+    "senha": "CarmoLocal123!",
+    "papel": "city_admin",
+    "cidade": "carmo-do-rio-claro",
+    "entrada": "/entrar",
+    "destino_esperado": "/painel/cidade",
+    "pode_testar": "equipe, módulos, distritos e audit da cidade"
+  },
+  {
+    "email": "merchant@carmolocal.test",
+    "senha": "CarmoLocal123!",
+    "papel": "merchant",
+    "cidade": "carmo-do-rio-claro",
+    "entrada": "/entrar",
+    "destino_esperado": "/painel/comercio",
+    "pode_testar": "área base do comerciante"
+  },
+  {
+    "email": "citizen@carmolocal.test",
+    "senha": "CarmoLocal123!",
+    "papel": "citizen",
+    "cidade": "carmo-do-rio-claro",
+    "entrada": "/entrar",
+    "destino_esperado": "/painel",
+    "pode_testar": "perfil e experiência do cidadão"
+  }
+]

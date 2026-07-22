@@ -1,0 +1,25 @@
+<h1>Transparência</h1>
+<p>A camada de transparência é parte do app local de informações públicas de Carmo.</p>
+<p>O scraping pesado roda em <strong>apps/worker</strong> numa VPS.</p>
+<excalidraw data-path="data/transparencia-worker.json"></excalidraw>
+<h2>Fontes oficiais</h2>
+<ul>
+  <li><strong>Notícias da Câmara</strong>: texto aberto e destaque no front.</li>
+  <li><strong>Proposições</strong>: texto atual, com resumo breve por IA.</li>
+  <li><strong>Notícias da Prefeitura</strong>: últimas 5 com thumbnail.</li>
+  <li><strong>Diário Oficial, sessões e licitações</strong>: coleta preservada, fonte externa e sem resumo fraco quando depender de PDF.</li>
+</ul>
+<h2>Contrato de coleta</h2>
+<ul>
+  <li>Preservar sempre o link oficial original.</li>
+  <li>Salvar <code>source_url</code>, <code>source_host</code>, <code>scraped_at</code>, <code>published_at</code>, <code>title</code>, <code>raw_text</code>, <code>raw_html_excerpt</code> e <code>checksum</code>.</li>
+  <li>Fazer upsert por chave estável.</li>
+  <li>Não reprocessar quando o checksum não mudou.</li>
+  <li>Registrar warnings quando o parser tiver baixa confiança.</li>
+</ul>
+<h2>Responsabilidade pública</h2>
+<ul>
+  <li>IA só resume conteúdo textual útil.</li>
+  <li>Conteúdo sensível fica ocultável por <code>flagged</code>.</li>
+  <li>Todo link oficial abre externo.</li>
+</ul>

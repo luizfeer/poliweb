@@ -1,0 +1,46 @@
+<h1>Community</h1>
+<p><strong>Comunidade</strong> concentra UGC local com moderacao obrigatoria.</p>
+<p>Todo conteudo usa <code>city_id</code> e respeita <code>city_modules</code>.</p>
+<excalidraw data-path="data/community-moderation-flow.json"></excalidraw>
+<h2>Fluxo</h2>
+<ul>
+  <li><strong>Criacao:</strong> usuario logado envia formulario publico.</li>
+  <li><strong>Status inicial:</strong> sempre <code>pending</code>.</li>
+  <li><strong>IA:</strong> <code>moderate-ugc</code> registra uso em <code>ai_jobs</code>.</li>
+  <li><strong>Moderacao:</strong> <code>moderator</code>, <code>city_admin</code> e <code>super_admin</code> revisam.</li>
+  <li><strong>Auditoria:</strong> decisoes gravam <code>audit_log</code>.</li>
+  <li><strong>Denuncias:</strong> <code>content_reports</code> incrementa flags e pode voltar para fila.</li>
+</ul>
+<h2>Tabelas</h2>
+<database-view data-path="data/community-tables.json"></database-view>
+<h2>Superfícies novas</h2>
+<ul>
+  <li><strong><a href="igrejas.html">Igrejas</a>:</strong> perfis reivindicáveis e calendário religioso semanal.</li>
+  <li><strong>Grupos e coletivos:</strong> diretório público, ficha detalhada, sessão própria de WhatsApp e painel do gestor.</li>
+</ul>
+<h2>Grupos e coletivos</h2>
+<ul>
+  <li><strong><code>community_groups</code>:</strong> unifica coletivos, associações, projetos e grupos de WhatsApp.</li>
+  <li><strong><code>community_group_posts</code>:</strong> avisos práticos, pedidos, doações e oportunidades por grupo.</li>
+  <li><strong><code>community_group_followers</code>:</strong> moradores seguem grupos com <code>role='follower'</code>.</li>
+  <li><strong>Ownership:</strong> <code>owner_profile_id</code> + <code>entity_managers(entity_type='community_group')</code>.</li>
+  <li><strong>Seguidores:</strong> ficha pública mostra apenas nome e avatar do perfil.</li>
+  <li><strong>WhatsApp:</strong> link público, thumb/logo, capa, regras, contato e data de última verificação.</li>
+  <li><strong>OG compartilhável:</strong> <code>og_image_jobs</code> gera WebP persistido em Bunny CDN para cada grupo publicado.</li>
+  <li><strong>Cache público:</strong> listagem e ficha usam <code>publicCached()</code> com tag <code>community-groups</code>.</li>
+  <li><strong>Rotas:</strong> <code>/comunidade/grupos</code>, <code>/comunidade/grupos/whatsapp</code>, <code>/painel/comunidade/grupos</code>.</li>
+</ul>
+<h2>Arquivos-chave</h2>
+<ul>
+  <li><code>supabase/migrations/20260429120400_community.sql</code></li>
+  <li><code>supabase/migrations/20260430233000_comunidade_admin_plan04.sql</code></li>
+  <li><code>supabase/migrations/20260511110000_community_groups.sql</code></li>
+  <li><code>supabase/migrations/20260511111000_community_group_followers.sql</code></li>
+  <li><code>supabase/migrations/20260511203000_community_groups_og_jobs.sql</code></li>
+  <li><code>apps/web/lib/community/queries.ts</code></li>
+  <li><code>apps/web/lib/community/actions.ts</code></li>
+  <li><code>apps/web/app/comunidade/*</code></li>
+  <li><code>apps/worker/src/jobs/og-pending.ts</code></li>
+  <li><code>apps/web/app/painel/cidade/comunidade/page.tsx</code></li>
+  <li><code>supabase/functions/moderate-ugc/index.ts</code></li>
+</ul>

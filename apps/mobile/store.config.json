@@ -1,0 +1,60 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "version": "1.0",
+    "copyright": "© 2026 CidadeViva / Portal Carmelitano",
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gambling": false,
+      "gamblingSimulated": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "unrestrictedWebAccess": true,
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "violenceRealistic": "NONE",
+      "kidsAgeBand": null,
+      "ageRatingOverride": "NONE",
+      "koreaAgeRatingOverride": "NONE"
+    },
+    "categories": ["TRAVEL", "LIFESTYLE"],
+    "info": {
+      "en-US": {
+        "title": "Portal Carmelitano",
+        "subtitle": "Carmo do Rio Claro, MG",
+        "description": "Hyperlocal city app for Carmo do Rio Claro, Brazil: tourism, events, local businesses, classifieds, and public services.",
+        "keywords": ["carmo", "furnas", "canastra", "tourism", "brazil", "travel", "local", "events"],
+        "marketingUrl": "https://portalcarmelitano.com.br",
+        "privacyPolicyUrl": "https://portalcarmelitano.com.br/privacidade",
+        "supportUrl": "https://portalcarmelitano.com.br/contato"
+      },
+      "pt-BR": {
+        "title": "Portal Carmelitano",
+        "subtitle": "Carmo do Rio Claro na mão",
+        "description": "O Portal Carmelitano é o app da sua cidade em Carmo do Rio Claro/MG, na região de Furnas e da Serra da Canastra. Turismo, eventos, comércios, classificados, comunidade e transparência pública — tudo em um só lugar.\n\nO QUE VOCÊ ENCONTRA\n• Turismo: pousadas, restaurantes, passeios de barco, mirantes, cachoeiras e pontos da Canastra com mapa, fotos e contato direto.\n• Imóveis: aluguel de temporada e venda, com filtros por bairro, preço e características.\n• Comércios e serviços: guia completo da cidade — mercados, farmácias, oficinas, profissionais autônomos, com horário, telefone e WhatsApp.\n• Eventos: shows, festas, missas, eventos esportivos e culturais.\n• Classificados: compre, venda e troque com quem é da cidade.\n• Comunidade: avisos do bairro, achados e perdidos, vaquinhas e voluntariado.\n• Transparência: notícias da prefeitura, atas, editais e prestações de contas resumidas pela nossa IA, sempre com link para a fonte oficial.\n• Utilidades: telefones úteis, plantões, farmácias 24h, status da água e da energia.\n• Assistente: tire dúvidas sobre a cidade por texto ou voz.\n• Alertas locais: chuva forte, interdições e avisos importantes (com sua permissão).\n\nPRA QUEM É\n• Moradores de Carmo do Rio Claro que querem se manter informados.\n• Turistas que visitam Furnas, a Canastra e o Lago de Furnas.\n• Comerciantes e pousadeiros que querem aparecer pra cidade inteira.\n• Imobiliárias e corretores locais.\n\nSEU NEGÓCIO NO PORTAL\nCadastre gratuitamente sua pousada, restaurante, loja ou serviço. Receba avaliações, divulgue promoções e seja encontrado por quem está na cidade.\n\nFEITO PRA REGIÃO\nO Portal Carmelitano nasce em Carmo do Rio Claro e está se expandindo pra Capitólio, Guapé, São Roque de Minas e Alpinópolis.\n\nPRIVACIDADE\nLevamos a LGPD a sério. Você controla seus dados pelo painel do cidadão, pode pedir exclusão a qualquer momento e nunca exibimos CPF, endereço residencial ou dados sensíveis em conteúdo público.\n\nDúvidas ou sugestões: contato@carmolocal.com.br ou https://portalcarmelitano.com.br/contato",
+        "keywords": ["carmo", "furnas", "canastra", "turismo", "pousada", "comercio", "eventos", "classificados", "carmo mg"],
+        "releaseNotes": "Primeira versão pública do app: home nativa, busca, assistente com voz, mapa de turismo, login com Apple e notificações locais. Conteúdo de turismo, comércio, eventos e serviços de Carmo do Rio Claro.",
+        "promoText": "Tudo de Carmo do Rio Claro no bolso: turismo na Canastra, eventos, comércios, classificados e avisos da cidade.",
+        "marketingUrl": "https://portalcarmelitano.com.br",
+        "privacyPolicyUrl": "https://portalcarmelitano.com.br/privacidade",
+        "privacyChoicesUrl": "https://portalcarmelitano.com.br/excluir-conta",
+        "supportUrl": "https://portalcarmelitano.com.br/contato"
+      }
+    },
+    "review": {
+      "firstName": "Luiz",
+      "lastName": "Almeida",
+      "email": "luiz.garra@live.com",
+      "phone": "+55 35 98800-0000",
+      "demoUsername": "review@portalcarmelitano.com.br",
+      "demoPassword": "REPLACE_ME_REVIEW_PASSWORD",
+      "demoRequired": true,
+      "notes": "App hiperlocal multi-cidade; MVP em Carmo do Rio Claro/MG (cidade já selecionada ao abrir).\n\nCOMO TESTAR\n1) Abra o app — a home nativa carrega ofertas e atalhos da cidade.\n2) Login: use as credenciais demo acima, cadastre um e-mail novo em /entrar ou Sign in with Apple.\n3) Abas: Início (nativo), Explorar, Assistente (chat + microfone), Perfil. Turismo/comércio/painel abrem em WebView do domínio portalcarmelitano.com.br (navegação restrita ao portal).\n4) Exclusão de conta (Guideline 5.1.1): faça login → Perfil → Excluir conta → abre o formulário em Painel → Privacidade (pedido in-app, fila manual de aprovação).\n5) Notificações: opcionais — alertas da cidade e respostas no painel.\n6) Localização (When In Use): permissão ao abrir mapa em Explorar ou Turismo → Onde ficar; ponto azul no mapa.\n7) Microfone/fala: assistente na home.\n8) Fotos/câmera: upload no painel do comerciante (se logado).\n\nUniversal Links: https://portalcarmelitano.com.br/.well-known/apple-app-site-association\nConteúdo \"Resumido por IA\" sempre linka a fonte oficial. Criptografia padrão HTTPS (ITSAppUsesNonExemptEncryption = false)."
+    }
+  }
+}

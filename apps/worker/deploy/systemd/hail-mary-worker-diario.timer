@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Diario Oficial scraper daily
+
+[Timer]
+OnCalendar=*-*-* 06:00:00
+Persistent=true
+Unit=hail-mary-worker@scrape:diario.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,49 @@
+{
+  "name": "worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node --env-file=.env dist/index.js",
+    "scrape:diario": "node --env-file=.env dist/index.js scrape:diario",
+    "scrape:atas": "node --env-file=.env dist/index.js scrape:atas",
+    "scrape:licitacoes": "node --env-file=.env dist/index.js scrape:licitacoes",
+    "scrape:noticias-camara": "node --env-file=.env dist/index.js scrape:noticias-camara",
+    "scrape:noticias-prefeitura": "node --env-file=.env dist/index.js scrape:noticias-prefeitura",
+    "scrape:proposicoes": "node --env-file=.env dist/index.js scrape:proposicoes",
+    "scrape:all": "node --env-file=.env dist/index.js scrape:all",
+    "import:cliqueiachei-businesses": "node --env-file=.env dist/index.js import:cliqueiachei-businesses",
+    "import:google-business-photos": "node --env-file=.env dist/index.js import:google-business-photos",
+    "import:google-attraction-photos": "node --env-file=.env dist/index.js import:google-attraction-photos",
+    "estimate:ia": "node --env-file=.env dist/index.js estimate:ia",
+    "summarize:pending": "node --env-file=.env dist/index.js summarize:pending",
+    "embed:pending": "node --env-file=.env dist/index.js embed:pending",
+    "indexing:semantic": "node --env-file=.env dist/index.js indexing:semantic",
+    "moderate:backlog": "node --env-file=.env dist/index.js moderate:backlog",
+    "reindex:tourism": "node --env-file=.env dist/index.js reindex:tourism",
+    "analytics:aggregate": "node --env-file=.env dist/index.js analytics:aggregate",
+    "weather:update": "node --env-file=.env dist/index.js weather:update",
+    "road-routes:update": "node --env-file=.env dist/index.js road-routes:update",
+    "og:pending": "node --env-file=.env dist/index.js og:pending",
+    "email:deliveries": "node --env-file=.env dist/index.js email:deliveries",
+    "push:deliveries": "node --env-file=.env dist/index.js push:deliveries",
+    "business:trial-nudges": "node --env-file=.env dist/index.js business:trial-nudges",
+    "media:sweep-orphans": "node --env-file=.env dist/index.js media:sweep-orphans",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/sharp": "^0.32.0",
+    "@types/web-push": "^3.6.4",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1048.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@supabase/supabase-js": "^2.45.0",
+    "expo-server-sdk": "^6.1.0",
+    "satori": "^0.26.0",
+    "sharp": "^0.34.5",
+    "web-push": "^3.6.7"
+  }
+}

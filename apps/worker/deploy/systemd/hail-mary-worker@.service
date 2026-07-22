@@ -1,0 +1,12 @@
+[Unit]
+Description=Hail Mary transparency worker job %i
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hail-mary
+EnvironmentFile=/opt/hail-mary/apps/worker/.env
+ExecStart=/usr/bin/pnpm --filter worker %i
+User=hailmary
+Group=hailmary

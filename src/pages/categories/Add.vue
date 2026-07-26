@@ -129,11 +129,13 @@ export default defineComponent({
       this.$q.loading.show()
       const loc = this.selectedCity?.id ? this.selectedCity : this.getCurrentLocalization()
       const payload = { ...this.form }
-      if (loc?.id && !payload.addressId) {
+      if (payload.categoryId) {
+        payload.addressId = null
+      } else if (loc?.id && !payload.addressId) {
         payload.addressId = loc.id
       }
       Object.keys(payload).forEach((key) => {
-        if (payload[key] === null || payload[key] === undefined || payload[key] === '') {
+        if (payload[key] === undefined || payload[key] === '') {
           delete payload[key]
         }
       })

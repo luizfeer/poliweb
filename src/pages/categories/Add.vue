@@ -129,11 +129,14 @@ export default defineComponent({
       this.$q.loading.show()
       const loc = this.selectedCity?.id ? this.selectedCity : this.getCurrentLocalization()
       const payload = { ...this.form }
-      if (payload.categoryId) {
-        delete payload.addressId
-      } else if (loc?.id && !payload.addressId) {
+      if (loc?.id && !payload.addressId) {
         payload.addressId = loc.id
       }
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === null || payload[key] === undefined || payload[key] === '') {
+          delete payload[key]
+        }
+      })
       this.$api.post('/categories', payload)
       .then((response) => {
         //  console.log(response.data.addresses)

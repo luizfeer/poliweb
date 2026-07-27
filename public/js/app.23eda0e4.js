@@ -1,5 +1,5 @@
 (function () {
-  var key = 'poliweb_legacy_chunk_common_e6a3fe80_reloaded'
+  var key = 'poliweb_legacy_app_23eda0e4_recovered'
 
   function reload() {
     var separator = window.location.search ? '&' : '?'
@@ -31,14 +31,6 @@
     return Promise.all(work)
   }
 
-  window.poliwebForceLegacyReload = function () {
-    try {
-      window.sessionStorage && window.sessionStorage.removeItem(key)
-    } catch (_) {}
-
-    clearOldApp().then(reload).catch(reload)
-  }
-
   function showFallback() {
     try {
       document.body.innerHTML = [
@@ -46,25 +38,21 @@
         '<div style="max-width:420px;text-align:center">',
         '<h1 style="font-size:22px;margin:0 0 10px">Atualizacao necessaria</h1>',
         '<p style="font-size:15px;line-height:1.45;margin:0 0 18px;color:#475569">O aplicativo carregou uma versao antiga. Toque em atualizar para buscar a versao nova.</p>',
-        '<button onclick="window.poliwebForceLegacyReload()" style="border:0;border-radius:8px;background:#2563eb;color:white;font-weight:700;padding:12px 18px;font-size:15px">Atualizar</button>',
+        "<button onclick=\"window.sessionStorage&&window.sessionStorage.removeItem('poliweb_legacy_app_23eda0e4_recovered');window.location.replace(window.location.pathname+window.location.search+(window.location.search?'&':'?')+'appReload='+Date.now()+window.location.hash)\" style=\"border:0;border-radius:8px;background:#2563eb;color:white;font-weight:700;padding:12px 18px;font-size:15px\">Atualizar</button>",
         '</div>',
         '</div>'
       ].join('')
     } catch (_) {}
   }
 
-  function recover() {
-    if (window.sessionStorage && window.sessionStorage.getItem(key)) {
-      showFallback()
-      return
-    }
-
-    try {
-      window.sessionStorage && window.sessionStorage.setItem(key, '1')
-    } catch (_) {}
-
-    clearOldApp().then(reload).catch(reload)
+  if (window.sessionStorage && window.sessionStorage.getItem(key)) {
+    showFallback()
+    return
   }
 
-  recover()
+  try {
+    window.sessionStorage && window.sessionStorage.setItem(key, '1')
+  } catch (_) {}
+
+  clearOldApp().then(reload).catch(reload)
 }())

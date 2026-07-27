@@ -96,36 +96,49 @@
           <p class="empty-subtitle">Tente buscar pelo nome principal, uma categoria ou outro servico.</p>
         </div>
 
-        <div v-else class="results-grid">
-          <router-link
-            v-for="item in ads"
-            :key="item.id"
-            :to="goToAd(item)"
-            class="result-card"
+        <div v-else class="result-groups">
+          <section
+            v-for="group in resultGroups"
+            :key="group.key"
+            class="result-group"
           >
-            <div class="result-media">
-              <img v-if="imageFor(item)" :src="imageFor(item)" :alt="item.name" class="result-img">
-              <div v-else class="result-avatar">{{ initials(item.name) }}</div>
+            <div class="result-group-head">
+              <h3>{{ group.title }}</h3>
+              <span>{{ group.items.length }}</span>
             </div>
 
-            <div class="result-body">
-              <div class="result-meta">
-                <span v-if="categoryLabel(item)" class="result-chip">{{ categoryLabel(item) }}</span>
-                <span v-if="cityLabel(item)" class="result-city">
-                  <AppIcon name="place" :size="14" />
-                  {{ cityLabel(item) }}
-                </span>
-              </div>
-              <h3 class="result-name">{{ item.name }}</h3>
-              <p v-if="formatDesc(item.description)" class="result-desc">
-                {{ formatDesc(item.description) }}
-              </p>
-              <div class="result-footer">
-                <span v-if="isCurrentCity(item)" class="nearby-badge">Na cidade selecionada</span>
-                <span v-if="item._matchLabel" class="match-label">{{ item._matchLabel }}</span>
-              </div>
+            <div class="results-grid">
+              <router-link
+                v-for="item in group.items"
+                :key="item.id"
+                :to="goToAd(item)"
+                class="result-card"
+              >
+                <div class="result-media">
+                  <img v-if="imageFor(item)" :src="imageFor(item)" :alt="item.name" class="result-img">
+                  <div v-else class="result-avatar">{{ initials(item.name) }}</div>
+                </div>
+
+                <div class="result-body">
+                  <div class="result-meta">
+                    <span v-if="categoryLabel(item)" class="result-chip">{{ categoryLabel(item) }}</span>
+                    <span v-if="cityLabel(item)" class="result-city">
+                      <AppIcon name="place" :size="14" />
+                      {{ cityLabel(item) }}
+                    </span>
+                  </div>
+                  <h3 class="result-name">{{ item.name }}</h3>
+                  <p v-if="formatDesc(item.description)" class="result-desc">
+                    {{ formatDesc(item.description) }}
+                  </p>
+                  <div class="result-footer">
+                    <span v-if="isCurrentCity(item)" class="nearby-badge">Na cidade selecionada</span>
+                    <span v-if="item._matchLabel" class="match-label">{{ item._matchLabel }}</span>
+                  </div>
+                </div>
+              </router-link>
             </div>
-          </router-link>
+          </section>
         </div>
       </section>
 
@@ -200,6 +213,22 @@ export default ({
     },
     currentCityLabel() {
       return [this.currentCity?.city, this.currentCity?.state].filter(Boolean).join(', ')
+    },
+    resultGroups() {
+      const groups = []
+      const used = new Set()
+      const take = (key, title, predicate, limit = 12) => {
+        const items = this.ads.filter((item) => !used.has(item.id) && predicate(item)).slice(0, limit)
+        items.forEach((item) => used.add(item.id))
+        if (items.length) groups.push({ key, title, items })
+      }
+
+      take('best', 'Melhores resultados', (item, index) => index < 6 && item._matchKind === 'name', 6)
+      take('city', this.currentCityLabel ? 'Na cidade selecionada' : 'Com cidade informada', (item) => this.isCurrentCity(item), 12)
+      take('category', 'Categorias e relacionados', (item) => item._matchKind === 'category' || item._matchKind === 'description', 12)
+      take('other', 'Outras cidades', () => true, 18)
+
+      return groups
     }
   },
   watch: {
@@ -247,13 +276,14 @@ export default ({
 
       this.loading = true
       try {
-        const cityAds = await this.fetchCityAds()
-        let results = this.filterAndRank(cityAds, term)
+        const [nameAds, cityAds] = await Promise.all([
+          this.fetchGlobalSearch(term, ['name']),
+          this.fetchCityAds()
+        ])
 
-        if (results.length < 8) {
-          const globalAds = await this.fetchGlobalSearch(term)
-          results = this.filterAndRank([...cityAds, ...globalAds], term)
-        }
+        let results = this.filterAndRank([...nameAds, ...cityAds], term)
+        const relatedAds = await this.fetchGlobalSearch(term, ['category', 'description'])
+        results = this.filterAndRank([...nameAds, ...cityAds, ...relatedAds], term)
 
         if (requestId === this.searchRequestId) {
           const hydrated = await this.hydrateTopResults(results.slice(0, 24))
@@ -283,8 +313,7 @@ export default ({
         return []
       }
     },
-    async fetchGlobalSearch(term) {
-      const fields = ['name', 'description', 'category']
+    async fetchGlobalSearch(term, fields = ['name', 'description', 'category']) {
       const responses = await Promise.allSettled(fields.map((field) => {
         const params = new URLSearchParams()
         params.set(field, term)
@@ -575,6 +604,41 @@ export default ({
   color: #64748b;
   font-size: 0.78rem;
   white-space: nowrap;
+}
+
+.result-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.result-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.result-group-head h3 {
+  margin: 0;
+  color: #334155;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.result-group-head span {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .results-grid {

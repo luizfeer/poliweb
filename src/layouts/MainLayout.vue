@@ -255,6 +255,7 @@ export default defineComponent({
     },
     watch: {
       $route(to, from) {
+        this.syncDesktopSearch(to)
         if (from.fullPath === '/login') {
           console.log('change router')
           this.init()
@@ -271,6 +272,7 @@ export default defineComponent({
     },
     mounted() {
         console.log('mount')
+        this.syncDesktopSearch(this.$route)
         this.init()
         this.loadCategoriesRef = (loc) => this.getData(loc)
     },
@@ -287,6 +289,12 @@ export default defineComponent({
                 return
             }
             this.$router.push(`/buscar/${encodeURIComponent(term)}`)
+        },
+        syncDesktopSearch(route) {
+            const term = route?.params?.terms
+            if (route?.path?.startsWith('/buscar')) {
+                this.desktopSearch = term ? decodeURIComponent(String(term)) : ''
+            }
         },
         isDesktopLinkActive(link) {
             return this.isNavLinkActive(link)

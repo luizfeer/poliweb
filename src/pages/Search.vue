@@ -256,7 +256,9 @@ export default ({
         }
 
         if (requestId === this.searchRequestId) {
-          this.ads = results.slice(0, 40)
+          const hydrated = await this.hydrateTopResults(results.slice(0, 24))
+          const reranked = this.filterAndRank([...hydrated, ...results.slice(24)], term)
+          if (requestId === this.searchRequestId) this.ads = reranked.slice(0, 40)
         }
       } catch (err) {
         if (requestId !== this.searchRequestId) return
@@ -301,13 +303,17 @@ export default ({
         if (item?.id && !unique.has(item.id) && !item.deletedAt) unique.set(item.id, item)
       }
 
-      return [...unique.values()]
+      const ranked = [...unique.values()]
         .map((item) => ({ ...item, ...this.matchInfo(item, term) }))
         .filter((item) => item._score > 0)
         .sort((a, b) => {
           if (b._score !== a._score) return b._score - a._score
           return String(a.name || '').localeCompare(String(b.name || ''))
         })
+
+      const strongMatches = ranked.filter((item) => item._matchKind === 'name' || item._matchKind === 'category')
+      if (strongMatches.length) return strongMatches
+      return ranked
     },
     matchInfo(item, term) {
       const query = normalizeText(term)
@@ -320,33 +326,41 @@ export default ({
 
       let score = 0
       let label = ''
+      let kind = ''
 
       if (name === query) {
         score += 1200
         label = 'Nome exato'
+        kind = 'name'
       } else if (name.startsWith(query)) {
         score += 900
         label = 'Comeca pelo nome'
+        kind = 'name'
       } else if (name.includes(query)) {
         score += 700
         label = 'Nome contem a busca'
+        kind = 'name'
       }
 
       if (tokens.length && tokens.every((token) => name.includes(token))) {
         score += 260
         if (!label) label = 'Nome relacionado'
+        kind = kind || 'name'
       } else if (tokens.some((token) => name.includes(token))) {
         score += 120
         if (!label) label = 'Nome parecido'
+        kind = kind || 'name'
       }
 
       if (category.includes(query) || tokens.some((token) => category.includes(token))) {
         score += 90
         if (!label) label = 'Categoria'
+        kind = kind || 'category'
       }
       if (desc.includes(query) || tokens.some((token) => desc.includes(token))) {
         score += 35
         if (!label) label = 'Descricao'
+        kind = kind || 'description'
       }
       if (!score && tokens.some((token) => haystack.includes(token))) {
         score += 15
@@ -355,7 +369,19 @@ export default ({
       if (this.isCurrentCity(item)) score += 320
       if (this.imageFor(item)) score += 12
 
-      return { _score: score, _matchLabel: label }
+      return { _score: score, _matchLabel: label, _matchKind: kind }
+    },
+    async hydrateTopResults(items) {
+      const responses = await Promise.allSettled((items || []).map(async (item) => {
+        if (this.imageFor(item) && this.cityLabel(item)) return item
+        const response = await this.$api.get(`/categories/ads/${item.id}?nonDeleted=true`)
+        return { ...item, ...response?.data }
+      }))
+
+      return responses.map((response, index) => {
+        if (response.status === 'fulfilled' && response.value?.id) return response.value
+        return items[index]
+      })
     },
     isCurrentCity(item) {
       const current = this.currentCity

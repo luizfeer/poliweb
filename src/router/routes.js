@@ -5,7 +5,7 @@ function isAdmin() {
 }
 
 function isSuperAdmin() {
-  if (typeof localStorage === 'undefined') return true
+  if (typeof localStorage === 'undefined') return false
   try {
     const raw = localStorage.getItem('context')
     const context = raw ? JSON.parse(raw) : null

@@ -1,126 +1,164 @@
 <template>
   <q-page class="bg-gray-100">
-    
-    <span class="text-xl">
-      {{ "Criando um anúncio dentro da categoria " + nameCategorie }}
-    </span>
-     <q-carousel
-        v-model="slide"
-        transition-prev="slide-right"
-        transition-next="slide-left"
-        animated
-        class="h-[auto] bg-gray-100"          
-      >
-        <q-carousel-slide name="0" class="">
-          <q-form
-            @submit="getCityCoordinates"
-            @reset="onReset"
-            class="p-6"
-          >
-          <div class="mt-10">
-            <div class="row">      
-              <q-input filled v-model="city" type="text" lazy-rules label="Cidade" class="w-full py-2" />
-              <q-input filled v-model="district" type="text" lazy-rules label="UF" class="w-full py-2" />
-            </div>
+    <div class="q-pa-md" style="max-width: 500px">
+      <div class="text-h6 q-mb-md">Criar cidade</div>
+
+      <q-form @submit="searchCoordinates" class="q-gutter-md">
+        <div class="row q-col-gutter-md">
+          <q-input
+            class="col"
+            filled
+            v-model="city"
+            label="Cidade"
+            :rules="[(v) => !!v || 'Obrigatório']"
+          />
+          <q-input
+            class="col"
+            filled
+            v-model="state"
+            label="UF"
+            maxlength="2"
+            :rules="[(v) => !!v || 'Obrigatório']"
+          />
+        </div>
+        <q-btn
+          label="Buscar coordenadas"
+          type="submit"
+          color="primary"
+          :loading="searching"
+        />
+      </q-form>
+
+      <template v-if="coordinates">
+        <q-separator class="q-my-md" />
+
+        <q-form @submit="createCity" class="q-gutter-md">
+          <div class="text-caption text-grey-8">{{ foundDisplayName }}</div>
+
+          <q-input
+            filled
+            v-model="country"
+            label="País"
+            :rules="[(v) => !!v || 'Obrigatório']"
+          />
+
+          <q-input
+            filled
+            v-model="zipCode"
+            label="CEP"
+            mask="#####-###"
+            unmasked-value
+            hint="Deve ter 8 dígitos e terminar em 000"
+            :rules="[
+              (v) => /^\d{8}$/.test(v) || 'CEP deve ter 8 dígitos',
+              (v) => v.endsWith('000') || 'CEP deve terminar em 000'
+            ]"
+          />
+
+          <div class="row q-col-gutter-md">
+            <q-input
+              class="col"
+              filled
+              v-model.number="coordinates.lat"
+              type="number"
+              label="Latitude"
+            />
+            <q-input
+              class="col"
+              filled
+              v-model.number="coordinates.long"
+              type="number"
+              label="Longitude"
+            />
           </div>
-          <q-btn label="Procurar" type="submit" color="primary"/>
-          </q-form>
-          {{ model }}
-        </q-carousel-slide>
-         <q-carousel-slide name="1" class="">
-          
-            
-        </q-carousel-slide>
-     </q-carousel>
-     
+
+          <q-btn
+            label="Criar cidade"
+            type="submit"
+            color="positive"
+            :loading="creating"
+          />
+        </q-form>
+      </template>
+    </div>
   </q-page>
 </template>
 
 <script>
-import { defineComponent } from "vue";
-import { ref } from "vue";
+import { defineComponent } from 'vue'
+import axios from 'axios'
 
 export default defineComponent({
-  name: "AddCategorias",
-  setup() {
-    return {   
-      slide: ref('0'), 
-      city: ref(''),
-      district: ref(''),
-      model:ref([]),
-      dataApi: ref([])
+  name: 'AddAddress',
+  data () {
+    return {
+      city: '',
+      state: '',
+      country: 'Brasil',
+      zipCode: '',
+      coordinates: null,
+      foundDisplayName: '',
+      searching: false,
+      creating: false
     }
   },
-
   methods: {
-    getCityCoordinates () {
-    const url = "https://nominatim.openstreetmap.org/search?format=json&q="
-    const params = `${this.city}, ${this.district}`  
-    const self= this
-    this.$api.get(url + new URLSearchParams(params))
-    .then(function(response) {
-        if(response.data) {
-              const address = {                  
-                    city: response.data[0].display_name || "",                    
-                    coordinates: {
-                      lat: response.data[0].lat  || "",
-                      long: response.data[0].lon  || ""         
-                    },                  
-              }
-              self.model = address
-              console.log(self.model)
-              self.dataApi = response.data
-            
-        } else {
-          console.log('Network response was not ok.');
-        }
-      })
-      .catch(function(error) {
-        console.log('There has been a problem with your fetch operation: ' + error.message);
-      })      
-    },      
-    setAd(){
-      this.$q.loading.show()
-      this.$api.post(`/categories/${this.categoryId}/ads`, {...this.formAds})
-      .then((response) => {
-        //  console.log(response.data.addresses)
-        if(response.data){
-          this.adId = response.data.id
-          this.slide = "2"
-          this.$q.notify({
-          color: 'secondary',
-          position: 'top',
-          message: 'Anúncio com sucesso!',         
+    async searchCoordinates () {
+      this.searching = true
+      try {
+        const { data } = await axios.get('https://nominatim.openstreetmap.org/search', {
+          params: {
+            format: 'json',
+            q: `${this.city}, ${this.state}, Brasil`,
+            countrycodes: 'br',
+            limit: 1
+          }
         })
+
+        if (!data || !data.length) {
+          this.$q.notify({ color: 'negative', message: 'Cidade não encontrada' })
+          this.coordinates = null
+          return
         }
-      })
-      .catch((err) => {
-        let msg
-        if( err.response){
-          msg =  err.response.data.message
-        }else {
-            msg = 'Erro na conexão!'
-        }
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: msg,
-          icon: 'report_problem'
-        })
-      })
-      .finally(() => {
-        this.$q.loading.hide()
-      })
+
+        this.coordinates = { lat: Number(data[0].lat), long: Number(data[0].lon) }
+        this.foundDisplayName = data[0].display_name
+      } catch (error) {
+        this.$q.notify({ color: 'negative', message: 'Erro ao buscar coordenadas' })
+      } finally {
+        this.searching = false
+      }
     },
-    
-    onReset () {
-      form.name = null
-      form.addressId = null
-      selectedCity = null
+    async createCity () {
+      this.creating = true
+      try {
+        await this.$api.post('/address', {
+          zipCode: this.zipCode,
+          city: this.city,
+          state: this.state,
+          country: this.country,
+          coordinates: {
+            lat: this.coordinates.lat,
+            long: this.coordinates.long
+          }
+        })
+
+        this.$q.notify({ color: 'positive', message: 'Cidade criada com sucesso!' })
+        this.resetForm()
+      } catch (error) {
+        const msg = error.response?.data?.message || 'Erro ao criar cidade'
+        this.$q.notify({ color: 'negative', message: msg, icon: 'report_problem' })
+      } finally {
+        this.creating = false
+      }
+    },
+    resetForm () {
+      this.city = ''
+      this.state = ''
+      this.zipCode = ''
+      this.coordinates = null
+      this.foundDisplayName = ''
     }
-  }, 
- async mounted () {},
-});
+  }
+})
 </script>
-<style>
-</style>

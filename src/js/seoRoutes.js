@@ -52,12 +52,15 @@ export function adUrl(ad = {}) {
 }
 
 export function categoryCityUrl(city = {}, category = {}) {
+  city = city || {}
+  category = category || {}
   const citySlug = slugify(city.city || city)
   const categorySlug = slugify(category.name || category)
   return citySlug && categorySlug ? `/${citySlug}/${categorySlug}` : '/'
 }
 
 export function cityUrl(city = {}) {
+  city = city || {}
   const citySlug = slugify(city.city || city)
   return citySlug ? `/${citySlug}` : '/cidades'
 }

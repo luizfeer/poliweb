@@ -110,7 +110,7 @@
 
 <script>
 import AppIcon from 'components/AppIcon.vue'
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 
 function normalize(str) {
   if (!str || typeof str !== 'string') return ''
@@ -191,7 +191,8 @@ export default {
     if (this.labelInterval) clearInterval(this.labelInterval)
   },
   methods: {
-    init() {
+    async init() {
+      const citysData = await fetchCities()
       this.citys = [...citysData].sort((a, b) => a.city.localeCompare(b.city))
       this.filteredCitys = [...this.citys]
       this.selectedCity = null

@@ -87,6 +87,8 @@
 <script>
 import { defineComponent } from 'vue'
 import axios from 'axios'
+import { cityUrl } from 'src/js/seoRoutes'
+import { invalidateCitiesCache } from 'src/services/cities'
 
 export default defineComponent({
   name: 'AddAddress',
@@ -144,7 +146,10 @@ export default defineComponent({
         })
 
         this.$q.notify({ color: 'positive', message: 'Cidade criada com sucesso!' })
+        invalidateCitiesCache()
+        const slug = cityUrl({ city: this.city })
         this.resetForm()
+        this.$router.push(slug)
       } catch (error) {
         const msg = error.response?.data?.message || 'Erro ao criar cidade'
         this.$q.notify({ color: 'negative', message: msg, icon: 'report_problem' })

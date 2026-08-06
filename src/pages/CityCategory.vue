@@ -91,7 +91,7 @@ import { computed, onMounted, onServerPrefetch, ref, watch } from 'vue'
 import { useMeta } from 'quasar'
 import { useRoute } from 'vue-router'
 import { api } from 'boot/axios'
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 import {
   adUrl,
   categoryCityUrl,
@@ -140,6 +140,7 @@ export default {
 
     const loadPage = async () => {
       loading.value = true
+      const citysData = await fetchCities()
       city.value = findCityBySlug(citysData, route.params.citySlug)
       category.value = null
       categories.value = []

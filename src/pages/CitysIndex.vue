@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 import { adUrl, cityUrl, normalizeSearch, slugify } from 'src/js/seoRoutes'
 import { FIVE_HOURS, getCached, setCached } from 'src/services/homeCache'
 
@@ -138,6 +138,7 @@ export default {
     }
   },
   async mounted() {
+    const citysData = await fetchCities()
     this.citys = [...citysData]
       .filter((city) => !city.deletedAt)
       .map((city) => ({ ...city, link: slugify(city.city) }))

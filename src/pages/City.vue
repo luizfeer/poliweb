@@ -160,7 +160,7 @@ import { useMeta } from 'quasar'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { api } from 'boot/axios'
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 import {
   adUrl,
   categoryCityUrl,
@@ -266,6 +266,7 @@ export default {
     }
 
     const loadPage = async () => {
+      const citysData = await fetchCities()
       city.value = findCityBySlug(citysData, route.params.cidade)
       categories.value = []
       newAds.value = []

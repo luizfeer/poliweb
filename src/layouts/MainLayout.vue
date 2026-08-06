@@ -395,7 +395,8 @@ export default defineComponent({
                 const data = await res.json()
                 const cityName = data?.city
                 if (!cityName) return false
-                const { citysData } = await import('src/js/citys')
+                const { fetchCities } = await import('src/services/cities')
+                const citysData = await fetchCities()
                 const n = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()
                 const nCity = n(cityName)
                 const city =
@@ -423,7 +424,8 @@ export default defineComponent({
                     const addrs = ad?.address || ad?.addresses
                     const addr = Array.isArray(addrs) && addrs.length ? addrs[addrs.length - 1] : addrs
                     const cityName = addr?.city || addr?.addressCity
-                    const { citysData } = await import('src/js/citys')
+                    const { fetchCities } = await import('src/services/cities')
+                    const citysData = await fetchCities()
                     let city = addr?.addressId ? citysData.find((c) => c.id === addr.addressId) : null
                     if (!city && cityName) {
                         const n = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()

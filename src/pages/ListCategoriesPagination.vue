@@ -83,7 +83,7 @@
 <script>
 import { defineComponent } from "vue";
 import { slugify } from 'src/js/slugify'
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 
 // export default {
 //   }
@@ -111,7 +111,7 @@ export default defineComponent({
     };
   },
   async mounted(){
-    this.citys = citysData
+    this.citys = await fetchCities()
     this.citys.map(city => {
        city.link = slugify(city.city)
      })

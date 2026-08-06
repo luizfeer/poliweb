@@ -234,7 +234,7 @@
 
 <script>
 import { date } from 'quasar'
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 
 function format(val) {
   return date.formatDate(val, 'DD/MM/YY HH:mm')
@@ -311,7 +311,7 @@ export default {
         email: ''
       },
       commerceForm: createEmptyCommerceForm(),
-      cityOptions: [...citysData].sort((a, b) => a.city.localeCompare(b.city)),
+      cityOptions: [],
       headers: [
         {
           name: 'name',
@@ -574,8 +574,10 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     this.fetchUsers()
+    const citysData = await fetchCities()
+    this.cityOptions = [...citysData].sort((a, b) => a.city.localeCompare(b.city))
   }
 }
 </script>

@@ -110,7 +110,7 @@ import { useStore } from 'vuex'
 import { useMeta, useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 import { queryClient } from 'boot/vue-query'
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 
 const CATEGORIES_VIEW_KEY = 'poliweb_categories_view_mode'
 const CATEGORY_ADS_STALE_TIME = 1000 * 60 * 5
@@ -119,9 +119,10 @@ function normalizeCity (s) {
   return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
 }
 
-function findCityIdByName (cityName) {
+async function findCityIdByName (cityName) {
   if (!cityName) return null
   const n = normalizeCity(cityName)
+  const citysData = await fetchCities()
   const city = citysData.find((c) => {
     const nc = normalizeCity(c.city)
     return nc === n || nc.includes(n) || n.includes(nc)
@@ -231,7 +232,7 @@ export default {
       let cityId = loc?.id
       const cityFromAds = pickCityFromAds(adsList)
       if (!cityId && cityFromAds) {
-        cityId = findCityIdByName(cityFromAds)
+        cityId = await findCityIdByName(cityFromAds)
       }
       if (!cityId) return ''
 

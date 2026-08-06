@@ -103,7 +103,7 @@
 import { ref, inject, watch, onUnmounted } from "vue";
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { citysData } from 'src/js/citys'
+import { fetchCities } from 'src/services/cities'
 
 function normalizeCitySearch(value = '') {
   return String(value || '')
@@ -270,6 +270,7 @@ export default {
   },
   async mounted(){
 
+     const citysData = await fetchCities()
      this.citys = [...citysData].sort((a, b) => a.city.localeCompare(b.city))
      this.filteredCitys = [...this.citys]
 

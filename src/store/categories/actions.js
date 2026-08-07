@@ -56,7 +56,15 @@ function mergeCategoryChildren(cityCategory, globalCategory) {
 }
 
 async function fetchMergedCityCategories(addressId) {
-  const response = await api.get(`/cities/${addressId}/categories?nonDeleted=true`)
+  // Use a unique URL whenever the store really revalidates. Older API
+  // responses were published with a five-hour browser cache, so the same URL
+  // could keep returning an empty list even after a category was created.
+  const response = await api.get(`/cities/${addressId}/categories`, {
+    params: {
+      nonDeleted: true,
+      _revalidate: Date.now(),
+    },
+  })
   const cityCategories = formatCategories(response?.data?.categories ?? [])
 
   try {

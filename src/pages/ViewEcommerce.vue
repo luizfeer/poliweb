@@ -132,7 +132,7 @@
                             <strong v-if="selectedProduct.quantityCart > 0">{{ selectedProduct.quantityCart }}</strong>
                         </button>
                     </div>
-                    <p v-if="!phoneZap" class="product-detail-warning">Esta loja nao possui WhatsApp ativo para receber pedidos.</p>
+                    <p v-if="!phoneZap" class="product-detail-warning">Esta loja não possui WhatsApp ativo para receber pedidos.</p>
                 </div>
             </div>
 
@@ -263,6 +263,7 @@
                         <q-img class="cart-item-img" :src="item.link" alt="" />
                         <div class="cart-item-info">
                             <h4 class="cart-item-name">{{ item.name }}</h4>
+                            <p v-if="item.optionLabels?.length" class="text-caption">{{ item.optionLabels.join(' · ') }}</p>
                             <div class="cart-item-row">
                                 <div class="cart-qty">
                                     <button type="button" class="cart-qty-btn" @click="sub(item)">
@@ -292,7 +293,7 @@
                         <span class="cart-total-value">{{ RS(total) }}</span>
                     </div>
                     <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap" @click="botaoPedido()" />
-                    <p v-if="!phoneZap" class="cart-checkout-warning">A loja nao possui WhatsApp ativo para receber pedidos.</p>
+                    <p v-if="!phoneZap" class="cart-checkout-warning">A loja não possui WhatsApp ativo para receber pedidos.</p>
                 </div>
             </div>
             <div v-else class="cart-empty desktop-cart-empty">
@@ -316,6 +317,7 @@
                         <q-img class="cart-item-img" :src="item.link" alt="" />
                         <div class="cart-item-info">
                             <h4 class="cart-item-name">{{ item.name }}</h4>
+                            <p v-if="item.optionLabels?.length" class="text-caption">{{ item.optionLabels.join(' · ') }}</p>
                             <div class="cart-item-row">
                                 <div class="cart-qty">
                                     <button type="button" class="cart-qty-btn" @click="sub(item)">
@@ -345,7 +347,7 @@
                         <span class="cart-total-value">{{ RS(total) }}</span>
                     </div>
                     <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap" @click="botaoPedido()" />
-                    <p v-if="!phoneZap" class="cart-checkout-warning">A loja nao possui WhatsApp ativo para receber pedidos.</p>
+                    <p v-if="!phoneZap" class="cart-checkout-warning">A loja não possui WhatsApp ativo para receber pedidos.</p>
                 </div>
             </div>
             <div v-else class="cart-empty">
@@ -355,19 +357,57 @@
             </div>
         </div>
     </q-drawer>
-    <q-dialog v-model="confirmPedido">
-        <q-card>
-            <q-card-section>
-                <div class="text-h6">Confirmar pedido</div>
-            </q-card-section>
-
+    <q-dialog v-model="showConfiguration">
+        <q-card class="checkout-card">
+            <q-card-section><div class="text-h6">{{ configuringProduct?.title?.name }}</div></q-card-section>
             <q-card-section class="q-pt-none">
-                Tem certeza que deseja realizar o pedido?
+                <div v-for="(group, groupIndex) in configuringProduct?.title?.options || []" :key="groupIndex" class="q-mb-md">
+                    <strong>{{ group.name }} {{ group.required ? '*' : '' }}</strong>
+                    <div v-for="(choice, choiceIndex) in group.choices" :key="choiceIndex">
+                        <q-radio v-if="group.type === 'single'" v-model="selectedChoices[groupIndex]" :val="choiceIndex" :label="`${choice.name} ${Number(choice.price) ? `(+ ${RS(Number(choice.price))})` : ''}`" />
+                        <q-checkbox v-else v-model="selectedChoices[groupIndex]" :val="choiceIndex" :label="`${choice.name} ${Number(choice.price) ? `(+ ${RS(Number(choice.price))})` : ''}`" />
+                    </div>
+                </div>
+                <q-input v-model="configureNote" filled type="textarea" maxlength="180" label="Observação do item" />
+                <strong>Valor unitário: {{ RS(configuredUnitPrice) }}</strong>
             </q-card-section>
-
             <q-card-actions align="right">
-                <q-btn flat label="Não" v-close-popup />
-                <a v-if="phoneZap" :href="`https://wa.me/55${phoneZap}?text=${pedido}`" target="_blank" class="text-green-700 font-bold p-4">SIM</a>
+                <q-btn flat label="Cancelar" v-close-popup />
+                <q-btn color="secondary" label="Adicionar ao carrinho" @click="confirmProductConfiguration" />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+    <q-dialog v-model="confirmPedido">
+        <q-card class="checkout-card">
+            <q-card-section>
+                <div class="text-h6">Finalizar pedido</div>
+            </q-card-section>
+            <q-card-section class="q-pt-none">
+                <q-input v-model="checkout.customerName" filled label="Seu nome" maxlength="120" class="q-mb-sm" />
+                <q-input v-model="checkout.customerPhone" filled label="Seu telefone" type="tel" maxlength="30" class="q-mb-sm" />
+                <template v-if="commerceSettings.acceptsDelivery">
+                    <q-select v-if="savedAddresses.length" v-model="selectedSavedAddress" :options="savedAddresses" filled label="Selecionar endereço salvo" clearable class="q-mb-sm" @update:model-value="selectSavedAddress" />
+                    <q-input v-model="checkout.deliveryAddress" filled type="textarea" maxlength="500" label="Endereço de entrega completo" class="q-mb-sm" />
+                    <p v-if="commerceSettings.deliveryInfo">{{ commerceSettings.deliveryInfo }}</p>
+                    <p>Taxa de entrega: {{ money(commerceSettings.deliveryFeeCents) }}</p>
+                </template>
+                <p v-else>Retirada no estabelecimento</p>
+                <q-select v-model="checkout.paymentMethod" :options="commerceSettings.paymentMethods" filled label="Forma de pagamento" class="q-mb-sm" />
+                <strong>Total: {{ money(Math.round(total * 100) + (commerceSettings.acceptsDelivery ? commerceSettings.deliveryFeeCents : 0)) }}</strong>
+            </q-card-section>
+            <q-card-actions align="right">
+                <q-btn flat label="Cancelar" v-close-popup />
+                <q-btn color="positive" label="Continuar no WhatsApp" :loading="placingOrder" @click="placeOrder" />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+    <q-dialog v-model="showCompletedOrder">
+        <q-card class="checkout-card">
+            <q-card-section><div class="text-h6">Envie o pedido pelo WhatsApp</div></q-card-section>
+            <q-card-section>A mensagem está pronta. Confirme o envio no WhatsApp para que a loja receba o pedido. Total: {{ money(completedOrder?.totalCents) }}.</q-card-section>
+            <q-card-actions align="right">
+                <q-btn flat label="Fechar" v-close-popup />
+                <q-btn color="positive" label="Abrir WhatsApp" @click="shareOrderWhatsapp" />
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -409,6 +449,7 @@ import {
 import {
     liveQuery
 } from "dexie";
+import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
 
 const ECOMMERCE_VIEW_KEY = 'poliweb_ecommerce_view_mode'
 
@@ -434,8 +475,18 @@ export default {
                 itemsError: null
             }),
             idAd: ref(''),
-            pedido: ref(''),
             confirmPedido: ref(false),
+            completedOrder: ref(null),
+            showCompletedOrder: ref(false),
+            placingOrder: ref(false),
+            commerceSettings: ref(defaultCommerceSettings()),
+            checkout: ref({ customerName: '', customerPhone: '', deliveryAddress: '', paymentMethod: '' }),
+            selectedSavedAddress: ref(null),
+            configuringProduct: ref(null),
+            showConfiguration: ref(false),
+            selectedChoices: ref({}),
+            configureNote: ref(''),
+            buyAfterConfigure: ref(false),
             rightDrawerOpen: ref(false),
             whatsappChooser: ref(false),
             productSearch: ref(''),
@@ -485,6 +536,17 @@ export default {
             }
             return total;
         },
+        configuredUnitPrice() {
+            const product = this.configuringProduct
+            if (!product) return 0
+            let price = Number(String(product.subtitle?.value || 0).replace(',', '.'))
+            ;(product.title?.options || []).forEach((group, index) => {
+                const selected = this.selectedChoices[index]
+                const indexes = Array.isArray(selected) ? selected : (selected === null || selected === undefined ? [] : [selected])
+                indexes.forEach(choiceIndex => { price += Number(group.choices[choiceIndex]?.price || 0) })
+            })
+            return price
+        },
         isMobile() {
             return this.$q.screen.lt.sm;
         },
@@ -494,6 +556,12 @@ export default {
         phoneZap() {
             const whatsapp = this.activePhones.find((phone) => phone.isWhatsapp && phone.phone)
             return whatsapp ? whatsapp.phone.replace(/[^0-9]/g, '') : false
+        },
+        savedAddresses() {
+            try {
+                const addresses = JSON.parse(localStorage.getItem('poliweb_delivery_addresses') || '[]')
+                return Array.isArray(addresses) ? addresses.slice(0, 5) : []
+            } catch (_) { return [] }
         },
         ecommerceCategories() {
             const filtered = this.adsComponent?.files?.ecommerceFiltered
@@ -554,6 +622,79 @@ export default {
         },
     },
     methods: {
+        money(cents) { return (Number(cents || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
+        selectSavedAddress(value) { if (value) this.checkout.deliveryAddress = value },
+        async loadCommerceSettings() {
+            try {
+                this.commerceSettings = await commerceApi(this.$route.params.id, 'settings')
+                this.checkout.paymentMethod = this.commerceSettings.paymentMethods[0] || ''
+            } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+        },
+        async placeOrder() {
+            const form = this.checkout
+            if (!this.phoneZap) {
+                this.$q.notify({ color: 'warning', message: 'Esta loja não possui WhatsApp ativo para receber pedidos.' }); return
+            }
+            if (!form.customerName.trim() || !/^[\d\s()+-]{8,30}$/.test(form.customerPhone.trim()) ||
+                (this.commerceSettings.acceptsDelivery && !form.deliveryAddress.trim()) || !form.paymentMethod) {
+                this.$q.notify({ color: 'warning', message: 'Preencha nome, telefone, endereço e pagamento.' }); return
+            }
+            this.placingOrder = true
+            try {
+                let order
+                try {
+                    order = await commerceApi(this.idAd, 'orders', 'POST', {
+                        customerName: form.customerName,
+                        customerPhone: form.customerPhone,
+                        deliveryAddress: form.deliveryAddress,
+                        paymentMethod: form.paymentMethod,
+                        items: this.queries.cart.map(item => ({ productId: item.idProd, quantity: item.quantity,
+                            selections: item.selections || [], note: item.note || '' }))
+                    })
+                } catch (error) {
+                    if (error.status === 400 || error.status === 422) throw error
+                    // O banco serve para estatísticas; uma falha nele não impede o envio à loja.
+                    order = {
+                        id: '',
+                        customerName: form.customerName.trim(),
+                        customerPhone: form.customerPhone.trim(),
+                        deliveryAddress: this.commerceSettings.acceptsDelivery ? form.deliveryAddress.trim() : '',
+                        paymentMethod: form.paymentMethod,
+                        deliveryFeeCents: this.commerceSettings.acceptsDelivery ? this.commerceSettings.deliveryFeeCents : 0,
+                        totalCents: Math.round(this.total * 100) + (this.commerceSettings.acceptsDelivery ? this.commerceSettings.deliveryFeeCents : 0),
+                        items: this.queries.cart.map(item => ({
+                            name: item.name, quantity: item.quantity,
+                            selections: (item.optionLabels || []).map(label => ({ group: '', choices: [{ name: label }] })),
+                            totalCents: Math.round(Number(item.value) * item.quantity * 100), note: item.note || ''
+                        }))
+                    }
+                    this.$q.notify({ color: 'warning', message: 'Não foi possível registrar a estatística. Envie o pedido pelo WhatsApp.' })
+                }
+                if (this.commerceSettings.acceptsDelivery && form.deliveryAddress.trim()) {
+                    const addresses = [form.deliveryAddress.trim(), ...this.savedAddresses.filter(value => value !== form.deliveryAddress.trim())].slice(0, 5)
+                    localStorage.setItem('poliweb_delivery_addresses', JSON.stringify(addresses))
+                }
+                this.confirmPedido = false
+                this.rightDrawerOpen = false
+                this.completedOrder = order
+                this.showCompletedOrder = true
+                this.shareOrderWhatsapp()
+            } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+            finally { this.placingOrder = false }
+        },
+        shareOrderWhatsapp() {
+            if (!this.completedOrder || !this.phoneZap) return
+            const order = this.completedOrder
+            const lines = [`*Pedido Poliweb${order.id ? ` ${order.id.slice(0, 8)}` : ''}*`,
+                `Cliente: ${order.customerName}`, `Telefone: ${order.customerPhone}`,
+                ...(order.deliveryAddress ? [`Entrega: ${order.deliveryAddress}`] : ['Retirada no estabelecimento']),
+                `Pagamento: ${order.paymentMethod}`,
+                ...order.items.map(item => `${item.quantity}x ${item.name} — ${this.money(item.totalCents)}${item.selections?.length ? `\n   ${item.selections.map(group => `${group.group ? `${group.group}: ` : ''}${group.choices.map(choice => `${choice.name}${choice.priceCents ? ` (+${this.money(choice.priceCents)})` : ''}`).join(', ')}`).join(' · ')}` : ''}${item.note ? `\n   Obs: ${item.note}` : ''}`),
+                ...(order.deliveryFeeCents ? [`Taxa de entrega: ${this.money(order.deliveryFeeCents)}`] : []),
+                `Total: ${this.money(order.totalCents)}`]
+            const number = this.phoneZap.startsWith('55') ? this.phoneZap : `55${this.phoneZap}`
+            window.location.assign(`https://wa.me/${number}?text=${encodeURIComponent(lines.join('\n'))}`)
+        },
         categoryKey(category) {
             return String(category?.[0]?.label?.category?.category || category?.[0]?.label?.category?.label || 'sem-categoria')
         },
@@ -602,7 +743,7 @@ export default {
         syncProductQuantities(cartItems = this.queries.cart) {
             const byProductId = {}
             ;(cartItems || []).forEach((cartItem) => {
-                byProductId[String(cartItem.idProd)] = Number(cartItem.quantity || 0)
+                byProductId[String(cartItem.idProd)] = (byProductId[String(cartItem.idProd)] || 0) + Number(cartItem.quantity || 0)
             })
             this.allProducts.forEach((product) => {
                 product.quantityCart = byProductId[String(product.id)] || 0
@@ -687,50 +828,16 @@ export default {
             this.$router.go(-1)
         },
         async botaoPedido() {
+            if (!this.queries.cart.length) return
             if (!this.phoneZap) {
-                this.$q.notify({
-                    color: 'warning',
-                    message: 'A loja nao possui WhatsApp ativo para receber pedidos.',
-                    icon: 'report_problem',
-                    position: 'bottom'
-                })
-                return
+                this.$q.notify({ color: 'warning', message: 'Esta loja não possui WhatsApp ativo para receber pedidos.' }); return
             }
-            this.pedido = await this.geraPedidoWhatsapp()
             this.confirmPedido = true
         },
         async buyNow(item) {
-            if (!this.phoneZap) {
-                this.$q.notify({
-                    color: 'warning',
-                    message: 'A loja nao possui WhatsApp ativo para receber pedidos.',
-                    icon: 'report_problem',
-                    position: 'bottom'
-                })
-                return
-            }
-            await this.addToCart(item)
-            await this.botaoPedido()
-        },
-        async geraPedidoWhatsapp() {
-            let pedido = '* 🚨POLIWEB ECOMMERCE*' + '\n';
-            let date = new Date();
-            let day = date.getDate();
-            let month = date.getMonth() + 1;
-            let year = date.getFullYear();
-            let hour = date.getHours();
-            let minutes = date.getMinutes();
-            pedido += `Pedido realizado: ${day}/${month}/${year} às ${hour}:${minutes} \n\n`;
-            'Olá, gostaria de fazer o seguinte pedido: \n';
-            for (let i = 0; i < this.queries.cart.length; i++) {
-                pedido += `${this.queries.cart[i].quantity}x ${this.queries.cart[i].name}  - [${this.RS(this.queries.cart[i].quantity*this.queries.cart[i].value)}]\n`;
-                if (this.queries.cart[i].note) {
-                    pedido += `Obs: ${this.queries.cart[i].note}\n`;
-                }
-            }
-            pedido += `\n*Total: ${this.RS(this.total)}* \n`;
-            console.log(pedido);
-            return encodeURIComponent(pedido);
+            if (!this.phoneZap) return
+            const added = await this.addToCart(item, true)
+            if (added) await this.botaoPedido()
         },
         initialDb() {
             const queryRefs = toRefs(this.queries);
@@ -750,30 +857,67 @@ export default {
             );
 
         },
-        async addToCart(item) {
-            item.quantityCart = Number(item.quantityCart || 0) + 1
-            const quantityCount = await db.cart.where({
-                ad: this.idAd,
-                idProd: item.id
-            }).first();
-            let quantity = quantityCount ? quantityCount.quantity + 1 : 1;
+        async addToCart(item, buyNow = false) {
+            if (item.title?.options?.length) {
+                this.configuringProduct = item
+                this.selectedChoices = Object.fromEntries(item.title.options.map((group, index) => [index, group.type === 'multiple' ? [] : null]))
+                this.configureNote = ''
+                this.buyAfterConfigure = buyNow === true
+                this.showConfiguration = true
+                return false
+            }
+            await this.persistCartItem(item, [], '')
+            return true
+        },
+        async confirmProductConfiguration() {
+            const item = this.configuringProduct
+            const selections = []
+            for (const [groupIndex, group] of (item.title.options || []).entries()) {
+                const selected = this.selectedChoices[groupIndex]
+                const choiceIndexes = Array.isArray(selected) ? selected : (selected === null || selected === undefined ? [] : [selected])
+                if (group.required && !choiceIndexes.length) {
+                    this.$q.notify({ color: 'warning', message: `Selecione ${group.name}.` }); return
+                }
+                if (choiceIndexes.length) selections.push({ groupIndex, choiceIndexes })
+            }
+            await this.persistCartItem(item, selections, this.configureNote)
+            this.showConfiguration = false
+            if (this.buyAfterConfigure) await this.botaoPedido()
+        },
+        async persistCartItem(item, selections, note) {
+            const optionLabels = []
+            let value = Number(String(item.subtitle.value).replace(',', '.'))
+            selections.forEach(selection => {
+                const group = item.title.options[selection.groupIndex]
+                selection.choiceIndexes.forEach(choiceIndex => {
+                    const choice = group.choices[choiceIndex]
+                    value += Number(String(choice.price || 0).replace(',', '.'))
+                    optionLabels.push(`${group.name}: ${choice.name}`)
+                })
+            })
+            value = Math.round(value * 100) / 100
+            const productKey = JSON.stringify([item.id, selections, note])
+            const cartItems = await db.cart.where({ ad: this.idAd }).toArray()
+            const existing = cartItems.find(line => line.productKey === productKey ||
+                (!selections.length && !note && !line.productKey && Number(line.idProd) === Number(item.id)))
             await db.cart.put({
-                ...(quantityCount && {
-                    id: quantityCount.id
-                }),
-                ad: item.categoryAdId,
+                ...(existing && { id: existing.id }),
+                ad: this.idAd,
                 link: item.link,
                 label: item.label.category.label,
                 category: item.label.category.category,
-                value: item.subtitle.value,
+                value,
                 name: item.title.name,
                 idProd: item.id,
-                note: quantityCount?.note || '',
-                quantity: quantity
+                productKey,
+                selections,
+                optionLabels,
+                note: existing?.note || note,
+                quantity: existing ? existing.quantity + 1 : 1
             })
-            const cartItems = await db.cart.where({ ad: this.idAd }).toArray()
-            this.queries.cart = cartItems
-            this.syncProductQuantities(cartItems)
+            const updated = await db.cart.where({ ad: this.idAd }).toArray()
+            this.queries.cart = updated
+            this.syncProductQuantities(updated)
         },
         RS(value) {
             return value.toLocaleString('pt-BR', {
@@ -818,21 +962,23 @@ export default {
             let productsFiltered = {}
             try {
                 arr.forEach(element => {
-                    let label = JSON.parse(element.label)
+                    try {
+                    let label = typeof element.label === 'string' ? JSON.parse(element.label) : element.label
                     if (label && label.category && label.category.category) {
-                        let title = JSON.parse(element.title)
-                        let subtitle = JSON.parse(element.subtitle)
+                        let title = typeof element.title === 'string' ? JSON.parse(element.title) : element.title
+                        let subtitle = typeof element.subtitle === 'string' ? JSON.parse(element.subtitle) : element.subtitle
                         if (!productsFiltered[label.category.category]) {
                             productsFiltered[label.category.category] = []
                         }
                         productsFiltered[label.category.category].push({
                             ...element,
                             label: label,
-                            title: title,
+                            title: { ...title, options: element.meta?.productOptions || title.options || [] },
                             subtitle: subtitle,
                             quantityCart: 0
                         })
                     }
+                    } catch (_) { /* Um arquivo antigo inválido não oculta os demais produtos. */ }
                 });
                 return productsFiltered
 
@@ -878,6 +1024,7 @@ export default {
     mounted() {
         // On mount, subscribe to your query:
         this.idAd = parseFloat(this.$route.params.id)
+        this.loadCommerceSettings()
         this.initialDb()
         const admin = localStorage.getItem('admin') ? true : false
         let id = localStorage.getItem('id-customer')
@@ -888,7 +1035,7 @@ export default {
         }
         this.loading = true
         this.$api.get(`/categories/ads/${this.idAd}?nonDeleted=true`)
-            .then((response) => {
+            .then(async (response) => {
                 if (response.data) {
                     console.log(response.data)
                     if (response.data.deletedAt) {
@@ -905,6 +1052,11 @@ export default {
                     filtered.phones = this.filterDeleted(filtered.phones)
                     filtered.files.logo = this.filterDeleted(filtered.files.logo)
                     filtered.files.ecommerce = this.sortAb(filtered.files.ecommerce)
+                    try {
+                        const { data: products } = await this.$api.get(`/commerce/stores/${this.idAd}/products`)
+                        const imageIds = new Set(products.map(product => Number(product.imageFileId)))
+                        filtered.files.ecommerce = [...products.filter(product => product.active), ...filtered.files.ecommerce.filter(file => !imageIds.has(Number(file.id)))]
+                    } catch (_) { /* Mantém o catálogo legado disponível durante a migração. */ }
                     filtered.files.ecommerceFiltered = this.filterEatchType(filtered.files.ecommerce)
                     this.adsComponent = filtered
                     this.syncProductQuantities()
@@ -952,6 +1104,7 @@ export default {
 </script>
 
 <style scoped>
+.checkout-card { width: min(100%, 500px); }
 .ecommerce-page {
   padding-bottom: env(safe-area-inset-bottom);
   min-height: 100vh;

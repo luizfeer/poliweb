@@ -41,6 +41,42 @@
                     </div>
                 </div>
             </q-btn>
+            <section v-if="admin" class="commerce-panel">
+                <h2>Configurações de pedidos</h2>
+                <q-toggle v-model="commerceSettings.acceptsDelivery" label="Realizo entregas" />
+                <q-input v-if="commerceSettings.acceptsDelivery" v-model="deliveryFeeInput" filled label="Taxa de entrega (R$)" type="number" min="0" step="0.01" />
+                <q-input v-if="commerceSettings.acceptsDelivery" v-model="commerceSettings.deliveryInfo" filled type="textarea" maxlength="500" label="Informações de entrega (áreas atendidas, prazo, horários)" />
+                <p>Formas de pagamento aceitas</p>
+                <div class="row q-gutter-sm q-mb-md">
+                    <q-checkbox v-for="method in standardPayments" :key="method" v-model="commerceSettings.paymentMethods" :val="method" :label="method" />
+                </div>
+                <div class="row q-gutter-sm q-mb-md">
+                    <q-input v-model="customPayment" dense filled label="Outra forma de pagamento" @keyup.enter="addPayment" />
+                    <q-btn outline label="Adicionar" @click="addPayment" />
+                </div>
+                <div class="row q-gutter-sm q-mb-md">
+                    <q-chip v-for="method in commerceSettings.paymentMethods.filter(item => !standardPayments.includes(item))" :key="method" removable @remove="removePayment(method)">{{ method }}</q-chip>
+                </div>
+                <q-btn color="primary" label="Salvar configurações" :loading="savingSettings" @click="saveCommerceSettings" />
+            </section>
+            <section v-if="admin" class="commerce-panel">
+                <div class="row items-center justify-between"><h2>Pedidos recebidos</h2><q-btn flat label="Atualizar" @click="loadOrders" /></div>
+                <p v-if="!orders.length">Nenhum pedido registrado.</p>
+                <article v-for="order in orders" :key="order.id" class="order-card">
+                    <strong>Pedido {{ order.id.slice(0, 8) }} · gerado no site</strong>
+                    <div class="text-caption">O envio pelo WhatsApp não pode ser confirmado automaticamente.</div>
+                    <div>{{ order.customer_name }} · {{ order.customer_phone }}</div>
+                    <div v-if="order.delivery_address">Entrega: {{ order.delivery_address }}</div>
+                    <div>Pagamento: {{ order.payment_method }}</div>
+                    <div v-for="(item, index) in order.items" :key="`${item.productId}-${index}`">
+                        {{ item.quantity }}x {{ item.name }} — {{ money(item.totalCents) }}
+                        <div v-for="(group, groupIndex) in item.selections || []" :key="groupIndex" class="text-caption">{{ group.group }}: {{ group.choices.map(choice => `${choice.name}${choice.priceCents ? ` (+${money(choice.priceCents)})` : ''}`).join(', ') }}</div>
+                        <div v-if="item.note" class="text-caption">Obs.: {{ item.note }}</div>
+                    </div>
+                    <div v-if="order.delivery_fee_cents">Entrega: {{ money(order.delivery_fee_cents) }}</div>
+                    <strong>Total: {{ money(order.total_cents) }}</strong>
+                </article>
+            </section>
             <template v-if="adsComponent.files && adsComponent.files.ecommerceFiltered && (Object.keys(adsComponent.files.ecommerceFiltered).length)">
                 <div class="admin-ecommerce-category" v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
                     <div class="admin-ecommerce-category-header">
@@ -92,6 +128,39 @@
             </q-btn>
         </div>
         <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden" />
+        <q-dialog v-model="showSetupDialog" persistent>
+            <q-card class="product-type-card">
+                <q-card-section>
+                    <div class="text-h6">Configure os pedidos da sua loja</div>
+                    <p>Escolha como o cliente compra antes de cadastrar produtos.</p>
+                </q-card-section>
+                <q-card-section class="q-pt-none">
+                    <q-toggle v-model="commerceSettings.acceptsDelivery" label="Fazer entregas e pedir endereço ao cliente" />
+                    <template v-if="commerceSettings.acceptsDelivery">
+                        <q-input v-model="deliveryFeeInput" filled label="Taxa de entrega (R$)" type="number" min="0" step="0.01" class="q-mb-sm" />
+                        <q-input v-model="commerceSettings.deliveryInfo" filled type="textarea" maxlength="500" label="Regiões, prazo e horários de entrega" class="q-mb-sm" />
+                    </template>
+                    <p>Formas de pagamento aceitas</p>
+                    <q-checkbox v-for="method in standardPayments" :key="method" v-model="commerceSettings.paymentMethods" :val="method" :label="method" />
+                    <q-input v-model="customPayment" filled label="Outra forma de pagamento" @keyup.enter="addPayment" class="q-mt-sm" />
+                    <q-btn flat label="Adicionar pagamento" @click="addPayment" />
+                    <div><q-chip v-for="method in commerceSettings.paymentMethods.filter(item => !standardPayments.includes(item))" :key="method" removable @remove="removePayment(method)">{{ method }}</q-chip></div>
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn color="primary" label="Salvar e continuar" :loading="savingSettings" @click="saveCommerceSettings" />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+        <q-dialog v-model="productTypeDialog">
+            <q-card class="product-type-card">
+                <q-card-section><div class="text-h6">O que você vai vender?</div><p>Vamos sugerir os campos para cadastrar pelo celular.</p></q-card-section>
+                <q-card-section class="q-pt-none">
+                    <button type="button" class="product-type-option" @click="chooseProductType('food')"><strong>Comida ou bebida</strong><span>Tamanhos, sabores e adicionais</span></button>
+                    <button type="button" class="product-type-option" @click="chooseProductType('clothing')"><strong>Roupa ou calçado</strong><span>Tamanhos e outras variações</span></button>
+                    <button type="button" class="product-type-option" @click="chooseProductType('other')"><strong>Outro produto</strong><span>Cadastro simples; opções podem ser adicionadas</span></button>
+                </q-card-section>
+            </q-card>
+        </q-dialog>
 
         <q-dialog v-model="confirmGallery" persistent :maximized="maximizedToggle" transition-show="slide-up" transition-hide="slide-down">
             <q-card class="">
@@ -142,6 +211,7 @@
                     <div class="row">
                         <q-select v-model="form.label.category" :options="optionsCategory" filled :rules="required" ref="category" lazy-rules label="Categoria" class="w-full py-4" />
                     </div>
+                    <ProductOptionsEditor v-model="form.meta.productOptions" />
                 </q-form>
 
                 <q-card-actions align="right" class="product-dialog-actions">
@@ -199,6 +269,7 @@
                     <div class="row">
                         <q-select v-model="form.label.category" :options="optionsCategory" filled :rules="required" ref="category" lazy-rules label="Categoria" class="w-full py-4" />
                     </div>
+                    <ProductOptionsEditor v-model="form.meta.productOptions" />
                 </q-form>
 
                 <q-card-actions align="right" class="product-dialog-actions">
@@ -239,9 +310,11 @@ import {
     categoryes
 } from 'src/js/CategoryesEcommerceNew'
 import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
+import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
+import ProductOptionsEditor from 'src/components/ProductOptionsEditor.vue'
 
 export default {
-    components: {},
+    components: { ProductOptionsEditor },
     setup() {
         return {
             required: [val => !!val || 'Campo obrigatório'],
@@ -267,6 +340,14 @@ export default {
                 id: ''
             }),
             loading: ref(true),
+            productTypeDialog: ref(false),
+            showSetupDialog: ref(false),
+            commerceSettings: ref(defaultCommerceSettings()),
+            deliveryFeeInput: ref('0'),
+            customPayment: ref(''),
+            standardPayments: ref(['Pix', 'Cartão', 'Dinheiro']),
+            savingSettings: ref(false),
+            orders: ref([]),
             confirmEdit: ref(false),
             descriptionError: ref(false),
             editorToolbar: ref([
@@ -282,11 +363,13 @@ export default {
                 title: {},
                 subtitle: {},
                 label: {},
+                meta: { productOptions: [] },
             }),
             resetForm: ref({
                 title: {},
                 subtitle: {},
                 label: {},
+                meta: { productOptions: [] },
             }),
             optionsCategory: ref(categoryes),
             adsComponent: ref({
@@ -326,6 +409,39 @@ export default {
         },
     },
     methods: {
+        money(cents) { return (Number(cents || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
+        addPayment() {
+            const value = this.customPayment.trim().slice(0, 60)
+            if (value && !this.commerceSettings.paymentMethods.some(item => item.toLowerCase() === value.toLowerCase())) this.commerceSettings.paymentMethods.push(value)
+            this.customPayment = ''
+        },
+        removePayment(method) { this.commerceSettings.paymentMethods = this.commerceSettings.paymentMethods.filter(item => item !== method) },
+        async loadCommerceSettings() {
+            try {
+                this.commerceSettings = await commerceApi(this.$route.params.id, 'settings')
+                this.deliveryFeeInput = String(this.commerceSettings.deliveryFeeCents / 100)
+                this.showSetupDialog = !this.commerceSettings.configured
+            } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+        },
+        async saveCommerceSettings() {
+            const fee = Math.round(Number(this.deliveryFeeInput) * 100)
+            if (!this.commerceSettings.paymentMethods.length || !Number.isSafeInteger(fee) || fee < 0) {
+                this.$q.notify({ color: 'warning', message: 'Selecione um pagamento e informe uma taxa válida.' }); return
+            }
+            this.savingSettings = true
+            try {
+                this.commerceSettings = await commerceApi(this.$route.params.id, 'settings', 'PUT', {
+                    ...this.commerceSettings, deliveryFeeCents: fee
+                })
+                this.showSetupDialog = false
+                this.$q.notify({ color: 'positive', message: 'Configurações salvas.' })
+            } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+            finally { this.savingSettings = false }
+        },
+        async loadOrders() {
+            try { this.orders = await commerceApi(this.$route.params.id, 'orders') }
+            catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+        },
         backPage() {
             this.$router.go(-1)
         },
@@ -342,10 +458,25 @@ export default {
             }
         },
         addProduct() {
+            this.productTypeDialog = true
+        },
+        chooseProductType(type) {
+            const presets = {
+                food: [
+                    { name: 'Variação (ex.: tamanho ou sabor)', type: 'single', required: true, choices: [{ name: '', price: '0' }] },
+                    { name: 'Adicionais', type: 'multiple', required: false, choices: [{ name: '', price: '0' }] }
+                ],
+                clothing: [{ name: 'Tamanho', type: 'single', required: true,
+                    choices: ['P', 'M', 'G', 'GG'].map(name => ({ name, price: '0' })) }],
+                other: []
+            }
+            this.form = { title: {}, subtitle: {}, label: {}, meta: { productKind: type, productOptions: presets[type] } }
+            this.productTypeDialog = false
             this.$refs.gallery.click()
         },
         galleryUpload() {
             const file = this.$refs.gallery.files[0];
+            if (!file) return
             this.preview = URL.createObjectURL(file);
             this.descriptionError = false
             this.confirmGallery = true
@@ -362,6 +493,14 @@ export default {
             this.descriptionError = !value
             return !this.descriptionError
         },
+        hasValidOptions() {
+            const groups = this.form.meta?.productOptions || []
+            const valid = groups.every(group => group.name?.trim() && ['single', 'multiple'].includes(group.type) &&
+                group.choices?.length && group.choices.every(choice => choice.name?.trim() &&
+                    /^\d+(?:[.,]\d{1,2})?$/.test(String(choice.price ?? ''))))
+            if (!valid) this.$q.notify({ color: 'negative', message: 'Preencha os nomes e valores das variações e adicionais.' })
+            return valid
+        },
         safeHtml(value) {
             return String(value || '')
                 .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
@@ -372,7 +511,9 @@ export default {
 
         deleteImg() {
             this.$q.loading.show()
-            this.$api.delete(`/categories/ads/files/${this.tray.id}`)
+            this.$api.delete(this.tray.source === 'v2'
+                ? `/commerce/stores/${this.adsComponent.id}/products/${this.tray.productId}`
+                : `/categories/ads/files/${this.tray.id}`)
                 .then((response) => {
                     //  console.log(response.data.addresses)
                     if (response.data) {
@@ -407,138 +548,84 @@ export default {
             this.$refs.category.validate()
             this.$refs.value.validate()
             const descriptionValid = this.hasDescription()
-
-            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || !descriptionValid) {
-                this.$q.notify({
-                    color: 'negative',
-                    message: 'Você precisa preencher todos os campos!',
-                })
+            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || !descriptionValid || !this.hasValidOptions()) {
+                this.$q.notify({ color: 'negative', message: 'Você precisa preencher todos os campos!' })
                 return
             }
             this.$q.loading.show()
-            const data = new FormData()
+            let uploadedId = null
             try {
+                const data = new FormData()
                 data.append('file', await normalizeUploadImage(this.$refs.gallery.files[0]))
+                const upload = await this.$api.post(`/categories/ads/${this.adsComponent.id}/files/product_image`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+                uploadedId = Number(upload.data.id)
+                await this.$api.post(`/commerce/stores/${this.adsComponent.id}/products`, this.productPayload(uploadedId))
+                this.$q.notify({ color: 'positive', message: 'Produto salvo com sucesso!' })
+                this.$router.go(0)
             } catch (err) {
-                this.$q.loading.hide()
-                this.$q.notify({
-                    color: 'negative',
-                    message: err.message,
-                })
-                return
-            }
-            // data.append('name', 'ecommerce');
-            const url = new URLSearchParams()
-            url.append('title', JSON.stringify(this.form.title));
-            url.append('subtitle', JSON.stringify(this.form.subtitle));
-            url.append('label', JSON.stringify(this.form.label));
-            this.$api.post(`/categories/ads/${this.adsComponent.id}/files/ecommerce?${url.toString()}`, data, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-                .then((response) => {
-                    //  console.log(response.data.addresses)
-                    if (response.data) {
-                        this.$q.notify({
-                            color: 'secondary',
-                            position: 'top',
-                            message: 'Produto salvo com sucesso!',
-                        })
-                        this.$router.go(0)
-                    }
-                    // $router.go(0)
-                })
-                .catch((err) => {
-                    let msg
-                    if (err.response) {
-                        msg = err.response.data.message
-                    } else {
-                        msg = 'Erro na conexão!'
-                    }
-                    this.$q.notify({
-                        color: 'negative',
-                        position: 'top',
-                        message: msg,
-                        icon: 'report_problem'
-                    })
-                })
-                .finally(() => {
-                    this.$q.loading.hide()
-                })
+                if (uploadedId) await this.$api.delete(`/categories/ads/files/${uploadedId}`).catch(() => {})
+                this.$q.notify({ color: 'negative', message: err.response?.data?.message || err.message || 'Erro ao salvar produto.' })
+            } finally { this.$q.loading.hide() }
         },
-        saveProduct() {
+        productPayload(imageFileId) {
+            return {
+                imageFileId,
+                kind: this.form.meta?.productKind || 'other',
+                name: this.form.title.name.trim(),
+                description: this.form.title.description || '',
+                categoryKey: String(this.form.label.category.category),
+                categoryLabel: this.form.label.category.label,
+                basePriceCents: Math.round(Number(String(this.form.subtitle.value).replace(',', '.')) * 100),
+                options: this.form.meta?.productOptions || []
+            }
+        },
+        async saveProduct() {
             this.$refs.name.validate()
             this.$refs.category.validate()
             this.$refs.value.validate()
             const descriptionValid = this.hasDescription()
-
-            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || !descriptionValid) {
-                this.$q.notify({
-                    color: 'negative',
-                    message: 'Você precisa preencher todos os campos!',
-                })
+            if (this.$refs.name.hasError || this.$refs.category.hasError || this.$refs.value.hasError || !descriptionValid || !this.hasValidOptions()) {
+                this.$q.notify({ color: 'negative', message: 'Você precisa preencher todos os campos!' })
                 return
             }
             this.$q.loading.show()
-            const data = {
-                title: JSON.stringify(this.form.title),
-                subtitle: JSON.stringify(this.form.subtitle),
-                label: JSON.stringify(this.form.label),
-                meta: this.edit.meta ?? null
-            }
-            this.$api.post(`/categories/ads/files/${this.edit.id}`, {
-                    ...data
-                })
-                .then((response) => {
-                    //  console.log(response.data.addresses)
-                    if (response.data) {
-                        this.$q.notify({
-                            color: 'secondary',
-                            position: 'top',
-                            message: 'Produto atualizado com sucesso!',
-                        })
-                        this.$router.go(0)
-                    }
-                    // $router.go(0)
-                })
-                .catch((err) => {
-                    let msg
-                    if (err.response) {
-                        msg = err.response.data.message
-                    } else {
-                        msg = 'Erro na conexão!'
-                    }
-                    this.$q.notify({
-                        color: 'negative',
-                        position: 'top',
-                        message: msg,
-                        icon: 'report_problem'
-                    })
-                })
-                .finally(() => {
-                    this.$q.loading.hide()
-                })
+            try {
+                const imageFileId = this.edit.imageFileId || this.edit.id
+                const payload = this.productPayload(Number(imageFileId))
+                if (this.edit.source === 'v2') {
+                    await this.$api.put(`/commerce/stores/${this.adsComponent.id}/products/${this.edit.productId}`, payload)
+                } else {
+                    await this.$api.post(`/commerce/stores/${this.adsComponent.id}/products`, payload)
+                }
+                this.$q.notify({ color: 'positive', message: 'Produto atualizado com sucesso!' })
+                this.$router.go(0)
+            } catch (err) {
+                this.$q.notify({ color: 'negative', message: err.response?.data?.message || 'Erro ao atualizar produto.' })
+            } finally { this.$q.loading.hide() }
         },
         filterEatchType(arr) {
             if (!arr) return
             let productsFiltered = {}
             try {
                 arr.forEach(element => {
-                    let label = JSON.parse(element.label)
+                    try {
+                    let label = typeof element.label === 'string' ? JSON.parse(element.label) : element.label
                     if (label && label.category && label.category.category) {
-                        let title = JSON.parse(element.title)
-                        let subtitle = JSON.parse(element.subtitle)
+                        let title = typeof element.title === 'string' ? JSON.parse(element.title) : element.title
+                        let subtitle = typeof element.subtitle === 'string' ? JSON.parse(element.subtitle) : element.subtitle
                         if (!productsFiltered[label.category.category]) {
                             productsFiltered[label.category.category] = []
                         }
                         productsFiltered[label.category.category].push({
                             ...element,
                             label: label,
-                            title: title,
+                            title: { ...title, options: element.meta?.productOptions || title.options || [] },
                             subtitle: subtitle,
                         })
                     }
+                    } catch (_) { /* Um arquivo antigo inválido não oculta os demais produtos. */ }
                 });
                 return productsFiltered
 
@@ -572,7 +659,9 @@ export default {
             this.confirmDelete = true
             this.tray = {
                 preview: item.link,
-                id: item.id
+                id: item.id,
+                source: item.source,
+                productId: item.productId
             }
         },
         openConfirmEdit(item) {
@@ -584,9 +673,11 @@ export default {
             }
             this.form = this.resetForm
             this.form = {
-                title: item.title,
+                title: { name: item.title.name, description: item.title.description },
                 subtitle: item.subtitle,
                 label: item.label,
+                meta: { ...(item.meta || {}), productKind: item.meta?.productKind || 'other',
+                    productOptions: item.meta?.productOptions || item.title.options || [] },
             }
         },
         pathImg() {
@@ -617,7 +708,7 @@ export default {
 
         this.loading = true
         await this.$api.get(`/categories/ads/${this.$route.params.id}?nonDeleted=true`)
-            .then((response) => {
+            .then(async (response) => {
                 if (response.data) {
                     console.log(response.data)
                     if (response.data.deletedAt) {
@@ -634,6 +725,11 @@ export default {
                     filtered.files.logo = this.filterDeleted(filtered.files.logo)
                     filtered.files.ecommerce = this.filterDeleted(filtered.files.ecommerce)
                     filtered.files.ecommerce = this.sortAb(filtered.files.ecommerce)
+                    try {
+                        const { data: products } = await this.$api.get(`/commerce/stores/${this.$route.params.id}/products`)
+                        const imageIds = new Set(products.map(product => Number(product.imageFileId)))
+                        filtered.files.ecommerce = [...products.filter(product => product.active), ...filtered.files.ecommerce.filter(file => !imageIds.has(Number(file.id)))]
+                    } catch (_) { /* Mantém o catálogo legado disponível durante a migração. */ }
                     filtered.files.ecommerceFiltered = this.filterEatchType(filtered.files.ecommerce)
                     this.adsComponent = filtered
                     console.log(filtered)
@@ -674,6 +770,10 @@ export default {
         if (this.adsComponent.customerId === id) {
             this.admin = true
         }
+        if (this.admin) {
+            this.loadCommerceSettings()
+            this.loadOrders()
+        }
         console.log(this.adsComponent, id, this.admin)
         if (!this.admin) {
             this.$router.push(`/${this.$route.params.id}`)
@@ -684,6 +784,15 @@ export default {
 </script>
 
 <style scoped>
+.product-type-card { width: min(100%, 440px); }
+.product-type-option { display: flex; flex-direction: column; width: 100%; text-align: left; padding: 1rem; margin-bottom: 0.65rem; border: 1px solid #d1d5db; border-radius: 10px; background: white; }
+.product-type-option strong { color: #1f2937; }
+.product-type-option span { color: #6b7280; font-size: 0.875rem; }
+.product-type-option:focus-visible { outline: 2px solid #059669; }
+.commerce-panel { margin: 1.5rem 0; padding: 1.25rem; background: white; border: 1px solid #e5e7eb; border-radius: 12px; }
+.commerce-panel h2 { font-size: 1.2rem; font-weight: 700; margin: 0 0 1rem; }
+.commerce-panel p { margin: 1rem 0 0.5rem; }
+.order-card { padding: 1rem 0; border-top: 1px solid #e5e7eb; line-height: 1.8; overflow-wrap: anywhere; }
 .product-dialog-actions {
     gap: 0.5rem;
     padding: 1rem 1.25rem 1.25rem;

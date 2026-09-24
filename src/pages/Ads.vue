@@ -93,11 +93,11 @@ export default {
                 for (let i = 0; i < items; i++) {
                   let label = false
                     if(arr[i] && arr[i].label && arr[i].label !== null){
-                      label = JSON.parse(arr[i].label)
+                      label = typeof arr[i].label === 'string' ? JSON.parse(arr[i].label) : arr[i].label
                     }
                     if (label && label.category && label.category.category) {
-                        let title = JSON.parse(arr[i].title)
-                        let subtitle = JSON.parse(arr[i].subtitle)
+                        let title = typeof arr[i].title === 'string' ? JSON.parse(arr[i].title) : arr[i].title
+                        let subtitle = typeof arr[i].subtitle === 'string' ? JSON.parse(arr[i].subtitle) : arr[i].subtitle
                         productsFiltered.push({
                             ...arr[i],
                             label: label,
@@ -114,7 +114,7 @@ export default {
             }
         }
         const getData = () => api.get(`/categories/ads/${route.params.id}?nonDeleted=true`)
-            .then((response) => {
+            .then(async (response) => {
                 if (response.data) {
                     if (response.data.deletedAt) {
                         router.push('/')
@@ -134,11 +134,14 @@ export default {
                         filtered.files.videos = filterDeleted(filtered.files.videos)
                         filtered.files.videos = filtered.files.videos.slice(0).reverse();
                     }
-                    if(filtered.files && filtered.files.ecommerce){
-                        filtered.files.ecommerce = filterDeleted(filtered.files.ecommerce)
-                        filtered.files.ecommerce = filtered.files.ecommerce.slice(0).reverse();
-                        filtered.files.ecommercePreview = filterEatchType(filtered.files.ecommerce)
-                    }
+                    filtered.files = filtered.files || {}
+                    filtered.files.ecommerce = filterDeleted(filtered.files.ecommerce || [])
+                    try {
+                        const { data: products } = await api.get(`/commerce/stores/${route.params.id}/products`)
+                        const imageIds = new Set(products.map(product => Number(product.imageFileId)))
+                        filtered.files.ecommerce = [...products.filter(product => product.active), ...filtered.files.ecommerce.filter(file => !imageIds.has(Number(file.id)))]
+                    } catch (_) { /* Mantém preview legado enquanto o V2 não está publicado. */ }
+                    filtered.files.ecommercePreview = filterEatchType(filtered.files.ecommerce)
                     filtered.phones = filterDeleted(filtered.phones)
                     filtered.address = filterDeleted(filtered.address)
                     data.value = filtered

@@ -385,6 +385,7 @@
             <q-card-section class="q-pt-none">
                 <q-input v-model="checkout.customerName" filled label="Seu nome" maxlength="120" class="q-mb-sm" />
                 <q-input v-model="checkout.customerPhone" filled label="Seu telefone" type="tel" maxlength="30" class="q-mb-sm" />
+                <p class="text-caption">Nome e telefone ficam salvos neste navegador para os próximos pedidos.</p>
                 <template v-if="commerceSettings.acceptsDelivery">
                     <q-select v-if="savedAddresses.length" v-model="selectedSavedAddress" :options="savedAddresses" filled label="Selecionar endereço salvo" clearable class="q-mb-sm" @update:model-value="selectSavedAddress" />
                     <q-input v-model="checkout.deliveryAddress" filled type="textarea" maxlength="500" label="Endereço de entrega completo" class="q-mb-sm" />
@@ -452,6 +453,7 @@ import {
 import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
 
 const ECOMMERCE_VIEW_KEY = 'poliweb_ecommerce_view_mode'
+const CHECKOUT_CONTACT_KEY = 'poliweb_checkout_contact'
 
 export default {
     components: {},
@@ -639,6 +641,11 @@ export default {
                 (this.commerceSettings.acceptsDelivery && !form.deliveryAddress.trim()) || !form.paymentMethod) {
                 this.$q.notify({ color: 'warning', message: 'Preencha nome, telefone, endereço e pagamento.' }); return
             }
+            try {
+                localStorage.setItem(CHECKOUT_CONTACT_KEY, JSON.stringify({
+                    customerName: form.customerName.trim(), customerPhone: form.customerPhone.trim()
+                }))
+            } catch (_) { /* O pedido funciona mesmo quando o armazenamento do navegador está indisponível. */ }
             this.placingOrder = true
             try {
                 let order
@@ -1024,6 +1031,11 @@ export default {
     mounted() {
         // On mount, subscribe to your query:
         this.idAd = parseFloat(this.$route.params.id)
+        try {
+            const savedContact = JSON.parse(localStorage.getItem(CHECKOUT_CONTACT_KEY) || '{}')
+            if (typeof savedContact.customerName === 'string') this.checkout.customerName = savedContact.customerName.slice(0, 120)
+            if (typeof savedContact.customerPhone === 'string') this.checkout.customerPhone = savedContact.customerPhone.slice(0, 30)
+        } catch (_) { /* Um registro antigo inválido não bloqueia o checkout. */ }
         this.loadCommerceSettings()
         this.initialDb()
         const admin = localStorage.getItem('admin') ? true : false

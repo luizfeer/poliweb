@@ -180,6 +180,10 @@ const routes = [
         component: () => import('pages/ManagePosts.vue')
       },
       {
+        path: '/ecommerce/:id/pedidos',
+       component: () => import('pages/CommerceOrdersMonitor.vue')
+      },
+      {
         path: '/ecommerce/:id',
        component: () => import('pages/EditEcommerce.vue')
 

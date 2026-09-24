@@ -62,7 +62,11 @@
             <section v-if="admin" class="commerce-panel">
                 <div class="row items-center justify-between">
                     <h2>Últimos pedidos</h2>
-                    <div><q-btn flat label="Atualizar" @click="loadOrders" /><q-btn color="primary" outline label="Ver todos" @click="openOrders" /></div>
+                    <div class="row q-gutter-xs">
+                        <q-btn flat label="Atualizar" @click="loadOrders" />
+                        <q-btn color="primary" outline label="Ver todos" @click="openOrders" />
+                        <q-btn color="positive" label="Acompanhar ao vivo" @click="$router.push(`/ecommerce/${$route.params.id}/pedidos`)" />
+                    </div>
                 </div>
                 <p v-if="!orders.length">Nenhum pedido registrado.</p>
                 <CommerceOrderCard v-for="order in orders" :key="order.id" :order="order" />
@@ -840,6 +844,7 @@ export default {
         if (this.admin) {
             this.loadCommerceSettings()
             this.loadOrders()
+            if (this.$route.query.pedidos === 'todos') this.openOrders()
         }
         console.log(this.adsComponent, id, this.admin)
         if (!this.admin) {

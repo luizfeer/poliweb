@@ -60,22 +60,12 @@
                 <q-btn color="primary" label="Salvar configurações" :loading="savingSettings" @click="saveCommerceSettings" />
             </section>
             <section v-if="admin" class="commerce-panel">
-                <div class="row items-center justify-between"><h2>Pedidos recebidos</h2><q-btn flat label="Atualizar" @click="loadOrders" /></div>
+                <div class="row items-center justify-between">
+                    <h2>Últimos pedidos</h2>
+                    <div><q-btn flat label="Atualizar" @click="loadOrders" /><q-btn color="primary" outline label="Ver todos" @click="openOrders" /></div>
+                </div>
                 <p v-if="!orders.length">Nenhum pedido registrado.</p>
-                <article v-for="order in orders" :key="order.id" class="order-card">
-                    <strong>Pedido {{ order.id.slice(0, 8) }} · gerado no site</strong>
-                    <div class="text-caption">O envio pelo WhatsApp não pode ser confirmado automaticamente.</div>
-                    <div>{{ order.customer_name }} · {{ order.customer_phone }}</div>
-                    <div v-if="order.delivery_address">Entrega: {{ order.delivery_address }}</div>
-                    <div>Pagamento: {{ order.payment_method }}</div>
-                    <div v-for="(item, index) in order.items" :key="`${item.productId}-${index}`">
-                        {{ item.quantity }}x {{ item.name }} — {{ money(item.totalCents) }}
-                        <div v-for="(group, groupIndex) in item.selections || []" :key="groupIndex" class="text-caption">{{ group.group }}: {{ group.choices.map(choice => `${choice.name}${choice.priceCents ? ` (+${money(choice.priceCents)})` : ''}`).join(', ') }}</div>
-                        <div v-if="item.note" class="text-caption">Obs.: {{ item.note }}</div>
-                    </div>
-                    <div v-if="order.delivery_fee_cents">Entrega: {{ money(order.delivery_fee_cents) }}</div>
-                    <strong>Total: {{ money(order.total_cents) }}</strong>
-                </article>
+                <CommerceOrderCard v-for="order in orders" :key="order.id" :order="order" />
             </section>
             <template v-if="adsComponent.files && adsComponent.files.ecommerceFiltered && (Object.keys(adsComponent.files.ecommerceFiltered).length)">
                 <div class="admin-ecommerce-category" v-for="category in adsComponent.files.ecommerceFiltered" :key="category">
@@ -128,6 +118,34 @@
             </q-btn>
         </div>
         <input type="file" id="gallery" ref="gallery" @change="galleryUpload()" accept="image/*" class="hidden" />
+        <q-dialog v-model="ordersDialog" maximized transition-show="slide-up" transition-hide="slide-down">
+            <q-card class="orders-dialog">
+                <q-bar><div class="text-weight-bold">Todos os pedidos</div><q-space /><q-btn flat dense icon="close" v-close-popup /></q-bar>
+                <q-card-section class="orders-dialog-content">
+                    <p class="text-caption">Pedidos gerados no site. O envio pelo WhatsApp não é confirmado automaticamente.</p>
+                    <div class="orders-filters">
+                        <q-input v-model="ordersFilters.search" filled label="Buscar cliente, telefone ou pedido" maxlength="120" @keyup.enter="applyOrdersFilters" />
+                        <q-input v-model="ordersFilters.from" filled type="date" label="De" stack-label />
+                        <q-input v-model="ordersFilters.to" filled type="date" label="Até" stack-label />
+                        <q-select v-model="ordersFilters.payment" filled clearable :options="commerceSettings.paymentMethods" label="Pagamento" />
+                        <q-select v-model="ordersFilters.fulfillment" filled clearable emit-value map-options :options="fulfillmentOptions" label="Entrega ou retirada" />
+                    </div>
+                    <div class="row q-gutter-sm q-my-md">
+                        <q-btn color="primary" label="Filtrar" :loading="ordersLoading" @click="applyOrdersFilters" />
+                        <q-btn flat label="Limpar filtros" @click="clearOrdersFilters" />
+                    </div>
+                    <div v-if="ordersLoading" class="text-center q-pa-lg"><q-spinner color="primary" size="32px" /></div>
+                    <template v-else>
+                        <p>{{ ordersTotal }} {{ ordersTotal === 1 ? 'pedido encontrado' : 'pedidos encontrados' }}</p>
+                        <p v-if="!allOrders.length">Nenhum pedido para os filtros escolhidos.</p>
+                        <CommerceOrderCard v-for="order in allOrders" :key="order.id" :order="order" />
+                        <div v-if="ordersTotal > ordersPageSize" class="row justify-center q-mt-lg">
+                            <q-pagination :model-value="ordersPage" :max="Math.ceil(ordersTotal / ordersPageSize)" :max-pages="5" boundary-numbers color="primary" @update:model-value="changeOrdersPage" />
+                        </div>
+                    </template>
+                </q-card-section>
+            </q-card>
+        </q-dialog>
         <q-dialog v-model="showSetupDialog" persistent>
             <q-card class="product-type-card">
                 <q-card-section>
@@ -312,9 +330,10 @@ import {
 import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
 import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
 import ProductOptionsEditor from 'src/components/ProductOptionsEditor.vue'
+import CommerceOrderCard from 'src/components/CommerceOrderCard.vue'
 
 export default {
-    components: { ProductOptionsEditor },
+    components: { ProductOptionsEditor, CommerceOrderCard },
     setup() {
         return {
             required: [val => !!val || 'Campo obrigatório'],
@@ -348,6 +367,15 @@ export default {
             standardPayments: ref(['Pix', 'Cartão', 'Dinheiro']),
             savingSettings: ref(false),
             orders: ref([]),
+            ordersDialog: ref(false),
+            ordersLoading: ref(false),
+            ordersRequestId: ref(0),
+            allOrders: ref([]),
+            ordersTotal: ref(0),
+            ordersPage: ref(1),
+            ordersPageSize: ref(20),
+            ordersFilters: ref({ search: '', from: '', to: '', payment: null, fulfillment: null }),
+            fulfillmentOptions: ref([{ label: 'Entrega', value: 'delivery' }, { label: 'Retirada', value: 'pickup' }]),
             confirmEdit: ref(false),
             descriptionError: ref(false),
             editorToolbar: ref([
@@ -441,6 +469,45 @@ export default {
         async loadOrders() {
             try { this.orders = await commerceApi(this.$route.params.id, 'orders') }
             catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+        },
+        openOrders() {
+            this.ordersDialog = true
+            this.ordersPage = 1
+            this.loadAllOrders()
+        },
+        async loadAllOrders() {
+            const requestId = ++this.ordersRequestId
+            this.ordersLoading = true
+            const params = new URLSearchParams({ view: 'all', page: String(this.ordersPage) })
+            for (const [key, value] of Object.entries(this.ordersFilters)) {
+                if (value) params.set(key, String(value))
+            }
+            try {
+                const result = await commerceApi(this.$route.params.id, `orders?${params.toString()}`)
+                if (requestId === this.ordersRequestId) {
+                    this.allOrders = result.orders
+                    this.ordersTotal = result.total
+                    this.ordersPageSize = result.pageSize
+                }
+            } catch (error) {
+                if (requestId === this.ordersRequestId) this.$q.notify({ color: 'negative', message: error.message })
+            } finally { if (requestId === this.ordersRequestId) this.ordersLoading = false }
+        },
+        applyOrdersFilters() {
+            if (this.ordersFilters.from && this.ordersFilters.to && this.ordersFilters.from > this.ordersFilters.to) {
+                this.$q.notify({ color: 'warning', message: 'A data inicial deve vir antes da data final.' }); return
+            }
+            this.ordersPage = 1
+            this.loadAllOrders()
+        },
+        clearOrdersFilters() {
+            this.ordersFilters = { search: '', from: '', to: '', payment: null, fulfillment: null }
+            this.ordersPage = 1
+            this.loadAllOrders()
+        },
+        changeOrdersPage(page) {
+            this.ordersPage = page
+            this.loadAllOrders()
         },
         backPage() {
             this.$router.go(-1)
@@ -792,7 +859,9 @@ export default {
 .commerce-panel { margin: 1.5rem 0; padding: 1.25rem; background: white; border: 1px solid #e5e7eb; border-radius: 12px; }
 .commerce-panel h2 { font-size: 1.2rem; font-weight: 700; margin: 0 0 1rem; }
 .commerce-panel p { margin: 1rem 0 0.5rem; }
-.order-card { padding: 1rem 0; border-top: 1px solid #e5e7eb; line-height: 1.8; overflow-wrap: anywhere; }
+.orders-dialog-content { max-width: 960px; margin: 0 auto; }
+.orders-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+@media (max-width: 600px) { .orders-filters { grid-template-columns: 1fr; } }
 .product-dialog-actions {
     gap: 0.5rem;
     padding: 1rem 1.25rem 1.25rem;

@@ -363,9 +363,12 @@
             <q-card-section class="q-pt-none">
                 <div v-for="(group, groupIndex) in configuringProduct?.title?.options || []" :key="groupIndex" class="q-mb-md">
                     <strong>{{ group.name }} {{ group.required ? '*' : '' }}</strong>
-                    <div v-for="(choice, choiceIndex) in group.choices" :key="choiceIndex">
-                        <q-radio v-if="group.type === 'single'" v-model="selectedChoices[groupIndex]" :val="choiceIndex" :label="`${choice.name} ${Number(choice.price) ? `(+ ${RS(Number(choice.price))})` : ''}`" />
-                        <q-checkbox v-else v-model="selectedChoices[groupIndex]" :val="choiceIndex" :label="`${choice.name} ${Number(choice.price) ? `(+ ${RS(Number(choice.price))})` : ''}`" />
+                    <div v-for="(choice, choiceIndex) in group.choices" :key="choiceIndex" class="option-choice-row">
+                        <button v-if="choice.imageUrl" type="button" class="option-choice-image" :title="`Ampliar imagem de ${choice.name}`" @click.stop="openOptionImage(choice.imageUrl)">
+                            <img :src="choice.imageUrl" :alt="choice.name" />
+                        </button>
+                        <q-radio v-if="group.type === 'single'" v-model="selectedChoices[groupIndex]" :val="choiceIndex" :label="`${choice.name} ${optionPrice(choice.price) ? `(+ ${RS(optionPrice(choice.price))})` : ''}`" />
+                        <q-checkbox v-else v-model="selectedChoices[groupIndex]" :val="choiceIndex" :label="`${choice.name} ${optionPrice(choice.price) ? `(+ ${RS(optionPrice(choice.price))})` : ''}`" />
                     </div>
                 </div>
                 <q-input v-model="configureNote" filled type="textarea" maxlength="180" label="Observação do item" />
@@ -377,6 +380,7 @@
             </q-card-actions>
         </q-card>
     </q-dialog>
+    <q-dialog v-model="showOptionImage"><q-card class="option-image-dialog"><q-img :src="optionImageUrl" fit="contain" /><q-card-actions align="right"><q-btn flat label="Fechar" v-close-popup /></q-card-actions></q-card></q-dialog>
     <q-dialog v-model="confirmPedido">
         <q-card class="checkout-card">
             <q-card-section>
@@ -488,6 +492,8 @@ export default {
             showConfiguration: ref(false),
             selectedChoices: ref({}),
             configureNote: ref(''),
+            showOptionImage: ref(false),
+            optionImageUrl: ref(''),
             buyAfterConfigure: ref(false),
             rightDrawerOpen: ref(false),
             whatsappChooser: ref(false),
@@ -545,7 +551,7 @@ export default {
             ;(product.title?.options || []).forEach((group, index) => {
                 const selected = this.selectedChoices[index]
                 const indexes = Array.isArray(selected) ? selected : (selected === null || selected === undefined ? [] : [selected])
-                indexes.forEach(choiceIndex => { price += Number(group.choices[choiceIndex]?.price || 0) })
+                indexes.forEach(choiceIndex => { price += this.optionPrice(group.choices[choiceIndex]?.price) })
             })
             return price
         },
@@ -625,6 +631,8 @@ export default {
     },
     methods: {
         money(cents) { return (Number(cents || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
+        optionPrice(value) { return Number(String(value || 0).replace(',', '.')) || 0 },
+        openOptionImage(url) { this.optionImageUrl = url; this.showOptionImage = true },
         selectSavedAddress(value) { if (value) this.checkout.deliveryAddress = value },
         async loadCommerceSettings() {
             try {
@@ -873,23 +881,33 @@ export default {
                 this.showConfiguration = true
                 return false
             }
-            await this.persistCartItem(item, [], '')
-            return true
+            try {
+                await this.persistCartItem(item, [], '')
+                return true
+            } catch (_) {
+                this.$q.notify({ color: 'negative', message: 'Não foi possível adicionar ao carrinho. Tente novamente.' })
+                return false
+            }
         },
         async confirmProductConfiguration() {
             const item = this.configuringProduct
             const selections = []
             for (const [groupIndex, group] of (item.title.options || []).entries()) {
                 const selected = this.selectedChoices[groupIndex]
-                const choiceIndexes = Array.isArray(selected) ? selected : (selected === null || selected === undefined ? [] : [selected])
+                const choiceIndexes = Array.isArray(selected) ? [...selected] : (selected === null || selected === undefined ? [] : [selected])
                 if (group.required && !choiceIndexes.length) {
                     this.$q.notify({ color: 'warning', message: `Selecione ${group.name}.` }); return
                 }
                 if (choiceIndexes.length) selections.push({ groupIndex, choiceIndexes })
             }
-            await this.persistCartItem(item, selections, this.configureNote)
-            this.showConfiguration = false
-            if (this.buyAfterConfigure) await this.botaoPedido()
+            try {
+                await this.persistCartItem(item, selections, this.configureNote)
+                this.showConfiguration = false
+                if (this.buyAfterConfigure) await this.botaoPedido()
+                else this.$q.notify({ color: 'positive', message: 'Produto adicionado ao carrinho.' })
+            } catch (_) {
+                this.$q.notify({ color: 'negative', message: 'Não foi possível adicionar ao carrinho. Tente novamente.' })
+            }
         },
         async persistCartItem(item, selections, note) {
             const optionLabels = []
@@ -1117,6 +1135,10 @@ export default {
 
 <style scoped>
 .checkout-card { width: min(100%, 500px); }
+.option-choice-row { display: flex; align-items: center; gap: 0.5rem; min-height: 52px; }
+.option-choice-image { width: 48px; height: 48px; padding: 0; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; flex: 0 0 auto; background: white; }
+.option-choice-image img { width: 100%; height: 100%; object-fit: cover; }
+.option-image-dialog { width: min(90vw, 600px); }.option-image-dialog :deep(.q-img) { max-height: 75vh; }
 .ecommerce-page {
   padding-bottom: env(safe-area-inset-bottom);
   min-height: 100vh;

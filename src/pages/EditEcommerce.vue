@@ -233,7 +233,7 @@
                     <div class="row">
                         <q-select v-model="form.label.category" :options="optionsCategory" filled :rules="required" ref="category" lazy-rules label="Categoria" class="w-full py-4" />
                     </div>
-                    <ProductOptionsEditor v-model="form.meta.productOptions" />
+                    <ProductOptionsEditor v-model="form.meta.productOptions" :ad-id="adsComponent.id" />
                 </q-form>
 
                 <q-card-actions align="right" class="product-dialog-actions">
@@ -291,7 +291,7 @@
                     <div class="row">
                         <q-select v-model="form.label.category" :options="optionsCategory" filled :rules="required" ref="category" lazy-rules label="Categoria" class="w-full py-4" />
                     </div>
-                    <ProductOptionsEditor v-model="form.meta.productOptions" />
+                    <ProductOptionsEditor v-model="form.meta.productOptions" :ad-id="adsComponent.id" />
                 </q-form>
 
                 <q-card-actions align="right" class="product-dialog-actions">

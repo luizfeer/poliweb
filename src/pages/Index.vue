@@ -2,6 +2,7 @@
   <q-page class="index-page">
     <div class="index-shell px-4 py-4 pb-8">
       <Location class="mb-4" />
+      <DeliveryWidget :address-id="addressId" :city-name="current?.city || localization?.city || ''" :city-state="current?.state || localization?.state || ''" />
 
       <!-- Destaque: favorito que você segue -->
       <div v-if="favoriteFollow" class="section mt-2">
@@ -172,6 +173,7 @@ import CardAds from "src/components/CardAds.vue";
 import RecentVideosWidget from "src/components/RecentVideosWidget.vue";
 import TopRankedAdsWidget from "src/components/TopRankedAdsWidget.vue";
 import CityAdsWidget from "src/components/CityAdsWidget.vue";
+import DeliveryWidget from "src/components/DeliveryWidget.vue";
 import { timeAgo } from "src/js/timeAgo";
 
 export default defineComponent({
@@ -181,6 +183,7 @@ export default defineComponent({
     RecentVideosWidget,
     TopRankedAdsWidget,
     CityAdsWidget,
+    DeliveryWidget,
   },
   computed: {
     ...mapState('categories', ['list']),

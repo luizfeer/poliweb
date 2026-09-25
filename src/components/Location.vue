@@ -114,6 +114,7 @@ function normalizeCitySearch(value = '') {
 }
 
 export default {
+  props: { redirectTo: { type: String, default: '' } },
   setup() {
     const store = useStore()
     const router = useRouter()
@@ -181,7 +182,7 @@ export default {
         if (typeof loadFn === 'function') {
           await loadFn(val)
         }
-        await this.router.push('/')
+        await this.router.push(this.redirectTo ? { path: this.redirectTo, query: { cidade: val.id } } : '/')
       } finally {
         this.switchingCity = false
         this.store.dispatch('localization/setCategoriesLoading', false)

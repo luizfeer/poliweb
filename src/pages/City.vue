@@ -38,17 +38,16 @@
         </q-card>
       </section>
 
-      <nav class="city-delivery-tabs" aria-label="Seções da cidade">
-        <router-link :to="cityUrl(city || cityName)" :class="{ active: !deliveryTab }">Início</router-link>
-        <router-link :to="{ path: cityUrl(city || cityName), query: { aba: 'delivery' } }" :class="{ active: deliveryTab }">Delivery <span v-if="deliveryStores.length">({{ deliveryStores.length }})</span></router-link>
+      <nav v-if="deliveryStores.length" class="city-delivery-tabs" aria-label="Seções da cidade">
+        <router-link :to="cityUrl(city || cityName)" class="active">Início</router-link>
+        <router-link :to="`/delivery?cidade=${city?.id || ''}`">Delivery <span v-if="deliveryStores.length">({{ deliveryStores.length }})</span></router-link>
       </nav>
-      <section v-if="deliveryTab || deliveryStores.length" class="city-section city-delivery-section">
+      <section v-if="deliveryStores.length" class="city-section city-delivery-section">
         <div class="city-section-head"><h2>Delivery em {{ cityName }}</h2>
-          <router-link v-if="!deliveryTab" :to="{ path: cityUrl(city || cityName), query: { aba: 'delivery' } }">Ver todos</router-link>
+          <router-link :to="`/delivery?cidade=${city.id}`">Ver todos</router-link>
         </div>
-        <p v-if="deliveryTab && !deliveryStores.length">Ainda não há lojas de comida com delivery cadastradas nesta cidade.</p>
         <div class="city-delivery-grid">
-          <router-link v-for="shop in (deliveryTab ? deliveryStores : deliveryStores.slice(0, 4))" :key="shop.id" :to="`/loja/${shop.id}`" class="city-delivery-card">
+          <router-link v-for="shop in deliveryStores.slice(0, 4)" :key="shop.id" :to="`/loja/${shop.id}`" class="city-delivery-card">
             <img v-if="shop.imageUrl" :src="shop.imageUrl" alt="" />
             <q-icon v-else name="restaurant" size="38px" />
             <span><strong>{{ shop.name }}</strong><small>{{ shop.description || shop.categoryName || 'Comida e bebida' }}</small></span>
@@ -56,7 +55,6 @@
           </router-link>
         </div>
       </section>
-      <template v-if="!deliveryTab">
       <section class="city-section">
         <div class="city-section-head">
           <h2>Categorias populares em {{ cityName }}</h2>
@@ -161,7 +159,6 @@
         </div>
       </section>
 
-      </template>
       <section class="city-seo-text">
         <h2>Guia local de {{ cityName }}</h2>
         <p>
@@ -218,7 +215,6 @@ export default {
     const newAds = ref([])
     const topAds = ref([])
     const deliveryStores = ref([])
-    const deliveryTab = computed(() => route.query.aba === 'delivery')
     const loadingCategories = ref(true)
     const loadingAds = ref(true)
     const loadingTop = ref(true)
@@ -397,7 +393,6 @@ export default {
       newAds,
       topAds,
       deliveryStores,
-      deliveryTab,
       loadingCategories,
       loadingAds,
       loadingTop,

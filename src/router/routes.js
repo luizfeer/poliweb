@@ -158,8 +158,12 @@ const routes = [
       },
       {
         path: '/cidades',
-       component: () => import('pages/CitysIndex.vue')
+        component: () => import('pages/CitysIndex.vue')
 
+      },
+      {
+        path: '/delivery',
+        component: () => import('pages/Delivery.vue')
       },
       {
         path: '/c/:city/:id?',

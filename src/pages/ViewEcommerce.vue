@@ -865,9 +865,7 @@ export default {
         initialDb() {
             const queryRefs = toRefs(this.queries);
             this.subscription = liveQuery(async () => {
-                return db.cart.where({
-                    ad: this.idAd
-                }).toArray()
+                return db.cart.filter(line => Number(line.ad) === Number(this.idAd)).toArray()
             }).subscribe(
                 (items) => {
                     queryRefs.cart.value = items;
@@ -930,7 +928,7 @@ export default {
             })
             value = Math.round(value * 100) / 100
             const productKey = JSON.stringify([item.id, selections, note])
-            const cartItems = await db.cart.where({ ad: this.idAd }).toArray()
+            const cartItems = await db.cart.filter(line => Number(line.ad) === Number(this.idAd)).toArray()
             const existing = cartItems.find(line => line.productKey === productKey ||
                 (!selections.length && !note && !line.productKey && Number(line.idProd) === Number(item.id)))
             await db.cart.put({
@@ -948,7 +946,7 @@ export default {
                 note: existing?.note || note,
                 quantity: existing ? existing.quantity + 1 : 1
             })
-            const updated = await db.cart.where({ ad: this.idAd }).toArray()
+            const updated = await db.cart.filter(line => Number(line.ad) === Number(this.idAd)).toArray()
             this.queries.cart = updated
             this.syncProductQuantities(updated)
         },
@@ -1082,10 +1080,11 @@ export default {
                     }
 
                     let filtered = {
+                        ...response.data,
                         files: {
-                            ecommerce: []
-                        },
-                        ...response.data
+                            ...(response.data.files || {}),
+                            ecommerce: Array.isArray(response.data.files?.ecommerce) ? response.data.files.ecommerce : []
+                        }
                     }
                     filtered.files.ecommerce = this.filterDeleted(filtered.files.ecommerce)
                     filtered.phones = this.filterDeleted(filtered.phones)

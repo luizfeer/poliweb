@@ -809,10 +809,11 @@ export default {
                     }
 
                     let filtered = {
+                        ...response.data,
                         files: {
-                            ecommerce: []
-                        },
-                        ...response.data
+                            ...(response.data.files || {}),
+                            ecommerce: Array.isArray(response.data.files?.ecommerce) ? response.data.files.ecommerce : []
+                        }
                     }
                     filtered.phones = this.filterDeleted(filtered.phones)
                     filtered.files.logo = this.filterDeleted(filtered.files.logo)

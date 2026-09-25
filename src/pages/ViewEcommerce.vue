@@ -391,7 +391,7 @@
             </q-card-section>
             <q-card-section class="q-pt-none">
                 <q-input v-model="checkout.customerName" filled label="Seu nome" maxlength="120" class="q-mb-sm" />
-                <q-input v-model="checkout.customerPhone" filled label="Seu telefone" type="tel" maxlength="30" class="q-mb-sm" />
+                <q-input v-model="checkout.customerPhone" filled label="Seu telefone" type="tel" inputmode="numeric" maxlength="22" hint="Digite o DDD e o número" class="q-mb-sm" @update:model-value="formatCustomerPhone" />
                 <p class="text-caption">Nome e telefone ficam salvos neste navegador para os próximos pedidos.</p>
                 <template v-if="commerceSettings.acceptsDelivery">
                     <q-select v-if="savedAddresses.length" v-model="selectedSavedAddress" :options="savedAddresses" filled label="Selecionar endereço salvo" clearable class="q-mb-sm" @update:model-value="selectSavedAddress" />
@@ -405,17 +405,28 @@
             </q-card-section>
             <q-card-actions align="right">
                 <q-btn flat label="Cancelar" v-close-popup />
-                <q-btn color="positive" label="Continuar no WhatsApp" :loading="placingOrder" @click="placeOrder" />
+                <q-btn color="positive" label="Continuar" :loading="placingOrder" @click="placeOrder" />
             </q-card-actions>
         </q-card>
     </q-dialog>
-    <q-dialog v-model="showCompletedOrder">
-        <q-card class="checkout-card">
-            <q-card-section><div class="text-h6">Envie o pedido pelo WhatsApp</div></q-card-section>
-            <q-card-section>A mensagem está pronta. Confirme o envio no WhatsApp para que a loja receba o pedido. Total: {{ money(completedOrder?.totalCents) }}.</q-card-section>
-            <q-card-actions align="right">
-                <q-btn flat label="Fechar" v-close-popup />
-                <q-btn color="positive" label="Abrir WhatsApp" @click="shareOrderWhatsapp" />
+    <q-dialog v-model="showCompletedOrder" persistent transition-show="scale" transition-hide="scale">
+        <q-card class="whatsapp-handoff-card">
+            <div class="whatsapp-handoff-art" aria-hidden="true">
+                <span class="whatsapp-handoff-ring whatsapp-handoff-ring-one" />
+                <span class="whatsapp-handoff-ring whatsapp-handoff-ring-two" />
+                <q-icon name="whatsapp" size="48px" />
+                <span class="whatsapp-handoff-send"><q-icon name="send" size="18px" /></span>
+            </div>
+            <q-card-section class="whatsapp-handoff-content">
+                <span class="whatsapp-handoff-eyebrow">ÚLTIMO PASSO</span>
+                <h2>Envie seu pedido para {{ adsComponent.name }}</h2>
+                <p>A mensagem está pronta. <strong>Abra o WhatsApp e toque em Enviar</strong> para que {{ adsComponent.name }} receba seu pedido.</p>
+                <div class="whatsapp-handoff-total">Total do pedido <strong>{{ money(completedOrder?.totalCents) }}</strong></div>
+                <div class="whatsapp-handoff-steps"><span>1</span> Abrir o WhatsApp <q-icon name="arrow_forward" /><span>2</span> Tocar em Enviar</div>
+            </q-card-section>
+            <q-card-actions class="whatsapp-handoff-actions">
+                <q-btn color="positive" icon="whatsapp" label="Abrir WhatsApp e enviar" unelevated no-caps @click="shareOrderWhatsapp" />
+                <q-btn flat color="grey-7" label="Voltar à loja" no-caps @click="showCompletedOrder = false" />
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -638,6 +649,16 @@ export default {
         optionPrice(value) { return Number(String(value || 0).replace(',', '.')) || 0 },
         openOptionImage(url) { this.optionImageUrl = url; this.showOptionImage = true },
         selectSavedAddress(value) { if (value) this.checkout.deliveryAddress = value },
+        formatCustomerPhone(value) {
+            let digits = String(value || '').replace(/\D/g, '')
+            if (digits.startsWith('55') && digits.length >= 12) digits = digits.slice(2)
+            digits = digits.slice(0, 11)
+            if (!digits) { this.checkout.customerPhone = ''; return }
+            if (digits.length <= 2) { this.checkout.customerPhone = `(${digits}`; return }
+            const local = digits.slice(2)
+            const split = local.length > 8 ? 5 : 4
+            this.checkout.customerPhone = `(${digits.slice(0, 2)}) ${local.slice(0, split)}${local.length > split ? `-${local.slice(split)}` : ''}`
+        },
         async loadCommerceSettings(silent = false) {
             try {
                 this.commerceSettings = await commerceApi(this.$route.params.id, 'settings')
@@ -651,9 +672,9 @@ export default {
             if (!this.phoneZap) {
                 this.$q.notify({ color: 'warning', message: 'Esta loja não possui WhatsApp ativo para receber pedidos.' }); return
             }
-            if (!form.customerName.trim() || !/^[\d\s()+-]{8,30}$/.test(form.customerPhone.trim()) ||
+            if (!form.customerName.trim() || ![10, 11].includes(form.customerPhone.replace(/\D/g, '').length) ||
                 (this.commerceSettings.acceptsDelivery && !form.deliveryAddress.trim()) || !form.paymentMethod) {
-                this.$q.notify({ color: 'warning', message: 'Preencha nome, telefone, endereço e pagamento.' }); return
+                this.$q.notify({ color: 'warning', message: 'Preencha nome, telefone com DDD, endereço e pagamento.' }); return
             }
             try {
                 localStorage.setItem(CHECKOUT_CONTACT_KEY, JSON.stringify({
@@ -699,7 +720,6 @@ export default {
                 this.rightDrawerOpen = false
                 this.completedOrder = order
                 this.showCompletedOrder = true
-                this.shareOrderWhatsapp()
             } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
             finally { this.placingOrder = false }
         },
@@ -1058,7 +1078,7 @@ export default {
         try {
             const savedContact = JSON.parse(localStorage.getItem(CHECKOUT_CONTACT_KEY) || '{}')
             if (typeof savedContact.customerName === 'string') this.checkout.customerName = savedContact.customerName.slice(0, 120)
-            if (typeof savedContact.customerPhone === 'string') this.checkout.customerPhone = savedContact.customerPhone.slice(0, 30)
+            if (typeof savedContact.customerPhone === 'string') this.formatCustomerPhone(savedContact.customerPhone)
         } catch (_) { /* Um registro antigo inválido não bloqueia o checkout. */ }
         this.loadCommerceSettings()
         this.availabilityTimer = window.setInterval(() => this.loadCommerceSettings(true), 60000)
@@ -1144,6 +1164,26 @@ export default {
 
 <style scoped>
 .checkout-card { width: min(100%, 500px); }
+.whatsapp-handoff-card { width:min(100%,440px); padding:1.25rem; border-radius:24px; overflow:hidden; text-align:center; background:linear-gradient(180deg,#effdf4 0%,#fff 42%); }
+.whatsapp-handoff-art { position:relative; display:flex; align-items:center; justify-content:center; width:120px; height:120px; margin:0 auto .25rem; color:#fff; border-radius:50%; background:linear-gradient(135deg,#25d366,#128c7e); box-shadow:0 12px 30px #25d36644; animation:handoff-arrive .6s both; }
+.whatsapp-handoff-ring { position:absolute; inset:-10px; border:2px solid #25d36666; border-radius:50%; animation:handoff-pulse 2.2s ease-out infinite; }
+.whatsapp-handoff-ring-two { animation-delay:1.1s; }
+.whatsapp-handoff-send { position:absolute; right:-2px; bottom:1px; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#fff; color:#128c7e; box-shadow:0 3px 10px #0002; animation:handoff-send 1.4s ease-in-out infinite; }
+.whatsapp-handoff-content { padding:1.2rem .25rem .5rem; }
+.whatsapp-handoff-eyebrow { color:#087e62; font-size:.7rem; font-weight:900; letter-spacing:.16em; }
+.whatsapp-handoff-content h2 { margin:.4rem 0 .65rem; color:#153c30; font-size:1.55rem; font-weight:900; line-height:1.18; }
+.whatsapp-handoff-content p { margin:0; color:#4b6357; line-height:1.5; }
+.whatsapp-handoff-content p strong { color:#14532d; }
+.whatsapp-handoff-total { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin:1rem 0; padding:.8rem 1rem; border-radius:12px; background:#e8f8ee; color:#315848; font-size:.88rem; }
+.whatsapp-handoff-total strong { color:#14532d; font-size:1rem; }
+.whatsapp-handoff-steps { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.4rem; color:#4b6357; font-size:.78rem; font-weight:700; }
+.whatsapp-handoff-steps span { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#d1fae5; color:#047857; }
+.whatsapp-handoff-actions { display:grid; gap:.4rem; padding:1rem .25rem .25rem; }
+.whatsapp-handoff-actions .q-btn { width:100%; min-height:46px; border-radius:12px; }
+@keyframes handoff-arrive { from { transform:scale(.7); opacity:0; } to { transform:scale(1); opacity:1; } }
+@keyframes handoff-pulse { 0% { transform:scale(.8); opacity:.65; } 100% { transform:scale(1.45); opacity:0; } }
+@keyframes handoff-send { 50% { transform:translate(4px,-4px); } }
+@media (prefers-reduced-motion: reduce) { .whatsapp-handoff-art, .whatsapp-handoff-ring, .whatsapp-handoff-send { animation:none; } }
 .option-choice-row { display: flex; align-items: center; gap: 0.5rem; min-height: 52px; }
 .option-choice-image { width: 48px; height: 48px; padding: 0; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; flex: 0 0 auto; background: white; }
 .option-choice-image img { width: 100%; height: 100%; object-fit: cover; }

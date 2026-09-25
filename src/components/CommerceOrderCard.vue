@@ -4,6 +4,7 @@
       <strong>Pedido {{ String(order.id).slice(0, 8) }}</strong>
       <span class="text-caption">{{ formatDate(order.created_at) }}</span>
     </div>
+    <q-badge :color="statusColor(order.status)" class="q-mr-sm">{{ statusLabel(order.status) }}</q-badge><q-badge v-if="order.hidden" color="grey-7">Oculto</q-badge>
     <div class="text-caption">Gerado no site · envio pelo WhatsApp não confirmado automaticamente</div>
     <div>{{ order.customer_name }} · {{ order.customer_phone }}</div>
     <div v-if="order.delivery_address">Entrega: {{ order.delivery_address }}</div>
@@ -26,6 +27,8 @@ export default {
   name: 'CommerceOrderCard',
   props: { order: { type: Object, required: true } },
   methods: {
+    statusLabel(value) { return ({ new: 'Novo', accepted: 'Aceito', preparing: 'Em preparo', ready: 'Pronto', completed: 'Concluído', cancelled: 'Cancelado' })[value] || 'Novo' },
+    statusColor(value) { return ({ new: 'deep-orange', accepted: 'blue', preparing: 'amber-9', ready: 'teal', completed: 'positive', cancelled: 'grey-7' })[value] || 'deep-orange' },
     money(cents) { return (Number(cents || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
     formatDate(value) {
       return value ? new Date(value).toLocaleString('pt-BR', {

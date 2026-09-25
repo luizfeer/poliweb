@@ -38,6 +38,25 @@
         </q-card>
       </section>
 
+      <nav class="city-delivery-tabs" aria-label="Seções da cidade">
+        <router-link :to="cityUrl(city || cityName)" :class="{ active: !deliveryTab }">Início</router-link>
+        <router-link :to="{ path: cityUrl(city || cityName), query: { aba: 'delivery' } }" :class="{ active: deliveryTab }">Delivery <span v-if="deliveryStores.length">({{ deliveryStores.length }})</span></router-link>
+      </nav>
+      <section v-if="deliveryTab || deliveryStores.length" class="city-section city-delivery-section">
+        <div class="city-section-head"><h2>Delivery em {{ cityName }}</h2>
+          <router-link v-if="!deliveryTab" :to="{ path: cityUrl(city || cityName), query: { aba: 'delivery' } }">Ver todos</router-link>
+        </div>
+        <p v-if="deliveryTab && !deliveryStores.length">Ainda não há lojas de comida com delivery cadastradas nesta cidade.</p>
+        <div class="city-delivery-grid">
+          <router-link v-for="shop in (deliveryTab ? deliveryStores : deliveryStores.slice(0, 4))" :key="shop.id" :to="`/loja/${shop.id}`" class="city-delivery-card">
+            <img v-if="shop.imageUrl" :src="shop.imageUrl" alt="" />
+            <q-icon v-else name="restaurant" size="38px" />
+            <span><strong>{{ shop.name }}</strong><small>{{ shop.description || shop.categoryName || 'Comida e bebida' }}</small></span>
+            <q-badge :color="shop.isOpen ? 'positive' : 'orange-9'">{{ shop.label }}</q-badge>
+          </router-link>
+        </div>
+      </section>
+      <template v-if="!deliveryTab">
       <section class="city-section">
         <div class="city-section-head">
           <h2>Categorias populares em {{ cityName }}</h2>
@@ -142,6 +161,7 @@
         </div>
       </section>
 
+      </template>
       <section class="city-seo-text">
         <h2>Guia local de {{ cityName }}</h2>
         <p>
@@ -197,6 +217,8 @@ export default {
     const categories = ref([])
     const newAds = ref([])
     const topAds = ref([])
+    const deliveryStores = ref([])
+    const deliveryTab = computed(() => route.query.aba === 'delivery')
     const loadingCategories = ref(true)
     const loadingAds = ref(true)
     const loadingTop = ref(true)
@@ -265,12 +287,20 @@ export default {
       }
     }
 
+    const loadDelivery = async () => {
+      try {
+        const response = await api.get(`/commerce/cities/${city.value.id}/delivery`)
+        deliveryStores.value = response?.data?.stores || []
+      } catch (_) { deliveryStores.value = [] }
+    }
+
     const loadPage = async () => {
       const citysData = await fetchCities()
       city.value = findCityBySlug(citysData, route.params.cidade)
       categories.value = []
       newAds.value = []
       topAds.value = []
+      deliveryStores.value = []
 
       if (!city.value) {
         loadingCategories.value = false
@@ -287,7 +317,8 @@ export default {
       await Promise.all([
         loadCategories(),
         loadAds(),
-        loadTopAds()
+        loadTopAds(),
+        loadDelivery()
       ])
     }
 
@@ -365,6 +396,8 @@ export default {
       categories,
       newAds,
       topAds,
+      deliveryStores,
+      deliveryTab,
       loadingCategories,
       loadingAds,
       loadingTop,
@@ -673,4 +706,16 @@ export default {
     font-size: 1.25rem;
   }
 }
+</style>
+
+<style scoped>
+.city-delivery-tabs { display:flex; gap:.5rem; margin:1rem 0; }
+.city-delivery-tabs a { padding:.65rem 1.1rem; border-radius:999px; color:#334155; background:#e2e8f0; font-weight:700; }
+.city-delivery-tabs a.active { background:#ea580c; color:white; }
+.city-delivery-section { background:#fff7ed; border:1px solid #fed7aa; border-radius:18px; padding:1rem; }
+.city-delivery-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:.8rem; }
+.city-delivery-card { display:flex; align-items:center; gap:.75rem; padding:1rem; border-radius:12px; background:white; color:#1e293b; box-shadow:0 2px 8px #7c2d1214; }
+.city-delivery-card img { width:52px; height:52px; object-fit:cover; border-radius:10px; }
+.city-delivery-card span { flex:1; min-width:0; }
+.city-delivery-card small { display:block; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style>

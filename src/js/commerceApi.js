@@ -17,6 +17,11 @@ export async function commerceApi(adId, resource, method = 'GET', body) {
 
 export const defaultCommerceSettings = () => ({
   acceptsDelivery: false,
+  isFoodDelivery: false,
+  acceptingOrders: true,
+  deliveryPromptAnswered: false,
+  isOpen: true,
+  label: 'Aberto agora',
   deliveryFeeCents: 0,
   deliveryInfo: '',
   paymentMethods: ['Pix', 'Cartão', 'Dinheiro']

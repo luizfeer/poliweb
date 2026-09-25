@@ -9,6 +9,7 @@
             <div class="ecommerce-info">
                 <h1 class="ecommerce-name">{{ adsComponent.name }}</h1>
                 <p class="ecommerce-desc" v-if="adsComponent.description">{{ adsComponent.description }}</p>
+                <q-chip :color="commerceSettings.isOpen ? 'positive' : 'orange-9'" text-color="white" :icon="commerceSettings.isOpen ? 'check_circle' : 'schedule'">{{ commerceSettings.label }}</q-chip>
             </div>
         </div>
 
@@ -292,8 +293,9 @@
                         <span>Total</span>
                         <span class="cart-total-value">{{ RS(total) }}</span>
                     </div>
-                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap" @click="botaoPedido()" />
+                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap || !commerceSettings.isOpen" @click="botaoPedido()" />
                     <p v-if="!phoneZap" class="cart-checkout-warning">A loja não possui WhatsApp ativo para receber pedidos.</p>
+                    <p v-else-if="!commerceSettings.isOpen" class="cart-checkout-warning">{{ commerceSettings.label }}. Volte no horário de funcionamento.</p>
                 </div>
             </div>
             <div v-else class="cart-empty desktop-cart-empty">
@@ -346,8 +348,9 @@
                         <span>Total</span>
                         <span class="cart-total-value">{{ RS(total) }}</span>
                     </div>
-                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap" @click="botaoPedido()" />
+                    <q-btn color="secondary" label="Finalizar pedido" class="cart-checkout" unelevated :disable="!phoneZap || !commerceSettings.isOpen" @click="botaoPedido()" />
                     <p v-if="!phoneZap" class="cart-checkout-warning">A loja não possui WhatsApp ativo para receber pedidos.</p>
+                    <p v-else-if="!commerceSettings.isOpen" class="cart-checkout-warning">{{ commerceSettings.label }}. Volte no horário de funcionamento.</p>
                 </div>
             </div>
             <div v-else class="cart-empty">
@@ -485,6 +488,7 @@ export default {
             completedOrder: ref(null),
             showCompletedOrder: ref(false),
             placingOrder: ref(false),
+            availabilityTimer: ref(null),
             commerceSettings: ref(defaultCommerceSettings()),
             checkout: ref({ customerName: '', customerPhone: '', deliveryAddress: '', paymentMethod: '' }),
             selectedSavedAddress: ref(null),
@@ -634,13 +638,15 @@ export default {
         optionPrice(value) { return Number(String(value || 0).replace(',', '.')) || 0 },
         openOptionImage(url) { this.optionImageUrl = url; this.showOptionImage = true },
         selectSavedAddress(value) { if (value) this.checkout.deliveryAddress = value },
-        async loadCommerceSettings() {
+        async loadCommerceSettings(silent = false) {
             try {
                 this.commerceSettings = await commerceApi(this.$route.params.id, 'settings')
-                this.checkout.paymentMethod = this.commerceSettings.paymentMethods[0] || ''
-            } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+                if (!this.commerceSettings.paymentMethods.includes(this.checkout.paymentMethod)) this.checkout.paymentMethod = this.commerceSettings.paymentMethods[0] || ''
+            } catch (error) { this.commerceSettings.isOpen = false; this.commerceSettings.label = 'Disponibilidade indisponível'; if (!silent) this.$q.notify({ color: 'negative', message: error.message }) }
         },
         async placeOrder() {
+            await this.loadCommerceSettings()
+            if (!this.commerceSettings.isOpen) { this.$q.notify({ color: 'warning', message: this.commerceSettings.label }); return }
             const form = this.checkout
             if (!this.phoneZap) {
                 this.$q.notify({ color: 'warning', message: 'Esta loja não possui WhatsApp ativo para receber pedidos.' }); return
@@ -667,7 +673,7 @@ export default {
                             selections: item.selections || [], note: item.note || '' }))
                     })
                 } catch (error) {
-                    if (error.status === 400 || error.status === 422) throw error
+                    if ([400, 409, 422].includes(error.status)) throw error
                     // O banco serve para estatísticas; uma falha nele não impede o envio à loja.
                     order = {
                         id: '',
@@ -844,6 +850,8 @@ export default {
         },
         async botaoPedido() {
             if (!this.queries.cart.length) return
+            await this.loadCommerceSettings()
+            if (!this.commerceSettings.isOpen) { this.$q.notify({ color: 'warning', message: this.commerceSettings.label }); return }
             if (!this.phoneZap) {
                 this.$q.notify({ color: 'warning', message: 'Esta loja não possui WhatsApp ativo para receber pedidos.' }); return
             }
@@ -1055,6 +1063,7 @@ export default {
             if (typeof savedContact.customerPhone === 'string') this.checkout.customerPhone = savedContact.customerPhone.slice(0, 30)
         } catch (_) { /* Um registro antigo inválido não bloqueia o checkout. */ }
         this.loadCommerceSettings()
+        this.availabilityTimer = window.setInterval(() => this.loadCommerceSettings(true), 60000)
         this.initialDb()
         const admin = localStorage.getItem('admin') ? true : false
         let id = localStorage.getItem('id-customer')
@@ -1127,6 +1136,7 @@ export default {
 
     },
     unmounted() {
+        window.clearInterval(this.availabilityTimer)
         // Stop subscribing:
         this.subscription.unsubscribe();
     },

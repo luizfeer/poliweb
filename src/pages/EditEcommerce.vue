@@ -43,7 +43,10 @@
             </q-btn>
             <section v-if="admin" class="commerce-panel">
                 <h2>Configurações de pedidos</h2>
-                <q-toggle v-model="commerceSettings.acceptsDelivery" label="Realizo entregas" />
+                <q-toggle v-model="commerceSettings.isFoodDelivery" label="Faço delivery de comida ou bebida" @update:model-value="setFoodDelivery" />
+                <q-toggle v-model="commerceSettings.acceptsDelivery" label="Realizo entregas" @update:model-value="disableFoodDeliveryIfNeeded" />
+                <q-toggle v-model="commerceSettings.acceptingOrders" label="Aceitar pedidos agora (respeitando meu horário de funcionamento)" />
+                <q-banner rounded :class="commerceSettings.isOpen ? 'bg-green-1 text-green-10' : 'bg-orange-1 text-orange-10'">{{ commerceSettings.label }}. Configure os horários no cadastro do estabelecimento.</q-banner>
                 <q-input v-if="commerceSettings.acceptsDelivery" v-model="deliveryFeeInput" filled label="Taxa de entrega (R$)" type="number" min="0" step="0.01" />
                 <q-input v-if="commerceSettings.acceptsDelivery" v-model="commerceSettings.deliveryInfo" filled type="textarea" maxlength="500" label="Informações de entrega (áreas atendidas, prazo, horários)" />
                 <p>Formas de pagamento aceitas</p>
@@ -133,6 +136,8 @@
                         <q-input v-model="ordersFilters.to" filled type="date" label="Até" stack-label />
                         <q-select v-model="ordersFilters.payment" filled clearable :options="commerceSettings.paymentMethods" label="Pagamento" />
                         <q-select v-model="ordersFilters.fulfillment" filled clearable emit-value map-options :options="fulfillmentOptions" label="Entrega ou retirada" />
+                        <q-select v-model="ordersFilters.status" filled clearable emit-value map-options :options="orderStatusOptions" label="Status" />
+                        <q-select v-model="ordersFilters.visibility" filled emit-value map-options :options="visibilityOptions" label="Exibir" />
                     </div>
                     <div class="row q-gutter-sm q-my-md">
                         <q-btn color="primary" label="Filtrar" :loading="ordersLoading" @click="applyOrdersFilters" />
@@ -157,7 +162,8 @@
                     <p>Escolha como o cliente compra antes de cadastrar produtos.</p>
                 </q-card-section>
                 <q-card-section class="q-pt-none">
-                    <q-toggle v-model="commerceSettings.acceptsDelivery" label="Fazer entregas e pedir endereço ao cliente" />
+                    <q-toggle v-model="commerceSettings.isFoodDelivery" label="Faço delivery de comida ou bebida" @update:model-value="setFoodDelivery" />
+                    <q-toggle v-model="commerceSettings.acceptsDelivery" label="Fazer entregas e pedir endereço ao cliente" @update:model-value="disableFoodDeliveryIfNeeded" />
                     <template v-if="commerceSettings.acceptsDelivery">
                         <q-input v-model="deliveryFeeInput" filled label="Taxa de entrega (R$)" type="number" min="0" step="0.01" class="q-mb-sm" />
                         <q-input v-model="commerceSettings.deliveryInfo" filled type="textarea" maxlength="500" label="Regiões, prazo e horários de entrega" class="q-mb-sm" />
@@ -172,6 +178,9 @@
                     <q-btn color="primary" label="Salvar e continuar" :loading="savingSettings" @click="saveCommerceSettings" />
                 </q-card-actions>
             </q-card>
+        </q-dialog>
+        <q-dialog v-model="deliveryPromptDialog" persistent>
+            <q-card class="product-type-card"><q-card-section><div class="text-h6">Sua loja faz delivery de comida ou bebida?</div><p>Se sim, ela aparecerá na aba Delivery da cidade. O cliente poderá pedir apenas quando a loja estiver aberta.</p></q-card-section><q-card-actions align="right"><q-btn flat label="Não" :loading="savingSettings" @click="answerDeliveryPrompt(false)" /><q-btn color="primary" label="Sim, faço delivery" :loading="savingSettings" @click="answerDeliveryPrompt(true)" /></q-card-actions></q-card>
         </q-dialog>
         <q-dialog v-model="productTypeDialog">
             <q-card class="product-type-card">
@@ -365,6 +374,7 @@ export default {
             loading: ref(true),
             productTypeDialog: ref(false),
             showSetupDialog: ref(false),
+            deliveryPromptDialog: ref(false),
             commerceSettings: ref(defaultCommerceSettings()),
             deliveryFeeInput: ref('0'),
             customPayment: ref(''),
@@ -378,7 +388,9 @@ export default {
             ordersTotal: ref(0),
             ordersPage: ref(1),
             ordersPageSize: ref(20),
-            ordersFilters: ref({ search: '', from: '', to: '', payment: null, fulfillment: null }),
+            ordersFilters: ref({ search: '', from: '', to: '', payment: null, fulfillment: null, status: null, visibility: 'visible' }),
+            orderStatusOptions: ref([{label:'Novo',value:'new'},{label:'Aceito',value:'accepted'},{label:'Em preparo',value:'preparing'},{label:'Pronto',value:'ready'},{label:'Concluído',value:'completed'},{label:'Cancelado',value:'cancelled'}]),
+            visibilityOptions: ref([{label:'Visíveis',value:'visible'},{label:'Ocultos',value:'hidden'},{label:'Todos',value:'all'}]),
             fulfillmentOptions: ref([{ label: 'Entrega', value: 'delivery' }, { label: 'Retirada', value: 'pickup' }]),
             confirmEdit: ref(false),
             descriptionError: ref(false),
@@ -453,7 +465,16 @@ export default {
                 this.commerceSettings = await commerceApi(this.$route.params.id, 'settings')
                 this.deliveryFeeInput = String(this.commerceSettings.deliveryFeeCents / 100)
                 this.showSetupDialog = !this.commerceSettings.configured
+                this.deliveryPromptDialog = this.commerceSettings.configured && !this.commerceSettings.deliveryPromptAnswered
             } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
+        },
+        setFoodDelivery(value) { if (value) this.commerceSettings.acceptsDelivery = true },
+        disableFoodDeliveryIfNeeded(value) { if (!value) this.commerceSettings.isFoodDelivery = false },
+        async answerDeliveryPrompt(value) {
+            this.commerceSettings.isFoodDelivery = value
+            if (value) this.commerceSettings.acceptsDelivery = true
+            this.commerceSettings.deliveryPromptAnswered = true
+            await this.saveCommerceSettings()
         },
         async saveCommerceSettings() {
             const fee = Math.round(Number(this.deliveryFeeInput) * 100)
@@ -466,6 +487,7 @@ export default {
                     ...this.commerceSettings, deliveryFeeCents: fee
                 })
                 this.showSetupDialog = false
+                this.deliveryPromptDialog = false
                 this.$q.notify({ color: 'positive', message: 'Configurações salvas.' })
             } catch (error) { this.$q.notify({ color: 'negative', message: error.message }) }
             finally { this.savingSettings = false }
@@ -505,7 +527,7 @@ export default {
             this.loadAllOrders()
         },
         clearOrdersFilters() {
-            this.ordersFilters = { search: '', from: '', to: '', payment: null, fulfillment: null }
+            this.ordersFilters = { search: '', from: '', to: '', payment: null, fulfillment: null, status: null, visibility: 'visible' }
             this.ordersPage = 1
             this.loadAllOrders()
         },

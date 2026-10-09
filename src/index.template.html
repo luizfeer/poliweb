@@ -25,8 +25,124 @@
     <meta name="theme-color" content="#1976D2">
     <meta name="msapplication-TileColor" content="#1976D2">
     <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png">
+    <link rel="preload" as="image" href="/icons/splash-logo.webp" type="image/webp" fetchpriority="high"
+      imagesrcset="/icons/splash-logo.webp 256w, /icons/splash-logo@2x.webp 512w"
+      imagesizes="(max-height: 500px) 34vh, (max-width: 480px) 46vw, 200px">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3028385982016033"
      crossorigin="anonymous"></script>
+    <style>
+      /* Splash de primeiro paint. Some quando o Vue monta em #q-app. Fundo #fff = splash nativa da TWA (background_color). */
+      html { background: #fff; }
+      #pw-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 24px;
+        background: #fff;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .pw-splash__stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      .pw-splash__mark {
+        position: relative;
+        width: 200px;
+        width: min(46vw, 34vh, 200px);
+        height: 200px;
+        height: min(46vw, 34vh, 200px);
+      }
+      .pw-splash__logo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        -webkit-user-drag: none;
+      }
+      .pw-splash__shine {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        -webkit-mask-image: url("/icons/splash-logo.webp");
+        mask-image: url("/icons/splash-logo.webp");
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+      }
+      .pw-splash__shine::before {
+        content: "";
+        position: absolute;
+        top: -12%;
+        bottom: -12%;
+        left: 0;
+        width: 38%;
+        background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.95), rgba(255,255,255,0));
+        transform: translateX(-180%) skewX(-18deg);
+      }
+      .pw-splash__word {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 1.5rem;
+        font-size: clamp(1.35rem, 4.6vw, 1.7rem);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        line-height: 1;
+        color: #1565c0;
+      }
+      #pw-splash.pw-splash--out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        #pw-splash { transition: opacity .55s ease; }
+        .pw-splash__mark {
+          animation-name: pw-in, pw-idle;
+          animation-duration: .95s, 4.8s;
+          animation-timing-function: cubic-bezier(.16, .84, .28, 1), ease-in-out;
+          animation-delay: 0s, .95s;
+          animation-iteration-count: 1, infinite;
+          animation-fill-mode: both, none;
+        }
+        .pw-splash__shine { opacity: 1; }
+        .pw-splash__shine::before { animation: pw-shine 3.1s ease-in-out 1.05s infinite; }
+        .pw-splash__word { animation: pw-word .65s ease .38s both; }
+      }
+      @keyframes pw-in {
+        from { opacity: 0; transform: rotate(-200deg) scale(.9); }
+        to { opacity: 1; transform: rotate(0deg) scale(1); }
+      }
+      @keyframes pw-idle {
+        0%, 100% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(8deg) scale(1.03); }
+      }
+      @keyframes pw-shine {
+        0%, 16% { transform: translateX(-180%) skewX(-18deg); }
+        58%, 100% { transform: translateX(360%) skewX(-18deg); }
+      }
+      @keyframes pw-word {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @media (forced-colors: active) {
+        #pw-splash { background: Canvas; }
+        .pw-splash__word { color: CanvasText; }
+        .pw-splash__shine { display: none; }
+      }
+    </style>
     <!-- iPhone 12 Pro Max -->
     <link rel="apple-touch-startup-image"
       media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)"
@@ -77,7 +193,66 @@
       href="icons/apple-launch-2048x2732.png">
   </head>
   <body>
+    <div id="pw-splash" role="status" aria-live="polite" aria-busy="true" aria-label="Carregando Poliweb">
+      <div class="pw-splash__stage">
+        <div class="pw-splash__mark">
+          <img class="pw-splash__logo" src="/icons/splash-logo.webp" width="200" height="200" alt=""
+            srcset="/icons/splash-logo.webp 256w, /icons/splash-logo@2x.webp 512w"
+            sizes="(max-height: 500px) 34vh, (max-width: 480px) 46vw, 200px"
+            decoding="async" fetchpriority="high" draggable="false">
+          <span class="pw-splash__shine" aria-hidden="true"></span>
+        </div>
+        <p class="pw-splash__word">Poliweb</p>
+      </div>
+    </div>
+    <noscript><style>#pw-splash{display:none}</style></noscript>
     <!-- DO NOT touch the following DIV -->
     <div id="q-app"></div>
+    <script>
+      (function () {
+        var splash = document.getElementById('pw-splash');
+        var root = document.getElementById('q-app');
+        if (!splash || !root) return;
+
+        var reduce = false;
+        try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+        var done = false;
+        var poll = 0;
+        var observer = null;
+
+        function cleanup() {
+          if (poll) clearInterval(poll);
+          if (observer) observer.disconnect();
+        }
+        function removeSplash() {
+          if (splash.parentNode) splash.parentNode.removeChild(splash);
+        }
+        function hide() {
+          if (done) return;
+          done = true;
+          cleanup();
+          splash.setAttribute('aria-busy', 'false');
+          splash.setAttribute('aria-hidden', 'true');
+          if (reduce) { removeSplash(); return; }
+          splash.classList.add('pw-splash--out');
+          splash.addEventListener('transitionend', function (ev) {
+            if (ev.propertyName === 'opacity') removeSplash();
+          });
+          setTimeout(removeSplash, 800);
+        }
+        function ready() { return root.childElementCount > 0; }
+
+        if (ready()) { hide(); return; }
+
+        try {
+          observer = new MutationObserver(function () { if (ready()) hide(); });
+          observer.observe(root, { childList: true });
+        } catch (e) { observer = null; }
+
+        poll = setInterval(function () { if (ready()) hide(); }, 100);
+        setTimeout(hide, 30000);
+      })();
+    </script>
   </body>
 </html>

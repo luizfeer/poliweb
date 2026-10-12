@@ -21,7 +21,9 @@
         "NSCameraUsageDescription": "O Poliweb usa a câmera para você enviar fotos e vídeos do seu comércio.",
         "NSPhotoLibraryUsageDescription": "O Poliweb acessa suas fotos para você enviar imagens do comércio.",
         "NSMicrophoneUsageDescription": "O Poliweb usa o microfone quando você grava um vídeo para enviar.",
-        "UIBackgroundModes": ["remote-notification"],
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
         "LSApplicationQueriesSchemes": [
           "whatsapp",
           "tel",
@@ -79,7 +81,11 @@
     "extra": {
       "poliweb": {
         "startUrl": "https://www.poliwebapp.com.br/"
+      },
+      "eas": {
+        "projectId": "fc60cdda-2f91-4bc4-ad63-bfd71098d09e"
       }
-    }
+    },
+    "owner": "luizalmeidadev"
   }
 }

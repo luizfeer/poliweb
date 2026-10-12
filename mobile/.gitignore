@@ -18,6 +18,10 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# credenciais de push e assinatura. Nunca commitar a chave APNs.
+credentials.json
+google-services.json
+
 # Metro
 .metro-health-check*
 

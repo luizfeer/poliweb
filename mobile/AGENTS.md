@@ -9,7 +9,7 @@ Comandos, sempre a partir de `mobile/`:
 ```bash
 npx expo install <pacote>
 npx tsc --noEmit
-node --experimental-strip-types --test src/navigationPolicy.test.ts
+node --experimental-strip-types --test src/*.test.ts
 npx expo start --web
 ```
 

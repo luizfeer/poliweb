@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   classifyNavigation,
+  notificationUrl,
   tabForPath,
 } from "./navigationPolicy.ts";
 
@@ -76,4 +77,17 @@ test("abas seguem as rotas do site", () => {
   assert.equal(tabForPath("/buscar/padaria"), "search");
   assert.equal(tabForPath("/perfil"), "profile");
   assert.equal(tabForPath("/comercio/9/loja"), null);
+});
+
+test("o toque na notificação só abre URL do Poliweb", () => {
+  assert.equal(
+    notificationUrl({ path: "/buscar" }),
+    "https://www.poliwebapp.com.br/buscar",
+  );
+  assert.equal(
+    notificationUrl({ url: "https://www.poliwebapp.com.br/perfil" }),
+    "https://www.poliwebapp.com.br/perfil",
+  );
+  assert.equal(notificationUrl({ url: "https://example.com" }), null);
+  assert.equal(notificationUrl(undefined), null);
 });

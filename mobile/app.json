@@ -21,12 +21,16 @@
         "NSCameraUsageDescription": "O Poliweb usa a câmera para você enviar fotos e vídeos do seu comércio.",
         "NSPhotoLibraryUsageDescription": "O Poliweb acessa suas fotos para você enviar imagens do comércio.",
         "NSMicrophoneUsageDescription": "O Poliweb usa o microfone quando você grava um vídeo para enviar.",
+        "UIBackgroundModes": ["remote-notification"],
         "LSApplicationQueriesSchemes": [
           "whatsapp",
           "tel",
           "mailto",
           "sms"
         ]
+      },
+      "entitlements": {
+        "aps-environment": "production"
       }
     },
     "android": {
@@ -62,7 +66,15 @@
         }
       ],
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "mode": "production",
+          "color": "#1976D2",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
     ],
     "extra": {
       "poliweb": {

@@ -55,7 +55,7 @@ Checagens:
 
 ```bash
 npx tsc --noEmit
-node --experimental-strip-types --test src/navigationPolicy.test.ts
+node --experimental-strip-types --test src/*.test.ts
 ```
 
 ## Vincular o projeto Expo
@@ -118,6 +118,64 @@ npx eas-cli@latest submit --profile production --platform ios
 ```
 
 Não use `--platform android` nem `eas submit -p android`. Isso apontaria para o pacote da TWA que já está na Play Store.
+
+## Notificações
+
+O site não tem Firebase, web push nem endpoint de dispositivo. O app pede permissão cerca de 1,5 s depois que a home aparece (não durante a intro). Se a pessoa aceitar, lê o Expo push token e o token nativo da APNs e injeta os dois na página:
+
+- `window.__POLIWEB_NATIVE_PUSH__`
+- `localStorage.poliweb_native_push`
+- evento `poliweb-native-push`
+- `window.postMessage`
+- `window.poliwebRegisterPushToken(payload)`, se o site definir essa função
+
+O site também pode pedir de novo com `window.poliwebRequestPushToken()`. O payload é `{ type, permission, expoPushToken, devicePushToken, platform }`. `devicePushToken` é o token da APNs. Uma notificação pode trazer `data.url` ou `data.path` do domínio `poliwebapp.com.br` para abrir essa rota no WebView.
+
+A chave `.p8` não entra no repositório. O `.gitignore` já ignora `*.p8`. Ela fica só no EAS, na conta do time `Y6FSFUALV7`.
+
+O `app.json` liga `ios.entitlements.aps-environment` em `production` e `UIBackgroundModes` com `remote-notification`. O perfil `development` deste projeto é de simulador. Preview (ad hoc) e production usam a APNs de produção, que é o ambiente certo para essa chave. O token Expo só existe depois do `eas init`, porque ele precisa do `extra.eas.projectId`. O token APNs não depende disso.
+
+### Associar a chave APNs
+
+No Apple Developer, a chave precisa ser Apple Push Notifications service (sandbox e production), com o Key ID anotado. Team ID: `Y6FSFUALV7`.
+
+```bash
+cd mobile
+npx eas-cli@latest login
+npx eas-cli@latest credentials
+```
+
+Na CLI:
+
+1. Plataforma: iOS
+2. Perfil: `production` (repita em `preview` se for testar o binário interno)
+3. `Push Notifications: Manage your Apple Push Notifications Key`
+4. Envie a chave que já existe: caminho do `.p8`, o Key ID e o Team ID `Y6FSFUALV7`
+
+Não escolha gerar outra chave se a conta já tem a `.p8` do time. A Apple só deixa duas chaves de push por conta.
+
+### Notificação de teste
+
+Instale um build `preview` ou `production` num iPhone físico, aceite o pedido de permissão e copie o `expoPushToken` que a página recebeu (`window.__POLIWEB_NATIVE_PUSH__.expoPushToken`). No simulador o app não registra token.
+
+Pelo site da Expo: https://expo.dev/notifications
+
+Ou por curl, trocando o token:
+
+```bash
+curl -X POST https://exp.host/--/api/v2/push/send \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "to": "ExponentPushToken[cole-o-token]",
+    "title": "Poliweb",
+    "body": "Notificação de teste",
+    "sound": "default",
+    "data": { "path": "/buscar" }
+  }'
+```
+
+Com o app aberto, o aviso aparece em banner. No toque, `data.path` abre `/buscar` dentro do app.
 
 ## Ícone
 

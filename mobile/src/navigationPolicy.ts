@@ -117,3 +117,18 @@ export function classifyNavigation(
   if (isTopFrame === false) return "allow";
   return "browser";
 }
+
+/** Abre no WebView só rotas do próprio Poliweb vindas de uma notificação. */
+export function notificationUrl(
+  data: Record<string, unknown> | undefined,
+): string | null {
+  const raw = data?.url ?? data?.path;
+  if (typeof raw !== "string" || raw.length === 0) return null;
+  const url = raw.startsWith("/") ? `https://www.poliwebapp.com.br${raw}` : raw;
+  try {
+    const host = new URL(url).hostname;
+    return isFirstPartyHost(host) ? url : null;
+  } catch {
+    return null;
+  }
+}

@@ -22,6 +22,7 @@ import {
   INTRO_FALLBACK_MS,
   MIN_INTRO_MS,
   ORIGIN,
+  PUSH_PROMPT_DELAY_MS,
   SPLASH_BACKGROUND,
   START_URL,
   THEME_COLOR,
@@ -29,7 +30,17 @@ import {
 import { IntroOverlay } from "./IntroOverlay";
 import { NativeTabBar } from "./NativeTabBar";
 import { NATIVE_SHELL_SCRIPT } from "./nativeShellScript";
+import {
+  collectNativePushToken,
+  lastNotificationUrl,
+  listenForNotificationOpens,
+  listenForPushTokenChanges,
+} from "./nativePush";
 import { OfflineScreen } from "./OfflineScreen";
+import {
+  buildPushBridgeScript,
+  type NativePushPayload,
+} from "./pushBridge";
 import { openExternal } from "./openExternal";
 import {
   classifyNavigation,
@@ -55,6 +66,8 @@ export function PoliwebShell() {
   const fallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const minTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nativeSplashHidden = useRef(false);
+  const pushPayload = useRef<NativePushPayload | null>(null);
+  const pendingPushUrl = useRef<string | null>(null);
 
   const [introMounted, setIntroMounted] = useState(true);
   const [minElapsed, setMinElapsed] = useState(false);
@@ -94,6 +107,17 @@ export function PoliwebShell() {
     SplashScreen.hideAsync().catch(() => {});
   }, []);
 
+  const deliverPush = useCallback((payload: NativePushPayload) => {
+    pushPayload.current = payload;
+    webRef.current?.injectJavaScript(buildPushBridgeScript(payload));
+  }, []);
+
+  const openInSite = useCallback((url: string) => {
+    webRef.current?.injectJavaScript(
+      `window.location.assign(${JSON.stringify(url)}); true;`,
+    );
+  }, []);
+
   useEffect(() => {
     minTimer.current = setTimeout(() => setMinElapsed(true), MIN_INTRO_MS);
     const splashGuard = setTimeout(hideNativeSplash, 2500);
@@ -110,6 +134,36 @@ export function PoliwebShell() {
       unsubscribe();
     };
   }, [clearFallback, hideNativeSplash]);
+
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    void lastNotificationUrl().then((url) => {
+      if (url) pendingPushUrl.current = url;
+    });
+    const opens = listenForNotificationOpens((url) => {
+      if (!loadedOnce.current) pendingPushUrl.current = url;
+      else openInSite(url);
+    });
+    const tokens = listenForPushTokenChanges(deliverPush);
+    return () => {
+      opens.remove();
+      tokens.remove();
+    };
+  }, [deliverPush, openInSite]);
+
+  useEffect(() => {
+    if (!siteReady || introMounted || Platform.OS === "web") return;
+    const timer = setTimeout(() => {
+      void collectNativePushToken({ requestPermission: true }).then((payload) => {
+        if (payload) deliverPush(payload);
+      });
+      if (pendingPushUrl.current) {
+        openInSite(pendingPushUrl.current);
+        pendingPushUrl.current = null;
+      }
+    }, PUSH_PROMPT_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [deliverPush, introMounted, openInSite, siteReady]);
 
   useEffect(() => {
     if (Platform.OS !== "android") return;
@@ -150,11 +204,21 @@ export function PoliwebShell() {
       try {
         const data = JSON.parse(event.nativeEvent.data) as { type?: string };
         if (data.type === "app-ready") markReady();
+        if (data.type === "poliweb-push-request") {
+          if (pushPayload.current) deliverPush(pushPayload.current);
+          else {
+            void collectNativePushToken({ requestPermission: true }).then(
+              (payload) => {
+                if (payload) deliverPush(payload);
+              },
+            );
+          }
+        }
       } catch {
         // Mensagens do site que não são JSON ficam ignoradas.
       }
     },
-    [markReady],
+    [deliverPush, markReady],
   );
 
   const goToPath = useCallback((path: string) => {
@@ -207,6 +271,11 @@ export function PoliwebShell() {
           failed.current = false;
         }}
         onLoadEnd={() => {
+          if (pushPayload.current) {
+            webRef.current?.injectJavaScript(
+              buildPushBridgeScript(pushPayload.current),
+            );
+          }
           if (Platform.OS === "web") {
             markReady();
             return;

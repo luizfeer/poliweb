@@ -12,3 +12,6 @@ export const MIN_INTRO_MS = 1700;
 
 /** Se a página não avisar que o Vue montou, a intro sai mesmo assim. */
 export const INTRO_FALLBACK_MS = 12000;
+
+/** Espera o site aparecer antes do diálogo de notificação. */
+export const PUSH_PROMPT_DELAY_MS = 1500;

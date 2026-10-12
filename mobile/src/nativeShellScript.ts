@@ -29,6 +29,13 @@ export const NATIVE_SHELL_SCRIPT = `
       }
     } catch (e) {}
   }
+  window.poliwebRequestPushToken = function () {
+    try {
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'poliweb-push-request' }));
+      }
+    } catch (e) {}
+  };
   function ready() {
     var root = document.getElementById('q-app');
     return !!(root && root.childElementCount > 0);

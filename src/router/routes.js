@@ -94,6 +94,17 @@ const routes = [
 
       },
       {
+        path: '/adm/notificacoes',
+        component: () => import('pages/admin/Notifications.vue'),
+        beforeEnter: (to, from, next) => {
+          if (!isAdmin()) {
+            next({ path: '/adm/login', query: { redirect: to.fullPath } })
+          } else {
+            next()
+          }
+        }
+      },
+      {
         path: '/adm/contatos',
         component: () => import('pages/admin/Contacts.vue'),
         beforeEnter: (to, from, next) => {

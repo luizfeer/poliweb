@@ -15,7 +15,7 @@
     "build:ssr": "quasar build -m ssr && npm install --omit=dev --prefix dist/ssr --legacy-peer-deps",
     "start:ssr": "node dist/ssr/index.js",
     "lint": "eslint --ext .js,.vue ./",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "node --test src/js/pushRegistration.test.js && npm test --prefix api"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

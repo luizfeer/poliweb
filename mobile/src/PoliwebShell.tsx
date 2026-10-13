@@ -2,9 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Platform,
+  StatusBar as NativeStatusBar,
   StyleSheet,
   View,
 } from "react-native";
+import * as Linking from "expo-linking";
+import { NavigationBar } from "expo-navigation-bar";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
@@ -44,6 +47,7 @@ import {
 import { openExternal } from "./openExternal";
 import {
   classifyNavigation,
+  firstPartyWebUrl,
   pathnameOf,
   tabForPath,
   type TabId,
@@ -75,7 +79,10 @@ export function PoliwebShell() {
   const [loadFailed, setLoadFailed] = useState(false);
   const [netOffline, setNetOffline] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId | null>("home");
-  const [canGoBack, setCanGoBack] = useState(false);
+  const canGoBackRef = useRef(false);
+  const [entryUrl, setEntryUrl] = useState<string | null>(
+    Platform.OS === "android" ? null : START_URL,
+  );
   const [retryKey, setRetryKey] = useState(0);
 
   const clearFallback = useCallback(() => {
@@ -167,15 +174,37 @@ export function PoliwebShell() {
 
   useEffect(() => {
     if (Platform.OS !== "android") return;
-    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (canGoBack) {
-        webRef.current?.goBack();
-        return true;
-      }
-      return false;
+    let alive = true;
+    const giveUp = setTimeout(() => {
+      if (!alive) return;
+      setEntryUrl((current) => current ?? START_URL);
+    }, 1500);
+    Linking.getInitialURL()
+      .then((url) => {
+        if (!alive || loadedOnce.current) return;
+        setEntryUrl(firstPartyWebUrl(url) ?? START_URL);
+      })
+      .catch(() => {
+        if (alive) setEntryUrl((current) => current ?? START_URL);
+      });
+    const links = Linking.addEventListener("url", ({ url }) => {
+      const next = firstPartyWebUrl(url);
+      if (!next) return;
+      if (!loadedOnce.current) setEntryUrl(next);
+      else openInSite(next);
     });
-    return () => sub.remove();
-  }, [canGoBack]);
+    const back = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!canGoBackRef.current) return false;
+      webRef.current?.goBack();
+      return true;
+    });
+    return () => {
+      alive = false;
+      clearTimeout(giveUp);
+      links.remove();
+      back.remove();
+    };
+  }, [openInSite]);
 
   const offline = (loadFailed || netOffline) && !siteReady;
   const exitingIntro = introMounted && minElapsed && (siteReady || offline);
@@ -188,7 +217,7 @@ export function PoliwebShell() {
   }, [markReady]);
 
   const onNavigation = useCallback((nav: WebViewNavigation) => {
-    setCanGoBack(nav.canGoBack);
+    canGoBackRef.current = nav.canGoBack;
     if (nav.url) setActiveTab(tabForPath(pathnameOf(nav.url)));
   }, []);
 
@@ -240,6 +269,7 @@ export function PoliwebShell() {
   const retry = useCallback(() => {
     failed.current = false;
     loadedOnce.current = false;
+    canGoBackRef.current = false;
     clearFallback();
     setLoadFailed(false);
     setSiteReady(false);
@@ -251,15 +281,21 @@ export function PoliwebShell() {
   }, [clearFallback]);
 
   const showTabs = siteReady && !offline;
+  const topInset = Math.max(
+    insets.top,
+    Platform.OS === "android" ? NativeStatusBar.currentHeight ?? 0 : 0,
+  );
 
   return (
     <View style={styles.root}>
-      <StatusBar style={introMounted ? "dark" : "light"} />
-      <View style={{ height: insets.top, backgroundColor: THEME_COLOR }} />
+      <StatusBar style={introMounted ? "dark" : "light"} animated />
+      <NavigationBar style="light" />
+      <View style={{ height: topInset, backgroundColor: THEME_COLOR }} />
+      {entryUrl ? (
       <WebView
         key={retryKey}
         ref={webRef}
-        source={{ uri: START_URL }}
+        source={{ uri: entryUrl }}
         style={styles.web}
         containerStyle={styles.web}
         applicationNameForUserAgent="PoliwebAgenda"
@@ -288,7 +324,8 @@ export function PoliwebShell() {
         }}
         injectedJavaScriptBeforeContentLoaded={NATIVE_SHELL_SCRIPT}
         injectedJavaScript={NATIVE_SHELL_SCRIPT}
-        setSupportMultipleWindows={false}
+        setSupportMultipleWindows={Platform.OS === "android"}
+        geolocationEnabled
         onOpenWindow={(event) => {
           const url = event.nativeEvent.targetUrl;
           if (!url) return;
@@ -318,6 +355,7 @@ export function PoliwebShell() {
         webviewDebuggingEnabled={__DEV__}
         mediaPlaybackRequiresUserAction
       />
+      ) : null}
       {showTabs ? <NativeTabBar active={activeTab} onPress={goToPath} /> : null}
       {offline && !introMounted ? <OfflineScreen onRetry={retry} /> : null}
       {introMounted ? (

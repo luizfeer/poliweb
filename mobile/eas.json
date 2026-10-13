@@ -18,7 +18,10 @@
     },
     "production": {
       "distribution": "store",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {
@@ -26,6 +29,9 @@
       "ios": {
         "ascAppId": "1659657349",
         "appleTeamId": "Y6FSFUALV7"
+      },
+      "android": {
+        "track": "internal"
       }
     }
   }

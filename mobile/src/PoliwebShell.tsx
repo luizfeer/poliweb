@@ -338,7 +338,11 @@ export function PoliwebShell() {
           }
           void openExternal(url, decision);
         }}
-        pullToRefreshEnabled
+        // Android: o SwipeRefreshLayout do pull-to-refresh intercepta o scroll
+        // e os toques do site (scroll fica preso e taps somem). Só no iOS.
+        pullToRefreshEnabled={Platform.OS === "ios"}
+        nestedScrollEnabled
+        overScrollMode="content"
         allowsBackForwardNavigationGestures
         sharedCookiesEnabled
         thirdPartyCookiesEnabled

@@ -98,6 +98,9 @@ export function IntroOverlay({ exiting, onHidden, onLayoutReady }: Props) {
       onHidden();
       return;
     }
+    // Garantia: se o callback da animação não vier (Android), desmonta a
+    // cortina assim mesmo para ela não ficar por cima do WebView.
+    const safety = setTimeout(onHidden, 900);
     curtain.value = withTiming(
       0,
       { duration: 550, easing: Easing.out(Easing.ease) },
@@ -105,6 +108,7 @@ export function IntroOverlay({ exiting, onHidden, onLayoutReady }: Props) {
         if (finished) runOnJS(onHidden)();
       },
     );
+    return () => clearTimeout(safety);
   }, [curtain, exiting, onHidden, reduceMotion]);
 
   const curtainStyle = useAnimatedStyle(() => ({

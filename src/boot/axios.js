@@ -71,6 +71,8 @@ export const persistAuthSession = (authPayload, options = {}) => {
     if (options.isAdmin) window.localStorage.setItem(ADMIN_STORAGE_KEY, 'true')
     else window.localStorage.removeItem(ADMIN_STORAGE_KEY)
   }
+
+  window.dispatchEvent(new CustomEvent('poliweb:auth-changed'))
 }
 
 export const clearAuthSession = () => {
@@ -81,6 +83,7 @@ export const clearAuthSession = () => {
   window.localStorage.removeItem(CONTEXT_STORAGE_KEY)
   window.localStorage.removeItem(ADMIN_STORAGE_KEY)
   applyAccessToken(null)
+  window.dispatchEvent(new CustomEvent('poliweb:auth-changed'))
 }
 
 let refreshPromise = null

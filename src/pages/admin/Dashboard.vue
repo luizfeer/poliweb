@@ -46,6 +46,12 @@ export default {
     return {
       shortcuts: [
         {
+          title: 'Notificações',
+          description: 'Enviar push para cidades, donos ou usuários',
+          icon: 'notifications',
+          to: '/adm/notificacoes'
+        },
+        {
           title: 'Mensagens',
           description: 'Ler contatos enviados pelo formulário',
           icon: 'mark_email_unread',

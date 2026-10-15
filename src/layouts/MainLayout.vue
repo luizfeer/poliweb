@@ -357,6 +357,10 @@ export default defineComponent({
                     icon: "admin_panel_settings",
                     link: "/adm",
                 }, {
+                    title: "Notificações",
+                    icon: "notifications",
+                    link: "/adm/notificacoes",
+                }, {
                     title: "Usuários",
                     icon: "group",
                     link: "/adm/users",

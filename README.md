@@ -51,5 +51,15 @@ pnpm run build:ssr
 pm2 start ecosystem.config.js
 ```
 
+### Notificações push
+O app iOS entrega o token na página. O navegador e a TWA Android usam Web Push. O registro, a contagem e o disparo ficam em `api/` (Fastify, mesmo PostgreSQL da API). O painel é `/adm/notificacoes`.
+
+Variáveis, nginx e o teste ponta a ponta estão em [api/README.md](api/README.md).
+
+```bash
+npm install --prefix api
+npm test
+```
+
 ### Customize the configuration
 See [Configuring quasar.conf.js](https://v2.quasar.dev/quasar-cli/quasar-conf-js).

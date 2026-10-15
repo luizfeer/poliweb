@@ -60,6 +60,7 @@ module.exports = configure(function (ctx) {
     boot: [
       'sentry',
       'axios',
+      'push',
       'vue-query',
       'color',
       'lucide'
@@ -112,7 +113,9 @@ module.exports = configure(function (ctx) {
         PUBLIC_SITE_URL: process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br',
         SEO_SITE_URL: process.env.SEO_SITE_URL || 'https://www.poliwebapp.com.br',
         SSR_ONLY_ROUTE_PREFIX: process.env.SSR_ONLY_ROUTE_PREFIX || '/comercio,/adm,/painel,/cidade',
-        SSR_FALLBACK_URL: process.env.SSR_FALLBACK_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br'
+        SSR_FALLBACK_URL: process.env.SSR_FALLBACK_URL || process.env.PUBLIC_SITE_URL || 'https://www.poliwebapp.com.br',
+        PUSH_API_URL: process.env.PUSH_API_URL || '',
+        VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || ''
       },
 
       // https://v2.quasar.dev/quasar-cli/handling-webpack
@@ -205,11 +208,9 @@ module.exports = configure(function (ctx) {
     // https://v2.quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
 
-      workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {
-        skipWaiting: true,
-        clientsClaim: true
-      }, // only for GenerateSW
+      // InjectManifest para o service worker próprio receber push no navegador e na TWA.
+      workboxPluginMode: 'InjectManifest',
+      workboxOptions: {},
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode

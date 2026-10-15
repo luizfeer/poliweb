@@ -1,0 +1,91 @@
+{
+  "expo": {
+    "name": "Poliweb Agenda",
+    "slug": "poliweb-agenda",
+    "version": "1.0.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "poliweb",
+    "backgroundColor": "#ffffff",
+    "ios": {
+      "bundleIdentifier": "br.com.poliwebapp",
+      "buildNumber": "2",
+      "supportsTablet": true,
+      "appleTeamId": "Y6FSFUALV7",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDisplayName": "Poliweb Agenda",
+        "NSCameraUsageDescription": "O Poliweb usa a câmera para você enviar fotos e vídeos do seu comércio.",
+        "NSPhotoLibraryUsageDescription": "O Poliweb acessa suas fotos para você enviar imagens do comércio.",
+        "NSMicrophoneUsageDescription": "O Poliweb usa o microfone quando você grava um vídeo para enviar.",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "LSApplicationQueriesSchemes": [
+          "whatsapp",
+          "tel",
+          "mailto",
+          "sms"
+        ]
+      },
+      "entitlements": {
+        "aps-environment": "production"
+      }
+    },
+    "android": {
+      "package": "br.com.poliwebapp.www.twa",
+      "versionCode": 2,
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "imageWidth": 200
+        }
+      ],
+      "expo-web-browser",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "mode": "production",
+          "color": "#1976D2",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
+    ],
+    "extra": {
+      "poliweb": {
+        "startUrl": "https://www.poliwebapp.com.br/"
+      },
+      "eas": {
+        "projectId": "fc60cdda-2f91-4bc4-ad63-bfd71098d09e"
+      }
+    },
+    "owner": "luizalmeidadev"
+  }
+}

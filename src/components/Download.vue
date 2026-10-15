@@ -138,19 +138,28 @@ import { ref, onMounted } from "vue";
 export default {
 
   setup() {
-    const display = ref(true);
+    // Começa fechado: só abre no navegador comum. Dentro do app nativo
+    // (WebView Expo Android/iOS) o dialog persistente, mesmo escondido por
+    // CSS, trava o scroll e os toques da página.
+    const display = ref(false);
     const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined'
     const userAgent = isBrowser ? navigator.userAgent : ''
     const isIOSWebview = isBrowser && /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(userAgent)
+    const isNativeApp = isBrowser && (
+      /PoliwebAgenda/i.test(userAgent) ||
+      !!window.ReactNativeWebView ||
+      /;\s*wv\)/i.test(userAgent)
+    )
     const isPWA = isBrowser && (
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone
     )
     onMounted(() => {
-      const dismissed = typeof localStorage !== 'undefined' && localStorage.getItem('poliweb_download_modal_dismissed');
-      if (isIOSWebview || isPWA || dismissed) {
-        display.value = false;
-      }
+      let dismissed = false;
+      try {
+        dismissed = !!localStorage.getItem('poliweb_download_modal_dismissed');
+      } catch (_) {}
+      display.value = !(isIOSWebview || isNativeApp || isPWA || dismissed);
     });
 
     const DISMISSED_KEY = 'poliweb_download_modal_dismissed';

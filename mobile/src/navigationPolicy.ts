@@ -2,7 +2,7 @@ export type TabId = "home" | "categories" | "cities" | "search" | "profile";
 
 export type NavigationDecision = "allow" | "system" | "browser";
 
-const SPECIAL_SCHEME = /^(tel|mailto|sms|whatsapp|intent):/i;
+const SPECIAL_SCHEME = /^(tel|mailto|sms|whatsapp|intent|geo|maps):/i;
 
 export function pathnameOf(url: string): string {
   try {
@@ -116,6 +116,24 @@ export function classifyNavigation(
   if (isFirstPartyHost(host)) return "allow";
   if (isTopFrame === false) return "allow";
   return "browser";
+}
+
+/**
+ * URL https/http do próprio Poliweb, para App Link e deep link.
+ * Esquemas do Expo, WhatsApp e outros hosts ficam de fora.
+ */
+export function firstPartyWebUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  const protocol = parsed.protocol.toLowerCase();
+  if (protocol !== "https:" && protocol !== "http:") return null;
+  if (!isFirstPartyHost(parsed.hostname)) return null;
+  return parsed.toString();
 }
 
 /** Abre no WebView só rotas do próprio Poliweb vindas de uma notificação. */

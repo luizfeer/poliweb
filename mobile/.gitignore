@@ -18,9 +18,14 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# credenciais de push e assinatura. Nunca commitar a chave APNs.
+# Segredos. Nunca commitar.
+# A chave .p8 da APNs, o JSON da conta de serviço FCM V1 e o JSON da Play
+# Console ficam só no EAS. O google-services.json é a config pública do
+# cliente Android: ele precisa entrar no git, senão o EAS Build não o vê.
 credentials.json
-google-services.json
+*firebase-adminsdk*.json
+*service-account*.json
+**/google-services-account.json
 
 # Metro
 .metro-health-check*

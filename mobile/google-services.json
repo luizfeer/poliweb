@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "305485391108",
+    "project_id": "poliweb-e1352",
+    "storage_bucket": "poliweb-e1352.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:305485391108:android:8304276dd1023fde9fdc51",
+        "android_client_info": {
+          "package_name": "br.com.poliwebapp.www.twa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDoFltpLHrRzdmmGULdOQw91oACZTH7gE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

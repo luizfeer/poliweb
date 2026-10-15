@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   classifyNavigation,
+  firstPartyWebUrl,
   notificationUrl,
   tabForPath,
 } from "./navigationPolicy.ts";
@@ -31,6 +32,8 @@ test("WhatsApp, telefone, e-mail e mapas saem do app", () => {
   assert.equal(classifyNavigation("whatsapp://send?text=Ola"), "system");
   assert.equal(classifyNavigation("tel:+5511999999999"), "system");
   assert.equal(classifyNavigation("mailto:contato@poliwebapp.com.br"), "system");
+  assert.equal(classifyNavigation("geo:0,0?q=Padaria"), "system");
+  assert.equal(classifyNavigation("maps:?q=Padaria"), "system");
   assert.equal(
     classifyNavigation("https://maps.google.com/maps?q=Padaria"),
     "system",
@@ -77,6 +80,21 @@ test("abas seguem as rotas do site", () => {
   assert.equal(tabForPath("/buscar/padaria"), "search");
   assert.equal(tabForPath("/perfil"), "profile");
   assert.equal(tabForPath("/comercio/9/loja"), null);
+});
+
+test("App Link só entra no WebView se for o site do Poliweb", () => {
+  assert.equal(
+    firstPartyWebUrl("https://www.poliwebapp.com.br/comercio/12/padaria"),
+    "https://www.poliwebapp.com.br/comercio/12/padaria",
+  );
+  assert.equal(
+    firstPartyWebUrl("https://poliwebapp.com.br/buscar"),
+    "https://poliwebapp.com.br/buscar",
+  );
+  assert.equal(firstPartyWebUrl("https://wa.me/5511999999999"), null);
+  assert.equal(firstPartyWebUrl("poliweb://buscar"), null);
+  assert.equal(firstPartyWebUrl("exp://127.0.0.1:8081"), null);
+  assert.equal(firstPartyWebUrl(null), null);
 });
 
 test("o toque na notificação só abre URL do Poliweb", () => {

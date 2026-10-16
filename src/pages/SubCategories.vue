@@ -79,7 +79,7 @@
                       </q-btn>
                     </div>
                     <div v-else class="icon-chevron-wrap">
-                      <AppIcon name="chevron-right" :size="20" class="text-indigo-500" />
+                      <AppIcon name="chevron-right" :size="22" class="text-indigo-500" />
                     </div>
                   </div>
                 </article>
@@ -159,7 +159,7 @@
                     </q-btn>
                   </div>
                   <div v-else class="icon-chevron-wrap">
-                    <AppIcon name="chevron-right" :size="18" class="text-indigo-500" />
+                    <AppIcon name="chevron-right" :size="22" class="text-indigo-500" />
                   </div>
                   </div>
                 </article>
@@ -391,15 +391,6 @@ export default defineComponent({
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.category-card::before,
-.sub-card::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: linear-gradient(180deg, #6366f1, #3b82f6);
-  content: '';
-}
-
 .cursor-pointer:active .category-card,
 .cursor-pointer:active .sub-card {
   transform: scale(0.985);
@@ -510,8 +501,8 @@ export default defineComponent({
   height: 34px;
   min-width: 34px;
   border-radius: 999px;
-  border: 1px solid #e0e7ff;
-  background: #eef2ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -21,7 +21,7 @@
 
       <q-card-section class="download-content">
         <div class="download-icon-wrapper">
-          <AppIcon name="file-download" :size="40" class="text-primary" />
+          <AppIcon name="file-download" :size="46" class="text-primary" />
         </div>
         <h3 class="download-title">Instale em seu celular</h3>
         <p class="download-text">
@@ -92,7 +92,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(25, 118, 210, 0.12);
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   border-radius: 18px;
 }
 

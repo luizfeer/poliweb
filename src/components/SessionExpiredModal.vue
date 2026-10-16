@@ -10,7 +10,7 @@
     <q-card class="session-expired-card glass-card">
       <q-card-section class="session-expired-content">
         <div class="session-expired-icon-wrapper">
-          <AppIcon name="lock" :size="34" class="text-primary" />
+          <AppIcon name="lock" :size="40" class="text-primary" />
         </div>
         <h3 class="session-expired-title">Sessão expirada</h3>
         <p class="session-expired-text">
@@ -119,8 +119,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(25, 118, 210, 0.16), rgba(25, 118, 210, 0.06));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
 }
 
 .session-expired-title {

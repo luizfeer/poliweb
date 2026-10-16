@@ -22,7 +22,7 @@
         <section class="perfil-card perfil-card--highlight">
           <div class="perfil-empty">
             <div class="perfil-empty__icon">
-              <q-icon name="login" size="30px" />
+              <q-icon name="login" size="36px" />
             </div>
             <div>
               <h2 class="perfil-section-title">Entre na sua conta</h2>
@@ -175,7 +175,7 @@
 
           <div v-else class="perfil-empty perfil-empty--soft">
             <div class="perfil-empty__icon bg-grey-2 text-grey-7">
-              <q-icon name="store_mall_directory" size="28px" />
+              <q-icon name="store_mall_directory" size="34px" />
             </div>
             <div>
               <h3 class="perfil-section-title">Nenhum comércio encontrado</h3>
@@ -591,7 +591,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #dbeafe;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   color: #1d4ed8;
   flex-shrink: 0;
 }

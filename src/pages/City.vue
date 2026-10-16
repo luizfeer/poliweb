@@ -540,14 +540,14 @@ export default {
   height: 76px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #dbeafe;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
   border-radius: 999px;
-  background: #eff6ff;
+  background: #ffffff;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 .city-popular-icon :deep(.q-img) {
-  width: 56px;
-  height: 56px;
+  width: 68px;
+  height: 68px;
 }
 .city-popular-icon .q-icon {
   color: #2563eb;
@@ -590,17 +590,18 @@ export default {
 }
 .city-category-icon {
   display: grid;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
   place-items: center;
   border-radius: 8px;
-  background: #eff6ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   overflow: hidden;
 }
 .city-category-icon :deep(.q-img) {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
 .city-category-icon .q-icon {
   color: #2563eb;

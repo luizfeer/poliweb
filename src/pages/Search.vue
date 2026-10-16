@@ -144,7 +144,7 @@
 
       <section v-else class="start-panel">
         <div class="start-icon">
-          <AppIcon name="storefront" :size="30" />
+          <AppIcon name="storefront" :size="36" />
         </div>
         <h2>Busque com mais precisao</h2>
         <p>Use o nome do comercio quando souber. A cidade selecionada entra como prioridade nos resultados.</p>
@@ -783,7 +783,8 @@ export default ({
   align-items: center;
   justify-content: center;
   color: #2563eb;
-  background: #dbeafe;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
 }
 
 .empty-title,

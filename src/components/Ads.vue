@@ -2467,8 +2467,8 @@ export default {
 
 /* Story ring no logo de perfil */
 .ads-story-ring {
-  padding: 4px;
-  margin: -4px;
+  padding: 2px;
+  margin: -2px;
   border-radius: 50%;
   background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #833ab4, #5851db, #405de6);
   background-size: 300% 300%;
@@ -2476,7 +2476,7 @@ export default {
   box-sizing: content-box;
 }
 .ads-story-logo {
-  border: 2.5px solid white;
+  border: 1.5px solid white;
   border-radius: 50% !important;
   overflow: hidden;
 }

@@ -24,7 +24,7 @@
           class="admin-dashboard-card"
         >
           <span class="admin-dashboard-icon">
-            <q-icon :name="item.icon" size="24px" />
+            <q-icon :name="item.icon" size="28px" />
           </span>
           <span class="admin-dashboard-card-body">
             <strong>{{ item.title }}</strong>
@@ -157,7 +157,8 @@ export default {
   justify-content: center;
   flex: 0 0 auto;
   border-radius: 10px;
-  background: #eff6ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   color: #2563eb;
 }
 .admin-dashboard-card-body {

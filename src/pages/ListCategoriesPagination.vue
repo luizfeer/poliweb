@@ -271,19 +271,20 @@ export default defineComponent({
 }
 
 .category-icon-wrap {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   border-radius: 999px;
-  background: #eff6ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .category-icon-img {
-  width: 26px;
-  height: 26px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
 }
 
@@ -337,19 +338,20 @@ export default defineComponent({
 }
 
 .sub-icon-wrap {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   border-radius: 999px;
-  background: #eef2ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .sub-icon-img {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
 }
 

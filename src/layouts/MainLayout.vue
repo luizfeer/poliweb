@@ -502,10 +502,11 @@ export default defineComponent({
 }
 
 .category-chip-icon-wrapper {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
-  background: #eff6ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -513,8 +514,8 @@ export default defineComponent({
 }
 
 .category-chip-icon {
-  width: 26px;
-  height: 26px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
 }
 

@@ -146,6 +146,10 @@ const routes = [
        component: () => import('pages/SubCategories.vue')
 
       },
+      {
+        path: '/demo-icones',
+        component: () => import('pages/DemoIcones.vue')
+      },
       // {
       //   path: '/cidades',
       //  component: () => import('pages/Citys.vue')

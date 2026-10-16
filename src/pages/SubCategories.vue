@@ -418,12 +418,11 @@ export default defineComponent({
   min-width: 58px;
   height: 58px;
   border-radius: 999px;
-  border: 1px solid #dbeafe;
-  background: linear-gradient(145deg, #eef2ff, #e0f2fe);
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .sub-thumb {
@@ -431,22 +430,22 @@ export default defineComponent({
   min-width: 54px;
   height: 54px;
   border-radius: 999px;
-  border: 1px solid #dbeafe;
-  background: linear-gradient(145deg, #eef2ff, #e0f2fe);
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .category-icon {
-  width: 42px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
   border-radius: 999px;
 }
 
 .sub-icon {
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
 }
 

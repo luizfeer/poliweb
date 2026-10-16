@@ -454,10 +454,11 @@ export default defineComponent({
 }
 
 .category-grid-icon-wrapper {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
-  background: #eff6ff;
+  border: 0.5px solid rgba(59, 130, 246, 0.28);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -465,8 +466,8 @@ export default defineComponent({
 }
 
 .category-grid-icon {
-  width: 28px;
-  height: 28px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
 }
 
@@ -528,13 +529,13 @@ export default defineComponent({
     padding: 0.7rem 0.5rem;
   }
   .category-grid-icon-wrapper {
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
     border-radius: 8px;
   }
   .category-grid-icon {
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
   }
 }
 </style>

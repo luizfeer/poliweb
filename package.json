@@ -34,6 +34,7 @@
     "lucide-vue-next": "^0.577.0",
     "quasar": "^2.16.4",
     "rxjs": "^7.8.0",
+    "source-map": "^0.6.1",
     "tailwindcss": "^2.2.2",
     "vue": "^3.2.29",
     "vue-recaptcha": "^2.0.2",

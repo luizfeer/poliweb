@@ -49,3 +49,6 @@ During verification, Sentry's ingest endpoint accepted diagnostic events with HT
 - Mobile: version 1.0.3, iOS build 14 and Android version code 25 contain the native SDK. There are 15 passing mobile regression tests.
 
 Sentry's symbol-upload API returned 500 after authenticating during the iOS build. `SENTRY_ALLOW_FAILURE=true` was set temporarily in the EAS production environment so this external upload outage does not prevent generating the diagnostic app. This does not disable runtime error/crash collection. The production profile retains dSYMs and maps as additional EAS artifacts, allowing symbolication artifacts to be uploaded again after recovery. Remove the temporary EAS variable after these builds have completed.
+
+
+Sentry API recovery was confirmed: backend diagnostic exceptions became visible in the project, and the web artifact bundle uploaded successfully (133 files). iOS build 14 completed successfully and its signed IPA and debug artifacts were saved locally. App Store submission still requires a matching App Store Connect API key and Issuer ID; the EAS submission attempt reported that no API key was configured.

@@ -14,7 +14,37 @@ body.has-glass-navbar .q-page { padding-bottom: 0 !important; }
 
 export const NATIVE_SHELL_SCRIPT = `
 (function () {
+  if (window.__poliwebNativeShellInstalled) return;
+  window.__poliwebNativeShellInstalled = true;
   var css = ${JSON.stringify(NATIVE_SHELL_CSS)};
+  var observer;
+  var timer;
+  var done = false;
+  var errorCount = 0;
+  function stopWatching() {
+    if (observer) observer.disconnect();
+    if (timer) clearInterval(timer);
+  }
+  function reportError(message, filename, line) {
+    if (errorCount >= 5) return;
+    errorCount += 1;
+    try {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'poliweb-web-error',
+        message: String(message || 'WebView JavaScript error').slice(0, 1000),
+        filename: String(filename || '').split(/[?#]/)[0].slice(0, 500),
+        line: typeof line === 'number' ? line : undefined
+      }));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (event) {
+    if (event.message) reportError(event.message, event.filename, event.lineno);
+  });
+  window.addEventListener('unhandledrejection', function (event) {
+    var reason = event.reason;
+    reportError(reason && reason.message ? reason.message : 'Unhandled promise rejection');
+  });
+  window.addEventListener('pagehide', stopWatching);
   function mountStyle() {
     if (document.getElementById('poliweb-native-shell')) return;
     var style = document.createElement('style');
@@ -41,21 +71,22 @@ export const NATIVE_SHELL_SCRIPT = `
     return !!(root && root.childElementCount > 0);
   }
   mountStyle();
-  if (ready()) { signal(); return; }
-  var done = false;
   function check() {
     if (done || !ready()) return;
     done = true;
+    stopWatching();
     signal();
   }
+  if (ready()) { check(); return; }
   try {
-    new MutationObserver(check).observe(document.documentElement, { childList: true, subtree: true });
+    observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
   } catch (e) {}
   var ticks = 0;
-  var timer = setInterval(function () {
+  timer = setInterval(function () {
     ticks += 1;
     check();
-    if (done || ticks > 150) clearInterval(timer);
+    if (done || ticks > 150) stopWatching();
   }, 200);
 })();
 true;

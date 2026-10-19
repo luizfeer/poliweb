@@ -1,3 +1,5 @@
+import "./src/sentry";
+
 import { registerRootComponent } from "expo";
 import * as SplashScreen from "expo-splash-screen";
 

@@ -88,6 +88,14 @@
     },
     "plugins": [
       [
+        "@sentry/react-native/expo",
+        {
+          "organization": "agora-passei",
+          "project": "poliweb-mobile",
+          "url": "https://sentry.io/"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#ffffff",

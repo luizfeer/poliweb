@@ -2,8 +2,9 @@ import { Platform, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { PoliwebShell } from "./src/PoliwebShell";
+import { Sentry } from "./src/sentry";
 
-export default function App() {
+function App() {
   const shell = (
     <SafeAreaProvider>
       <PoliwebShell />
@@ -18,6 +19,8 @@ export default function App() {
     </View>
   );
 }
+
+export default Sentry.wrap(App);
 
 const styles = StyleSheet.create({
   preview: {

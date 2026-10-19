@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@sentry/node": "^10.76.2",
     "@sentry/vue": "^10.58.0",
     "@tanstack/vue-query": "^5.101.0",
     "@vueuse/rxjs": "^9.7.0",
@@ -62,11 +63,11 @@
     "last 10 Chrome versions",
     "last 10 Firefox versions",
     "last 4 Edge versions",
-    "last 7 Safari versions",
+    "Safari >= 16.4",
     "last 8 Android versions",
     "last 8 ChromeAndroid versions",
     "last 8 FirefoxAndroid versions",
-    "last 10 iOS versions",
+    "iOS >= 16.4",
     "last 5 Opera versions"
   ],
   "pnpm": {

@@ -224,8 +224,9 @@ export function PoliwebShell() {
     canGoBackRef.current = nav.canGoBack;
     if (nav.url) {
       setActiveTab(tabForPath(pathnameOf(nav.url)));
-      if (classifyNavigation(nav.url, true) === "allow") {
-        currentUrl.current = nav.url;
+      const firstParty = firstPartyWebUrl(nav.url);
+      if (firstParty) {
+        currentUrl.current = firstParty;
         Sentry.setTag("webview.path", pathnameOf(nav.url));
       }
     }
@@ -382,7 +383,7 @@ export function PoliwebShell() {
         onHttpError={(event) => {
           if (event.nativeEvent.statusCode >= 500) {
             captureNativeError(new Error(`WebView HTTP ${event.nativeEvent.statusCode}`), "webview.http");
-            markFailed();
+            if (safePageUrl(event.nativeEvent.url) === safePageUrl(currentUrl.current)) markFailed();
           }
         }}
         onContentProcessDidTerminate={() => recoverWebView("ios.content-process")}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Platform,
+  Share,
   StatusBar as NativeStatusBar,
   StyleSheet,
   View,
@@ -45,6 +46,12 @@ import {
   type NativePushPayload,
 } from "./pushBridge";
 import { openExternal } from "./openExternal";
+import {
+  buildShareResultScript,
+  nativeShareContent,
+  parseShareRequest,
+  type ShareOutcome,
+} from "./shareBridge";
 import { captureNativeError, safePageUrl, Sentry } from "./sentry";
 import { nextRecoveryAttempt, type RecoveryState } from "./webViewRecovery";
 import {
@@ -259,6 +266,25 @@ export function PoliwebShell() {
             });
             Sentry.captureException(new Error(String(data.message || "WebView JavaScript error").slice(0, 1000)));
           });
+        }
+        if (data.type === "poliweb-share") {
+          const request = parseShareRequest(data);
+          if (!request) return;
+          const reply = (outcome: ShareOutcome) =>
+            webRef.current?.injectJavaScript(buildShareResultScript(request.id, outcome));
+          if (!firstPartyWebUrl(event.nativeEvent.url)) {
+            reply("error");
+            return;
+          }
+          Share.share(nativeShareContent(request, Platform.OS), {
+            dialogTitle: request.title ?? "Compartilhar",
+            subject: request.title,
+          })
+            .then((result) => reply(result.action === Share.dismissedAction ? "dismissed" : "shared"))
+            .catch((error: unknown) => {
+              captureNativeError(error, "native.share");
+              reply("error");
+            });
         }
         if (data.type === "poliweb-push-request") {
           if (pushPayload.current) deliverPush(pushPayload.current);

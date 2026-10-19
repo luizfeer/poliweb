@@ -342,6 +342,7 @@ import {
 } from 'src/js/CategoryesEcommerceNew'
 import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
 import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
+import { shareLink, shareNotice } from 'src/js/share'
 import ProductOptionsEditor from 'src/components/ProductOptionsEditor.vue'
 import CommerceOrderCard from 'src/components/CommerceOrderCard.vue'
 
@@ -544,11 +545,8 @@ export default {
                 text: 'Confira loja: ' + this.adsComponent.name,
                 url: `https://www.poliwebapp.com.br/loja/${this.adsComponent.id}`,
             }
-            try {
-                await navigator.share(shareData)
-            } catch (err) {
-                console.logg('Error: ' + err)
-            }
+            const notice = shareNotice(await shareLink(shareData))
+            if (notice) this.$q.notify(notice)
         },
         addProduct() {
             this.productTypeDialog = true

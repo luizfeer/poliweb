@@ -155,6 +155,7 @@ import { useMeta, useQuasar } from 'quasar'
 import { useRouter, useRoute } from 'vue-router'
 import AdsPage from 'components/Ads'
 import { api } from 'boot/axios'
+import { copyText, shareNotice } from 'src/js/share'
 
 export default {
   name: 'CommercePage',
@@ -623,16 +624,10 @@ export default {
         : `Ver ${commerceName.value} em ${categoryLabel(category)}`
 
     const copyCommerceLink = async () => {
-      try {
-        const link = commerceCanonicalUrl.value || (typeof window !== 'undefined' ? window.location.href : '')
-        if (!link) return
-        if (typeof window !== 'undefined' && window.navigator?.clipboard?.writeText) {
-          await window.navigator.clipboard.writeText(link)
-        }
-        $q.notify({ color: 'positive', message: 'Link copiado!', icon: 'check_circle', position: 'bottom' })
-      } catch (_) {
-        $q.notify({ color: 'negative', message: 'Não foi possível copiar', icon: 'error', position: 'bottom' })
-      }
+      const link = commerceCanonicalUrl.value || (typeof window !== 'undefined' ? window.location.href : '')
+      if (!link) return
+      if (await copyText(link)) $q.notify(shareNotice('copied'))
+      else $q.notify({ color: 'negative', message: 'Não foi possível copiar', icon: 'error', position: 'bottom' })
     }
 
     return {

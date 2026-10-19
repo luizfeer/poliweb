@@ -3,18 +3,19 @@ import { test } from "node:test";
 import vm from "node:vm";
 import { NATIVE_SHELL_SCRIPT } from "./nativeShellScript.ts";
 
-function page() {
+function page(options: { navigator?: Record<string, unknown> } = {}) {
   let ready = false;
   let observerCallback = () => {};
   let intervalCallback = () => {};
   let disconnected = 0;
   let cleared = 0;
   let observers = 0;
-  const messages: Array<{ type: string; message?: string }> = [];
+  const messages: Array<{ type: string; message?: string; id?: number; title?: string; text?: string; url?: string }> = [];
   const listeners: Record<string, (event: any) => void> = {};
   const context = vm.createContext({
     window: {
-      location: { origin: "https://www.poliwebapp.com.br" },
+      location: { origin: "https://www.poliwebapp.com.br", href: "https://www.poliwebapp.com.br/comercio/7" },
+      navigator: options.navigator,
       addEventListener(name: string, cb: (event: any) => void) { listeners[name] = cb; },
       ReactNativeWebView: { postMessage(value: string) { messages.push(JSON.parse(value)); } },
     },
@@ -29,6 +30,7 @@ function page() {
       observe() {}
       disconnect() { disconnected += 1; }
     },
+    URL,
     setInterval(cb: () => void) { intervalCallback = cb; return 1; },
     clearInterval() { cleared += 1; },
   });
@@ -76,4 +78,45 @@ test("reports a failed application script even before the web app can initialize
   p.listeners.error({ target: { src: "https://ads.example.com/blocked.js" } });
   assert.equal(p.messages.length, 1);
   assert.equal(p.messages[0].message, "WebView application script failed to load");
+});
+
+test("Android WebView without Web Share gets a navigator.share that asks the app for the native sheet", async () => {
+  const navigator: Record<string, any> = {};
+  const p = page({ navigator });
+  vm.runInContext(NATIVE_SHELL_SCRIPT, p.context);
+  assert.equal(typeof navigator.share, "function");
+  assert.equal(navigator.canShare({ url: "/x" }), true);
+  assert.equal(navigator.canShare({ files: [] }), false);
+
+  const shared = navigator.share({ title: "Padaria", text: "Confira", url: "/comercio/7/padaria" });
+  const request = p.messages.find(m => m.type === "poliweb-share")!;
+  assert.deepEqual(
+    { id: request.id, title: request.title, text: request.text, url: request.url },
+    { id: 1, title: "Padaria", text: "Confira", url: "https://www.poliwebapp.com.br/comercio/7/padaria" },
+  );
+  vm.runInContext(`window.__poliwebShareResult(${request.id}, "shared")`, p.context);
+  await shared;
+});
+
+test("dismissing the native sheet rejects with AbortError and a native failure rejects so the site copies the link", async () => {
+  const navigator: Record<string, any> = {};
+  const p = page({ navigator });
+  vm.runInContext(NATIVE_SHELL_SCRIPT, p.context);
+
+  const dismissed = navigator.share({ url: "https://www.poliwebapp.com.br/" });
+  vm.runInContext(`window.__poliwebShareResult(1, "dismissed")`, p.context);
+  await assert.rejects(dismissed, (error: Error) => error.name === "AbortError");
+
+  const failed = navigator.share({ url: "https://www.poliwebapp.com.br/" });
+  vm.runInContext(`window.__poliwebShareResult(2, "error")`, p.context);
+  await assert.rejects(failed, (error: Error) => error.name !== "AbortError");
+});
+
+test("an existing Web Share implementation (iOS WebKit) is left alone", () => {
+  const share = () => Promise.resolve();
+  const navigator: Record<string, any> = { share };
+  const p = page({ navigator });
+  vm.runInContext(NATIVE_SHELL_SCRIPT, p.context);
+  assert.equal(navigator.share, share);
+  assert.equal(p.messages.filter(m => m.type === "poliweb-share").length, 0);
 });

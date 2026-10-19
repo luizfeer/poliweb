@@ -73,6 +73,55 @@ export const NATIVE_SHELL_SCRIPT = `
       }
     } catch (e) {}
   };
+  // A WebView do Android não implementa a Web Share API, e o site caía no
+  // fallback de copiar o link. Este polyfill pede ao app o share sheet nativo.
+  if (window.navigator && typeof window.navigator.share !== 'function') {
+    var pendingShares = {};
+    var shareSeq = 0;
+    window.__poliwebShareResult = function (id, outcome) {
+      var pending = pendingShares[id];
+      if (!pending) return;
+      delete pendingShares[id];
+      if (outcome === 'shared') { pending.resolve(); return; }
+      var error = new Error(outcome === 'dismissed' ? 'Share canceled' : 'Native share failed');
+      error.name = outcome === 'dismissed' ? 'AbortError' : 'NotAllowedError';
+      pending.reject(error);
+    };
+    var nativeShare = function (data) {
+      return new Promise(function (resolve, reject) {
+        data = data || {};
+        if (!window.ReactNativeWebView || !window.ReactNativeWebView.postMessage || (!data.title && !data.text && !data.url)) {
+          var unsupported = new Error('Native share unavailable');
+          unsupported.name = 'TypeError';
+          reject(unsupported);
+          return;
+        }
+        shareSeq += 1;
+        pendingShares[shareSeq] = { resolve: resolve, reject: reject };
+        try {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'poliweb-share',
+            id: shareSeq,
+            title: data.title ? String(data.title) : undefined,
+            text: data.text ? String(data.text) : undefined,
+            url: data.url ? String(new URL(String(data.url), window.location.href)) : undefined
+          }));
+        } catch (e) {
+          delete pendingShares[shareSeq];
+          reject(e);
+        }
+      });
+    };
+    var nativeCanShare = function (data) {
+      return !!data && !data.files && !!(data.title || data.text || data.url);
+    };
+    try {
+      Object.defineProperty(window.navigator, 'share', { configurable: true, writable: true, value: nativeShare });
+      Object.defineProperty(window.navigator, 'canShare', { configurable: true, writable: true, value: nativeCanShare });
+    } catch (e) {
+      try { window.navigator.share = nativeShare; window.navigator.canShare = nativeCanShare; } catch (e2) {}
+    }
+  }
   function ready() {
     var root = document.getElementById('q-app');
     return !!(root && root.childElementCount > 0);

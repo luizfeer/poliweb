@@ -39,7 +39,14 @@ export const NATIVE_SHELL_SCRIPT = `
   }
   window.addEventListener('error', function (event) {
     if (event.message) reportError(event.message, event.filename, event.lineno);
-  });
+    else {
+      var target = event.target;
+      var source = target && (target.src || target.href);
+      if (source && window.location && source.indexOf(window.location.origin + '/js/') === 0) {
+        reportError('WebView application script failed to load', source);
+      }
+    }
+  }, true);
   window.addEventListener('unhandledrejection', function (event) {
     var reason = event.reason;
     reportError(reason && reason.message ? reason.message : 'Unhandled promise rejection');

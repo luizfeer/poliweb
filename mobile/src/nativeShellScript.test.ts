@@ -14,6 +14,7 @@ function page() {
   const listeners: Record<string, (event: any) => void> = {};
   const context = vm.createContext({
     window: {
+      location: { origin: "https://www.poliwebapp.com.br" },
       addEventListener(name: string, cb: (event: any) => void) { listeners[name] = cb; },
       ReactNativeWebView: { postMessage(value: string) { messages.push(JSON.parse(value)); } },
     },
@@ -66,4 +67,13 @@ test("page errors are bounded to avoid flooding the native message bridge", () =
   assert.equal(p.messages.length, 5);
   assert.ok(p.messages.every(m => m.type === "poliweb-web-error"));
   assert.ok(!JSON.stringify(p.messages).includes("secret"));
+});
+
+test("reports a failed application script even before the web app can initialize Sentry", () => {
+  const p = page();
+  vm.runInContext(NATIVE_SHELL_SCRIPT, p.context);
+  p.listeners.error({ target: { src: "https://www.poliwebapp.com.br/js/missing.js" } });
+  p.listeners.error({ target: { src: "https://ads.example.com/blocked.js" } });
+  assert.equal(p.messages.length, 1);
+  assert.equal(p.messages[0].message, "WebView application script failed to load");
 });

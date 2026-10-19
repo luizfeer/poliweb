@@ -19,6 +19,11 @@
     "production": {
       "distribution": "store",
       "autoIncrement": true,
+      "buildArtifactPaths": [
+        "ios/build/**/*.dSYM/**/*",
+        "ios/build/**/*.map",
+        "/Users/expo/Library/Developer/Xcode/Archives/**/PoliwebAgenda.app.dSYM/**/*"
+      ],
       "android": {
         "buildType": "app-bundle"
       }

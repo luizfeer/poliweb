@@ -40,3 +40,12 @@ npx @sentry/cli sourcemaps upload --org agora-passei --project poliweb-frontend 
 Keep the maps privately for retry if Sentry is unavailable, and remove `.map` files from the public deployment. The release passed to the upload must match the `SENTRY_RELEASE` compiled into the web build. Bump that release for later deployments.
 
 During verification, Sentry's ingest endpoint accepted diagnostic events with HTTP 200, while its management API intermittently timed out or returned HTTP 429. Successful ingestion alone does not verify that an event is indexed or symbolicated; verify both in the project after API service recovers.
+
+## Deployment status
+
+- Web: production Pages deployment `ccbf6705.poliweb.pages.dev`, verified on `www.poliwebapp.com.br`; the delivered app bundle contains the new DSN and release. Public source maps were excluded and retained privately for upload retry.
+- SSR: staged on a separate port before activation, then verified in production on home, cities, and commerce. The reproduced `window is not defined` error no longer occurs.
+- Backend: controller capture deployed and health-checked; source review is in `JuninProg/poliwebapp-api` PR #1.
+- Mobile: version 1.0.3, iOS build 14 and Android version code 25 contain the native SDK. There are 15 passing mobile regression tests.
+
+Sentry's symbol-upload API returned 500 after authenticating during the iOS build. `SENTRY_ALLOW_FAILURE=true` was set temporarily in the EAS production environment so this external upload outage does not prevent generating the diagnostic app. This does not disable runtime error/crash collection. The production profile retains dSYMs and maps as additional EAS artifacts, allowing symbolication artifacts to be uploaded again after recovery. Remove the temporary EAS variable after these builds have completed.

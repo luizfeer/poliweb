@@ -1,0 +1,79 @@
+diff --git a/node_modules/expo-modules-core/ios/Api/Factories/ConcurrentFunctionFactories.swift b/node_modules/expo-modules-core/ios/Api/Factories/ConcurrentFunctionFactories.swift
+index 0963ee7..0f7bb8a 100644
+--- a/node_modules/expo-modules-core/ios/Api/Factories/ConcurrentFunctionFactories.swift
++++ b/node_modules/expo-modules-core/ios/Api/Factories/ConcurrentFunctionFactories.swift
+@@ -5,7 +5,7 @@ import ExpoModulesJSI
+  */
+ public func AsyncFunction<R>(
+   _ name: String,
+-  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable () async throws -> sending R
++  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable () async throws -> R
+ ) -> ConcurrentFunctionDefinition<(), Void, R> {
+   return ConcurrentFunctionDefinition(
+     name,
+@@ -20,7 +20,7 @@ public func AsyncFunction<R>(
+  */
+ public func AsyncFunction<R, A0: AnyArgument, each A: AnyArgument>(
+   _ name: String,
+-  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable (A0, repeat each A) async throws -> sending R
++  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable (A0, repeat each A) async throws -> R
+ ) -> ConcurrentFunctionDefinition<(A0, repeat each A), A0, R> {
+   return ConcurrentFunctionDefinition(
+     name,
+diff --git a/node_modules/expo-modules-core/ios/Api/Factories/StaticFunctionFactories.swift b/node_modules/expo-modules-core/ios/Api/Factories/StaticFunctionFactories.swift
+index 3fd3a68..9f0d385 100644
+--- a/node_modules/expo-modules-core/ios/Api/Factories/StaticFunctionFactories.swift
++++ b/node_modules/expo-modules-core/ios/Api/Factories/StaticFunctionFactories.swift
+@@ -65,7 +65,7 @@ public func StaticAsyncFunction<R, A0: AnyArgument, each A: AnyArgument>(
+  */
+ public func StaticAsyncFunction<R>(
+   _ name: String,
+-  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable () async throws -> sending R
++  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable () async throws -> R
+ ) -> StaticConcurrentFunctionDefinition<(), Void, R> {
+   return StaticConcurrentFunctionDefinition(
+     name,
+@@ -80,7 +80,7 @@ public func StaticAsyncFunction<R>(
+  */
+ public func StaticAsyncFunction<R, A0: AnyArgument, each A: AnyArgument>(
+   _ name: String,
+-  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable (A0, repeat each A) async throws -> sending R
++  @_inheritActorContext @_implicitSelfCapture _ closure: sending @escaping @Sendable (A0, repeat each A) async throws -> R
+ ) -> StaticConcurrentFunctionDefinition<(A0, repeat each A), A0, R> {
+   return StaticConcurrentFunctionDefinition(
+     name,
+diff --git a/node_modules/expo-modules-core/ios/Core/Functions/ConcurrentFunctionDefinition.swift b/node_modules/expo-modules-core/ios/Core/Functions/ConcurrentFunctionDefinition.swift
+index 74d3e9b..89435c4 100644
+--- a/node_modules/expo-modules-core/ios/Core/Functions/ConcurrentFunctionDefinition.swift
++++ b/node_modules/expo-modules-core/ios/Core/Functions/ConcurrentFunctionDefinition.swift
+@@ -17,7 +17,9 @@ internal protocol AnyConcurrentFunctionDefinition: AnyFunctionDefinition {
+  As opposed to `AsyncFunctionDefinition`, it can leverage the new Swift's concurrency model and take the async/await closure.
+  */
+ public class ConcurrentFunctionDefinition<Args, FirstArgType, ReturnType>: AnyConcurrentFunctionDefinition, @unchecked Sendable {
+-  typealias ClosureType = @Sendable (Args) async throws -> sending ReturnType
++  // Patched: no `sending` result in the closure type. A function type with a `sending`
++  // result needs swift_getExtendedFunctionTypeMetadata, which only exists on iOS 18+.
++  typealias ClosureType = @Sendable (Args) async throws -> ReturnType
+ 
+   let body: ClosureType
+ 
+@@ -78,7 +80,7 @@ public class ConcurrentFunctionDefinition<Args, FirstArgType, ReturnType>: AnyCo
+       let returnValue: ReturnType = if requiresMainActor {
+         try await callBodyOnMainActor(nonisolatedArgumentsTuple)
+       } else {
+-        try await body(nonisolatedArgumentsTuple)
++        try await callBodyNonisolated(nonisolatedArgumentsTuple)
+       }
+ 
+       return try await appContext.runtime.execute {
+@@ -146,6 +148,10 @@ public class ConcurrentFunctionDefinition<Args, FirstArgType, ReturnType>: AnyCo
+     return argumentsTuple
+   }
+ 
++  nonisolated private func callBodyNonisolated(_ args: sending Args) async throws -> sending ReturnType {
++    return try await body(args)
++  }
++
+   @MainActor
+   private func callBodyOnMainActor(_ args: sending Args) async throws -> sending ReturnType {
+     return try await body(args)

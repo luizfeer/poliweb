@@ -160,7 +160,7 @@ export default boot(({ app, router }) => {
         url.includes('/users/login') ||
         url.includes('/auth/refresh')
 
-      if (status !== 401 || !originalRequest || originalRequest._retry || isAuthEndpoint) {
+      if (typeof window === 'undefined' || status !== 401 || !originalRequest || originalRequest._retry || isAuthEndpoint) {
         captureApiError(error)
         return Promise.reject(error)
       }

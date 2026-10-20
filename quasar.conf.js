@@ -86,6 +86,8 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
+      sourceMap: ctx.dev || process.env.SENTRY_SOURCEMAPS === '1',
+      devtool: ctx.dev ? 'eval-cheap-module-source-map' : 'hidden-source-map',
       vueRouterMode: 'history', // available values: 'hash', 'history'
 
       // transpile: false,
@@ -105,6 +107,7 @@ module.exports = configure(function (ctx) {
       // extractCSS: false,
 
       env: {
+        SENTRY_RELEASE: process.env.SENTRY_RELEASE || 'poliweb-web@2026.10.19',
         API_URL: process.env.API_URL || 'https://apiv4.poliwebapp.com.br',
         API_URL_LOCAL: process.env.API_URL_LOCAL || 'http://127.0.0.1:5001',
         API_URL_BROWSER: process.env.API_URL_BROWSER || process.env.API_URL || 'https://apiv4.poliwebapp.com.br',
@@ -196,6 +199,7 @@ module.exports = configure(function (ctx) {
       },
 
       middlewares: [
+        'sentry',
         ctx.prod ? 'compression' : '',
         'seo-only',
         'render' // keep this as last one

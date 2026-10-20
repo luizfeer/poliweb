@@ -15,10 +15,11 @@
     "build:ssr": "quasar build -m ssr && npm install --omit=dev --prefix dist/ssr --legacy-peer-deps",
     "start:ssr": "node dist/ssr/index.js",
     "lint": "eslint --ext .js,.vue ./",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "node --experimental-detect-module --test src/js/*.test.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@sentry/node": "^10.76.2",
     "@sentry/vue": "^10.58.0",
     "@tanstack/vue-query": "^5.101.0",
     "@vueuse/rxjs": "^9.7.0",
@@ -33,6 +34,7 @@
     "lucide-vue-next": "^0.577.0",
     "quasar": "^2.16.4",
     "rxjs": "^7.8.0",
+    "source-map": "^0.6.1",
     "tailwindcss": "^2.2.2",
     "vue": "^3.2.29",
     "vue-recaptcha": "^2.0.2",
@@ -62,11 +64,11 @@
     "last 10 Chrome versions",
     "last 10 Firefox versions",
     "last 4 Edge versions",
-    "last 7 Safari versions",
+    "Safari >= 16.4",
     "last 8 Android versions",
     "last 8 ChromeAndroid versions",
     "last 8 FirefoxAndroid versions",
-    "last 10 iOS versions",
+    "iOS >= 16.4",
     "last 5 Opera versions"
   ],
   "pnpm": {

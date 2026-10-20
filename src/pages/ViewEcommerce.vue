@@ -472,6 +472,7 @@ import {
 } from "dexie";
 import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
 import ReportPageButton from 'components/ReportPageButton.vue'
+import { copyText, shareLink, shareNotice } from 'src/js/share'
 
 const ECOMMERCE_VIEW_KEY = 'poliweb_ecommerce_view_mode'
 const CHECKOUT_CONTACT_KEY = 'poliweb_checkout_contact'
@@ -804,22 +805,10 @@ export default {
           this.componentProps.props = item
       },
         async copyLink() {
-            try {
-                await navigator.clipboard.writeText(this.shareUrl)
-                this.$q.notify({
-                    color: 'positive',
-                    message: 'Link copiado!',
-                    icon: 'check_circle',
-                    position: 'bottom'
-                })
-            } catch (err) {
-                this.$q.notify({
-                    color: 'negative',
-                    message: 'Não foi possível copiar',
-                    icon: 'error',
-                    position: 'bottom'
-                })
-            }
+            const copied = await copyText(this.shareUrl)
+            this.$q.notify(copied
+                ? shareNotice('copied')
+                : { color: 'negative', message: 'Não foi possível copiar', icon: 'error', position: 'bottom' })
         },
         async shareStore() {
             const shareData = {
@@ -827,23 +816,8 @@ export default {
                 text: (this.adsComponent.description || this.adsComponent.name).slice(0, 100),
                 url: this.shareUrl
             }
-            try {
-                if (navigator.share) {
-                    await navigator.share(shareData)
-                    this.$q.notify({
-                        color: 'positive',
-                        message: 'Compartilhado com sucesso!',
-                        icon: 'check_circle',
-                        position: 'bottom'
-                    })
-                } else {
-                    await this.copyLink()
-                }
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    await this.copyLink()
-                }
-            }
+            const notice = shareNotice(await shareLink(shareData))
+            if (notice) this.$q.notify(notice)
         },
         openWhatsappChooser() {
             if (!this.phoneZap) {

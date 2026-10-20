@@ -821,6 +821,7 @@ import { isSuperAdmin } from 'src/js/superadmin'
 import { normalizeUploadImage } from 'src/js/normalizeUploadImage'
 import { mapState } from 'vuex'
 import { getAdCategories } from 'src/services/adsCategories'
+import { copyText, shareLink, shareNotice } from 'src/js/share'
 
 export default {
    components:{
@@ -1199,22 +1200,10 @@ export default {
       return url
     },
     async copyLink() {
-      try {
-        await navigator.clipboard.writeText(this.shareUrl)
-        this.$q.notify({
-          color: 'positive',
-          message: 'Link copiado!',
-          icon: 'check_circle',
-          position: 'bottom'
-        })
-      } catch (err) {
-        this.$q.notify({
-          color: 'negative',
-          message: 'Não foi possível copiar',
-          icon: 'error',
-          position: 'bottom'
-        })
-      }
+      const copied = await copyText(this.shareUrl)
+      this.$q.notify(copied
+        ? shareNotice('copied')
+        : { color: 'negative', message: 'Não foi possível copiar', icon: 'error', position: 'bottom' })
     },
     async shareAd() {
       this.sendAction('share')
@@ -1223,23 +1212,8 @@ export default {
         text: (this.adsComponent.description || this.adsComponent.name).slice(0, 100),
         url: this.shareUrl
       }
-      try {
-        if (navigator.share) {
-          await navigator.share(shareData)
-          this.$q.notify({
-            color: 'positive',
-            message: 'Compartilhado com sucesso!',
-            icon: 'check_circle',
-            position: 'bottom'
-          })
-        } else {
-          await this.copyLink()
-        }
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          await this.copyLink()
-        }
-      }
+      const notice = shareNotice(await shareLink(shareData))
+      if (notice) this.$q.notify(notice)
     },
     openMap() {
       if (!this.lastAddress) return

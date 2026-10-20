@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import { notificationUrl } from "./navigationPolicy";
+import { captureNativeError } from "./sentry";
 import {
   type NativePushPayload,
   type PushPermission,
@@ -53,7 +54,8 @@ async function readExpoPushToken(): Promise<string | null> {
     const token = await Notifications.getExpoPushTokenAsync({ projectId: id });
     lastExpoPushToken = asToken(token.data);
     return lastExpoPushToken;
-  } catch {
+  } catch (error) {
+    captureNativeError(error, "push.expo-token");
     return null;
   }
 }
@@ -62,7 +64,8 @@ async function readDevicePushToken(): Promise<string | null> {
   try {
     const token = await Notifications.getDevicePushTokenAsync();
     return asToken(token.data);
-  } catch {
+  } catch (error) {
+    captureNativeError(error, "push.device-token");
     return null;
   }
 }
@@ -72,6 +75,17 @@ async function readDevicePushToken(): Promise<string | null> {
  * depois que o site já está na tela. Se já foi concedida, só lê os tokens.
  */
 export async function collectNativePushToken(options: {
+  requestPermission: boolean;
+}): Promise<NativePushPayload | null> {
+  try {
+    return await collectPushToken(options);
+  } catch (error) {
+    captureNativeError(error, "push.registration");
+    return null;
+  }
+}
+
+async function collectPushToken(options: {
   requestPermission: boolean;
 }): Promise<NativePushPayload | null> {
   if (Platform.OS === "web") return null;

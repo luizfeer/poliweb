@@ -19,8 +19,19 @@
     "production": {
       "distribution": "store",
       "autoIncrement": true,
+      "buildArtifactPaths": [
+        "ios/build/**/*.dSYM/**/*",
+        "ios/build/**/*.map",
+        "/Users/expo/Library/Developer/Xcode/Archives/**/PoliwebAgenda.app.dSYM/**/*"
+      ],
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_USE_PRECOMPILED_MODULES": "0"
+      },
+      "ios": {
+        "image": "sdk-57"
       }
     }
   },

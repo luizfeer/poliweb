@@ -2,7 +2,7 @@
   "expo": {
     "name": "Poliweb Agenda",
     "slug": "poliweb-agenda",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -73,7 +73,10 @@
               "pathPrefix": "/"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "adaptiveIcon": {
@@ -87,6 +90,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "agora-passei",
+          "project": "poliweb-mobile",
+          "url": "https://sentry.io/"
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -115,7 +126,15 @@
           "enforceContrast": false
         }
       ],
-      "./plugins/withAndroidIntentQueries"
+      "./plugins/withAndroidIntentQueries",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "usePrecompiledModules": false
+          }
+        }
+      ]
     ],
     "extra": {
       "poliweb": {

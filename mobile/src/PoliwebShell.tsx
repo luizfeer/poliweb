@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Platform,
+  Share,
   StatusBar as NativeStatusBar,
   StyleSheet,
   View,
@@ -46,6 +47,14 @@ import {
 } from "./pushBridge";
 import { openExternal } from "./openExternal";
 import {
+  buildShareResultScript,
+  nativeShareContent,
+  parseShareRequest,
+  type ShareOutcome,
+} from "./shareBridge";
+import { captureNativeError, safePageUrl, Sentry } from "./sentry";
+import { nextRecoveryAttempt, type RecoveryState } from "./webViewRecovery";
+import {
   classifyNavigation,
   firstPartyWebUrl,
   pathnameOf,
@@ -72,6 +81,8 @@ export function PoliwebShell() {
   const nativeSplashHidden = useRef(false);
   const pushPayload = useRef<NativePushPayload | null>(null);
   const pendingPushUrl = useRef<string | null>(null);
+  const currentUrl = useRef(START_URL);
+  const recovery = useRef<RecoveryState>({ startedAt: 0, attempts: 0 });
 
   const [introMounted, setIntroMounted] = useState(true);
   const [minElapsed, setMinElapsed] = useState(false);
@@ -101,8 +112,8 @@ export function PoliwebShell() {
   }, [clearFallback]);
 
   const markFailed = useCallback(() => {
-    if (loadedOnce.current) return;
     failed.current = true;
+    loadedOnce.current = false;
     clearFallback();
     setSiteReady(false);
     setLoadFailed(true);
@@ -218,7 +229,14 @@ export function PoliwebShell() {
 
   const onNavigation = useCallback((nav: WebViewNavigation) => {
     canGoBackRef.current = nav.canGoBack;
-    if (nav.url) setActiveTab(tabForPath(pathnameOf(nav.url)));
+    if (nav.url) {
+      setActiveTab(tabForPath(pathnameOf(nav.url)));
+      const firstParty = firstPartyWebUrl(nav.url);
+      if (firstParty) {
+        currentUrl.current = firstParty;
+        Sentry.setTag("webview.path", pathnameOf(nav.url));
+      }
+    }
   }, []);
 
   const onShouldStart = useCallback((request: ShouldStartLoadRequest) => {
@@ -231,8 +249,43 @@ export function PoliwebShell() {
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       try {
-        const data = JSON.parse(event.nativeEvent.data) as { type?: string };
+        const data = JSON.parse(event.nativeEvent.data) as {
+          type?: string;
+          message?: string;
+          filename?: string;
+          line?: number;
+        };
         if (data.type === "app-ready") markReady();
+        if (data.type === "poliweb-web-error") {
+          Sentry.withScope((scope) => {
+            scope.setTag("poliweb.phase", "webview.javascript");
+            scope.setContext("webview", {
+              url: safePageUrl(currentUrl.current),
+              filename: safePageUrl(String(data.filename || "")).slice(0, 500),
+              line: typeof data.line === "number" ? data.line : undefined,
+            });
+            Sentry.captureException(new Error(String(data.message || "WebView JavaScript error").slice(0, 1000)));
+          });
+        }
+        if (data.type === "poliweb-share") {
+          const request = parseShareRequest(data);
+          if (!request) return;
+          const reply = (outcome: ShareOutcome) =>
+            webRef.current?.injectJavaScript(buildShareResultScript(request.id, outcome));
+          if (!firstPartyWebUrl(event.nativeEvent.url)) {
+            reply("error");
+            return;
+          }
+          Share.share(nativeShareContent(request, Platform.OS), {
+            dialogTitle: request.title ?? "Compartilhar",
+            subject: request.title,
+          })
+            .then((result) => reply(result.action === Share.dismissedAction ? "dismissed" : "shared"))
+            .catch((error: unknown) => {
+              captureNativeError(error, "native.share");
+              reply("error");
+            });
+        }
         if (data.type === "poliweb-push-request") {
           if (pushPayload.current) deliverPush(pushPayload.current);
           else {
@@ -267,6 +320,7 @@ export function PoliwebShell() {
   }, []);
 
   const retry = useCallback(() => {
+    recovery.current = { startedAt: 0, attempts: 0 };
     failed.current = false;
     loadedOnce.current = false;
     canGoBackRef.current = false;
@@ -279,6 +333,33 @@ export function PoliwebShell() {
     minTimer.current = setTimeout(() => setMinElapsed(true), 600);
     setRetryKey((key) => key + 1);
   }, [clearFallback]);
+
+  const recoverWebView = useCallback((reason: string, didCrash?: boolean) => {
+    const next = nextRecoveryAttempt(recovery.current, Date.now());
+    Sentry.withScope((scope) => {
+      scope.setTag("poliweb.phase", "webview.process");
+      scope.setContext("webview", {
+        reason,
+        didCrash,
+        url: safePageUrl(currentUrl.current),
+        automaticRecovery: !!next,
+        attempt: next?.attempts ?? recovery.current.attempts,
+      });
+      Sentry.captureMessage("WebView content process terminated", "error");
+    });
+    if (!next) {
+      markFailed();
+      return;
+    }
+    recovery.current = next;
+    failed.current = false;
+    loadedOnce.current = false;
+    clearFallback();
+    setSiteReady(false);
+    setLoadFailed(false);
+    setEntryUrl(currentUrl.current);
+    setRetryKey((key) => key + 1);
+  }, [clearFallback, markFailed]);
 
   const showTabs = siteReady && !offline;
   const topInset = Math.max(
@@ -318,10 +399,21 @@ export function PoliwebShell() {
           }
           scheduleFallback();
         }}
-        onError={() => markFailed()}
-        onHttpError={(event) => {
-          if (event.nativeEvent.statusCode >= 500) markFailed();
+        onError={(event) => {
+          captureNativeError(
+            new Error(`WebView load failed (${event.nativeEvent.code}): ${event.nativeEvent.description}`),
+            "webview.load",
+          );
+          markFailed();
         }}
+        onHttpError={(event) => {
+          if (event.nativeEvent.statusCode >= 500) {
+            captureNativeError(new Error(`WebView HTTP ${event.nativeEvent.statusCode}`), "webview.http");
+            if (safePageUrl(event.nativeEvent.url) === safePageUrl(currentUrl.current)) markFailed();
+          }
+        }}
+        onContentProcessDidTerminate={() => recoverWebView("ios.content-process")}
+        onRenderProcessGone={(event) => recoverWebView("android.render-process", event.nativeEvent.didCrash)}
         injectedJavaScriptBeforeContentLoaded={NATIVE_SHELL_SCRIPT}
         injectedJavaScript={NATIVE_SHELL_SCRIPT}
         setSupportMultipleWindows={Platform.OS === "android"}

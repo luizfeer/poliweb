@@ -16,6 +16,7 @@ export default ssrMiddleware(({ app, resolve, render, serve }) => {
         res.send(html)
       })
       .catch(err => {
+        if (!err.url && err.code !== 404) req.captureSentryException?.(err)
         // oops, we had an error while rendering the page
 
         // we were told to redirect to another URL

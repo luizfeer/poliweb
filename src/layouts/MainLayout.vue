@@ -364,6 +364,10 @@ export default defineComponent({
                     title: "Icones",
                     icon: "insert_emoticon",
                     link: "/adm/icons",
+                }, {
+                    title: "Denúncias",
+                    icon: "flag",
+                    link: "/adm/denuncias",
                 }]
                 if (isSuperAdmin()) {
                     adminLinks.push({

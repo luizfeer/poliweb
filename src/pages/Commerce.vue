@@ -12,6 +12,9 @@
           <span v-if="primaryCategory" class="seo-breadcrumb-sep">/</span>
           <span class="seo-breadcrumb-current">{{ commerceName }}</span>
         </nav>
+        <div class="report-page-row">
+          <ReportPageButton :target-id="$route.params.id" button-class="report-page-link" label="Reportar página" icon-size="16px" />
+        </div>
       </q-card>
 
       <div class="seo-layout-grid">
@@ -155,10 +158,11 @@ import { useMeta, useQuasar } from 'quasar'
 import { useRouter, useRoute } from 'vue-router'
 import AdsPage from 'components/Ads'
 import { api } from 'boot/axios'
+import ReportPageButton from 'components/ReportPageButton.vue'
 
 export default {
   name: 'CommercePage',
-  components: { AdsPage },
+  components: { AdsPage, ReportPageButton },
 
   setup() {
     const $q = useQuasar()
@@ -658,6 +662,11 @@ export default {
 }
 </script>
 
+<style>
+.report-page-row { display: flex; justify-content: flex-end; margin-top: 6px; }
+.report-page-link { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; color: #9e9e9e; font-size: 12px; cursor: pointer; padding: 2px 0; }
+.report-page-link:hover { color: #c62828; }
+</style>
 <style scoped>
 .ads-page-wrapper {
   min-height: 100vh;

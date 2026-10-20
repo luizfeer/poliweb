@@ -26,6 +26,7 @@
                 <AppIcon name="whatsapp" :size="22" />
                 <span>WhatsApp</span>
             </button>
+            <ReportPageButton :target-id="$route.params.id" button-class="ecommerce-action-btn" icon-size="22px" />
         </div>
 
         <div class="ecommerce-shop-tools" v-if="totalProducts && !selectedProduct">
@@ -251,6 +252,7 @@
                     <AppIcon name="whatsapp" :size="19" />
                     <span>WhatsApp</span>
                 </button>
+                <ReportPageButton :target-id="$route.params.id" icon-size="19px" />
             </div>
         </div>
         <div class="desktop-cart-panel">
@@ -469,12 +471,13 @@ import {
     liveQuery
 } from "dexie";
 import { commerceApi, defaultCommerceSettings } from 'src/js/commerceApi'
+import ReportPageButton from 'components/ReportPageButton.vue'
 
 const ECOMMERCE_VIEW_KEY = 'poliweb_ecommerce_view_mode'
 const CHECKOUT_CONTACT_KEY = 'poliweb_checkout_contact'
 
 export default {
-    components: {},
+    components: { ReportPageButton },
     setup() {
         const colors = ['primary', 'secondary', 'accent', 'dark', 'positive', 'negative', 'info', 'warning']
         const stored = typeof localStorage !== 'undefined' && localStorage.getItem(ECOMMERCE_VIEW_KEY)

@@ -26,6 +26,12 @@
       ],
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_USE_PRECOMPILED_MODULES": "0"
+      },
+      "ios": {
+        "image": "sdk-57"
       }
     }
   },

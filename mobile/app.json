@@ -131,8 +131,7 @@
         "expo-build-properties",
         {
           "ios": {
-            "usePrecompiledModules": false,
-            "deploymentTarget": "18.0"
+            "usePrecompiledModules": false
           }
         }
       ]

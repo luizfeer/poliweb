@@ -131,7 +131,8 @@
         "expo-build-properties",
         {
           "ios": {
-            "usePrecompiledModules": false
+            "usePrecompiledModules": false,
+            "enableSceneSupport": true
           }
         }
       ]
